@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+
+  ::selection {
+    background: #4C7A3D;
+    color: #0F1713;
+  }
+
+  /* Visible keyboard focus everywhere — a student navigating with a
+     keyboard or a school computer lab's trackpad needs this. */
+  :focus-visible {
+    outline: 2px solid #DED2AE;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* A specimen tag: the recurring "label" chip used for topic names,
+     part labels, and quiz badges throughout the app. */
+  .tag-chip {
+    @apply inline-flex items-center gap-2 rounded-sm border border-tray-line
+           bg-tag/10 px-2.5 py-1 text-sm text-tag;
+  }
+}

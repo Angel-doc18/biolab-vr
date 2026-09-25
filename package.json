@@ -1,0 +1,32 @@
+{
+  "name": "biolab-vr",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "dev:host": "vite --host",
+    "server": "npm --prefix server run dev",
+    "dev:all": "concurrently -n frontend,ai-server -c cyan,magenta \"npm run dev:host\" \"npm run server\""
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-router-dom": "^7.1.1",
+    "three": "^0.180.0",
+    "@react-three/fiber": "9.7.0",
+    "@react-three/drei": "10.7.8",
+    "@react-three/xr": "6.6.29"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}
