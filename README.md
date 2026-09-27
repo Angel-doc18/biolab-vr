@@ -5,7 +5,11 @@ interactive 3D specimens, a stereoscopic VR mode, virtual practicals and timed m
 
 ## Download (Android)
 
-Latest APK: **https://github.com/Angel-doc18/biolab-vr/releases/latest** → `BioSpatial-VR.apk`.
+Direct download (no GitHub account needed — the link downloads the APK straight away):
+
+**https://github.com/Angel-doc18/biolab-vr/releases/latest/download/BioSpatial-VR.apk**
+
+This link always points at the newest build.
 Every push to `main` builds a new APK and publishes it as release `v1.0.<build>`
 (`.github/workflows/android-release.yml`).
 
