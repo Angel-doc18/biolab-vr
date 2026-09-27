@@ -1,32 +1,37 @@
 {
-  "name": "biolab-vr",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "dev:host": "vite --host",
-    "server": "npm --prefix server run dev",
-    "dev:all": "concurrently -n frontend,ai-server -c cyan,magenta \"npm run dev:host\" \"npm run server\""
-  },
+  "name": "biospatial-vr",
+  "version": "1.0.0",
+  "main": "index.js",
   "dependencies": {
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "react-router-dom": "^7.1.1",
-    "three": "^0.180.0",
-    "@react-three/fiber": "9.7.0",
-    "@react-three/drei": "10.7.8",
-    "@react-three/xr": "6.6.29"
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-three/fiber": "^9.8.1",
+    "expo": "~57.0.25",
+    "expo-asset": "~57.0.18",
+    "expo-blur": "~57.0.3",
+    "expo-file-system": "~57.0.7",
+    "expo-font": "~57.0.4",
+    "expo-gl": "~57.0.2",
+    "expo-screen-orientation": "~57.0.2",
+    "expo-sensors": "~57.0.3",
+    "expo-speech": "~57.0.3",
+    "expo-splash-screen": "~57.0.9",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2",
+    "three": "^0.186.1"
   },
-  "devDependencies": {
-    "concurrently": "^9.1.2",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.17",
-    "vite": "^5.4.11",
-    "vite-plugin-pwa": "^0.21.1"
-  }
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "private": true
 }

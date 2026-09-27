@@ -1,7 +1,6 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
-import { topics } from '../src/data/topics.js'
 
 const {
   ANTHROPIC_API_KEY,
@@ -17,7 +16,7 @@ if (!ANTHROPIC_API_KEY) {
   process.exit(1)
 }
 
-const SYSTEM_PROMPT = `You are a patient, encouraging Biology tutor for a secondary school student preparing for the WAEC/GCE Biology examination (West Africa).
+const SYSTEM_PROMPT = `You are a patient, encouraging Biology tutor for a secondary school student preparing for the Cameroon GCE Biology examination (O-Level and A-Level).
 
 Give clear, detailed, exam-relevant explanations:
 - Use language a teenage student can follow, but don't oversimplify to the point of being wrong.
@@ -27,7 +26,7 @@ Give clear, detailed, exam-relevant explanations:
 - If a question is outside secondary school Biology, politely redirect to biology topics — don't answer unrelated subjects.
 - Keep answers focused: aim for enough depth to actually help with exam prep, without padding.
 
-The app's topics are: ${topics.map((t) => t.title).join(', ')}.`
+The app's units are: Cell Ultrastructure; Nutrition & Enzymes; Transport Systems; Gaseous Exchange; Osmoregulation & Excretion; Coordination & Nervous System; Locomotion; Reproduction; Genetics; Ecology & Parasitology.`
 
 const allowedOrigins = ALLOWED_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
 const maxPerHour = Number(MAX_REQUESTS_PER_HOUR) || 30
