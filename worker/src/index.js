@@ -1,113 +1,118 @@
-// BioSpatial VR — Ask AI proxy on Cloudflare Workers.
-// The app never holds the Anthropic key: it posts questions here, and this
-// Worker adds the key (a Worker secret), a biology-only system prompt and
-// per-device rate limiting before forwarding to the Messages API.
+// BioSpatial VR API (Cloudflare Worker + D1).
+import { HttpError, json, now } from './lib/http.js';
+import * as auth from './routes/auth.js';
+import * as me from './routes/me.js';
+import * as school from './routes/school.js';
+import * as billing from './routes/billing.js';
+import * as ai from './routes/ai.js';
+import * as admin from './routes/admin.js';
+import { paymentsConfigured, sendSms, smsConfigured } from './lib/providers.js';
+import { notify } from './lib/notify.js';
 
-const SYSTEM_PROMPT = `You are a patient, encouraging Biology tutor for a secondary school student preparing for the Cameroon GCE Biology examination (O-Level and A-Level).
+const ID = '([A-Za-z0-9-]{8,64})';
+const routes = [
+  ['GET', '/v1/health', (req, env) => json({ ok: true, ai: Boolean(env.ANTHROPIC_API_KEY), sms: smsConfigured(env), payments: paymentsConfigured(env) })],
+  ['POST', '/v1/auth/register', auth.register],
+  ['POST', '/v1/auth/login', auth.login],
+  ['POST', '/v1/auth/refresh', auth.refresh],
+  ['POST', '/v1/auth/logout', auth.logout],
+  ['POST', '/v1/auth/otp/send', auth.sendVerifyOtp],
+  ['POST', '/v1/auth/otp/verify', auth.verifyOtp],
+  ['POST', '/v1/auth/password/forgot', auth.forgotPassword],
+  ['POST', '/v1/auth/password/reset', auth.resetPassword],
+  ['POST', '/v1/auth/password/change', auth.changePassword],
+  ['GET', '/v1/me', me.getMe],
+  ['PATCH', '/v1/me', me.patchMe],
+  ['DELETE', '/v1/me', me.deleteMe],
+  ['GET', '/v1/me/progress', me.getProgress],
+  ['PUT', '/v1/me/progress', me.putProgress],
+  ['GET', '/v1/me/report', me.myReport],
+  ['GET', '/v1/me/classes', school.myClasses],
+  ['GET', '/v1/me/assignments', school.myAssignments],
+  ['GET', '/v1/notifications', me.listNotifications],
+  ['POST', '/v1/notifications/read', me.markNotifications],
+  ['DELETE', '/v1/notifications', me.clearNotifications],
+  ['GET', '/v1/schools', school.searchSchools],
+  ['POST', '/v1/schools', school.createSchool],
+  ['GET', '/v1/classes', school.listMyClasses],
+  ['POST', '/v1/classes', school.createClass],
+  ['POST', '/v1/classes/join', school.joinClass],
+  ['GET', `/v1/classes/${ID}`, school.classDetail],
+  ['POST', `/v1/classes/${ID}/assignments`, school.createAssignment],
+  ['POST', `/v1/assignments/${ID}/complete`, school.completeAssignment],
+  ['POST', '/v1/parent/link-code', school.createLinkCode],
+  ['POST', '/v1/parent/link', school.linkChild],
+  ['GET', '/v1/parent/children', school.myChildren],
+  ['GET', '/v1/billing/plans', billing.plans],
+  ['POST', '/v1/billing/pay', billing.initiatePayment],
+  ['GET', '/v1/billing/payments', billing.listPayments],
+  ['GET', `/v1/billing/payments/${ID}`, billing.getPayment],
+  ['POST', '/v1/billing/fapshi-webhook', billing.fapshiWebhook],
+  ['POST', '/v1/billing/redeem', billing.redeemVoucher],
+  ['POST', '/v1/billing/licence-request', billing.licenceRequest],
+  ['GET', '/v1/ai/quota', ai.aiQuota],
+  ['POST', '/v1/ai/ask', ai.ask],
+  ['POST', '/v1/ai/mark', ai.mark],
+  ['POST', '/v1/admin/vouchers', admin.createVouchers],
+  ['GET', '/v1/admin/licence-requests', admin.listLicenceRequests],
+].map(([method, path, handler]) => [method, new RegExp(`^${path}$`), handler]);
 
-Give clear, detailed, exam-relevant explanations:
-- Use language a teenage student can follow, but don't oversimplify to the point of being wrong.
-- Structure longer answers with short paragraphs or a bulleted list when that helps.
-- Where relevant, mention the correct scientific term (in bold with **asterisks**) alongside a plain-language explanation.
-- If the question relates to one of the app's units, you can mention it by name so the student knows they can explore it in 3D, but don't force a connection.
-- If a question is outside secondary school Biology, politely redirect to biology topics — don't answer unrelated subjects.
-- Keep answers focused: enough depth to help with exam prep, without padding.
+async function handle(request, env) {
+  const url = new URL(request.url);
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204 });
+  for (const [method, pattern, handler] of routes) {
+    const match = url.pathname.match(pattern);
+    if (match && method === request.method) return handler(request, env, ...match.slice(1));
+  }
+  return json({ error: 'Not found.', code: 'not_found' }, 404);
+}
 
-The app's units are: Cell Ultrastructure; Nutrition & Enzymes; Transport Systems; Gaseous Exchange; Osmoregulation & Excretion; Coordination & Nervous System; Locomotion; Reproduction; Genetics; Ecology & Parasitology.`;
-
-const json = (body, status = 200, extra = {}) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json', ...extra },
-  });
-
-function corsHeaders(request, env) {
-  const origin = request.headers.get('origin');
-  if (!origin) return {}; // native mobile app: no CORS needed
-  const allowed = (env.ALLOWED_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
-  if (!allowed.includes('*') && !allowed.includes(origin)) return {};
-  return {
-    'access-control-allow-origin': origin,
-    'access-control-allow-methods': 'GET, POST, OPTIONS',
-    'access-control-allow-headers': 'content-type, x-app-passcode',
-    vary: 'origin',
-  };
+// Daily at 17:00 UTC (18:00 in Cameroon).
+async function scheduled(env) {
+  const day = 86_400_000;
+  // Inactivity alerts to parents, on day 3 and day 7 of a break.
+  if (smsConfigured(env)) {
+    const { results } = await env.DB.prepare(
+      `SELECT u.id, u.name, u.parent_phone, p.last_active FROM users u JOIN progress p ON p.user_id = u.id
+       WHERE u.role = 'student' AND u.deleted_at IS NULL AND u.inactivity_alert = 1 AND u.parent_phone IS NOT NULL AND p.last_active IS NOT NULL`
+    ).all();
+    for (const s of results) {
+      const idle = Math.floor((now() - s.last_active) / day);
+      if (idle === 3 || idle === 7) {
+        try {
+          await sendSms(env, s.parent_phone, `BioSpatial VR: ${s.name} has not revised Biology for ${idle} days. A short session today keeps exam preparation on track.`);
+        } catch (e) {
+          console.error('inactivity_sms_failed');
+        }
+      }
+    }
+  }
+  // Weekly report reminders on Fridays.
+  if (new Date().getUTCDay() === 5) {
+    const { results } = await env.DB.prepare(
+      "SELECT id FROM users WHERE role = 'student' AND deleted_at IS NULL AND parent_report_freq = 'weekly' AND parent_phone IS NOT NULL"
+    ).all();
+    for (const s of results) {
+      await notify(env, s.id, 'report', 'Weekly report ready', 'Your weekly progress report is ready to share with your parent.');
+    }
+    const { results: links } = await env.DB.prepare('SELECT parent_id, student_id FROM parent_links').all();
+    for (const l of links) {
+      await notify(env, l.parent_id, 'report', 'Weekly report ready', 'A new weekly progress report is available for your child.', { studentId: l.student_id });
+    }
+  }
 }
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    const cors = corsHeaders(request, env);
-
-    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
-    if (url.pathname === '/api/health') return json({ ok: true, configured: Boolean(env.ANTHROPIC_API_KEY) }, 200, cors);
-    if (url.pathname !== '/api/ask' || request.method !== 'POST') return json({ error: 'Not found.' }, 404, cors);
-
-    if (!env.ANTHROPIC_API_KEY) {
-      return json({ error: 'The AI server is not configured yet (missing API key).' }, 503, cors);
-    }
-    if (env.APP_PASSCODE && request.headers.get('x-app-passcode') !== env.APP_PASSCODE) {
-      return json({ error: 'Incorrect or missing class passcode.' }, 401, cors);
-    }
-
-    // CF-Connecting-IP is set by Cloudflare's edge and cannot be spoofed by the client.
-    const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-    if (env.ASK_LIMITER) {
-      const { success } = await env.ASK_LIMITER.limit({ key: ip });
-      if (!success) return json({ error: 'Too many questions from this device right now. Try again in a minute.' }, 429, cors);
-    }
-
-    let body;
     try {
-      body = await request.json();
-    } catch {
-      return json({ error: 'Invalid JSON body.' }, 400, cors);
-    }
-    const { question, history } = body || {};
-    if (!question || typeof question !== 'string' || question.length > 2000) {
-      return json({ error: 'Missing or invalid "question".' }, 400, cors);
-    }
-
-    // Keep only well-formed recent turns, then make the list start with a user turn.
-    let turns = Array.isArray(history)
-      ? history
-          .filter((h) => h && (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string' && h.content.length <= 8000)
-          .slice(-10)
-      : [];
-    while (turns.length && turns[0].role !== 'user') turns = turns.slice(1);
-    const messages = [...turns, { role: 'user', content: question }];
-
-    try {
-      const upstream = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-api-key': env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: env.ANTHROPIC_MODEL || 'claude-sonnet-5',
-          max_tokens: 2048,
-          system: SYSTEM_PROMPT,
-          messages,
-        }),
-        signal: AbortSignal.timeout(60000),
-      });
-
-      if (!upstream.ok) {
-        console.error('Anthropic API error', upstream.status, await upstream.text().catch(() => ''));
-        return json({ error: 'The AI service returned an error. Try again shortly.' }, 502, cors);
-      }
-
-      const data = await upstream.json();
-      const text = (data.content || [])
-        .filter((b) => b.type === 'text')
-        .map((b) => b.text)
-        .join('\n');
-      return json({ text: text || '(No response text returned.)' }, 200, cors);
+      return await handle(request, env);
     } catch (err) {
-      console.error('Proxy error', err);
-      return json({ error: 'Server could not reach the AI service.' }, 500, cors);
+      if (err instanceof HttpError) return json({ error: err.message, code: err.code }, err.status);
+      console.error('unhandled', err?.stack || err);
+      return json({ error: 'Something went wrong. Please try again.', code: 'server_error' }, 500);
     }
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(scheduled(env));
   },
 };
