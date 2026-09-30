@@ -37,7 +37,18 @@ npx expo start --tunnel # when the phone is not on the same Wi-Fi
 Content lives in `src/data/units.js` (the correct option is always written first; options are shuffled at display time).
 3D specimens are procedural specs in `src/three/models.js`.
 
-## Ask AI
+## Ask AI (Cloudflare Worker)
 
-The app never contains an API key. Deploy the proxy in `server/` (see `server/.env.example`), then set the
-repository variable `AI_PROXY_URL` (or `EXPO_PUBLIC_AI_PROXY_URL` locally) to its public URL and rebuild.
+The app never contains an API key. Questions go to a Cloudflare Worker in `worker/`
+(live at https://biospatial-vr-ai.biospatial-vr.workers.dev), which adds the key, a
+biology-only tutor prompt and a 10-questions-per-minute limit per device.
+
+```bash
+cd worker
+npx wrangler deploy                         # publish changes
+npx wrangler secret put ANTHROPIC_API_KEY   # set / rotate the key (never commit it)
+npx wrangler secret put APP_PASSCODE        # optional class passcode
+```
+
+The app reads the Worker URL at build time from the repository variable `AI_PROXY_URL`
+(or `EXPO_PUBLIC_AI_PROXY_URL` locally). `GET /api/health` shows whether the key is configured.

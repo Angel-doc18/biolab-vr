@@ -44,3 +44,7 @@ yarn-error.*
 server/node_modules
 server/.env
 .claude/
+
+# Cloudflare Worker
+worker/.wrangler
+worker/.dev.vars
