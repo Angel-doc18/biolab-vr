@@ -57,6 +57,21 @@ const routes = [
   ['GET', '/v1/admin/licence-requests', admin.listLicenceRequests],
 ].map(([method, path, handler]) => [method, new RegExp(`^${path}$`), handler]);
 
+// Browsers are only allowed from the origins listed in ALLOWED_ORIGINS (the web
+// preview during development). The mobile app is not a browser and needs no CORS.
+function corsHeaders(request, env) {
+  const origin = request.headers.get('origin');
+  const allowed = (env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
+  if (!origin || !allowed.includes(origin)) return null;
+  return {
+    'access-control-allow-origin': origin,
+    'access-control-allow-headers': 'authorization, content-type',
+    'access-control-allow-methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'access-control-max-age': '600',
+    vary: 'Origin',
+  };
+}
+
 async function handle(request, env) {
   const url = new URL(request.url);
   if (request.method === 'OPTIONS') return new Response(null, { status: 204 });
@@ -104,13 +119,21 @@ async function scheduled(env) {
 
 export default {
   async fetch(request, env) {
+    let response;
     try {
-      return await handle(request, env);
+      response = await handle(request, env);
     } catch (err) {
-      if (err instanceof HttpError) return json({ error: err.message, code: err.code }, err.status);
-      console.error('unhandled', err?.stack || err);
-      return json({ error: 'Something went wrong. Please try again.', code: 'server_error' }, 500);
+      if (err instanceof HttpError) response = json({ error: err.message, code: err.code }, err.status);
+      else {
+        console.error('unhandled', err?.stack || err);
+        response = json({ error: 'Something went wrong. Please try again.', code: 'server_error' }, 500);
+      }
     }
+    const cors = corsHeaders(request, env);
+    if (!cors) return response;
+    const headers = new Headers(response.headers);
+    for (const [k, v] of Object.entries(cors)) headers.set(k, v);
+    return new Response(response.body, { status: response.status, headers });
   },
   async scheduled(event, env, ctx) {
     ctx.waitUntil(scheduled(env));

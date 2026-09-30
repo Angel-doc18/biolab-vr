@@ -9,6 +9,8 @@ enabled = true
 
 [vars]
 FAPSHI_ENV = "sandbox"
+# Browser origins allowed to call the API (web preview only; the app is native).
+ALLOWED_ORIGINS = "http://localhost:8081"
 
 [[d1_databases]]
 binding = "DB"

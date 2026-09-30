@@ -48,7 +48,8 @@ export async function ask(request, env) {
     .slice(-10)
     .map((h) => ({ role: h.role, content: h.content }));
   while (history.length && history[0].role !== 'user') history.shift();
-  const text = await tutorReply(env, history, question);
+  const context = str(b.context, 'Context', { max: 200, optional: true });
+  const text = await tutorReply(env, history, question, { lang: user.lang, context, level: user.class_name });
   await consume(env, user.id, 'asks');
   return ok({ text, asksLeft: Math.max(0, AI_LIMITS[tier].asks - used.asks - 1) });
 }

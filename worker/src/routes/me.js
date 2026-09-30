@@ -8,11 +8,16 @@ export async function getMe(request, env) {
   return ok({ user: publicUser(user), pro: isPro(user) });
 }
 
-// Only these profile fields can be changed by the user. Role and billing fields cannot.
+// Only these profile fields can be changed by the user. Billing fields never can.
 export async function patchMe(request, env) {
   const user = await requireUser(request, env);
   const b = await readJson(request);
   const fields = {};
+  // The role can be chosen during onboarding only, never changed afterwards.
+  if ('role' in b) {
+    if (user.onboarded) throw new HttpError(403, 'Your role cannot be changed.', 'forbidden');
+    fields.role = oneOf(b.role, 'Role', ['student', 'parent', 'teacher']);
+  }
   if ('name' in b) fields.name = str(b.name, 'Full name', { min: 2, max: 80 });
   if ('lang' in b) fields.lang = oneOf(b.lang, 'Language', ['en', 'fr']);
   if ('level' in b) fields.level = oneOf(b.level, 'Level', ['O', 'A']);

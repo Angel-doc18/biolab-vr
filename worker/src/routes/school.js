@@ -11,13 +11,10 @@ const REGIONS = ['Adamawa', 'Centre', 'East', 'Far North', 'Littoral', 'North', 
 export async function searchSchools(request, env) {
   await requireUser(request, env);
   const q = (new URL(request.url).searchParams.get('q') || '').trim().slice(0, 60);
+  const students = '(SELECT COUNT(DISTINCT m.student_id) FROM classes c JOIN class_members m ON m.class_id = c.id WHERE c.school_id = s.id) AS students';
   const stmt = q
-    ? env.DB.prepare(
-        `SELECT s.id, s.name, s.town, s.region,
-           (SELECT COUNT(*) FROM classes c JOIN class_members m ON m.class_id = c.id WHERE c.school_id = s.id) AS students
-         FROM schools s WHERE s.name LIKE ? OR s.town LIKE ? ORDER BY s.name LIMIT 20`
-      ).bind(`%${q}%`, `%${q}%`)
-    : env.DB.prepare('SELECT id, name, town, region, 0 AS students FROM schools ORDER BY created_at DESC LIMIT 20');
+    ? env.DB.prepare(`SELECT s.id, s.name, s.town, s.region, ${students} FROM schools s WHERE s.name LIKE ? OR s.town LIKE ? ORDER BY s.name LIMIT 20`).bind(`%${q}%`, `%${q}%`)
+    : env.DB.prepare(`SELECT s.id, s.name, s.town, s.region, ${students} FROM schools s ORDER BY s.created_at DESC LIMIT 20`);
   const { results } = await stmt.all();
   return ok({ items: results });
 }

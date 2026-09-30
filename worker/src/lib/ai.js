@@ -36,11 +36,18 @@ const client = (env) => {
   return new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 90_000 });
 };
 
-export async function tutorReply(env, history, question) {
+export async function tutorReply(env, history, question, { lang, context, level } = {}) {
+  const notes = [
+    lang === 'fr' ? 'The student has chosen French: answer in French unless they write in English.' : null,
+    level ? `The student is in ${level}.` : null,
+    context ? `The student is currently studying: ${context}.` : null,
+  ].filter(Boolean);
   const response = await client(env).beta.messages.create({
     model: MODEL,
     max_tokens: 4000,
-    system: TUTOR_SYSTEM,
+    system: notes.length ? `${TUTOR_SYSTEM}
+
+${notes.join(' ')}` : TUTOR_SYSTEM,
     output_config: { effort: 'low' },
     ...FALLBACK,
     messages: [...history, { role: 'user', content: question }],
