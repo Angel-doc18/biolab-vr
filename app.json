@@ -4,7 +4,7 @@
     "slug": "biospatial-vr",
     "version": "1.0.0",
     "orientation": "default",
-    "icon": "./assets/img/logo.png",
+    "icon": "./assets/img/app-icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
@@ -12,14 +12,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#ffffff",
-        "foregroundImage": "./assets/img/logo.png"
+        "foregroundImage": "./assets/img/adaptive-foreground.png",
+        "backgroundColor": "#0369a1"
       },
       "package": "com.biospatial.vr",
       "permissions": []
     },
     "web": {
-      "favicon": "./assets/img/logo.png"
+      "favicon": "./assets/img/app-icon.png"
     },
     "plugins": [
       "expo-font",
@@ -27,8 +27,8 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/img/logo.png",
-          "imageWidth": 160,
+          "image": "./assets/img/splash-logo.png",
+          "imageWidth": 180,
           "resizeMode": "contain",
           "backgroundColor": "#f7f9fb"
         }
