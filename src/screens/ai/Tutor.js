@@ -40,7 +40,8 @@ function matchUnit(text) {
 
 // Renders the tutor's markdown-lite: **bold**, numbered steps and bullets.
 function Rich({ text, own }) {
-  const lines = text.split(/\n+/).filter((l) => l.trim());
+  // Drops markdown dividers and table rule rows the model sometimes adds.
+  const lines = text.split(/\n+/).filter((l) => l.trim() && !/^\s*([-*_]\s*){3,}$/.test(l) && !/^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(l));
   const base = own ? 'font-body-md text-body-md text-on-primary' : 'font-body-md text-body-md text-on-surface';
   const inline = (s, k) =>
     s.split('**').map((p, i) =>

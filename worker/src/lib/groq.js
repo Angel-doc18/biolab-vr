@@ -2,34 +2,65 @@
 // GROQ_API_KEY Worker secret and never reaches the app.
 import { HttpError } from './http.js';
 
-const URL_ = 'https://api.groq.com/openai/v1/chat/completions';
+const API = 'https://api.groq.com/openai/v1';
 
-// Tried in order: if Groq retires a model, the next one keeps the tutor working.
-// Override with GROQ_MODEL / GROQ_VISION_MODEL vars (comma separated).
-const TEXT_MODELS = ['llama-3.3-70b-versatile', 'openai/gpt-oss-120b', 'qwen/qwen3-32b'];
-const VISION_MODELS = ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'];
+// Preferred models, best first. Override with GROQ_MODEL / GROQ_VISION_MODEL
+// (comma separated). Only models Groq currently serves are tried, so a retired
+// model can never take the tutor offline.
+const TEXT_MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+const VISION_MODELS = ['qwen/qwen3.8-27b'];
+// Never used for chat: speech, safety classifiers and narrow models.
+const NOT_CHAT = /whisper|guard|orpheus|tts|allam|prompt/i;
 
 const list = (v, fallback) => (v ? v.split(',').map((s) => s.trim()).filter(Boolean) : fallback);
 
 export const groqConfigured = (env) => Boolean(env.GROQ_API_KEY);
 
-// Removes hidden reasoning some models emit, and em dashes from all output.
+// Removes hidden reasoning some models emit, and em dashes and special
+// hyphens from all output.
 export const clean = (s) =>
   String(s || '')
     .replace(/<think>[\s\S]*?<\/think>/g, '')
-    .replace(/—/g, ', ')
+    .replace(/\s*—\s*/g, ', ')
+    .replace(/[‐‑‒–―]/g, '-')
     .trim();
+
+// Live model list, cached per Worker instance for an hour.
+let catalog = { ids: null, at: 0 };
+async function liveModels(env) {
+  if (catalog.ids && Date.now() - catalog.at < 3_600_000) return catalog.ids;
+  try {
+    const res = await fetch(`${API}/models`, { headers: { authorization: `Bearer ${env.GROQ_API_KEY}` } });
+    if (!res.ok) return catalog.ids;
+    const data = await res.json();
+    catalog = { ids: (data.data || []).map((m) => m.id), at: Date.now() };
+  } catch {
+    // keep whatever we had; the preferred list is tried as is
+  }
+  return catalog.ids;
+}
+
+async function modelsFor(env, vision) {
+  const preferred = vision ? list(env.GROQ_VISION_MODEL, VISION_MODELS) : list(env.GROQ_MODEL, TEXT_MODELS);
+  const ids = await liveModels(env);
+  if (!ids) return preferred;
+  const live = preferred.filter((m) => ids.includes(m));
+  if (live.length) return live;
+  // None of the preferred models is served any more: fall back to any chat model.
+  const others = ids.filter((m) => !NOT_CHAT.test(m));
+  return others.length ? others : preferred;
+}
 
 export async function groqChat(env, { messages, vision = false, json = false, maxTokens = 2000, temperature = 0.4 }) {
   if (!env.GROQ_API_KEY) throw new HttpError(503, 'The AI tutor is not available yet.', 'ai_unavailable');
-  const models = vision ? list(env.GROQ_VISION_MODEL, VISION_MODELS) : list(env.GROQ_MODEL, TEXT_MODELS);
+  const models = await modelsFor(env, vision);
   let lastError = null;
   for (const model of models) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 60_000);
     let res;
     try {
-      res = await fetch(URL_, {
+      res = await fetch(`${API}/chat/completions`, {
         method: 'POST',
         signal: ctrl.signal,
         headers: { authorization: `Bearer ${env.GROQ_API_KEY}`, 'content-type': 'application/json' },
@@ -58,6 +89,7 @@ export async function groqChat(env, { messages, vision = false, json = false, ma
     console.error('groq_error', model, res.status, body.slice(0, 300));
     // Model missing, retired or unable to take this request: try the next one.
     if (res.status === 404 || res.status === 400 || res.status === 413 || res.status >= 500) {
+      if (res.status === 404) catalog.at = 0; // refresh the model list next time
       lastError = new Error(`groq_${res.status}`);
       continue;
     }

@@ -56,7 +56,7 @@ export async function tutorReply(env, history, question, { lang, context, level 
   if (!provider) throw new HttpError(503, 'The AI tutor is not available yet.', 'ai_unavailable');
   if (provider === 'groq') {
     const { text } = await groqChat(env, {
-      messages: [{ role: 'system', content: `${system}\n\nKeep answers under 350 words unless the student asks for more detail.` }, ...history, { role: 'user', content: question }],
+      messages: [{ role: 'system', content: `${system}\n\nKeep answers under 350 words unless the student asks for more detail. Format for a phone chat: short paragraphs, numbered steps and **bold** key terms only. Never use tables, headings with #, horizontal rules or LaTeX.` }, ...history, { role: 'user', content: question }],
       maxTokens: 1500,
       temperature: 0.4,
     });
