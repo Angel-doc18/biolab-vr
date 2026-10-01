@@ -144,7 +144,7 @@ export default function Me({ navigation }) {
               <V c="flex-row items-center justify-between">
                 <T c="font-headline-sm text-headline-sm text-on-surface">{L('Syllabus mastery', 'Maîtrise du programme')}</T>
                 <T c="font-label-sm text-label-sm text-primary">
-                  {assessed.length} {L('units started', 'unités commencées')}
+                  {assessed.length} {assessed.length === 1 ? L('unit started', 'unité commencée') : L('units started', 'unités commencées')}
                 </T>
               </V>
               {(assessed.length ? assessed : units.slice(0, 3)).map((u) => {
@@ -213,7 +213,7 @@ export default function Me({ navigation }) {
                 </V>
                 <V c="flex-1">
                   <T c="font-headline-sm text-headline-sm text-on-surface">
-                    {progress.exams.length} {L('tests', 'tests')}
+                    {progress.exams.length} {progress.exams.length === 1 ? L('test', 'test') : L('tests', 'tests')}
                   </T>
                   <T c="font-label-sm text-label-sm text-on-surface-variant" numberOfLines={1}>
                     {L('Mock papers done', 'Examens blancs faits')}
