@@ -52,7 +52,8 @@ namespace_id = "1004"
 
 # Secrets (set with `npx wrangler secret put <NAME>`, never committed):
 #   JWT_SECRET             required, 64+ random characters
-#   ANTHROPIC_API_KEY      AI tutor and marking
+#   GROQ_API_KEY           AI tutor and marking (primary provider)
+#   ANTHROPIC_API_KEY      optional alternative, used when AI_PROVIDER = "anthropic"
 #   FAPSHI_API_USER / FAPSHI_API_KEY / FAPSHI_WEBHOOK_SECRET   payments (set FAPSHI_ENV = "live" for real money)
 #   TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM       SMS codes and parent alerts
 #   ADMIN_TOKEN            operator endpoints (voucher creation), 32+ characters

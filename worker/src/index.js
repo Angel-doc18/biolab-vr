@@ -8,10 +8,11 @@ import * as ai from './routes/ai.js';
 import * as admin from './routes/admin.js';
 import { paymentsConfigured, sendSms, smsConfigured } from './lib/providers.js';
 import { notify } from './lib/notify.js';
+import { aiProvider } from './lib/ai.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
 const routes = [
-  ['GET', '/v1/health', (req, env) => json({ ok: true, ai: Boolean(env.ANTHROPIC_API_KEY), sms: smsConfigured(env), payments: paymentsConfigured(env) })],
+  ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), sms: smsConfigured(env), payments: paymentsConfigured(env) })],
   ['POST', '/v1/auth/register', auth.register],
   ['POST', '/v1/auth/login', auth.login],
   ['POST', '/v1/auth/refresh', auth.refresh],

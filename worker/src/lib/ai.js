@@ -1,8 +1,17 @@
-// Claude calls for the tutor chat and for "Mark my answer".
+// AI for the tutor chat and for "Mark my answer". Groq is the primary
+// provider; Claude is used only when AI_PROVIDER = "anthropic".
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { HttpError } from './http.js';
+import { clean, groqChat, groqConfigured } from './groq.js';
+
+export const aiProvider = (env) => {
+  if (env.AI_PROVIDER === 'anthropic' && env.ANTHROPIC_API_KEY) return 'anthropic';
+  if (groqConfigured(env)) return 'groq';
+  if (env.ANTHROPIC_API_KEY) return 'anthropic';
+  return null;
+};
 
 const MODEL = 'claude-opus-5-5';
 // Server-side fallback: if the model declines on a policy check, the API
@@ -42,12 +51,21 @@ export async function tutorReply(env, history, question, { lang, context, level 
     level ? `The student is in ${level}.` : null,
     context ? `The student is currently studying: ${context}.` : null,
   ].filter(Boolean);
+  const system = notes.length ? `${TUTOR_SYSTEM}\n\n${notes.join(' ')}` : TUTOR_SYSTEM;
+  const provider = aiProvider(env);
+  if (!provider) throw new HttpError(503, 'The AI tutor is not available yet.', 'ai_unavailable');
+  if (provider === 'groq') {
+    const { text } = await groqChat(env, {
+      messages: [{ role: 'system', content: `${system}\n\nKeep answers under 350 words unless the student asks for more detail.` }, ...history, { role: 'user', content: question }],
+      maxTokens: 1500,
+      temperature: 0.4,
+    });
+    return clean(text) || 'I could not produce an answer this time. Please rephrase your question.';
+  }
   const response = await client(env).beta.messages.create({
     model: MODEL,
     max_tokens: 4000,
-    system: notes.length ? `${TUTOR_SYSTEM}
-
-${notes.join(' ')}` : TUTOR_SYSTEM,
+    system,
     output_config: { effort: 'low' },
     ...FALLBACK,
     messages: [...history, { role: 'user', content: question }],
@@ -78,14 +96,87 @@ const MarkResult = z.object({
   modelAnswer: z.string(),
 });
 
-export async function markAnswer(env, { question, markScheme, maxMarks, answerText, image }) {
-  const schemeText = markScheme.map((p, i) => `${i + 1}. [${p.marks} mark${p.marks === 1 ? '' : 's'}] ${p.point}`).join('\n');
+// Never lets a model slip inflate a score: every point is clamped to the scheme.
+function finalize(result, { markScheme, maxMarks }, transcription) {
+  const criteria = markScheme.map((p, i) => {
+    const c = result.criteria?.[i] || { awarded: 0, comment: 'Not addressed.' };
+    const awarded = Math.max(0, Math.min(p.marks, Math.round((Number(c.awarded) || 0) * 2) / 2));
+    return { point: p.point, max: p.marks, awarded, comment: clean(c.comment) };
+  });
+  const awarded = Math.min(maxMarks, criteria.reduce((a, c) => a + c.awarded, 0));
+  return {
+    transcription: clean(transcription ?? result.transcription ?? ''),
+    criteria,
+    awarded,
+    maxMarks,
+    feedback: clean(result.feedback),
+    modelAnswer: clean(result.modelAnswer),
+  };
+}
+
+const schemeLines = (markScheme) => markScheme.map((p, i) => `${i + 1}. [${p.marks} mark${p.marks === 1 ? '' : 's'}] ${p.point}`).join('\n');
+
+const GroqMark = z.object({
+  criteria: z.array(z.object({ awarded: z.coerce.number(), comment: z.coerce.string().default('') }).passthrough()),
+  feedback: z.coerce.string(),
+  modelAnswer: z.coerce.string(),
+});
+
+async function groqMark(env, input) {
+  const { question, markScheme, maxMarks, answerText, image } = input;
+  let answer = answerText;
+  if (image) {
+    const { text } = await groqChat(env, {
+      vision: true,
+      maxTokens: 1200,
+      temperature: 0,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Transcribe the handwritten answer in this photo exactly as written, including spelling mistakes. Output only the transcription. If there is no readable writing, output exactly: [ILLEGIBLE]',
+            },
+            { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.data}` } },
+          ],
+        },
+      ],
+    });
+    answer = clean(text);
+  }
+  const prompt = `Question (${maxMarks} marks):\n${question}\n\nMark scheme:\n${schemeLines(markScheme)}\n\nStudent answer:\n${answer || '[NO ANSWER]'}\n\nReply with JSON only, in exactly this shape:\n{"criteria":[{"awarded":number,"comment":string}],"feedback":string,"modelAnswer":string}\n"criteria" must have exactly ${markScheme.length} entries, one per mark scheme point in order. "awarded" is the marks for that point (whole or half). "comment" says briefly why marks were given or lost. "feedback" is two or three sentences to the student. "modelAnswer" is a short full-mark answer.`;
+  for (const temperature of [0.2, 0]) {
+    const { text } = await groqChat(env, {
+      json: true,
+      maxTokens: 1800,
+      temperature,
+      messages: [
+        { role: 'system', content: MARK_SYSTEM },
+        { role: 'user', content: prompt },
+      ],
+    });
+    try {
+      const parsed = GroqMark.parse(JSON.parse(clean(text)));
+      return finalize(parsed, input, answer);
+    } catch {
+      // malformed JSON: retry once with temperature 0
+    }
+  }
+  throw new HttpError(422, 'This answer could not be marked. Try a clearer photo or type your answer.', 'mark_failed');
+}
+
+export async function markAnswer(env, input) {
+  const provider = aiProvider(env);
+  if (!provider) throw new HttpError(503, 'Marking is not available yet.', 'ai_unavailable');
+  if (provider === 'groq') return groqMark(env, input);
+  const { question, markScheme, maxMarks, answerText, image } = input;
   const content = [];
   if (image) content.push({ type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } });
   content.push({
     type: 'text',
-    text: `Question (${maxMarks} marks):\n${question}\n\nMark scheme:\n${schemeText}\n\n${
-      image ? 'The student\'s handwritten answer is in the image above.' : `Student answer:\n${answerText}`
+    text: `Question (${maxMarks} marks):\n${question}\n\nMark scheme:\n${schemeLines(markScheme)}\n\n${
+      image ? "The student's handwritten answer is in the image above." : `Student answer:\n${answerText}`
     }\n\nReturn the marking. "criteria" must contain one entry per mark scheme point in order, "awarded" is the total.`,
   });
   const response = await client(env).beta.messages.parse({
@@ -100,19 +191,5 @@ export async function markAnswer(env, { question, markScheme, maxMarks, answerTe
   if (response.stop_reason === 'refusal' || !result) {
     throw new HttpError(422, 'This answer could not be marked. Try a clearer photo or type your answer.', 'mark_failed');
   }
-  // Clamp to the scheme so a model slip can never inflate a score.
-  const criteria = markScheme.map((p, i) => {
-    const c = result.criteria[i] || { awarded: 0, comment: 'Not addressed.' };
-    const awarded = Math.max(0, Math.min(p.marks, Math.round((Number(c.awarded) || 0) * 2) / 2));
-    return { point: p.point, max: p.marks, awarded, comment: String(c.comment || '').replace(/—/g, ', ') };
-  });
-  const awarded = Math.min(maxMarks, criteria.reduce((a, c) => a + c.awarded, 0));
-  return {
-    transcription: result.transcription,
-    criteria,
-    awarded,
-    maxMarks,
-    feedback: result.feedback.replace(/—/g, ', '),
-    modelAnswer: result.modelAnswer.replace(/—/g, ', '),
-  };
+  return finalize(result, input);
 }
