@@ -71,7 +71,6 @@ export default function Role({ navigation }) {
         </V>
       </V>
       <V c="w-full mb-space-lg">
-        <V c="absolute -right-2 -top-3 w-16 h-16 rounded-full bg-secondary-fixed/30" />
         <V c="flex-row items-center gap-space-xs mb-space-xs">
           <T c="font-headline-lg text-headline-lg text-on-background tracking-tight">{L('Who are you?', 'Qui êtes-vous ?')}</T>
           <V c="w-6 h-6 rounded-full bg-secondary-container items-center justify-center">

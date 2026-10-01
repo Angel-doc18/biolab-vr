@@ -1,7 +1,7 @@
 // Primitives that let each screen keep the Stitch utility classes:
 //   <V c="flex-row items-center gap-2">  <T c="font-headline-sm text-headline-sm">  <Ic n="home" s={22} />
 import { useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { createIconSet } from '@expo/vector-icons';
 import Svg, { Circle, Path } from 'react-native-svg';
 import glyphMap from '../glyphmap.json';
@@ -63,9 +63,18 @@ export function Ic({ n, s: size = 24, c = 'on-surface-variant', fill, style }) {
 }
 
 // Every tappable surface: 0.98 press scale, as the motion spec asks.
+// Layout props belong on the Pressable so sizing and spacing behave like a
+// plain View; the visual box (and the press scale) stays on the inner view.
+const OUTER = ['flex', 'flexGrow', 'flexShrink', 'flexBasis', 'alignSelf', 'width', 'minWidth', 'maxWidth', 'position', 'top', 'left', 'right', 'bottom', 'zIndex', 'margin', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'marginHorizontal', 'marginVertical'];
+
 export function P({ c, style, children, onPress, disabled, scale = 0.98, hitSlop, accessibilityLabel, ...rest }) {
   const v = useRef(new Animated.Value(1)).current;
   const to = (x) => Animated.spring(v, { toValue: x, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
+  const flat = StyleSheet.flatten([s(c), style]) || {};
+  const outer = {};
+  const inner = {};
+  for (const [k, val] of Object.entries(flat)) (OUTER.includes(k) ? outer : inner)[k] = val;
+  if (outer.width != null || outer.flex != null || outer.flexGrow != null || outer.alignSelf === 'stretch') inner.width = '100%';
   return (
     <Pressable
       onPress={onPress}
@@ -75,16 +84,18 @@ export function P({ c, style, children, onPress, disabled, scale = 0.98, hitSlop
       accessibilityLabel={accessibilityLabel}
       onPressIn={() => to(scale)}
       onPressOut={() => to(1)}
+      style={outer}
       {...rest}
     >
-      <Animated.View style={[s(c), style, { transform: [{ scale: v }] }, disabled && { opacity: 0.5 }]}>{children}</Animated.View>
+      <Animated.View style={[inner, { transform: [{ scale: v }] }, disabled && { opacity: 0.5 }]}>{children}</Animated.View>
     </Pressable>
   );
 }
 
 export function Input({ c, style, ...rest }) {
   const flat = StyleSheet.flatten([BASE_TEXT, { fontSize: 16, lineHeight: undefined }, s(c), style]);
-  return <TextInput placeholderTextColor={C.outline} {...rest} style={resolveFont(flat)} />;
+  // No browser focus ring on web; the field backgrounds already show focus.
+  return <TextInput placeholderTextColor={C.outline} {...rest} style={[resolveFont(flat), Platform.OS === 'web' && { outlineStyle: 'none' }]} />;
 }
 
 // Circular progress ring (SVG, rotated to start at 12 o'clock).

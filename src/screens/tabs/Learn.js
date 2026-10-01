@@ -30,8 +30,12 @@ export default function Learn({ navigation }) {
       <V c="pb-space-lg">
         <V c="mt-space-md mb-space-sm p-1 bg-surface-container rounded-full flex-row items-center">
           <V c="flex-1 py-2 px-3 rounded-full bg-primary-container flex-row items-center justify-center gap-1.5 shadow-sm">
-            <T c="font-label-md text-label-md text-on-primary">GCE O-Level</T>
-            <T c="font-label-sm text-label-sm text-on-primary opacity-80">({L('Forms 3 to 5', 'Form 3 à 5')})</T>
+            <T c="font-label-md text-label-md text-on-primary" numberOfLines={1}>
+              GCE O-Level
+            </T>
+            <T c="font-label-sm text-label-sm text-on-primary opacity-80" numberOfLines={1}>
+              {L('Forms 3-5', 'Form 3-5')}
+            </T>
           </V>
           <V c="flex-1 py-2 px-3 rounded-full flex-row items-center justify-center gap-1.5">
             <Ic n="lock" s={15} c="outline" />

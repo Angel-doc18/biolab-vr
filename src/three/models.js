@@ -1,5 +1,5 @@
 // Procedural 3D specimens, one per syllabus unit. Pure data so the same spec
-// renders in the touch viewer and in stereoscopic VR — and ships with zero
+// renders in the touch viewer and in stereoscopic VR, and ships with zero
 // downloaded model files (everything works offline).
 //
 // mesh: { g: geometry, a: args, p: position, r: rotation, s: scale, c: colour, o: opacity }
@@ -24,7 +24,7 @@ function helix({ x = 0, steps = 14, h = 2, rad = 0.28, turns = 1.5, a = '#0369a1
 }
 
 export const MODELS = {
-  // Unit 1 — mitochondrion cut-away (matches the design's centrepiece)
+  // Unit 1: mitochondrion cut-away (matches the design's centrepiece)
   cell: {
     rot: [0.35, -0.45],
     shell: [
@@ -63,7 +63,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 2 — digestive system
+  // Unit 2: digestive system
   nutrition: {
     rot: [0.2, -0.35],
     shell: [
@@ -81,7 +81,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 3 — heart
+  // Unit 3: heart
   transport: {
     rot: [0.15, -0.3],
     shell: [
@@ -96,7 +96,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 4 — lungs
+  // Unit 4: lungs
   gas: {
     rot: [0.1, -0.25],
     shell: [
@@ -111,7 +111,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 5 — kidneys & urinary tract
+  // Unit 5: kidneys & urinary tract
   kidney: {
     rot: [0.1, -0.3],
     shell: [{ g: 'sphere', a: [0.55, 24, 24], p: [0.6, 0.55, 0], s: [0.55, 0.9, 0.45], c: '#8e3b46' }],
@@ -123,7 +123,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 6 — brain, spinal cord & neurone
+  // Unit 6: brain, spinal cord & neurone
   nervous: {
     rot: [0.15, -0.55],
     shell: [],
@@ -142,7 +142,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 7 — arm, elbow & antagonistic muscles
+  // Unit 7: arm, elbow & antagonistic muscles
   locomotion: {
     rot: [0.1, -0.5],
     shell: [{ g: 'cyl', a: [0.08, 0.07, 1.3, 14], p: [0.46, 0.21, 0], r: [0, 0, -PI / 4], c: '#e8dcc3' }],
@@ -154,7 +154,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 8 — flower
+  // Unit 8: flower
   reproduction: {
     rot: [0.45, -0.3],
     shell: [
@@ -188,7 +188,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 9 — chromosome + DNA helix
+  // Unit 9: chromosome + DNA helix
   genetics: {
     rot: [0.1, -0.2],
     shell: [
@@ -209,7 +209,7 @@ export const MODELS = {
     },
   },
 
-  // Unit 10 — energy pyramid
+  // Unit 10: energy pyramid
   ecology: {
     rot: [0.3, -0.45],
     shell: [

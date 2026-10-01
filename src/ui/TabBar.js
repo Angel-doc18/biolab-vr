@@ -59,6 +59,7 @@ export function TabBarView({ activeIndex, onSelect }) {
                 key={t.name}
                 onPress={() => onSelect(t.name, i)}
                 accessibilityRole="tab"
+                accessibilityLabel={L(t.en, t.fr)}
                 accessibilityState={{ selected: on }}
                 style={{ flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingVertical: 4 }}
               >

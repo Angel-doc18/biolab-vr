@@ -13,7 +13,7 @@ export function OfflineChip({ label }) {
   return (
     <V c="flex-row items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full">
       <V c="w-2 h-2 rounded-full bg-secondary" />
-      <T c="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">{label || L('Offline Ready', 'Hors ligne')}</T>
+      <T c="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">{label || L('Offline', 'Hors ligne')}</T>
     </V>
   );
 }

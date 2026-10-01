@@ -40,7 +40,7 @@ export const units = [
           tag: 'Impermeable bilayer',
           list: 'Inner Mitochondrial Membrane',
           title: 'Inner Mitochondrial Membrane',
-          desc: 'The inner membrane is far less permeable than the outer one, especially to protons (H⁺). This lets the mitochondrion build up a proton gradient across it — the energy store that drives ATP production.',
+          desc: 'The inner membrane is far less permeable than the outer one, especially to protons (H⁺). This lets the mitochondrion build up a proton gradient across it: the energy store that drives ATP production.',
           fr: {
             name: 'Membrane interne',
             tag: 'Bicouche imperméable',
@@ -70,7 +70,7 @@ export const units = [
           tag: 'Krebs cycle hub',
           list: 'Mitochondrial Matrix & Circular DNA',
           title: 'Mitochondrial Matrix',
-          desc: 'The fluid inside the inner membrane. It holds the enzymes of the Krebs cycle, plus the mitochondrion’s own circular DNA and small 70S ribosomes — evidence that mitochondria evolved from bacteria.',
+          desc: 'The fluid inside the inner membrane. It holds the enzymes of the Krebs cycle, plus the mitochondrion’s own circular DNA and small 70S ribosomes, evidence that mitochondria evolved from bacteria.',
           fr: {
             name: 'Matrice & ADN',
             tag: 'Centre du cycle de Krebs',
@@ -207,7 +207,7 @@ export const units = [
         },
         {
           key: 'aorta', name: 'Aorta', tag: 'Largest artery', list: 'Aorta (Oxygenated Blood Out)', title: 'Aorta',
-          desc: 'The main artery carrying oxygenated blood from the left ventricle to the body. Remember: arteries carry blood AWAY from the heart — the pulmonary artery is the exception that carries deoxygenated blood (to the lungs).',
+          desc: 'The main artery carrying oxygenated blood from the left ventricle to the body. Remember: arteries carry blood AWAY from the heart. The pulmonary artery is the exception that carries deoxygenated blood (to the lungs).',
           fr: { name: 'Aorte', tag: 'Plus grande artère', list: 'Aorte (sang oxygéné)', title: 'Aorte', desc: 'Artère principale qui transporte le sang oxygéné du ventricule gauche vers le corps. Les artères partent du cœur ; l’artère pulmonaire fait exception en transportant du sang désoxygéné.' },
         },
         {
@@ -219,7 +219,7 @@ export const units = [
     },
     quiz: [
       { q: 'Which chamber of the heart has the thickest muscular wall?', a: ['Left ventricle', 'Right ventricle', 'Left atrium', 'Right atrium'], why: 'The left ventricle pumps blood around the entire body, so it needs the most muscle to produce the highest pressure.' },
-      { q: 'The pulmonary artery carries:', a: ['Deoxygenated blood to the lungs', 'Oxygenated blood to the body', 'Oxygenated blood to the lungs', 'Deoxygenated blood to the body'], why: 'It is an artery because it carries blood away from the heart, but that blood is deoxygenated — a classic exam trap.' },
+      { q: 'The pulmonary artery carries:', a: ['Deoxygenated blood to the lungs', 'Oxygenated blood to the body', 'Oxygenated blood to the lungs', 'Deoxygenated blood to the body'], why: 'It is an artery because it carries blood away from the heart, but that blood is deoxygenated. This is a classic exam trap.' },
       { q: 'Valves in veins prevent:', a: ['Backflow of blood', 'Blood clotting', 'Gas exchange', 'High blood pressure'], why: 'Blood in veins is under low pressure, so pocket valves stop it flowing backwards.' },
       { q: 'Exchange of materials between blood and body cells occurs across the walls of:', a: ['Capillaries', 'Arteries', 'Veins', 'The aorta'], why: 'Capillary walls are one cell thick, allowing oxygen, glucose and wastes to diffuse between blood and tissue fluid.' },
       { q: 'Water moves up the stem of a flowering plant mainly in the:', a: ['Xylem', 'Phloem', 'Cortex', 'Epidermis'], why: 'Xylem vessels carry water and mineral salts from the roots up to the leaves.' },
@@ -274,7 +274,7 @@ export const units = [
       ],
     },
     quiz: [
-      { q: 'Gas exchange in the lungs takes place across the walls of the:', a: ['Alveoli', 'Trachea', 'Bronchi', 'Pleural membranes'], why: 'Alveoli have thin, moist walls surrounded by capillaries — the gas-exchange surface.' },
+      { q: 'Gas exchange in the lungs takes place across the walls of the:', a: ['Alveoli', 'Trachea', 'Bronchi', 'Pleural membranes'], why: 'Alveoli have thin, moist walls surrounded by capillaries: the gas-exchange surface.' },
       { q: 'During inhalation the diaphragm:', a: ['Contracts and flattens', 'Relaxes and domes upwards', 'Does not move', 'Pushes air out of the lungs'], why: 'Contraction flattens the diaphragm, increasing chest volume and decreasing pressure so air flows in.' },
       { q: 'The trachea is kept open by:', a: ['C-shaped rings of cartilage', 'Bone', 'Smooth muscle alone', 'The diaphragm'], why: 'Cartilage rings stop the trachea collapsing when pressure falls during inhalation.' },
       { q: 'Aerobic respiration releases energy from glucose using:', a: ['Oxygen', 'Carbon dioxide', 'Lactic acid', 'Nitrogen'], why: 'Glucose + oxygen → carbon dioxide + water + energy (ATP).' },
@@ -299,10 +299,10 @@ export const units = [
     focus: 'Nephron: Ultrafiltration & Reabsorption',
     vr: {
       title: 'Mammalian Kidney & Urinary System',
-      subtitle: 'From ultrafiltration in the nephron to urine storage — and how ADH controls water balance.',
+      subtitle: 'From ultrafiltration in the nephron to urine storage, and how ADH controls water balance.',
       fr: {
         title: 'Rein des mammifères et appareil urinaire',
-        subtitle: 'De l’ultrafiltration dans le néphron au stockage de l’urine — et le rôle de l’ADH.',
+        subtitle: 'De l’ultrafiltration dans le néphron au stockage de l’urine, et le rôle de l’ADH.',
       },
       weightTile: ['11% of Paper 2', 'Nephron Diagram Questions'],
       concept: ['Osmoregulation', 'ADH & water reabsorption'],
@@ -426,12 +426,12 @@ export const units = [
         },
         {
           key: 'biceps', name: 'Biceps', tag: 'Flexor muscle', list: 'Biceps (Flexor)', title: 'Biceps',
-          desc: 'When the biceps contracts (and the triceps relaxes), the forearm is pulled up and the arm bends — flexion. Muscles can only pull, never push.',
+          desc: 'When the biceps contracts (and the triceps relaxes), the forearm is pulled up and the arm bends (flexion). Muscles can only pull, never push.',
           fr: { name: 'Biceps', tag: 'Muscle fléchisseur', list: 'Biceps (fléchisseur)', title: 'Biceps', desc: 'Quand le biceps se contracte et que le triceps se relâche, l’avant-bras se lève : c’est la flexion. Un muscle ne peut que tirer.' },
         },
         {
           key: 'triceps', name: 'Triceps', tag: 'Extensor muscle', list: 'Triceps (Extensor)', title: 'Triceps',
-          desc: 'When the triceps contracts (and the biceps relaxes), the arm straightens — extension. Biceps and triceps form an antagonistic pair.',
+          desc: 'When the triceps contracts (and the biceps relaxes), the arm straightens (extension). Biceps and triceps form an antagonistic pair.',
           fr: { name: 'Triceps', tag: 'Muscle extenseur', list: 'Triceps (extenseur)', title: 'Triceps', desc: 'Quand le triceps se contracte et que le biceps se relâche, le bras se tend : c’est l’extension. Ils forment une paire antagoniste.' },
         },
         {

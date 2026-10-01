@@ -82,7 +82,7 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
   };
   useImperativeHandle(ref, () => ({ reset }));
 
-  // Turn the selected part toward the viewer — only when it is currently facing away,
+  // Turn the selected part toward the viewer, only when it is currently facing away,
   // so the default three-quarter view is kept whenever the part is already visible.
   useEffect(() => {
     if (!active) return;

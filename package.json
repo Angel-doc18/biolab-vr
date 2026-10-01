@@ -48,5 +48,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  }
 }
