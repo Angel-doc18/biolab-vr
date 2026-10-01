@@ -70,9 +70,11 @@ export default function Specimen({ spec, active, xray, explodeRef, partRefs }) {
 export function Lights() {
   return (
     <>
-      <ambientLight intensity={0.75} />
+      <ambientLight intensity={0.6} />
+      <ambientLight intensity={0.15} color="#0369A1" />
       <hemisphereLight args={['#ffffff', '#cde5ff', 0.6]} />
-      <directionalLight position={[3, 4, 5]} intensity={1.4} />
+      <directionalLight position={[3, 4, 5]} intensity={1.3} />
+      <directionalLight position={[-4, 3, 2]} intensity={0.35} color="#38BDF8" />
       <directionalLight position={[-3, -2, -4]} intensity={0.4} color="#94ccff" />
     </>
   );

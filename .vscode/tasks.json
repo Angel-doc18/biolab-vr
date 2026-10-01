@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Expo doctor",
+			"type": "shell",
+			"command": "cd /d c:\\Users\\pc\\OneDrive\\Desktop\\biolab-vr && npx expo-doctor",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "none"
+		}
+	]
+}

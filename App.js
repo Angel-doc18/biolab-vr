@@ -1,79 +1,55 @@
-import { useEffect, useState } from 'react';
-import { BackHandler, View } from 'react-native';
+import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import * as SplashScreen from 'expo-splash-screen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
-import { PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold } from '@expo-google-fonts/plus-jakarta-sans';
-import { StoreProvider, useStore } from './src/store/store';
-import { AppHeader, BottomNav, TABS } from './src/components/chrome';
-import Curriculum from './src/screens/Curriculum';
-import CellVR from './src/screens/CellVR';
-import VirtualLab from './src/screens/VirtualLab';
-import ExamArena from './src/screens/ExamArena';
-import VRView from './src/three/VRView';
-import AskAI from './src/screens/AskAI';
-import ProfileSheet from './src/components/ProfileSheet';
-import { C } from './src/theme';
+import { Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold } from '@expo-google-fonts/manrope';
+import { AppProvider, useApp } from './src/state/store';
+import { LangContext } from './src/i18n';
+import AppNavigator from './src/navigation/AppNavigator';
 
-function Shell() {
-  const { ready, set } = useStore();
-  const [tab, setTab] = useState('curriculum');
-  const [vr, setVr] = useState(false);
-  const [ask, setAsk] = useState(false);
-  const [profile, setProfile] = useState(false);
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
-  // Portrait everywhere; VR immersion switches to landscape itself.
-  useEffect(() => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (ask) {
-        setAsk(false);
-        return true;
-      }
-      if (tab === 'curriculum') return false;
-      setTab('curriculum');
-      return true;
-    });
-    return () => sub.remove();
-  }, [tab, ask]);
-
-  if (!ready) return <View style={{ flex: 1, backgroundColor: C.surface }} />;
-
-  const openUnit = (id) => {
-    set({ unitId: id });
-    setAsk(false);
-    setTab('cell');
-  };
-  const label = TABS.find((t) => t.id === tab).label;
-
+function Root() {
+  const { prefs } = useApp();
   return (
-    <View style={{ flex: 1, backgroundColor: C.surface }}>
-      {!ask && tab === 'curriculum' && <Curriculum openUnit={openUnit} enterVR={() => setVr(true)} editProfile={() => setProfile(true)} />}
-      {!ask && tab === 'cell' && <CellVR openUnit={openUnit} />}
-      {!ask && tab === 'lab' && <VirtualLab />}
-      {!ask && tab === 'exam' && <ExamArena openUnit={openUnit} />}
-      {ask && <AskAI onClose={() => setAsk(false)} />}
-      <AppHeader section={ask ? 'Ask AI' : label === '3D Cell VR' ? '3D Cell Vr' : label} onAskAI={() => setAsk(true)} onProfile={() => setProfile(true)} />
-      <BottomNav active={ask ? null : tab} onChange={(t) => { setAsk(false); setTab(t); }} />
-      {vr && <VRView unitId="cell" onClose={() => setVr(false)} />}
-      {profile && <ProfileSheet onClose={() => setProfile(false)} />}
+    <LangContext.Provider value={prefs.lang}>
+      <AppNavigator />
       <StatusBar style="dark" />
-    </View>
+    </LangContext.Provider>
   );
 }
 
 export default function App() {
-  const [loaded] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold });
-  if (!loaded) return null;
+  const [loaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Manrope_500Medium,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
+  });
+
+  // Portrait everywhere; the VR view switches to landscape itself.
+  useEffect(() => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (loaded || fontError) SplashScreen.hideAsync().catch(() => {});
+  }, [loaded, fontError]);
+
+  if (!loaded && !fontError) return null;
   return (
-    <SafeAreaProvider>
-      <StoreProvider>
-        <Shell />
-      </StoreProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AppProvider>
+          <Root />
+        </AppProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

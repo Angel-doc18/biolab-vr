@@ -6,8 +6,7 @@ import { DeviceMotion } from 'expo-sensors';
 import * as THREE from 'three';
 import { MODELS } from './models';
 import Specimen, { Lights } from './Specimen';
-import { Btn, Icon, T } from '../components/ui';
-import { C, R, alpha } from '../theme';
+import { Ic, P, T } from '../ui/kit';
 
 // Device-orientation → camera quaternion (same maths as three's DeviceOrientationControls).
 const zee = new THREE.Vector3(0, 0, 1);
@@ -116,10 +115,10 @@ export default function VRView({ unitId, onClose }) {
         </Canvas>
         <View style={StyleSheet.absoluteFill} {...pan.panHandlers} />
         <View pointerEvents="none" style={styles.divider} />
-        <Btn onPress={onClose} accessibilityLabel="Exit VR" style={styles.close}>
-          <Icon name="close" size={20} color={C['on-primary']} />
-          <T v="label-sm" c="on-primary">Exit VR</T>
-        </Btn>
+        <P onPress={onClose} accessibilityLabel="Exit VR" style={styles.close}>
+          <Ic n="close" s={20} c="on-primary" />
+          <T c="font-label-sm text-label-sm text-on-primary">Exit VR</T>
+        </P>
       </View>
     </Modal>
   );
@@ -129,6 +128,6 @@ const styles = StyleSheet.create({
   divider: { position: 'absolute', top: 0, bottom: 0, left: '50%', width: 2, marginLeft: -1, backgroundColor: '#000' },
   close: {
     position: 'absolute', top: 16, left: 16, flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 12, paddingVertical: 8, borderRadius: R.full, backgroundColor: alpha('primary-container', 0.85),
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: 'rgba(3,105,161,0.85)',
   },
 });

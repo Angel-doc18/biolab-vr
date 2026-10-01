@@ -1,0 +1,159 @@
+// Primitives that let each screen keep the Stitch utility classes:
+//   <V c="flex-row items-center gap-2">  <T c="font-headline-sm text-headline-sm">  <Ic n="home" s={22} />
+import { useRef } from 'react';
+import { Animated, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { createIconSet } from '@expo/vector-icons';
+import Svg, { Circle, Path } from 'react-native-svg';
+import glyphMap from '../glyphmap.json';
+import tw, { C, color } from './tw';
+
+const SymbolOutline = createIconSet(glyphMap, 'MaterialSymbols', require('../../assets/fonts/MaterialSymbols-fill0.ttf'));
+const SymbolFilled = createIconSet(glyphMap, 'MaterialSymbolsFill', require('../../assets/fonts/MaterialSymbols-fill1.ttf'));
+
+const cache = new Map();
+export function s(c) {
+  if (!c) return null;
+  let v = cache.get(c);
+  if (!v) {
+    v = tw.style(c);
+    cache.set(c, v);
+  }
+  return v;
+}
+
+// Maps (family, weight) to the static font files that are actually loaded.
+const FONTS = {
+  Manrope: { 400: 'Manrope_500Medium', 500: 'Manrope_500Medium', 600: 'Manrope_600SemiBold', 700: 'Manrope_700Bold', 800: 'Manrope_800ExtraBold' },
+  Inter: { 400: 'Inter_400Regular', 500: 'Inter_500Medium', 600: 'Inter_600SemiBold', 700: 'Inter_700Bold', 800: 'Inter_700Bold' },
+};
+const WEIGHT = { normal: 400, bold: 700 };
+function resolveFont(style) {
+  const fam = FONTS[style.fontFamily] ? style.fontFamily : 'Inter';
+  let w = WEIGHT[style.fontWeight] || parseInt(style.fontWeight, 10) || 400;
+  if (w < 400) w = 400;
+  if (w > 800) w = 800;
+  const out = { ...style, fontFamily: FONTS[fam][w] || FONTS[fam][700] };
+  delete out.fontWeight;
+  return out;
+}
+
+const BASE_TEXT = { fontFamily: 'Inter', fontSize: 14, lineHeight: 20, color: C['on-surface'] };
+
+export function T({ c, style, children, ...rest }) {
+  const flat = StyleSheet.flatten([BASE_TEXT, s(c), style]);
+  if (flat.fontSize && !flat.lineHeight) flat.lineHeight = Math.round(flat.fontSize * 1.4);
+  return (
+    <Text {...rest} style={resolveFont(flat)}>
+      {children}
+    </Text>
+  );
+}
+
+export function V({ c, style, children, ...rest }) {
+  return (
+    <View {...rest} style={[s(c), style]}>
+      {children}
+    </View>
+  );
+}
+
+export function Ic({ n, s: size = 24, c = 'on-surface-variant', fill, style }) {
+  const Set = fill ? SymbolFilled : SymbolOutline;
+  return <Set name={n} size={size} color={color(c)} style={style} />;
+}
+
+// Every tappable surface: 0.98 press scale, as the motion spec asks.
+export function P({ c, style, children, onPress, disabled, scale = 0.98, hitSlop, accessibilityLabel, ...rest }) {
+  const v = useRef(new Animated.Value(1)).current;
+  const to = (x) => Animated.spring(v, { toValue: x, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={hitSlop}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      onPressIn={() => to(scale)}
+      onPressOut={() => to(1)}
+      {...rest}
+    >
+      <Animated.View style={[s(c), style, { transform: [{ scale: v }] }, disabled && { opacity: 0.5 }]}>{children}</Animated.View>
+    </Pressable>
+  );
+}
+
+export function Input({ c, style, ...rest }) {
+  const flat = StyleSheet.flatten([BASE_TEXT, { fontSize: 16, lineHeight: undefined }, s(c), style]);
+  return <TextInput placeholderTextColor={C.outline} {...rest} style={resolveFont(flat)} />;
+}
+
+// Circular progress ring (SVG, rotated to start at 12 o'clock).
+export function Ring({ size = 32, stroke = 3, pct = 0, track = C['surface-container'], tint = C.secondary, children }) {
+  const r = (size - stroke) / 2;
+  const len = 2 * Math.PI * r;
+  const p = Math.max(0, Math.min(100, pct));
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={size} height={size} style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] }}>
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={track} strokeWidth={stroke} fill="none" />
+        {p > 0 && (
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke={tint}
+            strokeWidth={stroke}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${len} ${len}`}
+            strokeDashoffset={len * (1 - p / 100)}
+          />
+        )}
+      </Svg>
+      {children}
+    </View>
+  );
+}
+
+export function Bar({ pct = 0, c = 'h-1.5 bg-surface-container-low', fill = 'bg-secondary' }) {
+  return (
+    <V c={`w-full rounded-full overflow-hidden ${c}`}>
+      <V c={`h-full rounded-full ${fill}`} style={{ width: `${Math.max(0, Math.min(100, pct))}%` }} />
+    </V>
+  );
+}
+
+// Initials in a squircle. The design system's rounded-full is 12px, so avatars
+// are soft squares, never stock portraits.
+export function Avatar({ name = '', size = 32, c = '', ring }) {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  const ini = ((parts[0]?.[0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase() || 'B';
+  return (
+    <V
+      c={`items-center justify-center bg-primary-fixed ${c}`}
+      style={[{ width: size, height: size, borderRadius: Math.min(12, size / 2.6) }, ring && { borderWidth: 2, borderColor: color(ring) }]}
+    >
+      <T c="font-headline-sm text-on-primary-fixed-variant" style={{ fontSize: size * 0.38, lineHeight: size * 0.5, fontWeight: '700' }}>
+        {ini}
+      </T>
+    </V>
+  );
+}
+
+// Brand mark: the orbit cell from the approved logo.
+export function Logo({ size = 32, mono }) {
+  const blue = mono ? '#ffffff' : '#0369A1';
+  const teal = mono ? '#ffffff' : '#14B8A6';
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Path d="M 12,62 C 14,35 48,22 84,36 C 94,40 92,48 82,54" fill="none" stroke={teal} strokeWidth={4.5} strokeLinecap="round" opacity={0.6} />
+      <Circle cx={50} cy={50} r={28} fill={mono ? 'transparent' : blue} stroke={mono ? '#ffffff' : '#FFFFFF'} strokeWidth={3} />
+      <Circle cx={50} cy={50} r={11} fill={mono ? '#ffffff' : teal} />
+      {!mono && <Circle cx={47} cy={47} r={3.5} fill="#E6FAF7" opacity={0.8} />}
+      <Path d="M 88,40 C 94,52 82,68 48,76 C 22,81 8,72 12,62 C 13,58 17,54 24,50" fill="none" stroke={teal} strokeWidth={4.5} strokeLinecap="round" />
+      <Circle cx={28} cy={74} r={3.5} fill="#FFFFFF" stroke={blue} strokeWidth={1.5} />
+    </Svg>
+  );
+}
+
+export { tw, C, color };

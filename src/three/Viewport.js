@@ -4,19 +4,11 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
 import * as THREE from 'three';
 import { MODELS } from './models';
 import Specimen, { Lights } from './Specimen';
-import { C, R, alpha } from '../theme';
-import { T } from '../components/ui';
+import { Ic, T } from '../ui/kit';
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const BASE_Z = 4.4;
 
-// Pin looks from the design: [circle bg, ring colour, tag colour]
-const PIN_STYLE = [
-  [C.primary, alpha('primary-fixed', 0.6), 'primary'],
-  [C.primary, alpha('secondary-fixed', 0.8), 'on-primary-container'], // "active focus" pin
-  [C.secondary, alpha('secondary-fixed', 0.5), 'secondary'],
-  [C['primary-container'], alpha('primary-fixed', 0.5), 'on-surface-variant'],
-];
 
 function Rig({ spec, ctrl, active, xray, explodeRef, pinXY, pinOpacity, onSides }) {
   const root = useRef();
@@ -140,7 +132,7 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
       <Canvas
         key={unitId}
         camera={{ position: [0, 0, BASE_Z], fov: 40 }}
-        onCreated={({ gl }) => gl.setClearColor('#ffffff', 1)}
+        onCreated={({ gl }) => gl.setClearColor('#ecf4ff', 1)}
         style={StyleSheet.absoluteFill}
       >
         <Lights />
@@ -159,45 +151,31 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
       {keys.map((k, i) => {
         const part = parts[i];
         const isActive = active === k;
-        const [bg, ring, tagColor] = PIN_STYLE[isActive ? 1 : i === 1 ? 0 : i];
         const left = sides[k];
-        const size = isActive ? 32 : 28;
         return (
           <Animated.View
             key={k}
             pointerEvents="box-none"
-            style={[
-              styles.pinAnchor,
-              { opacity: pinOpacity[i], zIndex: isActive ? 5 : 2, transform: pinXY[i].getTranslateTransform() },
-            ]}
+            style={[styles.pinAnchor, { opacity: pinOpacity[i], zIndex: isActive ? 5 : 2, transform: pinXY[i].getTranslateTransform() }]}
           >
             <Pressable
               accessibilityLabel={`Inspect ${part.list}`}
               onPress={() => onSelect(k)}
               hitSlop={6}
-              style={[styles.pin, left ? { right: -size / 2, flexDirection: 'row-reverse' } : { left: -size / 2 }]}
+              style={[styles.pin, left ? { right: -16, flexDirection: 'row-reverse' } : { left: -16 }]}
             >
-              <View
-                style={{
-                  width: size, height: size, borderRadius: size / 2, backgroundColor: bg,
-                  alignItems: 'center', justifyContent: 'center',
-                  boxShadow: `0px 0px 0px 4px ${ring}, ${isActive ? '0px 10px 15px -3px rgba(0,0,0,0.1)' : '0px 4px 6px -1px rgba(0,0,0,0.1)'}`,
-                }}
-              >
-                <T v="label-sm" w={700} c="on-primary">{i + 1}</T>
+              <View style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
+                {isActive && <View style={styles.ping} />}
+                <View style={[styles.dot, isActive ? styles.dotOn : null]}>
+                  <T c={`font-label-sm text-label-sm ${isActive ? 'text-on-primary' : 'text-primary'}`}>{i + 1}</T>
+                </View>
               </View>
-              {notes && (
-                <View
-                  style={[
-                    styles.label,
-                    isActive
-                      ? { backgroundColor: C['primary-container'], paddingHorizontal: 10, boxShadow: '0px 4px 6px -1px rgba(0,0,0,0.1)' }
-                      : { backgroundColor: alpha('surface-container-lowest', 0.95) },
-                    { alignItems: left ? 'flex-end' : 'flex-start' },
-                  ]}
-                >
-                  <T v="label-sm" w={isActive ? 700 : 600} c={isActive ? 'on-primary' : 'on-surface'} leading="tight" numberOfLines={1}>{part.name}</T>
-                  <T v="label-sm" size={10} w={500} c={tagColor} style={{ lineHeight: 11 }} numberOfLines={1}>{part.tag}</T>
+              {(notes || isActive) && (
+                <View style={[styles.label, isActive ? styles.labelOn : null]}>
+                  <T c={`font-label-sm text-label-sm ${isActive ? 'text-on-primary' : 'text-on-surface'}`} numberOfLines={1}>
+                    {part.name}
+                  </T>
+                  {isActive && <View style={styles.tealDot} />}
                 </View>
               )}
             </Pressable>
@@ -214,11 +192,16 @@ const styles = StyleSheet.create({
   frame: {
     width: '100%',
     aspectRatio: 4 / 3,
-    borderRadius: R.xl,
+    borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: C['surface-container-lowest'],
+    backgroundColor: '#ecf4ff',
   },
   pinAnchor: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
   pin: { position: 'absolute', top: -16, flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 32 },
-  label: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: R.lg, boxShadow: '0px 1px 2px 0px rgba(0,0,0,0.05)', maxWidth: 150 },
+  dot: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 4 },
+  dotOn: { backgroundColor: '#00507d' },
+  ping: { position: 'absolute', width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(79,219,200,0.55)' },
+  label: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.92)', maxWidth: 150 },
+  labelOn: { backgroundColor: '#0369a1' },
+  tealDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#6df5e1' },
 });
