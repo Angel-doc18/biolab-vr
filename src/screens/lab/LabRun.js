@@ -90,7 +90,7 @@ export default function LabRun({ navigation, route }) {
               <V c="flex-row items-center gap-space-xs">
                 <V c="flex-row items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full">
                   <V c="w-2 h-2 rounded-full bg-secondary" />
-                  <T c="font-label-sm text-label-sm text-secondary uppercase tracking-wider">{L('Ready', 'Prêt')}</T>
+                  <T c="font-label-sm text-label-sm text-secondary">{L('Ready', 'Prêt')}</T>
                 </V>
                 <P c="w-10 h-10 items-center justify-center rounded-full" onPress={() => setHelp(true)} accessibilityLabel="Method">
                   <Ic n="help_outline" s={22} />
@@ -103,7 +103,7 @@ export default function LabRun({ navigation, route }) {
       >
         <V c="px-margin pt-space-sm pb-space-xs">
           <V c="flex-row items-center justify-between mb-1.5">
-            <T c="font-label-sm text-label-sm text-primary-container uppercase tracking-wider flex-1" numberOfLines={1}>
+            <T c="font-label-sm text-label-sm text-primary-container flex-1" numberOfLines={1}>
               {L('Step', 'Étape')} {step} {L('of', 'sur')} 6: {steps[step - 1]}
             </T>
             <T c="font-label-sm text-label-sm text-on-surface-variant" style={{ fontWeight: '500' }}>
@@ -121,7 +121,7 @@ export default function LabRun({ navigation, route }) {
               <Ic n="biotech" s={18} c="primary" />
             </V>
             <V c="flex-1">
-              <T c="font-label-sm text-label-sm uppercase tracking-wider text-secondary">{L('Lab objective', 'Objectif')}</T>
+              <T c="font-label-sm text-label-sm text-secondary">{L('Lab objective', 'Objectif')}</T>
               <T c="font-headline-sm text-headline-sm text-on-surface mt-0.5" style={{ lineHeight: 22 }}>
                 {lab.objective}
               </T>
@@ -135,7 +135,7 @@ export default function LabRun({ navigation, route }) {
         </V>
 
         <V c="px-margin py-space-xs mt-1">
-          <T c="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">{lab.id === 'osmosis' ? L('Reagent solution series', 'Série de solutions') : L('Test conditions', 'Conditions')}</T>
+          <T c="font-label-sm text-label-sm text-on-surface-variant mb-2">{lab.id === 'osmosis' ? L('Reagent solution series', 'Série de solutions') : L('Test conditions', 'Conditions')}</T>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 4, paddingBottom: 4 }}>
             {lab.options.map((o, i) => {
               const on = i === r;
@@ -197,7 +197,7 @@ export default function LabRun({ navigation, route }) {
             </V>
             <V c="flex-1">
               <V c="flex-row items-center gap-1.5">
-                <T c="font-label-sm text-label-sm uppercase tracking-wider text-primary">{L('Examiner tip', 'Conseil d’examinateur')}</T>
+                <T c="font-label-sm text-label-sm text-primary">{L('Examiner tip', 'Conseil d’examinateur')}</T>
                 <V c="bg-primary-fixed px-1.5 rounded">
                   <T c="font-label-sm text-label-sm text-on-primary-fixed">GCE</T>
                 </V>
@@ -242,7 +242,7 @@ export default function LabRun({ navigation, route }) {
             <T c="font-label-lg text-label-lg text-on-primary">
               {recorded
                 ? L('Observation recorded', 'Observation enregistrée')
-                : `${L('Record observation in workbook', 'Noter dans le cahier')} (+${progress.labs[lab.id] ? 10 : 40} XP)`}
+                : `${L('Record observation in workbook', 'Noter dans le cahier')}`}
             </T>
           </P>
           {recorded && (

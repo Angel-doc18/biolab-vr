@@ -127,6 +127,7 @@ export function Screen({ children, header, footer, scroll = true, bg = 'bg-surfa
   const body = scroll ? (
     <ScrollView
       ref={scrollRef}
+      style={{ flex: 1 }}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
       refreshControl={refreshControl}

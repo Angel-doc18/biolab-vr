@@ -1,8 +1,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, View } from 'react-native';
-import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
+import { Canvas, useFrame, useThree } from './r3f';
 import * as THREE from 'three';
-import { MODELS } from './models';
+import { MODELS, realSpec } from './models';
+import { useAnatomy } from './anatomy';
 import Specimen, { Lights } from './Specimen';
 import { Ic, T } from '../ui/kit';
 
@@ -10,7 +11,7 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const BASE_Z = 4.4;
 
 
-function Rig({ spec, ctrl, active, xray, explodeRef, pinXY, pinOpacity, onSides }) {
+function Rig({ spec, geos, ctrl, active, xray, explodeRef, pinXY, pinOpacity, onSides }) {
   const root = useRef();
   const partRefs = useRef({});
   const { camera, size } = useThree();
@@ -57,7 +58,7 @@ function Rig({ spec, ctrl, active, xray, explodeRef, pinXY, pinOpacity, onSides 
 
   return (
     <group ref={root}>
-      <Specimen spec={spec} active={active} xray={xray} explodeRef={explodeRef} partRefs={partRefs} />
+      <Specimen spec={spec} geos={geos} active={active} xray={xray} explodeRef={explodeRef} partRefs={partRefs} />
     </group>
   );
 }
@@ -66,15 +67,26 @@ function Rig({ spec, ctrl, active, xray, explodeRef, pinXY, pinOpacity, onSides 
  * Touch-driven 3D specimen viewer with numbered pins that track their part.
  * Swipe = rotate, pinch = zoom, tap a pin = select.
  */
-const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect, xray, explode, notes, onInteract }, ref) {
-  const spec = MODELS[unitId];
+const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect, xray, explode, notes, onInteract, onStatus }, ref) {
+  // The real anatomy model when it has loaded, otherwise the simple diagram.
+  const real = useMemo(() => realSpec(unitId), [unitId]);
+  const anat = useAnatomy(real?.real);
+  const spec = real && anat.status === 'ready' ? real : MODELS[unitId];
+  const geos = spec.real ? anat.parts : null;
   const keys = Object.keys(spec.parts);
   const ctrl = useRef(null);
   if (!ctrl.current) ctrl.current = { rx: spec.rot[0], ry: spec.rot[1], trx: spec.rot[0], try: spec.rot[1], z: BASE_Z, tz: BASE_Z };
   const explodeRef = useRef(0);
   explodeRef.current = explode ? 1 : 0;
-  const pinXY = useMemo(() => keys.map(() => new Animated.ValueXY({ x: -100, y: -100 })), [unitId]);
-  const pinOpacity = useMemo(() => keys.map(() => new Animated.Value(1)), [unitId]);
+  const specKey = `${unitId}:${spec.real || 'diagram'}`;
+  const pinXY = useMemo(() => keys.map(() => new Animated.ValueXY({ x: -100, y: -100 })), [specKey]);
+  const pinOpacity = useMemo(() => keys.map(() => new Animated.Value(1)), [specKey]);
+  useEffect(() => {
+    onStatus?.(real ? anat.status : 'none');
+  }, [real, anat.status]);
+  useEffect(() => {
+    if (spec.real) Object.assign(ctrl.current, { trx: spec.rot[0], try: spec.rot[1] });
+  }, [specKey]);
   const [sides, setSides] = useState({});
 
   const reset = () => {
@@ -85,7 +97,7 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
   // Turn the selected part toward the viewer, only when it is currently facing away,
   // so the default three-quarter view is kept whenever the part is already visible.
   useEffect(() => {
-    if (!active) return;
+    if (!active || !spec.parts[active]) return;
     const a = spec.parts[active].anchor;
     const c = ctrl.current;
     const seen = new THREE.Vector3(...a).applyEuler(new THREE.Euler(c.trx, c.try, 0));
@@ -96,7 +108,7 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
     d = Math.atan2(Math.sin(d), Math.cos(d));
     c.try += d;
     c.trx = clamp(Math.atan2(a[1], Math.hypot(a[0], a[2])) * 0.6, -0.9, 0.9);
-  }, [active, unitId]);
+  }, [active, specKey]);
 
   const pan = useMemo(() => {
     let start = null;
@@ -130,7 +142,7 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
   return (
     <View style={styles.frame}>
       <Canvas
-        key={unitId}
+        key={specKey}
         camera={{ position: [0, 0, BASE_Z], fov: 40 }}
         onCreated={({ gl }) => gl.setClearColor('#ecf4ff', 1)}
         style={StyleSheet.absoluteFill}
@@ -138,6 +150,7 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
         <Lights />
         <Rig
           spec={spec}
+          geos={geos}
           ctrl={ctrl}
           active={active}
           xray={xray}
@@ -149,7 +162,8 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
       </Canvas>
       <View style={StyleSheet.absoluteFill} {...pan.panHandlers} />
       {keys.map((k, i) => {
-        const part = parts[i];
+        const part = parts.find((p) => p.key === k) || parts[i];
+        if (!part) return null;
         const isActive = active === k;
         const left = sides[k];
         return (

@@ -47,10 +47,9 @@ export default function Quiz({ navigation, route }) {
   if (locked) {
     return (
       <Screen header={<StackHeader title={L('Practice quiz', 'Quiz')} subtitle={unit.short} />}>
-        <V c="pt-space-xl items-center gap-space-md">
-          <Ic n="lock" s={40} c="primary-container" />
-          <T c="font-headline-sm text-headline-sm text-on-surface text-center">{L('This unit is part of Premium', 'Cette unité fait partie du Premium')}</T>
-          <Cta label={L('See plans', 'Voir les offres')} onPress={() => navigation.replace('Paywall')} />
+        <V c="pt-space-xl gap-space-md">
+          <T c="font-headline-sm text-headline-sm text-on-surface">{L('This unit is part of the full course.', 'Cette unité fait partie du cours complet.')}</T>
+          <Cta variant="dark" icon={null} label={L('See prices', 'Voir les prix')} onPress={() => navigation.replace('Paywall')} />
         </V>
       </Screen>
     );
@@ -61,26 +60,19 @@ export default function Quiz({ navigation, route }) {
     return (
       <Screen header={<StackHeader title={L('Quiz results', 'Résultats')} subtitle={unit.short} />}>
         <V c="pt-space-lg gap-space-md">
-          <V c="bg-primary-container rounded-xl p-space-lg items-center gap-1">
-            <T c="font-label-sm text-label-sm text-on-primary-container uppercase tracking-wider">{L('Your score', 'Votre score')}</T>
-            <T c="font-display-lg text-display-lg text-on-primary">
-              {finished.correct}/{questions.length}
+          <V c="gap-1">
+            <T c="font-headline-lg text-headline-lg text-on-surface" style={{ fontSize: 36, lineHeight: 42 }}>
+              {finished.correct} / {questions.length}
             </T>
-            <V c="px-2.5 py-0.5 rounded bg-secondary-fixed">
-              <T c="font-label-md text-label-md text-on-secondary-fixed">
-                {finished.pct}% · {L('Practice grade', 'Note estimée')} {gradeFor(finished.pct)}
-              </T>
-            </V>
-            {best != null && (
-              <T c="font-body-sm text-body-sm text-on-primary-container mt-1">
-                {L('Best so far', 'Meilleur score')}: {best}%
-              </T>
-            )}
+            <T c="font-body-md text-body-md text-on-surface-variant">
+              {finished.pct}%, {L('about grade', 'environ la note')} {gradeFor(finished.pct)}
+              {best != null ? `. ${L('Best so far', 'Meilleur score')}: ${best}%.` : '.'}
+            </T>
           </V>
           <V c="gap-2">
             {questions.map((qq, k) => (
               <V key={k} c="flex-row items-start gap-2 bg-surface-container-lowest p-3 rounded-xl shadow-sm">
-                <Ic n={picks[k] === 0 ? 'check_circle' : 'cancel'} s={20} c={picks[k] === 0 ? 'secondary' : 'error'} />
+                <Ic n={picks[k] === 0 ? 'check' : 'close'} s={20} c={picks[k] === 0 ? 'secondary' : 'error'} />
                 <V c="flex-1">
                   <T c="font-body-md text-body-md text-on-surface">{qq.q}</T>
                   {picks[k] !== 0 && <T c="font-body-sm text-body-sm text-secondary mt-1">{qq.a[0]}</T>}
@@ -88,7 +80,7 @@ export default function Quiz({ navigation, route }) {
               </V>
             ))}
           </V>
-          <Cta label={L('Try again', 'Recommencer')} icon="replay" onPress={restart} />
+          <Cta variant="dark" icon={null} label={L('Try again', 'Recommencer')} onPress={restart} />
           <Cta variant="soft" icon={null} label={L('Back to unit', 'Retour à l’unité')} onPress={() => navigation.goBack()} />
         </V>
       </Screen>
@@ -97,56 +89,37 @@ export default function Quiz({ navigation, route }) {
 
   return (
     <Screen
-      header={<StackHeader title={L('Practice quiz', 'Quiz')} subtitle={`${L('Unit', 'Unité')} ${unit.n} · ${unit.short}`} avatar={false} />}
+      header={<StackHeader title={`${L('Question', 'Question')} ${i + 1} ${L('of', 'sur')} ${questions.length}`} subtitle={`${L('Unit', 'Unité')} ${unit.n}, ${unit.short}`} subtitleColor="on-surface-variant" avatar={false} />}
       footer={
         <V c="px-margin py-3 bg-surface-container-lowest flex-row gap-space-sm" style={{ shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, elevation: 8 }}>
-          <P c="h-12 px-space-md rounded-xl bg-surface-container flex-row items-center gap-1" onPress={() => setI((x) => Math.max(0, x - 1))} disabled={i === 0}>
-            <Ic n="arrow_back" s={20} c="primary" />
-            <T c="font-label-lg text-label-lg text-primary">{L('Prev', 'Préc.')}</T>
+          <P c="h-12 px-space-md rounded-xl bg-surface-container items-center justify-center" onPress={() => setI((x) => Math.max(0, x - 1))} disabled={i === 0}>
+            <T c="font-label-lg text-label-lg text-on-surface">{L('Back', 'Retour')}</T>
           </P>
-          {i < questions.length - 1 ? (
-            <P c="flex-1 h-12 rounded-xl bg-primary flex-row items-center justify-center gap-2 shadow-md" onPress={() => setI((x) => x + 1)}>
-              <T c="font-label-lg text-label-lg text-on-primary">{L('Next question', 'Question suivante')}</T>
-              <Ic n="arrow_forward" s={20} c="on-primary" />
-            </P>
-          ) : (
-            <P c="flex-1 h-12 rounded-xl bg-secondary flex-row items-center justify-center gap-2 shadow-md" onPress={finish}>
-              <T c="font-label-lg text-label-lg text-on-secondary">{L('Finish quiz', 'Terminer')}</T>
-              <Ic n="task_alt" s={20} c="on-secondary" />
-            </P>
-          )}
+          <P c="flex-1 h-12 rounded-xl bg-primary-container items-center justify-center" onPress={i < questions.length - 1 ? () => setI((x) => x + 1) : finish}>
+            <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
+              {i < questions.length - 1 ? L('Next question', 'Question suivante') : L('Finish', 'Terminer')}
+            </T>
+          </P>
         </V>
       }
     >
       <V c="pt-space-md gap-space-md pb-space-lg">
-        <V c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-sm">
-          <V c="flex-row items-center justify-between">
-            <V c="flex-row items-center gap-space-xs">
-              <T c="font-headline-sm text-headline-sm text-primary" style={{ fontWeight: '700' }}>
-                Q {i + 1}
-              </T>
-              <T c="font-body-sm text-body-sm text-on-surface-variant">
-                {L('of', 'sur')} {questions.length}
-              </T>
-            </V>
-            <T c="font-label-sm text-label-sm text-secondary">
-              {Object.values(picks).filter((p) => p === 0).length} {L('correct', 'justes')}
-            </T>
-          </V>
-          <Bar pct={((i + 1) / questions.length) * 100} c="h-2 bg-surface-container" fill="bg-primary" />
-        </V>
-        <V c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
-          <T c="font-body-lg text-body-lg text-on-surface" style={{ lineHeight: 26 }}>
-            {q.q}
+        <V c="gap-1.5">
+          <Bar pct={((i + 1) / questions.length) * 100} c="h-1 bg-surface-container" fill="bg-primary-container" />
+          <T c="font-body-sm text-body-sm text-on-surface-variant">
+            {Object.values(picks).filter((p) => p === 0).length} {L('correct so far', 'justes pour l’instant')}
           </T>
         </V>
+        <T c="font-body-lg text-body-lg text-on-surface" style={{ lineHeight: 26 }}>
+          {q.q}
+        </T>
         <V c="gap-space-sm">
           {q.order.map((orig, k) => {
             const chosen = pick === orig;
             const reveal = pick != null;
-            const bg = !reveal ? 'bg-surface-container-lowest' : orig === 0 ? 'bg-secondary-container' : chosen ? 'bg-error-container' : 'bg-surface-container-lowest opacity-60';
+            const bg = !reveal ? 'bg-surface-container-lowest border border-outline-variant' : orig === 0 ? 'bg-secondary-container/60 border border-secondary' : chosen ? 'bg-error-container border border-error' : 'bg-surface-container-lowest border border-outline-variant opacity-60';
             return (
-              <P key={orig} c={`w-full ${bg} rounded-xl p-space-md shadow-sm flex-row items-start gap-space-sm`} onPress={() => choose(orig)} disabled={reveal} scale={0.99}>
+              <P key={orig} c={`w-full ${bg} rounded-xl p-space-md flex-row items-start gap-space-sm`} onPress={() => choose(orig)} disabled={reveal} scale={0.99}>
                 <V c={`w-6 h-6 rounded-full items-center justify-center mt-0.5 ${reveal && orig === 0 ? 'bg-secondary' : reveal && chosen ? 'bg-error' : 'bg-surface-container'}`}>
                   {reveal && (orig === 0 || chosen) ? (
                     <Ic n={orig === 0 ? 'check' : 'close'} s={16} c="on-primary" />
@@ -161,10 +134,9 @@ export default function Quiz({ navigation, route }) {
         </V>
         {pick != null && (
           <V c="bg-surface-container-low rounded-xl p-space-md gap-1">
-            <V c="flex-row items-center gap-1.5">
-              <Ic n="lightbulb" s={18} c="tertiary-container" />
-              <T c="font-label-md text-label-md text-tertiary-container uppercase tracking-wider">{L('Explanation', 'Explication')}</T>
-            </V>
+            <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+              {L('Why', 'Pourquoi')}
+            </T>
             <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
               {q.why}
             </T>

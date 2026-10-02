@@ -168,7 +168,7 @@ export default function Notifications({ navigation }) {
                 .filter(([, l]) => l.length)
                 .map(([label, l]) => (
                   <V key={label} c="gap-space-sm">
-                    <T c="font-label-sm text-label-sm uppercase tracking-wider text-outline">{label}</T>
+                    <T c="font-label-sm text-label-sm text-outline">{label}</T>
                     {l.map((n) => (
                       <Item key={n.id} n={n} />
                     ))}

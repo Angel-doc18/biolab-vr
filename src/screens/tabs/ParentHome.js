@@ -62,7 +62,7 @@ function ChildCard({ r, L, lang }) {
       </V>
       {Object.keys(r.unitMastery || {}).length > 0 && (
         <V c="gap-2">
-          <T c="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{L('Syllabus progress', 'Progression')}</T>
+          <T c="font-label-md text-label-md text-on-surface-variant">{L('Syllabus progress', 'Progression')}</T>
           {Object.entries(r.unitMastery)
             .map(([u, p]) => [unitById(u), p])
             .filter(([u]) => u)

@@ -1,0 +1,12 @@
+{
+  "name": "biospatial-model-builder",
+  "private": true,
+  "type": "module",
+  "description": "Builds the app's 3D anatomy models from BodyParts3D meshes.",
+  "scripts": { "build": "node build.mjs" },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.2.0",
+    "@gltf-transform/functions": "^4.2.0",
+    "meshoptimizer": "^0.25.0"
+  }
+}

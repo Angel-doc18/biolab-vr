@@ -114,7 +114,7 @@ export default function ParentReport() {
               )}
               {code && (
                 <V c="mt-3 p-3 rounded-lg bg-primary-fixed/40 gap-1">
-                  <T c="font-label-sm text-label-sm text-on-primary-fixed-variant uppercase tracking-wider">{L('Parent link code (valid 48 hours)', 'Code parent (valable 48 h)')}</T>
+                  <T c="font-label-sm text-label-sm text-on-primary-fixed-variant">{L('Parent link code (valid 48 hours)', 'Code parent (valable 48 h)')}</T>
                   <V c="flex-row items-center justify-between">
                     <T c="font-headline-md text-headline-md text-on-surface tracking-widest" style={{ fontWeight: '700' }}>
                       {code}
@@ -137,7 +137,7 @@ export default function ParentReport() {
 
             <V>
               <V c="flex-row items-center justify-between mb-2 px-1">
-                <T c="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">{L('Report preview', 'Aperçu du rapport')}</T>
+                <T c="font-label-md text-label-md text-on-surface-variant">{L('Report preview', 'Aperçu du rapport')}</T>
                 <V c="flex-row items-center gap-1">
                   <V c="w-2 h-2 rounded-full bg-secondary" />
                   <T c="font-label-sm text-label-sm text-secondary">{L('From your real progress', 'Basé sur vos progrès')}</T>
@@ -160,7 +160,7 @@ export default function ParentReport() {
                 <V c="p-3 bg-surface-container-high/40 gap-3">
                   <V c="items-center">
                     <V c="px-2 py-0.5 rounded-full bg-surface-container-lowest/80">
-                      <T c="text-outline uppercase" style={{ fontSize: 11 }}>
+                      <T c="text-outline" style={{ fontSize: 11 }}>
                         {new Date().toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
                       </T>
                     </V>

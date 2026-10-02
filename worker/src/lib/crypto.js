@@ -28,6 +28,12 @@ export async function sha256(text) {
   return toHex(await crypto.subtle.digest('SHA-256', enc.encode(text)));
 }
 
+// HMAC-SHA256 of a message, base64url. Used for short-lived signed download links.
+export async function hmac(secret, message) {
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return toB64Url(await crypto.subtle.sign('HMAC', key, enc.encode(message)));
+}
+
 // Constant-time comparison for equal-length strings.
 export function safeEqual(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;

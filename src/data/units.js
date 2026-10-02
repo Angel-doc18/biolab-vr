@@ -159,6 +159,11 @@ export const units = [
           desc: 'Digestion is completed in the small intestine and digested food is absorbed through millions of villi. Each villus has a thin wall, a dense capillary network and a lacteal for fat.',
           fr: { name: 'Intestin grêle', tag: 'Villosités absorbantes', list: 'Villosités de l’intestin grêle (absorption)', title: 'Intestin grêle et villosités', desc: 'La digestion s’achève dans l’intestin grêle et les nutriments sont absorbés par des millions de villosités, à paroi fine, riches en capillaires et munies d’un chylifère.' },
         },
+        {
+          key: 'colon', name: 'Large Intestine', tag: 'Absorbs water', list: 'Colon and Rectum', title: 'Large Intestine (Colon and Rectum)',
+          desc: 'Frames the small intestine: up the right side, across under the stomach and down the left. The colon absorbs most of the remaining water and mineral ions, so undigested food becomes semi-solid faeces. Faeces are stored in the rectum and leave through the anus (egestion).',
+          fr: { name: 'Gros intestin', tag: 'Absorbe l’eau', list: 'Côlon et rectum', title: 'Gros intestin (côlon et rectum)', desc: 'Il encadre l’intestin grêle : il monte à droite, passe sous l’estomac et descend à gauche. Le côlon absorbe la plus grande partie de l’eau et des ions minéraux restants : les aliments non digérés deviennent des fèces, stockées dans le rectum puis éliminées par l’anus (égestion).' },
+        },
       ],
     },
     quiz: [
@@ -196,9 +201,9 @@ export const units = [
       concept: ['Double Circulation', 'Pulmonary & systemic'],
       parts: [
         {
-          key: 'lv', name: 'Left Ventricle', tag: 'Thickest wall', list: 'Left Ventricle (Systemic Pump)', title: 'Left Ventricle',
-          desc: 'Pumps oxygenated blood into the aorta and around the whole body. Its muscular wall is the thickest of the four chambers because it must generate the highest pressure.',
-          fr: { name: 'Ventricule gauche', tag: 'Paroi la plus épaisse', list: 'Ventricule gauche (pompe systémique)', title: 'Ventricule gauche', desc: 'Envoie le sang oxygéné dans l’aorte vers tout le corps. Sa paroi musculaire est la plus épaisse car il doit produire la pression la plus élevée.' },
+          key: 'lv', name: 'Ventricles', tag: 'Pumping chambers', list: 'Left & Right Ventricles', title: 'Ventricles (Lower Chambers)',
+          desc: 'The two lower pumping chambers. The left ventricle pumps oxygenated blood into the aorta and around the whole body, so its muscular wall is the thickest of the four chambers. The right ventricle pumps deoxygenated blood only as far as the lungs, so its wall is thinner. Turn on "See inside" to compare them.',
+          fr: { name: 'Ventricules', tag: 'Cavités de pompage', list: 'Ventricules gauche et droit', title: 'Ventricules (cavités inférieures)', desc: 'Les deux cavités inférieures qui pompent le sang. Le ventricule gauche envoie le sang oxygéné dans l’aorte vers tout le corps : sa paroi est la plus épaisse. Le ventricule droit envoie le sang désoxygéné seulement jusqu’aux poumons : sa paroi est plus fine.' },
         },
         {
           key: 'atria', name: 'Atria', tag: 'Receiving chambers', list: 'Right & Left Atria', title: 'Atria (Upper Chambers)',
@@ -262,9 +267,9 @@ export const units = [
           fr: { name: 'Bronches', tag: 'Voies ramifiées', list: 'Bronches et bronchioles', title: 'Bronches et bronchioles', desc: 'La trachée se divise en deux bronches qui se ramifient en bronchioles se terminant par des grappes d’alvéoles.' },
         },
         {
-          key: 'alveoli', name: 'Alveoli', tag: 'Gas exchange surface', list: 'Alveoli (Air Sacs)', title: 'Alveoli',
-          desc: 'Millions of tiny air sacs with walls one cell thick, a moist lining and a dense capillary network. Oxygen diffuses into the blood and carbon dioxide diffuses out.',
-          fr: { name: 'Alvéoles', tag: 'Surface d’échange', list: 'Alvéoles (sacs aériens)', title: 'Alvéoles', desc: 'Des millions de petits sacs à paroi d’une seule cellule, humides et entourés de capillaires. L’oxygène diffuse vers le sang, le CO₂ en sens inverse.' },
+          key: 'alveoli', name: 'Lungs & Alveoli', tag: 'Gas exchange surface', list: 'Lung Lobes (Alveoli Inside)', title: 'Lungs and Alveoli',
+          desc: 'The right lung has three lobes and the left lung two, leaving room for the heart. Inside, the bronchioles end in millions of alveoli: air sacs with walls one cell thick, a moist lining and a dense capillary network. Oxygen diffuses into the blood and carbon dioxide diffuses out.',
+          fr: { name: 'Poumons et alvéoles', tag: 'Surface d’échange', list: 'Lobes pulmonaires (alvéoles dedans)', title: 'Poumons et alvéoles', desc: 'Le poumon droit a trois lobes et le gauche deux, ce qui laisse la place au cœur. Les bronchioles se terminent par des millions d’alvéoles à paroi d’une seule cellule, humides et entourées de capillaires. L’oxygène diffuse vers le sang, le CO₂ en sens inverse.' },
         },
         {
           key: 'diaphragm', name: 'Diaphragm', tag: 'Breathing muscle', list: 'Diaphragm (Ventilation)', title: 'Diaphragm',
@@ -313,9 +318,9 @@ export const units = [
           fr: { name: 'Rein', tag: 'Cortex & médulla', list: 'Rein (cortex et médulla)', title: 'Rein', desc: 'Organe en forme de haricot qui filtre environ 180 litres de plasma par jour. Le cortex contient les glomérules, la médulla les anses de Henlé.' },
         },
         {
-          key: 'nephron', name: 'Nephron', tag: 'Ultrafiltration unit', list: 'Nephron & Loop of Henle', title: 'Nephron & Loop of Henle',
-          desc: 'Blood is filtered under pressure from the glomerulus into Bowman’s capsule. Glucose is reabsorbed in the proximal tubule, and the loop of Henle builds a salt gradient that lets water be reabsorbed.',
-          fr: { name: 'Néphron', tag: 'Unité d’ultrafiltration', list: 'Néphron et anse de Henlé', title: 'Néphron et anse de Henlé', desc: 'Le sang est filtré sous pression du glomérule vers la capsule de Bowman. Le glucose est réabsorbé dans le tube proximal ; l’anse de Henlé crée un gradient de sel.' },
+          key: 'vessels', name: 'Renal Vessels', tag: 'Blood in and out', list: 'Renal Artery & Renal Vein', title: 'Renal Artery and Renal Vein',
+          desc: 'The renal artery brings blood from the aorta to each kidney under high pressure. Inside, about a million nephrons filter it: blood is forced from the glomerulus into Bowman’s capsule, then glucose and most water are reabsorbed. The renal vein returns the cleaned blood to the vena cava, so it carries the least urea of any blood vessel.',
+          fr: { name: 'Vaisseaux rénaux', tag: 'Entrée et sortie du sang', list: 'Artère et veine rénales', title: 'Artère rénale et veine rénale', desc: 'L’artère rénale amène le sang de l’aorte à chaque rein sous forte pression. Environ un million de néphrons le filtrent : le sang passe du glomérule à la capsule de Bowman, puis le glucose et la plupart de l’eau sont réabsorbés. La veine rénale ramène le sang épuré vers la veine cave : c’est le sang le plus pauvre en urée.' },
         },
         {
           key: 'ureter', name: 'Ureter', tag: 'Urine to bladder', list: 'Ureter', title: 'Ureter',
@@ -374,14 +379,14 @@ export const units = [
           fr: { name: 'Cervelet', tag: 'Équilibre', list: 'Cervelet', title: 'Cervelet', desc: 'À l’arrière de l’encéphale ; coordonne les mouvements musculaires et maintient l’équilibre et la posture.' },
         },
         {
-          key: 'cord', name: 'Spinal Cord', tag: 'Reflex centre', list: 'Spinal Cord & Medulla', title: 'Spinal Cord',
-          desc: 'Carries impulses between the brain and the body and is the centre for many reflexes. The medulla oblongata above it controls breathing and heart rate.',
-          fr: { name: 'Moelle épinière', tag: 'Centre réflexe', list: 'Moelle épinière et bulbe', title: 'Moelle épinière', desc: 'Transmet les influx entre l’encéphale et le corps et sert de centre à de nombreux réflexes. Le bulbe rachidien contrôle respiration et rythme cardiaque.' },
+          key: 'brainstem', name: 'Medulla & Pons', tag: 'Automatic control', list: 'Brainstem (Medulla Oblongata & Pons)', title: 'Medulla Oblongata and Pons',
+          desc: 'Connect the brain to the spinal cord. The medulla oblongata controls automatic actions you do not think about: heart rate, breathing rate, swallowing and coughing.',
+          fr: { name: 'Bulbe et pont', tag: 'Contrôle automatique', list: 'Tronc cérébral (bulbe rachidien et pont)', title: 'Bulbe rachidien et pont', desc: 'Relient l’encéphale à la moelle épinière. Le bulbe rachidien contrôle les actions automatiques : rythme cardiaque, rythme respiratoire, déglutition et toux.' },
         },
         {
-          key: 'neurone', name: 'Motor Neurone', tag: 'Impulse to effector', list: 'Motor Neurone & Synapse', title: 'Motor Neurone & Synapse',
-          desc: 'Carries impulses from the CNS to an effector (muscle or gland). Neurones meet at synapses, where a chemical transmitter crosses the gap so impulses travel in one direction only.',
-          fr: { name: 'Neurone moteur', tag: 'Vers l’effecteur', list: 'Neurone moteur et synapse', title: 'Neurone moteur et synapse', desc: 'Conduit l’influx du système nerveux central vers un effecteur. Aux synapses, un neurotransmetteur traverse la fente, dans un seul sens.' },
+          key: 'cord', name: 'Spinal Cord', tag: 'Reflex centre', list: 'Spinal Cord', title: 'Spinal Cord',
+          desc: 'Carries impulses between the brain and the body and is the centre for spinal reflexes. In a reflex arc the impulse passes from a sensory neurone to a relay neurone in the grey matter, then to a motor neurone, crossing a synapse at each step.',
+          fr: { name: 'Moelle épinière', tag: 'Centre réflexe', list: 'Moelle épinière', title: 'Moelle épinière', desc: 'Transmet les influx entre l’encéphale et le corps et sert de centre aux réflexes médullaires. Dans un arc réflexe, l’influx passe d’un neurone sensitif à un neurone d’association, puis à un neurone moteur, en franchissant une synapse à chaque étape.' },
         },
       ],
     },

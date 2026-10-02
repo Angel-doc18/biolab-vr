@@ -12,7 +12,7 @@ import { cancelDailyReminder, scheduleDailyReminder } from '../../lib/reminders'
 function Section({ title, children }) {
   return (
     <V c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-md">
-      <T c="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{title}</T>
+      <T c="font-label-sm text-label-sm text-on-surface-variant">{title}</T>
       {children}
     </V>
   );

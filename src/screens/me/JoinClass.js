@@ -59,7 +59,7 @@ export default function JoinClass() {
           <Cta label={L('Join class', 'Rejoindre')} icon="group_add" loading={busy} onPress={join} />
           {classes.length > 0 && (
             <V c="gap-space-sm pt-space-sm">
-              <T c="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{L('Your classes', 'Vos classes')}</T>
+              <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Your classes', 'Vos classes')}</T>
               {classes.map((c) => (
                 <V key={c.id} c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex-row items-center gap-3">
                   <V c="w-10 h-10 rounded-xl bg-secondary-container items-center justify-center">

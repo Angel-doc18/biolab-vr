@@ -87,7 +87,7 @@ function slideUp({ current, layouts }) {
 const stackOptions = {
   headerShown: false,
   gestureEnabled: true,
-  cardStyle: { backgroundColor: C['surface-container-lowest'] },
+  cardStyle: { backgroundColor: C['surface-container-lowest'], flex: 1 },
   cardStyleInterpolator: slide,
   transitionSpec: { open: SPRING, close: SPRING },
 };

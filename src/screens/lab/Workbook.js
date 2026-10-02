@@ -44,7 +44,7 @@ function DrawSheet({ entry, onClose, onSave, L, rubricList }) {
           <T c="font-label-lg text-label-lg text-on-surface">{entry.title}</T>
           <DrawPad initial={drawing} onChange={setDrawing} L={L} />
           <V c="bg-surface-container-low rounded-xl p-space-md gap-space-sm">
-            <T c="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{L('Check your drawing', 'Vérifiez votre dessin')}</T>
+            <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Check your drawing', 'Vérifiez votre dessin')}</T>
             {rubricList.map((r, i) => {
               const on = rubric.includes(i);
               return (
@@ -71,8 +71,8 @@ export default function Workbook({ navigation }) {
   const rubricList = prefs.lang === 'fr' ? RUBRIC_FR : RUBRIC_EN;
   const entries = [...progress.workbook].sort((a, b) => b.at - a.at);
   const drawings = entries.filter((e) => e.drawing).length;
-  const labsDone = LABS.filter((l) => !l.soon && progress.labs[l.id]).length;
-  const labsTotal = LABS.filter((l) => !l.soon).length;
+  const labsDone = LABS.filter((l) => progress.labs[l.id]).length;
+  const labsTotal = LABS.length;
 
   const exportPdf = async () => {
     if (!pro) return navigation.navigate('Paywall');
@@ -109,7 +109,7 @@ export default function Workbook({ navigation }) {
             </V>
             <P c="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high shadow-sm" onPress={exportPdf} disabled={busy || !entries.length}>
               <Ic n="military_tech" s={16} c="tertiary-container" fill />
-              <T c="font-label-md text-label-md text-primary-container">{pro ? L('Export PDF', 'Exporter PDF') : L('Export PDF (Premium)', 'PDF (Premium)')}</T>
+              <T c="font-label-md text-label-md text-primary-container">{pro ? L('Export PDF', 'Exporter PDF') : L('Export PDF (full course)', 'PDF (cours complet)')}</T>
             </P>
           </V>
 
@@ -219,7 +219,7 @@ export default function Workbook({ navigation }) {
                 <V c="bg-surface-container-low rounded-xl p-3 gap-1.5">
                   <V c="flex-row items-center gap-1">
                     <Ic n="edit_note" s={16} c="primary" />
-                    <T c="font-label-md text-label-md text-primary uppercase tracking-wider">{L('Findings', 'Résultats')}</T>
+                    <T c="font-label-md text-label-md text-primary">{L('Findings', 'Résultats')}</T>
                   </V>
                   <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
                     {e.observation}

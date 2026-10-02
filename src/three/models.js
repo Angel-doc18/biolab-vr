@@ -5,6 +5,8 @@
 // mesh: { g: geometry, a: args, p: position, r: rotation, s: scale, c: colour, o: opacity }
 // part.anchor is where that part's numbered pin sits (in model space).
 
+import { ANATOMY, UNIT_MODEL } from './anatomy';
+
 const PI = Math.PI;
 const range = (n, f) => Array.from({ length: n }, (_, i) => f(i));
 
@@ -117,7 +119,7 @@ export const MODELS = {
     shell: [{ g: 'sphere', a: [0.55, 24, 24], p: [0.6, 0.55, 0], s: [0.55, 0.9, 0.45], c: '#8e3b46' }],
     parts: {
       kidney: { anchor: [-0.8, 0.8, 0.25], meshes: [{ g: 'sphere', a: [0.55, 24, 24], p: [-0.6, 0.55, 0], s: [0.55, 0.9, 0.45], c: '#9f4450' }] },
-      nephron: { anchor: [0.6, 0.55, 0.35], meshes: [{ g: 'sphere', a: [0.07, 12, 12], p: [0.6, 0.8, 0.28], c: '#f2c14e' }, { g: 'torus', a: [0.1, 0.028, 8, 20, PI], p: [0.6, 0.35, 0.28], r: [0, 0, PI], c: '#fde68a' }, { g: 'cyl', a: [0.028, 0.028, 0.45, 8], p: [0.5, 0.57, 0.28], c: '#fde68a' }, { g: 'cyl', a: [0.028, 0.028, 0.45, 8], p: [0.7, 0.57, 0.28], c: '#fde68a' }] },
+      vessels: { anchor: [0.6, 0.55, 0.35], meshes: [{ g: 'sphere', a: [0.07, 12, 12], p: [0.6, 0.8, 0.28], c: '#f2c14e' }, { g: 'torus', a: [0.1, 0.028, 8, 20, PI], p: [0.6, 0.35, 0.28], r: [0, 0, PI], c: '#fde68a' }, { g: 'cyl', a: [0.028, 0.028, 0.45, 8], p: [0.5, 0.57, 0.28], c: '#fde68a' }, { g: 'cyl', a: [0.028, 0.028, 0.45, 8], p: [0.7, 0.57, 0.28], c: '#fde68a' }] },
       ureter: { anchor: [-0.45, -0.25, 0.15], meshes: [{ g: 'cyl', a: [0.05, 0.05, 0.95, 10], p: [-0.42, -0.25, 0], r: [0, 0, -0.25], c: '#e6c3a1' }, { g: 'cyl', a: [0.05, 0.05, 0.95, 10], p: [0.42, -0.25, 0], r: [0, 0, 0.25], c: '#e6c3a1' }] },
       bladder: { anchor: [0, -0.95, 0.4], meshes: [{ g: 'sphere', a: [0.38, 22, 22], p: [0, -0.95, 0], c: '#e8b4b8' }] },
     },
@@ -131,7 +133,7 @@ export const MODELS = {
       cerebrum: { anchor: [0.35, 1.05, 0.5], meshes: [{ g: 'sphere', a: [0.7, 32, 24], p: [0, 0.75, 0.05], s: [1.1, 0.8, 0.95], c: '#f4a3b4' }] },
       cerebellum: { anchor: [0, 0.2, -0.6], meshes: [{ g: 'sphere', a: [0.35, 20, 16], p: [0, 0.22, -0.4], s: [1.1, 0.6, 0.8], c: '#d97791' }] },
       cord: { anchor: [0, -0.9, -0.15], meshes: [{ g: 'cyl', a: [0.1, 0.08, 1.7, 14], p: [0, -0.6, -0.3], c: '#f7d6c4' }] },
-      neurone: {
+      brainstem: {
         anchor: [0.95, -0.6, 0.2],
         meshes: [
           { g: 'sphere', a: [0.1, 12, 12], p: [0.12, -0.6, -0.2], c: '#2563eb' },
@@ -230,3 +232,19 @@ export const MODELS = {
     },
   },
 };
+
+// Real anatomy for the units that have it (see anatomy.js). Labelled parts keep the
+// keys used by the unit's lesson content; unlabelled ones form the shell.
+
+export function realSpec(unitId) {
+  const name = UNIT_MODEL[unitId];
+  const m = name && ANATOMY[name];
+  if (!m) return null;
+  const all = Object.entries(m.parts);
+  return {
+    real: name,
+    rot: m.view,
+    parts: Object.fromEntries(all.filter(([, p]) => p.label).map(([k, p]) => [k, p])),
+    shell: all.filter(([, p]) => !p.label).map(([k, p]) => ({ key: k, ...p })),
+  };
+}

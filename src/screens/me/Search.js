@@ -37,7 +37,7 @@ export default function Search({ navigation }) {
       models: rank(units, (u) => score(`${u.vr.title} ${u.vr.subtitle} ${u.vr.parts.map((p) => `${p.name} ${p.title} ${p.fr?.name || ''}`).join(' ')}`, terms)),
       questions: rank(BANK, (b) => score(`${b.q} ${b.a[0]} ${b.why}`, terms)).slice(0, 12),
       labs: rank(
-        LABS.filter((l) => !l.soon),
+        LABS,
         (l) => score(`${l.title} ${l.desc} ${l.short}`, terms)
       ),
     };
@@ -51,7 +51,7 @@ export default function Search({ navigation }) {
       <V c="flex-row items-center justify-between px-1 mb-1">
         <V c="flex-row items-center gap-1.5">
           <Ic n={icon} s={20} c="secondary" />
-          <T c="font-headline-sm text-on-surface uppercase tracking-wide" style={{ fontSize: 12, fontWeight: '700' }}>
+          <T c="font-headline-sm text-on-surface" style={{ fontSize: 12, fontWeight: '700' }}>
             {title}
           </T>
         </V>
@@ -102,7 +102,7 @@ export default function Search({ navigation }) {
 
           {!terms.length ? (
             <V c="gap-space-sm">
-              <T c="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{L('Try searching for', 'Essayez')}</T>
+              <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Try searching for', 'Essayez')}</T>
               <V c="flex-row flex-wrap gap-2">
                 {['mitochondria', 'osmosis', 'enzyme', 'heart', 'alveoli', 'nephron', 'reflex arc', 'pollination', 'allele', 'malaria'].map((w) => (
                   <P key={w} c="px-3 py-1.5 rounded-full bg-surface-container-low" onPress={() => setQ(w)}>
@@ -115,7 +115,7 @@ export default function Search({ navigation }) {
             <V c="items-center gap-2 py-space-xl">
               <Ic n="search_off" s={36} c="outline" />
               <T c="font-headline-sm text-headline-sm text-on-surface">{L('No matches', 'Aucun résultat')}</T>
-              <T c="font-body-sm text-body-sm text-on-surface-variant text-center">{L('Check the spelling or ask Dr. Nkwenti instead.', 'Vérifiez l’orthographe ou demandez au Dr Nkwenti.')}</T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant text-center">{L('Check the spelling, or ask the tutor instead.', 'Vérifiez l’orthographe ou demandez au tuteur.')}</T>
               <P c="mt-2 px-4 py-2 rounded-xl bg-primary-container" onPress={() => navigation.navigate('Tutor', { prefill: q })}>
                 <T c="font-label-lg text-label-lg text-on-primary">{L('Ask the tutor', 'Demander au tuteur')}</T>
               </P>
@@ -167,7 +167,7 @@ export default function Search({ navigation }) {
                         <Ic n={u.icon} s={22} c="primary-container" />
                       </V>
                       <V c="flex-1">
-                        <T c="font-label-sm text-label-sm text-outline uppercase">
+                        <T c="font-label-sm text-label-sm text-outline">
                           {L('Unit', 'Unité')} {u.n}
                         </T>
                         <T c="font-headline-sm text-headline-sm text-on-surface">{u.short}</T>
@@ -181,7 +181,7 @@ export default function Search({ navigation }) {
                         <Ic n="article" s={22} c="secondary" />
                       </V>
                       <V c="flex-1">
-                        <T c="font-label-sm text-label-sm text-outline uppercase">
+                        <T c="font-label-sm text-label-sm text-outline">
                           {L('Lesson', 'Leçon')} {l.n} · {unitById(l.unit).short}
                         </T>
                         <T c="font-headline-sm text-headline-sm text-on-surface">{l.title}</T>
@@ -195,7 +195,7 @@ export default function Search({ navigation }) {
                 <Section icon="history_edu" title={L('Practice questions', 'Questions')} n={results.questions.length}>
                   {results.questions.map((b) => (
                     <P key={b.key} c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-2" onPress={() => navigation.navigate('Quiz', { unitId: b.unit })}>
-                      <T c="font-label-sm text-label-sm text-primary uppercase">{unitById(b.unit).short}</T>
+                      <T c="font-label-sm text-label-sm text-primary">{unitById(b.unit).short}</T>
                       <T c="font-body-md text-body-md text-on-surface">{b.q}</T>
                       <V c="flex-row items-center gap-1">
                         <Ic n="check_circle" s={14} c="secondary" />

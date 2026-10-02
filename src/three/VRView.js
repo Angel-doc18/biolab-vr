@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Modal, PanResponder, StatusBar, StyleSheet, View } from 'react-native';
-import { Canvas, useFrame, useThree } from '@react-three/fiber/native';
+import { Canvas, useFrame, useThree } from './r3f';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { DeviceMotion } from 'expo-sensors';
 import * as THREE from 'three';
-import { MODELS } from './models';
+import { MODELS, realSpec } from './models';
+import { useAnatomy } from './anatomy';
 import Specimen, { Lights } from './Specimen';
 import { Ic, P, T } from '../ui/kit';
 
@@ -20,7 +21,7 @@ function orientationQuaternion(out, alpha, beta, gamma, screenAngle) {
   out.multiply(q0.setFromAxisAngle(zee, -screenAngle));
 }
 
-function StereoRig({ spec, motion, drag }) {
+function StereoRig({ spec, geos, motion, drag }) {
   const { gl, scene, camera, size } = useThree();
   const stereo = useMemo(() => {
     const s = new THREE.StereoCamera();
@@ -63,13 +64,16 @@ function StereoRig({ spec, motion, drag }) {
 
   return (
     <group position={[0, 0, -3.2]} rotation={[spec.rot[0], spec.rot[1], 0]}>
-      <Specimen spec={spec} active={null} xray={false} explodeRef={explodeRef} partRefs={partRefs} />
+      <Specimen spec={spec} geos={geos} active={null} xray={false} explodeRef={explodeRef} partRefs={partRefs} />
     </group>
   );
 }
 
 export default function VRView({ unitId, onClose }) {
-  const spec = MODELS[unitId];
+  const real = useMemo(() => realSpec(unitId), [unitId]);
+  const anat = useAnatomy(real?.real);
+  const spec = real && anat.status === 'ready' ? real : MODELS[unitId];
+  const geos = spec.real ? anat.parts : null;
   const motion = useRef(null);
   const drag = useRef({ x: 0, y: 0 });
 
@@ -111,7 +115,7 @@ export default function VRView({ unitId, onClose }) {
       <View style={{ flex: 1, backgroundColor: '#000' }}>
         <Canvas camera={{ position: [0, 0, 0], fov: 80, near: 0.05 }} onCreated={({ gl }) => gl.setClearColor('#0b1a24', 1)} style={StyleSheet.absoluteFill}>
           <Lights />
-          <StereoRig spec={spec} motion={motion} drag={drag} />
+          <StereoRig key={spec.real || "diagram"} spec={spec} geos={geos} motion={motion} drag={drag} />
         </Canvas>
         <View style={StyleSheet.absoluteFill} {...pan.panHandlers} />
         <View pointerEvents="none" style={styles.divider} />

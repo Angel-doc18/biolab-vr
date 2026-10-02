@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, BackHandler, Modal, ScrollView } from 'react-native';
 import { Bar, Ic, P, T, V } from '../../ui/kit';
-import { Pulse, Screen, Spinner, StackHeader } from '../../ui/chrome';
+import { Screen, Spinner, StackHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { P1, buildPaper, byKey, clearSession, loadSession, saveSession, score, unitLabel } from '../../lib/exam';
@@ -19,12 +19,11 @@ function Option({ letter, text, selected, struck, onPick, onStrike, big, L }) {
   }, [struck, strike]);
   return (
     <Animated.View style={{ opacity: strike.interpolate({ inputRange: [0, 1], outputRange: [1, 0.4] }) }}>
-      <P c={`w-full rounded-xl p-space-md flex-row items-start gap-space-sm ${selected ? 'bg-surface-container shadow-md' : 'bg-surface-container-lowest shadow-sm'}`} onPress={onPick} scale={0.99}>
-        <V c={`w-6 h-6 rounded-full items-center justify-center mt-0.5 ${selected ? 'bg-primary shadow-sm' : 'bg-surface-container'}`}>
+      <P c={`w-full rounded-xl p-space-md flex-row items-start gap-space-sm ${selected ? 'bg-surface-container-low border-2 border-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={onPick} scale={0.99}>
+        <V c={`w-6 h-6 rounded-full items-center justify-center mt-0.5 ${selected ? 'bg-primary-container' : 'bg-surface-container'}`}>
           {selected ? <Ic n="check" s={16} c="on-primary" /> : <T c="font-label-md text-label-md text-on-surface-variant">{letter}</T>}
         </V>
         <V c="flex-1">
-          {selected && <T c="font-label-sm text-label-sm text-primary uppercase tracking-wider mb-1">{L('Your selection', 'Votre choix')}</T>}
           <V onLayout={(e) => setW(e.nativeEvent.layout.width)}>
             <T c={`font-body-md text-body-md ${struck ? 'text-on-surface-variant' : 'text-on-surface'}`} style={[{ lineHeight: big ? 26 : 20 }, big && { fontSize: 17 }, selected && { fontWeight: '600' }]}>
               {text}
@@ -176,71 +175,37 @@ export default function Paper1({ navigation }) {
         }
       >
         <V c="pt-space-md pb-space-md">
-          <V c="w-full bg-surface-container-low rounded-xl p-space-md shadow-sm mb-space-md flex-row items-center justify-between">
-            <V c="flex-row items-center gap-space-sm">
-              <V c="w-9 h-9 rounded-lg bg-surface-container items-center justify-center">
-                <Ic n="timer" s={20} c={low ? 'error' : 'primary'} />
-              </V>
-              <V>
-                <T c="font-label-sm text-label-sm text-on-surface-variant uppercase">{L('Time remaining', 'Temps restant')}</T>
-                <T c={`font-headline-sm text-headline-sm tracking-tight ${low ? 'text-error' : 'text-on-surface'}`} style={{ fontWeight: '700', fontVariant: ['tabular-nums'] }}>
-                  {fmt(left)}
-                </T>
-              </V>
-            </V>
-            <V c="flex-row items-center gap-space-xs">
-              <V c="flex-row items-center gap-1 px-space-sm py-0.5 rounded-full bg-secondary-container">
-                <Pulse c="w-1.5 h-1.5 rounded-full bg-secondary" />
-                <T c="font-label-sm text-label-sm text-on-secondary-container">{L('Exam live', 'En cours')}</T>
-              </V>
-              <P c="w-8 h-8 rounded-lg bg-surface-container items-center justify-center" onPress={() => setExit(true)} accessibilityLabel="Exit exam">
-                <Ic n="close" s={18} />
-              </P>
-            </V>
+          <V c="w-full mb-space-md flex-row items-center justify-between">
+            <T c={`font-headline-sm text-headline-sm ${low ? 'text-error' : 'text-on-surface'}`} style={{ fontWeight: '700', fontVariant: ['tabular-nums'] }}>
+              {fmt(left)} {L('left', 'restant')}
+            </T>
+            <P c="h-9 px-3 rounded-lg bg-surface-container items-center justify-center" onPress={() => setExit(true)} accessibilityLabel="Leave the paper">
+              <T c="font-label-md text-label-md text-on-surface">{L('Leave', 'Quitter')}</T>
+            </P>
           </V>
 
-          <V c="w-full bg-surface-container-lowest rounded-xl p-space-md shadow-sm mb-space-md gap-space-sm">
-            <V c="flex-row items-center justify-between gap-2">
-              <V c="flex-row items-center gap-space-xs">
-                <T c="font-headline-sm text-headline-sm text-primary" style={{ fontWeight: '700' }}>
-                  Q {i + 1}
-                </T>
-                <T c="font-body-sm text-body-sm text-on-surface-variant">
-                  {L('of', 'sur')} {s.paper.length}
-                </T>
-              </V>
-              <V c="flex-row items-center gap-1.5 bg-surface-container px-2.5 py-1 rounded-full flex-shrink">
-                <Ic n={unit.icon} s={14} c="primary" />
-                <T c="font-label-sm text-label-sm text-on-surface" numberOfLines={1}>
-                  {L('Unit', 'Unité')} {unit.n}: {unit.short}
-                </T>
-              </V>
+          <V c="w-full mb-space-md gap-space-sm">
+            <V c="flex-row items-end justify-between gap-2">
+              <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {L('Question', 'Question')} {i + 1} {L('of', 'sur')} {s.paper.length}
+              </T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant flex-shrink" numberOfLines={1}>
+                {L('Unit', 'Unité')} {unit.n}
+              </T>
             </V>
-            <Bar pct={(answered / s.paper.length) * 100} c="h-2 bg-surface-container" fill="bg-primary" />
+            <Bar pct={(answered / s.paper.length) * 100} c="h-1 bg-surface-container" fill="bg-primary-container" />
             <V c="flex-row items-center justify-between pt-1">
               <P c="flex-row items-center gap-1.5 py-1 px-2.5 rounded-lg" onPress={() => set({ flags: { ...s.flags, [i]: !s.flags[i] } })}>
                 <Ic n="flag" s={18} c={s.flags[i] ? 'tertiary-container' : 'on-surface-variant'} fill={!!s.flags[i]} />
                 <T c={`font-label-md text-label-md ${s.flags[i] ? 'text-tertiary-container' : 'text-on-surface-variant'}`}>{s.flags[i] ? L('Flagged for review', 'Marquée') : L('Flag for review', 'Marquer')}</T>
               </P>
-              <V c="flex-row items-center gap-space-xs">
-                <V c="flex-row items-center gap-1 px-2 py-1 rounded-lg bg-surface-container-low opacity-75">
-                  <Ic n="calculate" s={16} c="outline" />
-                  <T c="font-label-sm text-label-sm text-outline">{L('No calculator', 'Sans calculatrice')}</T>
-                </V>
-                <P c={`w-8 h-8 rounded-lg items-center justify-center ${big ? 'bg-primary-container' : 'bg-surface-container'}`} onPress={() => setBig((b) => !b)} accessibilityLabel="Larger text">
-                  <T c={`font-label-md text-label-md ${big ? 'text-on-primary' : 'text-on-surface'}`}>A+</T>
-                </P>
-              </V>
+              <P c={`w-8 h-8 rounded-lg items-center justify-center ${big ? 'bg-primary-container' : 'bg-surface-container'}`} onPress={() => setBig((b) => !b)} accessibilityLabel="Larger text">
+                <T c={`font-label-md text-label-md ${big ? 'text-on-primary' : 'text-on-surface'}`}>A+</T>
+              </P>
             </V>
           </V>
 
-          <V c="w-full bg-surface-container-lowest rounded-xl p-space-md shadow-sm mb-space-md gap-space-md">
-            <V c="flex-row items-center gap-2">
-              <V c="px-2 py-0.5 rounded bg-primary-fixed">
-                <T c="font-label-sm text-label-sm text-on-primary-fixed">GCE O-Level</T>
-              </V>
-              <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Single best answer (1 mark)', 'Une seule bonne réponse (1 point)')}</T>
-            </V>
+          <V c="w-full mb-space-md gap-space-xs">
             <T c="font-body-lg text-body-lg text-on-surface" style={big ? { fontSize: 18, lineHeight: 28 } : { lineHeight: 26 }}>
               {q.q}
             </T>
@@ -273,10 +238,9 @@ export default function Paper1({ navigation }) {
 
           <V c="w-full bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-sm">
             <V c="flex-row items-center justify-between flex-wrap gap-1">
-              <V c="flex-row items-center gap-space-xs">
-                <Ic n="grid_view" s={20} c="primary" />
-                <T c="font-headline-sm text-headline-sm text-on-surface">{L('Question matrix', 'Grille des questions')}</T>
-              </V>
+              <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {L('All questions', 'Toutes les questions')}
+              </T>
               <V c="flex-row items-center gap-space-sm">
                 {[
                   ['bg-secondary', `${answered} ${L('done', 'faites')}`],

@@ -9,6 +9,7 @@ import * as admin from './routes/admin.js';
 import { paymentsConfigured } from './lib/providers.js';
 import { channels, sendNotice } from './lib/messaging.js';
 import * as consent from './routes/consent.js';
+import * as models from './routes/models.js';
 import { notify } from './lib/notify.js';
 import { aiProvider } from './lib/ai.js';
 
@@ -19,6 +20,8 @@ const routes = [
   ['GET', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentPage],
   ['POST', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentDecision],
   ['POST', '/v1/ai/report', ai.report],
+  ['GET', '/v1/models/([a-z]{3,20})/link', models.modelLink],
+  ['GET', '/v1/models/([a-z]{3,20})\\.glb', models.modelFile],
   ['POST', '/v1/auth/register', auth.register],
   ['POST', '/v1/auth/login', auth.login],
   ['POST', '/v1/auth/refresh', auth.refresh],

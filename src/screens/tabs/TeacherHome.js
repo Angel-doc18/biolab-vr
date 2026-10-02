@@ -157,7 +157,7 @@ export function TeacherPortal({ navigation, standalone }) {
             {detail && (
               <V c="flex-row items-center justify-between bg-primary-fixed/30 px-3 py-2.5 rounded-lg">
                 <V>
-                  <T c="font-label-sm text-label-sm text-on-primary-fixed-variant uppercase tracking-wider">{L('Student join code', 'Code d’accès élève')}</T>
+                  <T c="font-label-sm text-label-sm text-on-primary-fixed-variant">{L('Student join code', 'Code d’accès élève')}</T>
                   <T c="font-headline-sm text-headline-sm text-on-surface tracking-wider" style={{ fontWeight: '700' }}>
                     {detail.class.joinCode}
                   </T>
@@ -319,7 +319,7 @@ export function TeacherPortal({ navigation, standalone }) {
                         <V key={a.id} c="gap-2">
                           <V c="flex-row items-center justify-between">
                             <V c="bg-primary-fixed px-2 py-0.5 rounded">
-                              <T c="font-label-sm text-label-sm text-on-primary-fixed-variant uppercase tracking-wider">
+                              <T c="font-label-sm text-label-sm text-on-primary-fixed-variant">
                                 {a.kind === 'lab' ? L('Practical', 'TP') : a.kind === 'mock' ? L('Paper 1 mock', 'Épreuve 1') : L('Quiz', 'Quiz')}
                               </T>
                             </V>
@@ -367,7 +367,7 @@ export function TeacherPortal({ navigation, standalone }) {
                         </P>
                       </V>
                       <V c="flex-row flex-wrap gap-1.5">
-                        {LABS.filter((l) => !l.soon && l.id !== 'osmosis').map((l) => (
+                        {LABS.filter((l) => l.id !== 'osmosis').map((l) => (
                           <P key={l.id} c="px-2.5 py-1.5 rounded-lg bg-surface-container" onPress={() => assign('lab', l.id, `${L('Practical', 'TP')}: ${l.short}`)} disabled={!!assigning}>
                             <T c="font-label-sm text-label-sm text-on-surface-variant">+ {l.short}</T>
                           </P>

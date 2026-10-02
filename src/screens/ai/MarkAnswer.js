@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, ScrollView } from 'react-native';
+// Mark one structured-question part: typed, or a photo of a handwritten answer.
+import { useEffect, useState } from 'react';
+import { Image, ScrollView } from 'react-native';
 import { Ic, Input, P, T, V } from '../../ui/kit';
-import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
+import { Cta, ErrorNote, Screen, Spinner, StackHeader } from '../../ui/chrome';
 import { CriterionRow, ModelAnswer, ScoreCard, VoiceFeedback } from '../../ui/MarkReport';
 import { post } from '../../api/client';
 import { useApp } from '../../state/store';
@@ -10,58 +11,7 @@ import { PAPER2 } from '../../data/paper2';
 import { unitById } from '../../data/units';
 import { pickAnswerPhoto } from '../../lib/photo';
 
-const PARTS = PAPER2.flatMap((q, qi) => q.parts.filter((p) => p.kind === 'text').map((p) => ({ q, qi, p, key: `${q.id}:${p.label}` })));
-
-// Lined paper with a sweeping scanner line while the answer is being marked.
-function Scanner({ photo, text, scanning }) {
-  const y = useRef(new Animated.Value(0)).current;
-  const [h, setH] = useState(170);
-  useEffect(() => {
-    if (!scanning) return undefined;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(y, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        Animated.timing(y, { toValue: 0, duration: 1400, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [scanning, y]);
-  return (
-    <V c="w-full rounded-xl overflow-hidden bg-surface-container-highest" style={{ minHeight: 170 }} onLayout={(e) => setH(e.nativeEvent.layout.height)}>
-      {photo ? (
-        <Image source={{ uri: photo.uri }} style={{ width: '100%', height: 260 }} resizeMode="contain" />
-      ) : (
-        <V c="p-space-md pl-10" style={{ minHeight: 170 }}>
-          {Array.from({ length: Math.max(6, Math.ceil(h / 26)) }, (_, i) => (
-            <V key={i} c="absolute left-0 right-0 bg-primary opacity-15" style={{ top: 14 + i * 26, height: 1 }} />
-          ))}
-          <V c="absolute top-0 bottom-0 bg-error/25" style={{ left: 28, width: 1 }} />
-          <T c="font-body-md text-on-surface" style={{ fontStyle: 'italic', fontSize: 15, lineHeight: 26 }}>
-            {text || ' '}
-          </T>
-        </V>
-      )}
-      {scanning && (
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            height: 3,
-            backgroundColor: '#4fdbc8',
-            shadowColor: '#4fdbc8',
-            shadowOpacity: 0.9,
-            shadowRadius: 8,
-            elevation: 6,
-            transform: [{ translateY: y.interpolate({ inputRange: [0, 1], outputRange: [0, Math.max(0, (photo ? 260 : h) - 3)] }) }],
-          }}
-        />
-      )}
-    </V>
-  );
-}
+const PARTS = PAPER2.flatMap((q) => q.parts.filter((p) => p.kind === 'text').map((p) => ({ q, p, key: `${q.id}:${p.label}` })));
 
 export default function MarkAnswer({ navigation, route }) {
   const { pro, quota, setQuota, refreshQuota } = useApp();
@@ -70,13 +20,12 @@ export default function MarkAnswer({ navigation, route }) {
   const initial = PARTS.findIndex((x) => x.key === route.params?.key);
   const [sel, setSel] = useState(initial >= 0 ? initial : 0);
   const [picking, setPicking] = useState(route.params?.key == null);
-  const [mode, setMode] = useState('photo');
+  const [mode, setMode] = useState('type');
   const [photo, setPhoto] = useState(null);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
-  const [toast, showToast] = useToast();
   const item = PARTS[sel];
   const unit = unitById(item.q.unit);
 
@@ -95,6 +44,12 @@ export default function MarkAnswer({ navigation, route }) {
     } catch (e) {
       setError(e);
     }
+  };
+
+  const reset = () => {
+    setResult(null);
+    setPhoto(null);
+    setText('');
   };
 
   const mark = async () => {
@@ -116,7 +71,7 @@ export default function MarkAnswer({ navigation, route }) {
         { timeout: 120000 }
       );
       setResult(r.result);
-      setQuota((q) => (q ? { ...q, marksLeft: r.marksLeft } : q));
+      setQuota((q) => (q ? { ...q, marksLeft: r.marksLeft, photosLeft: r.photosLeft } : q));
     } catch (e) {
       setError(e);
     } finally {
@@ -124,166 +79,138 @@ export default function MarkAnswer({ navigation, route }) {
     }
   };
 
+  const left = mode === 'photo' ? quota?.photosLeft : quota?.marksLeft;
+
   return (
-    <V c="flex-1">
-      <Screen bg="bg-surface" keyboard header={<StackHeader title={L('Mark my answer', 'Corriger ma réponse')} />}>
-        <V c="pt-space-md pb-space-lg gap-space-md">
-          <V c="bg-surface-container-low rounded-xl p-space-md shadow-sm">
-            <V c="flex-row items-center justify-between gap-space-xs mb-space-xs">
-              <V c="flex-row items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-highest">
-                <V c="w-1.5 h-1.5 rounded-full bg-secondary" />
-                <T c="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{L('Paper 2 · structured', 'Épreuve 2 · structurée')}</T>
-              </V>
-              <P c="flex-row items-center gap-1" onPress={() => setPicking((x) => !x)}>
-                <Ic n="swap_horiz" s={16} c="secondary" />
-                <T c="font-label-md text-label-md text-secondary">{L('Change question', 'Changer')}</T>
+    <Screen bg="bg-surface" keyboard header={<StackHeader title={L('Mark an answer', 'Corriger une réponse')} />}>
+      <V c="pt-space-md pb-space-lg gap-space-md">
+        <V c="gap-space-xs">
+          <V c="flex-row items-center justify-between gap-space-sm">
+            <T c="font-label-md text-label-md text-on-surface-variant flex-1" numberOfLines={1}>
+              {L('Unit', 'Unité')} {unit.n}, {item.q.topic}, {item.p.marks} {item.p.marks === 1 ? L('mark', 'point') : L('marks', 'points')}
+            </T>
+            <P onPress={() => setPicking((x) => !x)} hitSlop={8}>
+              <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                {picking ? L('Close', 'Fermer') : L('Change question', 'Changer')}
+              </T>
+            </P>
+          </V>
+          <T c="font-body-sm text-body-sm text-on-surface-variant">{item.q.stem}</T>
+          <T c="font-body-lg text-body-lg text-on-surface" style={{ lineHeight: 24 }}>
+            ({item.p.label}) {item.p.prompt}
+          </T>
+        </V>
+
+        {picking && (
+          <V c="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+            <ScrollView style={{ maxHeight: 300 }} nestedScrollEnabled>
+              {PARTS.map((x, i) => (
+                <P
+                  key={x.key}
+                  c={`px-space-md py-3 ${i ? 'border-t border-surface-container' : ''} ${i === sel ? 'bg-surface-container-low' : ''}`}
+                  scale={1}
+                  onPress={() => {
+                    setSel(i);
+                    setPicking(false);
+                    reset();
+                  }}
+                >
+                  <T c="font-label-md text-label-md text-on-surface-variant">
+                    {x.q.topic}, ({x.p.label}), {x.p.marks} {L('marks', 'points')}
+                  </T>
+                  <T c="font-body-sm text-body-sm text-on-surface" numberOfLines={2}>
+                    {x.p.prompt}
+                  </T>
+                </P>
+              ))}
+            </ScrollView>
+          </V>
+        )}
+
+        <V c="flex-row border-b border-surface-container">
+          {[
+            ['type', L('Type it', 'Taper')],
+            ['photo', L('Photo of handwriting', 'Photo de l’écriture')],
+          ].map(([id, label]) => (
+            <P key={id} c={`flex-1 pb-2 items-center ${mode === id ? 'border-b-2 border-primary-container' : ''}`} scale={1} onPress={() => (setMode(id), setResult(null))} accessibilityRole="tab" accessibilityState={{ selected: mode === id }}>
+              <T c={`font-label-lg text-label-lg ${mode === id ? 'text-on-surface' : 'text-on-surface-variant'}`} style={{ fontWeight: mode === id ? '700' : '500' }}>
+                {label}
+              </T>
+            </P>
+          ))}
+        </V>
+
+        {mode === 'photo' ? (
+          <V c="gap-space-sm">
+            {photo ? (
+              <Image source={{ uri: photo.uri }} style={{ width: '100%', height: 260, borderRadius: 8, backgroundColor: '#eef3f7' }} resizeMode="contain" />
+            ) : (
+              <T c="font-body-md text-body-md text-on-surface-variant">{L('Write your answer on paper, then photograph it in good light, flat and filling the frame.', 'Écrivez votre réponse sur papier, puis photographiez-la en bonne lumière, à plat et en plein cadre.')}</T>
+            )}
+            <V c="flex-row gap-space-sm">
+              <P c="flex-1 h-11 rounded-lg bg-primary-container flex-row items-center justify-center gap-1.5" onPress={() => take('camera')} disabled={busy}>
+                <Ic n="photo_camera" s={18} c="on-primary" />
+                <T c="font-label-md text-label-md text-on-primary">{photo ? L('Retake', 'Reprendre') : L('Camera', 'Appareil photo')}</T>
+              </P>
+              <P c="flex-1 h-11 rounded-lg bg-surface-container flex-row items-center justify-center gap-1.5" onPress={() => take('library')} disabled={busy}>
+                <Ic n="photo_library" s={18} c="on-surface" />
+                <T c="font-label-md text-label-md text-on-surface">{L('Gallery', 'Galerie')}</T>
               </P>
             </V>
-            <T c="font-headline-sm text-headline-sm text-on-surface mb-space-xs">
-              ({item.p.label}) {item.p.prompt}
-            </T>
-            <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={picking ? 0 : 2}>
-              {item.q.stem}
-            </T>
-            <V c="flex-row items-center justify-between pt-space-xs">
-              <V c="flex-row items-center gap-1 flex-1">
-                <Ic n="analytics" s={15} c="primary" />
-                <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={1}>
-                  {L('Unit', 'Unité')} {unit.n} · {item.q.topic}
-                </T>
-              </V>
-              <V c="bg-surface-container px-2 py-0.5 rounded-lg">
-                <T c="font-label-md text-label-md text-primary-container">
-                  [{item.p.marks} {item.p.marks === 1 ? L('mark', 'point') : L('marks', 'points')}]
-                </T>
-              </V>
-            </V>
           </V>
+        ) : (
+          <Input c="min-h-[150px] p-space-sm rounded-lg bg-surface-container-lowest border border-outline-variant text-body-md" multiline textAlignVertical="top" placeholder={L('Your answer', 'Votre réponse')} value={text} onChangeText={setText} maxLength={4000} />
+        )}
 
-          {picking && (
-            <V c="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-              <ScrollView style={{ maxHeight: 280 }} nestedScrollEnabled>
-                {PARTS.map((x, i) => (
-                  <P
-                    key={x.key}
-                    c={`px-space-md py-3 ${i === sel ? 'bg-surface-container-low' : ''}`}
-                    scale={1}
-                    onPress={() => {
-                      setSel(i);
-                      setPicking(false);
-                      setResult(null);
-                    }}
-                  >
-                    <T c="font-label-sm text-label-sm text-primary">
-                      {unitById(x.q.unit).short} · ({x.p.label}) · {x.p.marks} {L('marks', 'points')}
-                    </T>
-                    <T c="font-body-sm text-body-sm text-on-surface" numberOfLines={2}>
-                      {x.p.prompt}
-                    </T>
-                  </P>
-                ))}
-              </ScrollView>
-            </V>
-          )}
+        <ErrorNote error={error} />
+        {busy ? (
+          <V c="items-center gap-1 py-space-sm">
+            <Spinner c="py-1" />
+            <T c="font-body-sm text-body-sm text-on-surface-variant">{mode === 'photo' ? L('Reading your handwriting, then marking...', 'Lecture de votre écriture, puis correction...') : L('Marking...', 'Correction...')}</T>
+          </V>
+        ) : (
+          <Cta variant="dark" icon={null} label={pro ? L('Mark my answer', 'Corriger ma réponse') : L('Marking comes with the full course', 'La correction fait partie du cours complet')} onPress={mark} />
+        )}
+        {pro && left != null && (
+          <T c="font-body-sm text-body-sm text-on-surface-variant text-center">
+            {left} {mode === 'photo' ? L('photo markings left today', 'corrections par photo restantes aujourd’hui') : L('markings left today', 'corrections restantes aujourd’hui')}
+          </T>
+        )}
 
-          <V c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-sm">
-            <V c="flex-row items-center justify-between">
-              <V c="flex-row items-center gap-2">
-                <Ic n="document_scanner" s={20} c="primary" />
-                <T c="font-headline-sm text-headline-sm text-on-surface">{L('Your answer', 'Votre réponse')}</T>
-              </V>
-              <V c="flex-row p-0.5 bg-surface-container rounded-full">
-                {[
-                  ['photo', L('Photo', 'Photo')],
-                  ['type', L('Type', 'Taper')],
-                ].map(([id, label]) => (
-                  <P key={id} c={`px-3 py-1 rounded-full ${mode === id ? 'bg-secondary-container' : ''}`} onPress={() => (setMode(id), setResult(null))}>
-                    <T c={`font-label-sm text-label-sm ${mode === id ? 'text-on-secondary-container' : 'text-on-surface-variant'}`}>{label}</T>
-                  </P>
-                ))}
-              </V>
-            </V>
-            {mode === 'photo' ? (
-              photo || busy ? (
-                <Scanner photo={photo} scanning={busy} />
-              ) : (
-                <V c="w-full rounded-xl bg-surface-container-highest items-center justify-center gap-2 p-space-lg" style={{ minHeight: 170 }}>
-                  <Ic n="photo_camera" s={36} c="primary-container" />
-                  <T c="font-body-sm text-body-sm text-on-surface-variant text-center">{L('Write your answer on paper, then photograph it in good light.', 'Écrivez sur papier puis photographiez en bonne lumière.')}</T>
-                </V>
-              )
-            ) : busy ? (
-              <Scanner text={text} scanning />
-            ) : (
-              <Input c="min-h-[150px] p-space-sm rounded-lg bg-surface-container-low text-body-md" multiline textAlignVertical="top" placeholder={L('Type your answer here...', 'Tapez votre réponse ici...')} value={text} onChangeText={setText} maxLength={4000} />
-            )}
-            {mode === 'photo' && (
-              <V c="flex-row gap-space-sm pt-space-xs">
-                <P c="flex-1 h-10 rounded-lg bg-surface-container flex-row items-center justify-center gap-1.5 shadow-sm" onPress={() => take('library')} disabled={busy}>
-                  <Ic n="photo_library" s={18} c="primary" />
-                  <T c="font-label-md text-label-md text-primary">{L('Gallery', 'Galerie')}</T>
-                </P>
-                <P c="flex-1 h-10 rounded-lg bg-surface-container flex-row items-center justify-center gap-1.5 shadow-sm" onPress={() => take('camera')} disabled={busy}>
-                  <Ic n="photo_camera" s={18} c="primary" />
-                  <T c="font-label-md text-label-md text-primary">{photo ? L('Retake', 'Reprendre') : L('Camera', 'Appareil')}</T>
-                </P>
+        {result && (
+          <V c="gap-space-md">
+            <ScoreCard awarded={result.awarded} max={result.maxMarks} L={L} />
+            {mode === 'photo' && !!result.transcription && (
+              <V c="gap-1">
+                <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('What was read from your photo', 'Ce qui a été lu sur votre photo')}
+                </T>
+                <T c="font-body-md text-body-md text-on-surface-variant" style={{ fontStyle: 'italic', lineHeight: 22 }}>
+                  {result.transcription}
+                </T>
               </V>
             )}
-            <ErrorNote error={error} />
-            <Cta label={busy ? L('Marking your answer...', 'Correction en cours...') : pro ? L('Mark my answer', 'Corriger ma réponse') : L('Unlock marking with Premium', 'Débloquer avec Premium')} icon={pro ? 'grading' : 'workspace_premium'} loading={busy} onPress={mark} />
-            {pro && quota && (
-              <T c="font-label-sm text-label-sm text-on-surface-variant text-center">
-                {quota.marksLeft} {L('markings left today', 'corrections restantes aujourd’hui')}
+            <V c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
+              <T c="font-label-lg text-label-lg text-on-surface mb-1" style={{ fontWeight: '700' }}>
+                {L('Mark scheme', 'Barème')}
               </T>
-            )}
+              {result.criteria.map((c, i) => (
+                <CriterionRow key={i} c={c} L={L} />
+              ))}
+            </V>
+            <VoiceFeedback text={result.feedback} L={L} lang={lang} />
+            <ModelAnswer text={result.modelAnswer} L={L} />
+            <V c="flex-row gap-space-sm pb-space-lg">
+              <P c="flex-1 h-11 rounded-lg bg-surface-container items-center justify-center" onPress={() => (setPicking(true), reset())}>
+                <T c="font-label-md text-label-md text-on-surface">{L('Another question', 'Autre question')}</T>
+              </P>
+              <P c="flex-1 h-11 rounded-lg bg-surface-container items-center justify-center" onPress={() => navigation.navigate('Quiz', { unitId: unit.id })}>
+                <T c="font-label-md text-label-md text-on-surface">{L('Practise this unit', 'S’entraîner')}</T>
+              </P>
+            </V>
           </V>
-
-          {result && (
-            <>
-              {mode === 'photo' && !!result.transcription && (
-                <V c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-sm">
-                  <V c="flex-row items-center gap-2">
-                    <Ic n="text_fields" s={20} c="primary" />
-                    <T c="font-headline-sm text-headline-sm text-on-surface">{L('What the examiner read', 'Ce que l’examinateur a lu')}</T>
-                  </V>
-                  <Scanner text={result.transcription} />
-                </V>
-              )}
-              <V c="bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-md">
-                <ScoreCard awarded={result.awarded} max={result.maxMarks} L={L} />
-                <V c="gap-space-sm">
-                  <V c="flex-row items-center justify-between pb-1">
-                    <T c="font-headline-sm text-headline-sm text-on-surface">{L('Mark scheme breakdown', 'Détail du barème')}</T>
-                    <T c="font-label-sm text-label-sm text-on-surface-variant">
-                      {result.criteria.length} {L('points', 'points')}
-                    </T>
-                  </V>
-                  {result.criteria.map((c, i) => (
-                    <CriterionRow key={i} c={c} n={i + 1} L={L} />
-                  ))}
-                </V>
-              </V>
-              <VoiceFeedback text={result.feedback} L={L} lang={lang} />
-              <ModelAnswer text={result.modelAnswer} L={L} />
-              <V c="gap-space-sm pb-space-lg">
-                <Cta
-                  icon="refresh"
-                  label={L('Try another question', 'Autre question')}
-                  onPress={() => {
-                    setPicking(true);
-                    setResult(null);
-                    setPhoto(null);
-                    setText('');
-                    showToast(L('Pick the next question to mark', 'Choisissez la prochaine question'), 'swap_horiz');
-                  }}
-                />
-                <Cta variant="soft" icon="fitness_center" label={L('Practise this unit', 'S’entraîner sur cette unité')} onPress={() => navigation.navigate('Quiz', { unitId: unit.id })} />
-              </V>
-            </>
-          )}
-        </V>
-      </Screen>
-      {toast}
-    </V>
+        )}
+      </V>
+    </Screen>
   );
 }

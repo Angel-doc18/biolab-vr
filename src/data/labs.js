@@ -337,19 +337,7 @@ export const LABS = [
       };
     },
   },
-  {
-    id: 'frog',
-    unit: 'reproduction',
-    unitN: 8,
-    short: 'Frog dissection',
-    title: 'Dissection: frog viscera and arterial system',
-    desc: 'A 3D virtual dissection for Advanced Level. In preparation.',
-    icon: 'lock',
-    minutes: 30,
-    level: 'A-Level',
-    soon: true,
-  },
 ];
 
 export const labById = (id) => LABS.find((l) => l.id === id);
-export const labsForUnit = (unitId) => LABS.filter((l) => l.unit === unitId && !l.soon);
+export const labsForUnit = (unitId) => LABS.filter((l) => l.unit === unitId);

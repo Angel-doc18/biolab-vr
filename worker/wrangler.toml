@@ -4,6 +4,13 @@ compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
+# 3D models (built by tools/models). The Worker runs first for every request, so
+# the files are only reachable through the signed /v1/models routes.
+[assets]
+directory = "./assets"
+binding = "ASSETS"
+run_worker_first = true
+
 [observability]
 enabled = true
 
@@ -55,5 +62,10 @@ namespace_id = "1004"
 #   GROQ_API_KEY           AI tutor and marking (primary provider)
 #   ANTHROPIC_API_KEY      optional alternative, used when AI_PROVIDER = "anthropic"
 #   FAPSHI_API_USER / FAPSHI_API_KEY / FAPSHI_WEBHOOK_SECRET   payments (set FAPSHI_ENV = "live" for real money)
-#   TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM       SMS codes and parent alerts
+#   Messaging, any of (tried in this order):
+#     WHATSAPP_TOKEN / WHATSAPP_PHONE_ID (+ WHATSAPP_CODE_TEMPLATE, WHATSAPP_CONSENT_TEMPLATE, WHATSAPP_ALERT_TEMPLATE)
+#     ORANGE_CLIENT_ID / ORANGE_CLIENT_SECRET / ORANGE_SENDER (+ ORANGE_SENDER_NAME)
+#     AT_USERNAME / AT_API_KEY (+ AT_SENDER_ID)       Africa's Talking
+#     TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM
+#   SUPPORT_EMAIL          shown on the parent consent page
 #   ADMIN_TOKEN            operator endpoints (voucher creation), 32+ characters

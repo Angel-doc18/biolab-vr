@@ -2,15 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Modal } from 'react-native';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
-import { SpecimenPreview } from '../../ui/previews';
 import { get, post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { PLANS as LOCAL_PLANS, fcfa } from '../../data/plan';
 
+// Builds published on Google Play sell nothing inside the app (Play's payments
+// policy); students there unlock the course with a voucher from their school.
+const STORE_BUILD = process.env.EXPO_PUBLIC_STORE === 'play';
+
 const PROVIDERS = [
-  { id: 'mobile money', short: 'MTN', name: 'MoMo', ussd: '*126#', prefix: '67X, 68X, 650-654', bg: 'bg-tertiary-fixed', fg: 'text-on-tertiary-fixed' },
-  { id: 'orange money', short: 'OM', name: 'Orange Money', ussd: '#150#', prefix: '69X, 655-659', bg: 'bg-tertiary-container', fg: 'text-on-tertiary' },
+  { id: 'mobile money', name: 'MTN MoMo', ussd: '*126#', prefix: '67X, 68X, 650 to 654' },
+  { id: 'orange money', name: 'Orange Money', ussd: '#150#', prefix: '69X, 655 to 659' },
 ];
 
 // Cameroon mobile numbers: MTN 67/68/650-654, Orange 69/655-659.
@@ -20,21 +23,18 @@ export function operatorFor(d) {
   return null;
 }
 
-function Row({ title, badge, free, pro }) {
+function Compare({ title, free, full }) {
   return (
-    <V c="p-space-sm rounded-lg bg-surface-container-low gap-1">
-      <V c="flex-row items-center justify-between gap-2">
-        <T c="font-label-md text-label-md text-on-surface flex-1">{title}</T>
-        <V c="bg-secondary-container/50 px-1.5 py-0.5 rounded">
-          <T c="font-label-sm text-label-sm text-secondary">{badge}</T>
-        </V>
-      </V>
-      <V c="flex-row items-center justify-between gap-2">
-        <T c="font-body-sm text-body-sm text-on-surface-variant flex-1">{free}</T>
-        <T c="font-body-sm text-body-sm text-secondary" style={{ fontWeight: '600' }}>
-          {pro}
-        </T>
-      </V>
+    <V c="flex-row gap-space-sm py-2 border-t border-surface-container">
+      <T c="font-body-sm text-body-sm text-on-surface flex-1" style={{ fontWeight: '600' }}>
+        {title}
+      </T>
+      <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ width: '28%' }}>
+        {free}
+      </T>
+      <T c="font-body-sm text-body-sm text-on-surface" style={{ width: '28%' }}>
+        {full}
+      </T>
     </V>
   );
 }
@@ -44,7 +44,7 @@ export default function Paywall({ navigation, route }) {
   const L = useL();
   const [plans, setPlans] = useState(null);
   const [open, setOpen] = useState(true);
-  const [plan, setPlan] = useState('term');
+  const [plan, setPlan] = useState('year');
   const [provider, setProvider] = useState('mobile money');
   const [phone, setPhone] = useState(user?.phone ? user.phone.replace(/^237/, '') : '');
   const [voucher, setVoucher] = useState('');
@@ -62,8 +62,7 @@ export default function Paywall({ navigation, route }) {
         setOpen(r.paymentsOpen);
       })
       .catch(() => setPlans(null));
-    const d = phone;
-    const op = operatorFor(d);
+    const op = operatorFor(phone);
     if (op) setProvider(op);
     return () => clearTimeout(poll.current);
   }, []);
@@ -71,6 +70,7 @@ export default function Paywall({ navigation, route }) {
   const P_ = plans || Object.fromEntries(Object.entries(LOCAL_PLANS).map(([k, v]) => [k, { amount: v.amount, days: v.days }]));
   const amount = P_[plan]?.amount;
   const reason = route.params?.reason;
+  const prov = PROVIDERS.find((p) => p.id === provider);
 
   const check = async (id, tries = 0) => {
     try {
@@ -96,7 +96,7 @@ export default function Paywall({ navigation, route }) {
     const d = phone.replace(/\D/g, '');
     if (!/^6\d{8}$/.test(d)) return setError(L('Enter your 9 digit mobile money number.', 'Entrez votre numéro mobile money (9 chiffres).'));
     const op = operatorFor(d);
-    if (op && op !== provider) return setError(L('This number belongs to the other operator. Choose the matching one above.', 'Ce numéro appartient à l’autre opérateur.'));
+    if (op && op !== provider) return setError(L('This number belongs to the other network. Choose the matching one.', 'Ce numéro appartient à l’autre réseau. Choisissez le bon.'));
     setBusy(true);
     setError(null);
     try {
@@ -120,7 +120,7 @@ export default function Paywall({ navigation, route }) {
       await refreshMe();
       refreshQuota();
       setVoucher('');
-      showToast(`${r.label || L('Voucher', 'Code')} ${L('applied. Premium is active.', 'appliqué. Premium activé.')}`);
+      showToast(`${r.label || L('Voucher', 'Code')} ${L('applied. The full course is unlocked.', 'appliqué. Le cours complet est débloqué.')}`);
     } catch (e) {
       setError(e);
     } finally {
@@ -129,159 +129,94 @@ export default function Paywall({ navigation, route }) {
   };
 
   const until = user?.proUntil ? new Date(user.proUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
+  const intro = pro && until
+    ? `${L('Your full course runs until', 'Votre cours complet court jusqu’au')} ${until}. ${L('Another pass adds its days to this date.', 'Un autre pass ajoute ses jours à cette date.')}`
+    : reason === 'mocks'
+    ? L('You have used this week’s free Paper 1. The full course has no weekly limit.', 'Vous avez utilisé l’épreuve 1 gratuite de la semaine. Le cours complet n’a pas de limite.')
+    : reason === 'mark' || reason === 'ai'
+    ? L('Answer marking and more tutor questions each day come with the full course.', 'La correction des réponses et plus de questions au tuteur viennent avec le cours complet.')
+    : L('Every unit, every practical, unlimited papers and answer marking.', 'Toutes les unités, tous les TP, des épreuves illimitées et la correction des réponses.');
 
   return (
     <V c="flex-1">
-      <Screen bg="bg-surface" keyboard header={<StackHeader close title={L('Premium', 'Premium')} subtitle={L('Plans and payment', 'Offres et paiement')} logo />}>
-        <V c="pb-space-xl">
-          <V c="pt-space-md items-center">
-            <V c="flex-row items-center gap-space-xs px-3 py-1 rounded-full bg-secondary-container shadow-sm mb-space-sm">
-              <Ic n="verified" s={16} c="on-secondary-container" fill />
-              <T c="font-label-sm text-label-sm text-on-secondary-container uppercase tracking-wider">{pro ? L('Premium active', 'Premium actif') : L('BioSpatial Premium', 'BioSpatial Premium')}</T>
-            </V>
-            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight text-center" style={{ maxWidth: 320 }}>
-              {pro ? L('You have full access', 'Vous avez l’accès complet') : L('Unlock complete GCE Biology revision', 'Débloquez toute la biologie du GCE')}
+      <Screen bg="bg-surface" keyboard header={<StackHeader close title={L('Full course', 'Cours complet')} avatar={false} />}>
+        <V c="pb-space-xl gap-space-lg pt-space-md">
+          <V c="gap-space-xs">
+            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{pro ? L('You have the full course', 'Vous avez le cours complet') : L('The full GCE Biology course', 'Le cours complet de biologie GCE')}</T>
+            <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
+              {intro}
             </T>
-            <T c="font-body-md text-body-md text-on-surface-variant mt-space-xs text-center" style={{ maxWidth: 340 }}>
-              {pro && until
-                ? `${L('Premium is active until', 'Premium actif jusqu’au')} ${until}. ${L('Buying another pass adds time to it.', 'Un nouveau pass s’ajoute à la durée.')}`
-                : reason === 'mocks'
-                ? L('You have used this week’s free Paper 1 mock. Premium gives unlimited mocks, every unit and AI marking.', 'Vous avez utilisé l’examen gratuit de la semaine.')
-                : reason === 'mark' || reason === 'ai'
-                ? L('Mark my answer and extra tutor questions are part of Premium.', 'La correction IA et plus de questions font partie du Premium.')
-                : L('All ten units, every practical, unlimited mocks and examiner-style AI marking.', 'Les dix unités, tous les TP, examens illimités et correction IA.')}
-            </T>
-            <V c="w-full mt-space-md rounded-xl bg-surface-container-low shadow-sm p-space-sm flex-row items-center gap-space-md overflow-hidden">
-              <V c="w-20 h-20 rounded-lg overflow-hidden bg-surface-container">
-                <SpecimenPreview unitId="transport" />
-              </V>
-              <V c="flex-1">
-                <V c="flex-row items-center gap-1">
-                  <Ic n="view_in_ar" s={16} c="secondary" />
-                  <T c="font-label-sm text-label-sm text-secondary uppercase">{L('Interactive 3D lab', 'Labo 3D interactif')}</T>
-                </V>
-                <T c="font-headline-sm text-headline-sm text-on-surface" numberOfLines={1}>
-                  {L('3D organs and VR view', 'Organes 3D et vue VR')}
-                </T>
-                <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={1}>
-                  {L('Works offline once installed', 'Fonctionne hors ligne')}
-                </T>
-              </V>
-            </V>
           </V>
 
-          <V c="mt-space-lg gap-space-sm">
-            <V c="flex-row items-center justify-between px-1">
-              <T c="font-label-md text-label-md text-on-surface uppercase tracking-wider">{L('Choose a plan', 'Choisissez une offre')}</T>
-              <T c="font-label-sm text-label-sm text-secondary">{L('No automatic renewal', 'Sans renouvellement auto')}</T>
+          <V c="bg-surface-container-lowest rounded-xl px-space-md pb-space-xs pt-space-sm shadow-sm">
+            <V c="flex-row gap-space-sm pb-2">
+              <V c="flex-1" />
+              <T c="font-label-md text-label-md text-on-surface-variant" style={{ width: '28%' }}>
+                {L('Free', 'Gratuit')}
+              </T>
+              <T c="font-label-md text-label-md text-on-surface" style={{ width: '28%', fontWeight: '700' }}>
+                {L('Full course', 'Complet')}
+              </T>
             </V>
-            {[
-              ['term', L('Term Pass', 'Pass trimestre'), L('About one school term', 'Environ un trimestre'), L('Full access for', 'Accès complet pendant'), L('Most popular', 'Populaire')],
-              ['year', L('Academic Year Pass', 'Pass année scolaire'), L('Best value until your GCE', 'Le meilleur prix jusqu’au GCE'), L('Full access for', 'Accès complet pendant'), null],
-            ].map(([id, name, sub, pre, tag]) => {
-              const on = plan === id;
-              const p = P_[id];
-              const perMonth = p ? Math.round(p.amount / (p.days / 30)) : null;
-              return (
-                <P key={id} c={`rounded-xl p-space-md ${on ? 'bg-surface-container-lowest shadow-md' : 'bg-surface-container-low shadow-sm'}`} onPress={() => setPlan(id)} accessibilityRole="radio" accessibilityState={{ checked: on }}>
-                  {on && <V c="absolute top-0 bottom-0 left-0 w-1 bg-primary-container rounded-l-xl" />}
-                  <V c="flex-row items-start justify-between gap-2">
-                    <V c="flex-1">
-                      <V c="flex-row items-center gap-2 flex-wrap">
-                        <T c="font-headline-sm text-headline-sm text-on-surface">{name}</T>
-                        {tag && (
-                          <V c="px-2 py-0.5 rounded-full bg-surface-container-highest">
-                            <T c="font-label-sm text-label-sm text-primary">{tag}</T>
-                          </V>
-                        )}
-                      </V>
-                      <T c="font-body-sm text-body-sm text-on-surface-variant mt-1">{sub}</T>
-                    </V>
-                    <V c="items-end">
-                      <T c={`font-headline-md text-headline-md ${on ? 'text-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
-                        {p ? p.amount.toLocaleString('en-US') : '-'} <T c="font-label-sm text-label-sm text-on-surface-variant">FCFA</T>
-                      </T>
-                      {perMonth && (
-                        <T c="font-label-sm text-label-sm text-on-surface-variant">
-                          ≈ {perMonth.toLocaleString('en-US')} FCFA / {L('month', 'mois')}
-                        </T>
-                      )}
-                    </V>
-                  </V>
-                  <V c="mt-2 flex-row items-center gap-1.5">
-                    <Ic n={on ? 'check_circle' : 'task_alt'} s={16} c={on ? 'secondary' : 'on-surface-variant'} />
-                    <T c={`font-label-sm text-label-sm ${on ? 'text-secondary' : 'text-on-surface-variant'}`}>
-                      {pre} {p?.days} {L('days', 'jours')}
-                    </T>
-                  </V>
-                </P>
-              );
-            })}
-            <V c="rounded-xl bg-surface-container-lowest p-space-md shadow-sm flex-row items-center justify-between">
-              <V c="flex-row items-center gap-space-sm flex-1">
-                <V c="w-10 h-10 rounded-lg bg-surface-container-high items-center justify-center">
-                  <Ic n="corporate_fare" s={20} c="primary" />
-                </V>
-                <V c="flex-1">
-                  <T c="font-label-lg text-label-lg text-on-surface">{L('School licence', 'Licence d’école')}</T>
-                  <T c="font-body-sm text-body-sm text-on-surface-variant">{L('For a whole class or school', 'Pour une classe ou une école')}</T>
-                </V>
-              </V>
-              <P c="px-3 py-1.5 rounded-lg bg-surface-container-high" onPress={() => setLicence(true)}>
-                <T c="font-label-sm text-label-sm text-primary">{L('Request', 'Demander')}</T>
-              </P>
-            </V>
+            <Compare title={L('Units', 'Unités')} free={L('1 to 3, and first lessons', '1 à 3, et premières leçons')} full={L('All 10', 'Les 10')} />
+            <Compare title={L('Practicals', 'TP')} free="2" full={L('All', 'Tous')} />
+            <Compare title={L('Paper 1', 'Épreuve 1')} free={L('1 a week', '1 par semaine')} full={L('Unlimited', 'Illimitée')} />
+            <Compare title={L('Paper 2 marking', 'Correction épreuve 2')} free={L('Yourself', 'Vous-même')} full={L('By the app', 'Par l’application')} />
+            <Compare title={L('Tutor questions', 'Questions au tuteur')} free={L('5 a day', '5 par jour')} full={L('30 a day', '30 par jour')} />
+            <Compare title={L('Answer marking', 'Correction de réponses')} free="-" full={L('30 typed and 6 photos a day', '30 tapées et 6 photos par jour')} />
           </V>
 
-          <V c="mt-space-lg rounded-xl bg-surface-container-lowest p-space-md shadow-sm">
-            <V c="flex-row items-center justify-between pb-space-sm">
-              <V c="flex-row items-center gap-2">
-                <Ic n="science" s={20} c="primary" />
-                <T c="font-headline-sm text-headline-sm text-on-surface">{L('What you get', 'Ce que vous obtenez')}</T>
-              </V>
-              <V c="px-2 py-0.5 rounded-full bg-secondary-container">
-                <T c="font-label-sm text-label-sm text-on-secondary-container">{L('Free vs Premium', 'Gratuit / Premium')}</T>
-              </V>
-            </V>
-            <V c="gap-space-sm pt-2">
-              <Row title={L('Syllabus units', 'Unités')} badge={L('All 10 units', '10 unités')} free={L('Free: units 1 to 3 in full', 'Gratuit : unités 1 à 3')} pro={L('Premium: every lesson', 'Premium : tout')} />
-              <Row title={L('Dr. Nkwenti AI tutor', 'Tuteur IA')} badge={L('100 a day', '100 par jour')} free={L('Free: 5 questions a day', 'Gratuit : 5 par jour')} pro={L('Premium: 100 a day', 'Premium : 100 par jour')} />
-              <Row title={L('Virtual practicals', 'TP virtuels')} badge={L('All practicals', 'Tous les TP')} free={L('Free: 2 practicals', 'Gratuit : 2 TP')} pro={L('Premium: all of them', 'Premium : tous')} />
-              <Row title={L('Mark my answer (AI)', 'Correction IA')} badge={L('30 a day', '30 par jour')} free={L('Free: self-marking', 'Gratuit : auto-correction')} pro={L('Premium: photo marking', 'Premium : correction photo')} />
-              <Row title={L('Paper 1 mocks', 'Examens blancs')} badge={L('Unlimited', 'Illimités')} free={L('Free: 1 a week', 'Gratuit : 1 par semaine')} pro={L('Premium: unlimited', 'Premium : illimités')} />
-              <Row title={L('Workbook PDF export', 'Export PDF du cahier')} badge={L('Printable', 'Imprimable')} free={L('Free: view only', 'Gratuit : lecture')} pro={L('Premium: export', 'Premium : export')} />
-            </V>
-          </V>
-
-          <V c="mt-space-lg gap-space-sm">
-            <V c="flex-row items-center justify-between px-1">
-              <T c="font-label-md text-label-md text-on-surface uppercase tracking-wider">{L('Mobile money', 'Mobile money')}</T>
-              <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Approve on your phone', 'Validez sur votre téléphone')}</T>
-            </V>
-            <V c="flex-row gap-2">
-              {PROVIDERS.map((p) => {
-                const on = provider === p.id;
+          {!STORE_BUILD && (
+            <V c="gap-space-sm">
+              <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {L('Choose a pass', 'Choisissez un pass')}
+              </T>
+              {[
+                ['year', L('School year pass', 'Pass année scolaire'), L('Until your exam season', 'Jusqu’à la session d’examen')],
+                ['term', L('Term pass', 'Pass trimestre'), L('About one school term', 'Environ un trimestre')],
+              ].map(([id, name, sub]) => {
+                const on = plan === id;
+                const p = P_[id];
                 return (
-                  <P key={p.id} c={`flex-1 items-center justify-center p-space-sm rounded-xl ${on ? 'bg-surface-container-lowest shadow-md' : 'bg-surface-container-low shadow-sm'}`} onPress={() => setProvider(p.id)}>
-                    <V c={`w-8 h-8 rounded-full ${p.bg} items-center justify-center mb-1`} style={{ borderRadius: 16 }}>
-                      <T c={`font-label-sm text-label-sm ${p.fg}`}>{p.short}</T>
+                  <P key={id} c={`rounded-xl p-space-md flex-row items-center gap-space-sm ${on ? 'bg-surface-container-low border-2 border-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={() => setPlan(id)} accessibilityRole="radio" accessibilityState={{ checked: on }}>
+                    <V c="flex-1 gap-0.5">
+                      <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                        {name}
+                      </T>
+                      <T c="font-body-sm text-body-sm text-on-surface-variant">
+                        {sub}, {p?.days} {L('days', 'jours')}. {L('Paid once, no automatic renewal.', 'Payé une fois, sans renouvellement.')}
+                      </T>
                     </V>
-                    <T c="font-label-sm text-label-sm text-on-surface">{p.name}</T>
-                    <T c="font-label-sm text-on-surface-variant" style={{ fontSize: 9 }}>
-                      {p.ussd}
+                    <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+                      {p ? fcfa(p.amount) : '-'}
                     </T>
                   </P>
                 );
               })}
-            </V>
-            <V c="rounded-xl bg-surface-container-lowest p-space-md shadow-sm gap-space-xs">
-              <T c="font-label-sm text-label-sm text-on-surface-variant uppercase">
-                {L('Your', 'Votre numéro')} {PROVIDERS.find((p) => p.id === provider).name} {L('number', '')} ({PROVIDERS.find((p) => p.id === provider).prefix})
+
+              <T c="font-label-lg text-label-lg text-on-surface pt-space-sm" style={{ fontWeight: '700' }}>
+                {L('Pay with mobile money', 'Payer par mobile money')}
               </T>
-              <V c="flex-row items-center gap-space-sm bg-surface-container-low rounded-lg px-space-sm py-2">
-                <T c="font-label-md text-label-md text-on-surface-variant">+237</T>
+              <V c="flex-row gap-space-xs">
+                {PROVIDERS.map((p) => {
+                  const on = provider === p.id;
+                  return (
+                    <P key={p.id} c={`flex-1 h-12 items-center justify-center rounded-xl ${on ? 'bg-surface-container-low border-2 border-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={() => setProvider(p.id)} accessibilityRole="radio" accessibilityState={{ checked: on }}>
+                      <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: on ? '700' : '500' }}>
+                        {p.name}
+                      </T>
+                    </P>
+                  );
+                })}
+              </V>
+              <V c="flex-row items-center h-[52px] rounded-xl bg-surface-container-lowest border border-outline-variant overflow-hidden">
+                <V c="h-full px-3.5 justify-center bg-surface-container">
+                  <T c="font-label-md text-label-md text-on-surface" style={{ fontWeight: '700' }}>
+                    +237
+                  </T>
+                </V>
                 <Input
-                  c="flex-1 font-headline-sm text-headline-sm tracking-wider"
+                  c="flex-1 h-full px-3.5 text-body-lg"
                   keyboardType="phone-pad"
                   value={phone}
                   onChangeText={(t) => {
@@ -290,100 +225,84 @@ export default function Paywall({ navigation, route }) {
                     const op = operatorFor(d);
                     if (op) setProvider(op);
                   }}
-                  placeholder={provider === 'orange money' ? '690 123 456' : '670 123 456'}
+                  placeholder={provider === 'orange money' ? '690 12 34 56' : '670 12 34 56'}
                   maxLength={9}
                 />
-                <Ic n="phone_android" s={20} c="secondary" />
               </V>
-              <V c="mt-1 flex-row items-start gap-1.5">
-                <Ic n="lock" s={16} c="primary" style={{ marginTop: 2 }} />
-                <T c="font-body-sm text-body-sm text-on-surface-variant flex-1">
-                  {L('You will get a prompt on your phone. Enter your mobile money PIN there, never in this app. Payments are processed by Fapshi.', 'Vous recevrez une demande sur votre téléphone. Saisissez votre code PIN là-bas, jamais dans l’application. Paiements traités par Fapshi.')}
-                </T>
-              </V>
-            </V>
-          </V>
-
-          {!open && (
-            <V c="mt-space-md rounded-xl bg-tertiary-fixed/40 p-space-sm flex-row items-center gap-space-sm">
-              <Ic n="info" s={18} c="tertiary" />
-              <T c="font-body-sm text-body-sm text-on-tertiary-fixed-variant flex-1">
-                {L('Mobile money payments are not open yet. You can still use a school voucher code below.', 'Les paiements ne sont pas encore ouverts. Utilisez un code d’école ci-dessous.')}
+              <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
+                {L('A payment request appears on this phone. Approve it there with your PIN; never type your PIN in this app. Payments are handled by Fapshi.', 'Une demande de paiement apparaît sur ce téléphone. Validez-la avec votre code PIN ; ne tapez jamais votre PIN dans l’application. Paiements traités par Fapshi.')}
               </T>
+              {!open && <T c="font-body-sm text-body-sm text-error">{L('Mobile money payments are not open yet. A school voucher works now.', 'Les paiements mobile money ne sont pas encore ouverts. Un code d’école fonctionne déjà.')}</T>}
+              <ErrorNote error={error} />
+              <Cta variant="dark" icon={null} label={`${L('Pay', 'Payer')} ${amount ? fcfa(amount) : ''}`} loading={busy && !voucher} disabled={!open} onPress={pay} />
             </V>
           )}
-          <ErrorNote error={error} c="mt-space-md" />
 
-          <V c="mt-space-lg gap-space-sm">
-            <Cta label={`${L('Pay', 'Payer')} ${amount ? fcfa(amount) : ''} ${L('with mobile money', 'par mobile money')}`} loading={busy && !voucher} disabled={!open} onPress={pay} />
-            <V c="rounded-xl bg-surface-container-lowest p-space-sm shadow-sm items-center">
-              <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Have a school voucher code?', 'Un code de votre école ?')}</T>
-              <V c="w-full mt-2 flex-row items-center gap-2">
-                <Input
-                  c="flex-1 bg-surface-container-low px-3 py-2 rounded-lg font-label-md text-label-md tracking-wider"
-                  placeholder="XXXX-XXXX-XXXX"
-                  value={voucher}
-                  onChangeText={(t) => setVoucher(t.toUpperCase().replace(/[^A-Z0-9-]/g, ''))}
-                  autoCapitalize="characters"
-                  maxLength={14}
-                />
-                <P c="h-9 px-4 rounded-lg bg-secondary items-center justify-center" onPress={redeem} disabled={busy}>
-                  <T c="font-label-sm text-label-sm text-on-secondary">{L('Redeem', 'Utiliser')}</T>
-                </P>
-              </V>
+          <V c="gap-space-sm">
+            <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+              {L('Voucher from your school', 'Code de votre école')}
+            </T>
+            <V c="flex-row items-center gap-2">
+              <Input
+                c="flex-1 h-12 bg-surface-container-lowest border border-outline-variant px-3 rounded-lg font-label-md text-label-md tracking-wider"
+                placeholder="XXXX-XXXX-XXXX"
+                value={voucher}
+                onChangeText={(t) => setVoucher(t.toUpperCase().replace(/[^A-Z0-9-]/g, ''))}
+                autoCapitalize="characters"
+                maxLength={14}
+              />
+              <P c="h-12 px-4 rounded-lg bg-surface-container items-center justify-center" onPress={redeem} disabled={busy}>
+                <T c="font-label-md text-label-md text-on-surface">{L('Apply', 'Appliquer')}</T>
+              </P>
             </V>
-            <V c="rounded-xl bg-surface-container-high/60 p-space-sm flex-row items-center gap-space-sm">
-              <V c="w-8 h-8 rounded-full bg-surface-container-lowest items-center justify-center shadow-sm">
-                <Ic n="verified_user" s={18} c="secondary" />
-              </V>
-              <T c="font-body-sm text-body-sm text-on-surface flex-1">
-                <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '600' }}>
-                  {L('One-off payment.', 'Paiement unique.')}
-                </T>{' '}
-                {L('Nothing renews automatically. Premium follows your account on any phone you sign in to.', 'Rien ne se renouvelle automatiquement. Premium suit votre compte sur tout téléphone.')}
-              </T>
-            </V>
+            {STORE_BUILD && <ErrorNote error={error} />}
           </V>
+
+          <P c="flex-row items-center justify-between gap-space-sm py-space-xs" onPress={() => setLicence(true)}>
+            <V c="flex-1 gap-0.5">
+              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                {L('For a whole class or school', 'Pour une classe ou une école')}
+              </T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Request a school licence and we will contact you.', 'Demandez une licence d’école et nous vous contacterons.')}</T>
+            </V>
+            <Ic n="chevron_right" s={20} c="outline" />
+          </P>
         </V>
       </Screen>
 
       <Modal visible={!!payment} transparent animationType="slide" onRequestClose={() => payment?.status !== 'PENDING' && setPayment(null)}>
         <V c="flex-1 justify-end" style={{ backgroundColor: 'rgba(15,23,42,0.45)' }}>
-          <V c="bg-surface-container-lowest rounded-t-3xl p-space-lg gap-space-md items-center">
+          <V c="bg-surface-container-lowest rounded-t-xl p-space-lg gap-space-md">
             {payment?.status === 'SUCCESSFUL' ? (
               <>
-                <V c="w-16 h-16 rounded-full bg-secondary-container items-center justify-center" style={{ borderRadius: 32 }}>
-                  <Ic n="check_circle" s={36} c="secondary" fill />
-                </V>
-                <T c="font-headline-md text-headline-md text-on-surface text-center">{L('Payment received', 'Paiement reçu')}</T>
-                <T c="font-body-md text-body-md text-on-surface-variant text-center">{L('Premium is now active on your account. Thank you!', 'Premium est actif. Merci !')}</T>
-                <Cta label={L('Start revising', 'Commencer')} onPress={() => (setPayment(null), navigation.goBack())} />
+                <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('Payment received', 'Paiement reçu')}
+                </T>
+                <T c="font-body-md text-body-md text-on-surface-variant">{L('The full course is now open on your account, on any phone you log in to.', 'Le cours complet est ouvert sur votre compte, sur tout téléphone où vous vous connectez.')}</T>
+                <Cta variant="dark" icon={null} label={L('Continue', 'Continuer')} onPress={() => (setPayment(null), navigation.goBack())} />
               </>
             ) : payment?.status === 'PENDING' ? (
               <>
                 <ActivityIndicator size="large" color={C['primary-container']} />
-                <T c="font-headline-md text-headline-md text-on-surface text-center">{L('Approve the payment on your phone', 'Validez le paiement sur votre téléphone')}</T>
-                <T c="font-body-md text-body-md text-on-surface-variant text-center">
-                  {L('A prompt for', 'Une demande de')} {fcfa(payment.amount)} {L('has been sent to', 'a été envoyée au')} +237 {phone}.{' '}
-                  {L('If it does not appear, dial', 'Si rien n’apparaît, composez le')} {PROVIDERS.find((p) => p.id === provider).ussd} {L('to see pending approvals.', 'pour voir les validations en attente.')}
+                <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('Approve the payment on your phone', 'Validez le paiement sur votre téléphone')}
                 </T>
-                <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Checking automatically...', 'Vérification automatique...')}</T>
+                <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
+                  {L('A request for', 'Une demande de')} {fcfa(payment.amount)} {L('was sent to', 'a été envoyée au')} +237 {phone}. {L('If it does not appear, dial', 'Si elle n’apparaît pas, composez le')} {prov.ussd} {L('to see pending approvals. This screen updates by itself.', 'pour voir les validations en attente. Cet écran se met à jour seul.')}
+                </T>
               </>
             ) : (
               <>
-                <V c="w-16 h-16 rounded-full bg-error-container items-center justify-center" style={{ borderRadius: 32 }}>
-                  <Ic n="error" s={36} c="on-error-container" />
-                </V>
-                <T c="font-headline-md text-headline-md text-on-surface text-center">
-                  {payment?.status === 'REVIEW' ? L('Payment under review', 'Paiement en vérification') : payment?.status === 'TIMEOUT' ? L('Still waiting', 'Toujours en attente') : L('Payment not completed', 'Paiement non abouti')}
+                <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
+                  {payment?.status === 'REVIEW' ? L('Payment under review', 'Paiement en vérification') : payment?.status === 'TIMEOUT' ? L('Still waiting for confirmation', 'Toujours en attente de confirmation') : L('Payment not completed', 'Paiement non abouti')}
                 </T>
-                <T c="font-body-md text-body-md text-on-surface-variant text-center">
+                <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
                   {payment?.error ||
                     (payment?.status === 'TIMEOUT'
-                      ? L('We have not received confirmation yet. If you approved it, Premium will activate automatically. Check Me › Payments later.', 'Si vous avez validé, Premium s’activera automatiquement.')
+                      ? L('If you approved it, the course opens by itself once the confirmation arrives.', 'Si vous l’avez validé, le cours s’ouvrira dès réception de la confirmation.')
                       : payment?.status === 'REVIEW'
-                      ? L('The amount received did not match. Contact support with your payment reference.', 'Le montant ne correspond pas. Contactez le support.')
-                      : L('The payment was declined or expired. No money was taken. You can try again.', 'Le paiement a été refusé ou a expiré. Aucun débit.'))}
+                      ? L('The amount received did not match. Contact support with your payment reference.', 'Le montant reçu ne correspond pas. Contactez le support avec votre référence.')
+                      : L('It was declined or expired, and no money was taken. You can try again.', 'Il a été refusé ou a expiré, et aucun argent n’a été pris. Vous pouvez réessayer.'))}
                 </T>
                 <Cta variant="soft" icon={null} label={L('Close', 'Fermer')} onPress={() => setPayment(null)} />
               </>
@@ -392,7 +311,7 @@ export default function Paywall({ navigation, route }) {
         </V>
       </Modal>
 
-      {licence && <LicenceSheet onClose={() => setLicence(false)} onSent={() => (setLicence(false), showToast(L('Request sent. We will contact you.', 'Demande envoyée.')))} L={L} user={user} />}
+      {licence && <LicenceSheet onClose={() => setLicence(false)} onSent={() => (setLicence(false), showToast(L('Request sent. We will contact you.', 'Demande envoyée. Nous vous contacterons.')))} L={L} user={user} />}
       {toast}
     </V>
   );
@@ -420,14 +339,16 @@ function LicenceSheet({ onClose, onSent, L, user }) {
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <V c="flex-1 justify-end" style={{ backgroundColor: 'rgba(15,23,42,0.45)' }}>
-        <V c="bg-surface-container-lowest rounded-t-3xl p-space-lg gap-space-sm">
-          <T c="font-headline-md text-headline-md text-on-surface">{L('Request a school licence', 'Demander une licence')}</T>
+        <V c="bg-surface-container-lowest rounded-t-xl p-space-lg gap-space-sm">
+          <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
+            {L('School licence request', 'Demande de licence d’école')}
+          </T>
           <Input c="h-12 px-3 rounded-lg bg-surface-container-low text-body-md" placeholder={L('School name', 'Nom de l’école')} value={school} onChangeText={setSchool} maxLength={120} />
           <Input c="h-12 px-3 rounded-lg bg-surface-container-low text-body-md" placeholder={L('Number of students', 'Nombre d’élèves')} value={students} onChangeText={(t) => setStudents(t.replace(/\D/g, ''))} keyboardType="number-pad" maxLength={4} />
-          <Input c="h-12 px-3 rounded-lg bg-surface-container-low text-body-md" placeholder={L('Phone or email to contact you', 'Téléphone ou e-mail')} value={contact} onChangeText={setContact} maxLength={120} />
+          <Input c="h-12 px-3 rounded-lg bg-surface-container-low text-body-md" placeholder={L('Phone or email to reach you', 'Téléphone ou e-mail')} value={contact} onChangeText={setContact} maxLength={120} />
           <Input c="h-20 px-3 py-2 rounded-lg bg-surface-container-low text-body-md" placeholder={L('Anything else (optional)', 'Autre chose (facultatif)')} value={message} onChangeText={setMessage} multiline maxLength={500} />
           <ErrorNote error={error} />
-          <Cta label={L('Send request', 'Envoyer')} icon="send" loading={busy} onPress={send} />
+          <Cta variant="dark" icon={null} label={L('Send request', 'Envoyer la demande')} loading={busy} onPress={send} />
           <P c="items-center py-2" onPress={onClose}>
             <T c="font-label-md text-label-md text-on-surface-variant">{L('Cancel', 'Annuler')}</T>
           </P>
