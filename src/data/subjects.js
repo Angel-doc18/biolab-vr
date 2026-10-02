@@ -18,6 +18,7 @@ export const SUBJECTS = [
   {
     id: 'chemistry',
     code: '0515',
+    available: true,
     en: 'Chemistry',
     fr: 'Chimie',
     p1: { count: 50, minutes: 90 },
