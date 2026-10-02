@@ -6,6 +6,7 @@ import { units, unitsFor } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
 import { SUBJECT_IDS, chosenSubjects } from '../data/subjects';
 import { OPEN_FOR_TESTING } from '../data/plan';
+import { setVoice } from '../lib/voice';
 
 const PREFS = 'bs:prefs';
 const USER = 'bs:user';
@@ -60,6 +61,8 @@ export function AppProvider({ children }) {
     loadedFor.current = userId;
     setProgress({ ...EMPTY, ...local });
   }
+
+  useEffect(() => setVoice(prefs.voice), [prefs.voice]);
 
   const savePrefs = useCallback((patch) => {
     setPrefs((x) => {

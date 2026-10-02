@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Speech from 'expo-speech';
+import * as Speech from '../../lib/voice';
 import { Ic, P, T, V } from '../../ui/kit';
 import { StackHeader, useToast } from '../../ui/chrome';
 import Viewport from '../../three/Viewport';

@@ -61,6 +61,13 @@
         {
           "color": "#0369a1"
         }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
       ]
     ]
   }

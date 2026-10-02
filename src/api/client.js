@@ -65,7 +65,7 @@ export function onSessionLost(fn) {
   return () => listeners.delete(fn);
 }
 
-async function raw(path, { method = 'GET', body, token, timeout = 20000 } = {}) {
+async function raw(path, { method = 'GET', body, token, timeout = 20000, binary = false } = {}) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
   let res;
@@ -87,6 +87,13 @@ async function raw(path, { method = 'GET', body, token, timeout = 20000 } = {}) 
     );
   } finally {
     clearTimeout(timer);
+  }
+  if (binary && res.ok) {
+    try {
+      return { bytes: await res.arrayBuffer(), type: res.headers.get('content-type') || '' };
+    } catch {
+      throw new ApiError('The connection was interrupted. Try again.', { code: 'offline' });
+    }
   }
   let data = null;
   try {
@@ -138,4 +145,6 @@ export const get = (p, o) => api(p, o);
 export const post = (p, body, o) => api(p, { ...o, method: 'POST', body: body ?? {} });
 export const patch = (p, body, o) => api(p, { ...o, method: 'PATCH', body });
 export const put = (p, body, o) => api(p, { ...o, method: 'PUT', body });
+// For audio and other files: resolves to { bytes: ArrayBuffer, type }.
+export const postBytes = (p, body, o) => api(p, { ...o, method: 'POST', body: body ?? {}, binary: true });
 export const del = (p, body, o) => api(p, { ...o, method: 'DELETE', body });

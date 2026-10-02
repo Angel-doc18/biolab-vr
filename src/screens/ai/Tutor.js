@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Speech from 'expo-speech';
+import * as Speech from '../../lib/voice';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { StackHeader, useToast } from '../../ui/chrome';
 import { post } from '../../api/client';

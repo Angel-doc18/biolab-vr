@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Share } from 'react-native';
-import * as Speech from 'expo-speech';
+import * as Speech from '../../lib/voice';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Bar, Ic, P, T, V } from '../../ui/kit';

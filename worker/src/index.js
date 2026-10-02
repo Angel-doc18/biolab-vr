@@ -10,12 +10,14 @@ import { paymentsConfigured } from './lib/providers.js';
 import { channels, sendNotice } from './lib/messaging.js';
 import * as consent from './routes/consent.js';
 import * as models from './routes/models.js';
+import * as voice from './routes/voice.js';
 import { notify } from './lib/notify.js';
 import { aiProvider } from './lib/ai.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
 const routes = [
   ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), messaging: channels(env), payments: paymentsConfigured(env) })],
+  ['POST', '/v1/voice', voice.speak],
   ['POST', '/v1/me/consent', consent.requestConsent],
   ['GET', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentPage],
   ['POST', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentDecision],

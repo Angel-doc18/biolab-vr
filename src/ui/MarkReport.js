@@ -1,6 +1,6 @@
 // Point-by-point breakdown of a marked answer (by the app or by the student).
 import { useEffect, useState } from 'react';
-import * as Speech from 'expo-speech';
+import * as Speech from '../lib/voice';
 import { Ic, P, T, V } from './kit';
 
 const fmt = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));

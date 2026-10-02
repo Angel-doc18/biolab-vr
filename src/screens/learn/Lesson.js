@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Speech from 'expo-speech';
+import * as Speech from '../../lib/voice';
 import { Ic, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader, useToast } from '../../ui/chrome';
 import { Diagram } from '../../diagrams';
@@ -58,6 +58,7 @@ export default function Lesson({ navigation, route }) {
       return;
     }
     setPara(i);
+    if (i + 1 < script.length) Speech.prepare(script[i + 1], { language: 'en-GB' });
     Speech.speak(script[i], {
       language: 'en-GB',
       rate: 0.92,

@@ -159,7 +159,7 @@ export default function LabRun({ navigation, route }) {
       const list = (all[r] || []).filter((q) => !lab.input || q.x !== x);
       return { ...all, [r]: [...list, row].sort((a, b) => a.x - b.x) };
     });
-    if (aloud && lab.say) voice.say(lab.say(row, r));
+    if (aloud && lab.say) voice.say(lab.say(row, r), { keep: false });
   };
   const series = useMemo(
     () =>
@@ -322,7 +322,7 @@ export default function LabRun({ navigation, route }) {
                     <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22, fontWeight: '700' }}>
                       {analysis.conclusion}
                     </T>
-                    <P c="self-start flex-row items-center gap-1.5 py-1" onPress={() => voice.say(`${analysis.lines.join(' ')} ${analysis.conclusion}`)} hitSlop={8}>
+                    <P c="self-start flex-row items-center gap-1.5 py-1" onPress={() => voice.say(`${analysis.lines.join(' ')} ${analysis.conclusion}`, { keep: false })} hitSlop={8}>
                       <Ic n="volume_up" s={18} c="primary-container" />
                       <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
                         {L('Listen to the result', 'Écouter le résultat')}

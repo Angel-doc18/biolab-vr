@@ -18,6 +18,8 @@ enabled = true
 FAPSHI_ENV = "sandbox"
 # Browser origins allowed to call the API (web preview only; the app is native).
 ALLOWED_ORIGINS = "http://localhost:8081"
+# Characters of new natural-voice speech allowed per day across all users.
+VOICE_DAILY_CHARS = "150000"
 
 [[d1_databases]]
 binding = "DB"
@@ -56,6 +58,23 @@ namespace_id = "1004"
   [ratelimits.simple]
   limit = 20
   period = 60
+
+[[ratelimits]]
+name = "VOICE_LIMITER"
+namespace_id = "1005"
+  [ratelimits.simple]
+  limit = 40
+  period = 60
+
+# Workers AI makes the tutor's natural voice; finished audio is kept in KV.
+[ai]
+binding = "AI"
+# Local `wrangler dev` calls the real Workers AI as well (small cost per test).
+remote = true
+
+[[kv_namespaces]]
+binding = "VOICE_CACHE"
+id = "e0d1e3131791462b8e6cdb79bcd67042"
 
 # Secrets (set with `npx wrangler secret put <NAME>`, never committed):
 #   JWT_SECRET             required, 64+ random characters
