@@ -3,7 +3,8 @@
 import { useRef } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { createIconSet } from '@expo/vector-icons';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { LOGO_S } from './logoPath';
 import glyphMap from '../glyphmap.json';
 import tw, { C, color } from './tw';
 
@@ -152,17 +153,12 @@ export function Avatar({ name = '', size = 32, c = '', ring }) {
 }
 
 // Brand mark: the orbit cell from the approved logo.
+// The SciAid mark: a white S on a rounded brand-blue tile (white S alone when mono).
 export function Logo({ size = 32, mono }) {
-  const blue = mono ? '#ffffff' : '#0369A1';
-  const teal = mono ? '#ffffff' : '#14B8A6';
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
-      <Path d="M 12,62 C 14,35 48,22 84,36 C 94,40 92,48 82,54" fill="none" stroke={teal} strokeWidth={4.5} strokeLinecap="round" opacity={0.6} />
-      <Circle cx={50} cy={50} r={28} fill={mono ? 'transparent' : blue} stroke={mono ? '#ffffff' : '#FFFFFF'} strokeWidth={3} />
-      <Circle cx={50} cy={50} r={11} fill={mono ? '#ffffff' : teal} />
-      {!mono && <Circle cx={47} cy={47} r={3.5} fill="#E6FAF7" opacity={0.8} />}
-      <Path d="M 88,40 C 94,52 82,68 48,76 C 22,81 8,72 12,62 C 13,58 17,54 24,50" fill="none" stroke={teal} strokeWidth={4.5} strokeLinecap="round" />
-      <Circle cx={28} cy={74} r={3.5} fill="#FFFFFF" stroke={blue} strokeWidth={1.5} />
+      {!mono && <Rect x={0} y={0} width={100} height={100} rx={22} fill="#0369A1" />}
+      <Path d={LOGO_S} fill="#FFFFFF" />
     </Svg>
   );
 }

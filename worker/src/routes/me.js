@@ -2,6 +2,7 @@ import { HttpError, now, ok, readJson } from '../lib/http.js';
 import { publicUser, requireUser, isPro, requireConsent } from '../lib/auth.js';
 import { bool, int, oneOf, phone, str } from '../lib/validate.js';
 import { verifyPassword } from '../lib/crypto.js';
+import { SUBJECT_IDS, userSubjects } from '../lib/subjects.js';
 
 export async function getMe(request, env) {
   const user = await requireUser(request, env);
@@ -41,6 +42,12 @@ export async function patchMe(request, env) {
   if ('parentReportLang' in b) fields.parent_report_lang = oneOf(b.parentReportLang, 'Report language', ['en', 'fr']);
   if ('inactivityAlert' in b) fields.inactivity_alert = bool(b.inactivityAlert, 'Inactivity alert') ? 1 : 0;
   if ('onboarded' in b) fields.onboarded = bool(b.onboarded, 'Onboarded') ? 1 : 0;
+  if ('subjects' in b) {
+    if (!Array.isArray(b.subjects) || !b.subjects.length || b.subjects.some((s) => !SUBJECT_IDS.includes(s))) {
+      throw new HttpError(400, 'Choose at least one subject.', 'invalid_input');
+    }
+    fields.subjects = SUBJECT_IDS.filter((s) => b.subjects.includes(s)).join(',');
+  }
   const keys = Object.keys(fields);
   if (keys.length) {
     await env.DB.prepare(`UPDATE users SET ${keys.map((k) => `${k} = ?`).join(', ')}, updated_at = ? WHERE id = ?`)
@@ -85,7 +92,7 @@ export async function putProgress(request, env) {
   const s = b.stats || {};
   const unitMastery = {};
   if (s.unitMastery && typeof s.unitMastery === 'object') {
-    for (const [k, v] of Object.entries(s.unitMastery).slice(0, 40)) {
+    for (const [k, v] of Object.entries(s.unitMastery).slice(0, 120)) {
       if (/^[a-z0-9-]{1,40}$/.test(k)) unitMastery[k] = int(v, 'Unit mastery', { min: 0, max: 100 });
     }
   }
@@ -99,14 +106,27 @@ export async function putProgress(request, env) {
     minutesWeek: int(s.minutesWeek ?? 0, 'Minutes', { min: 0, max: 10080 }),
     lastActive: s.lastActive == null ? null : int(s.lastActive, 'Last active', { min: 0, max: now() + 86_400_000 }),
   };
+  // Mastery, best Paper 1 and papers done in each subject the student takes.
+  const subjectStats = {};
+  if (s.subjects && typeof s.subjects === 'object') {
+    for (const id of SUBJECT_IDS) {
+      const v = s.subjects[id];
+      if (!v || typeof v !== 'object') continue;
+      subjectStats[id] = {
+        mastery: int(v.mastery ?? 0, 'Mastery', { min: 0, max: 100 }),
+        bestMock: v.bestMock == null ? null : int(v.bestMock, 'Best mock', { min: 0, max: 100 }),
+        mocksDone: int(v.mocksDone ?? 0, 'Mocks', { min: 0, max: 100000 }),
+      };
+    }
+  }
   await env.DB.prepare(
-    `INSERT INTO progress (user_id, data, mastery, xp, streak, labs_done, mocks_done, best_mock, unit_mastery, minutes_week, last_active, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO progress (user_id, data, mastery, xp, streak, labs_done, mocks_done, best_mock, unit_mastery, minutes_week, last_active, subject_stats, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(user_id) DO UPDATE SET data = excluded.data, mastery = excluded.mastery, xp = excluded.xp, streak = excluded.streak,
        labs_done = excluded.labs_done, mocks_done = excluded.mocks_done, best_mock = excluded.best_mock, unit_mastery = excluded.unit_mastery,
-       minutes_week = excluded.minutes_week, last_active = excluded.last_active, updated_at = excluded.updated_at`
+       minutes_week = excluded.minutes_week, last_active = excluded.last_active, subject_stats = excluded.subject_stats, updated_at = excluded.updated_at`
   )
-    .bind(user.id, JSON.stringify(b.data), stats.mastery, stats.xp, stats.streak, stats.labsDone, stats.mocksDone, stats.bestMock, JSON.stringify(unitMastery), stats.minutesWeek, stats.lastActive, now())
+    .bind(user.id, JSON.stringify(b.data), stats.mastery, stats.xp, stats.streak, stats.labsDone, stats.mocksDone, stats.bestMock, JSON.stringify(unitMastery), stats.minutesWeek, stats.lastActive, JSON.stringify(subjectStats), now())
     .run();
   return ok({ savedAt: now() });
 }
@@ -146,7 +166,7 @@ export async function clearNotifications(request, env) {
 
 // ---------- weekly report (used by the student and linked parents) ----------
 export async function buildReport(env, studentId) {
-  const student = await env.DB.prepare('SELECT id, name, class_name, school_name, parent_phone, parent_report_lang FROM users WHERE id = ? AND deleted_at IS NULL')
+  const student = await env.DB.prepare('SELECT id, role, name, class_name, school_name, parent_phone, parent_report_lang, subjects FROM users WHERE id = ? AND deleted_at IS NULL')
     .bind(studentId)
     .first();
   if (!student) throw new HttpError(404, 'Student not found.', 'not_found');
@@ -154,8 +174,9 @@ export async function buildReport(env, studentId) {
   const unitMastery = p ? JSON.parse(p.unit_mastery || '{}') : {};
   const sorted = Object.entries(unitMastery).sort((a, b) => a[1] - b[1]);
   return {
-    student: { id: student.id, name: student.name, className: student.class_name, schoolName: student.school_name },
+    student: { id: student.id, name: student.name, className: student.class_name, schoolName: student.school_name, subjects: userSubjects(student) },
     readiness: p?.mastery ?? 0,
+    subjects: p?.subject_stats ? JSON.parse(p.subject_stats) : {},
     streak: p?.streak ?? 0,
     minutesWeek: p?.minutes_week ?? 0,
     xp: p?.xp ?? 0,

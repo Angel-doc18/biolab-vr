@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
+import { useL, useLang } from '../../i18n';
+import { subjectName } from '../../data/subjects';
 import { OnbHeader } from './Steps';
 
 export default function SetupDone({ navigation, route }) {
-  const { user, updateMe } = useApp();
+  const { user, updateMe, subjects } = useApp();
   const L = useL();
+  const lang = useLang();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const reminder = route.params?.reminder;
@@ -31,7 +33,7 @@ export default function SetupDone({ navigation, route }) {
     role === 'student'
       ? [
           [user?.className, user?.schoolName].filter(Boolean).join(', '),
-          user?.examYear ? `${L('GCE Biology, June', 'GCE Biologie, juin')} ${user.examYear}, ${L('aiming for grade', 'note visée')} ${user?.targetGrade || 'A'}.` : null,
+          user?.examYear ? `GCE O Level, ${L('June', 'juin')} ${user.examYear}: ${subjects.map((id) => subjectName(id, lang)).join(', ')}. ${L('Aiming for grade', 'Note visée')} ${user?.targetGrade || 'A'}.` : null,
           reminder ? `${L('Daily reminder at', 'Rappel quotidien à')} ${user?.reminderTime || '18:30'}.` : null,
           user?.consentStatus === 'pending' ? L('Your parent has not approved your account yet. Until they do, your progress stays on this phone and the tutor is not available.', 'Votre parent n’a pas encore approuvé votre compte. En attendant, votre progression reste sur ce téléphone et le tuteur n’est pas disponible.') : null,
         ]

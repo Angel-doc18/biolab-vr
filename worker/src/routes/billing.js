@@ -33,7 +33,7 @@ export async function initiatePayment(request, env) {
     name: user.name,
     userId: user.id.replace(/[^a-zA-Z0-9]/g, ''),
     externalId,
-    message: `BioSpatial VR ${plan.label}`,
+    message: `SciAid ${plan.label}`,
   });
   if (!result?.transId) throw new HttpError(502, 'The payment could not be started. Please try again.', 'payment_provider');
   await env.DB.prepare(

@@ -5,14 +5,15 @@ import { Ic, P, T, V } from '../../ui/kit';
 import { Screen, TabHeader } from '../../ui/chrome';
 import { get } from '../../api/client';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
-import { daysToExam } from '../../state/progress';
+import { useL, useLang } from '../../i18n';
+import { daysToExam, examSubject } from '../../state/progress';
 import { accuracyByUnit, gradeFor, weakestUnit } from '../../state/selectors';
 import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
 import { unitById } from '../../data/units';
 import { labById } from '../../data/labs';
-import { P1 } from '../../lib/exam';
-import { P2 } from '../../data/paper2';
+import { mockSubject, p1For } from '../../lib/exam';
+import { paper2Config } from '../../data/paper2';
+import { minutesLabel, subjectName } from '../../data/subjects';
 import { Section } from './Home';
 
 function PaperRow({ title, sub, note, onPress, first }) {
@@ -31,8 +32,12 @@ function PaperRow({ title, sub, note, onPress, first }) {
 }
 
 export default function Exams({ navigation }) {
-  const { user, pro, progress, stats } = useApp();
+  const { user, pro, progress, stats, subject, setSubject } = useApp();
   const L = useL();
+  const lang = useLang();
+  const P1 = p1For(subject);
+  const P2 = paper2Config(subject);
+  const name = subjectName(subject, lang);
   const [assignments, setAssignments] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -51,41 +56,46 @@ export default function Exams({ navigation }) {
   );
 
   const days = daysToExam(user?.examYear);
-  const p1 = progress.exams.filter((e) => e.kind === 'p1');
-  const history = [...progress.exams].sort((a, b) => b.at - a.at);
+  const mine = progress.exams.filter((e) => examSubject(e) === subject);
+  const p1 = mine.filter((e) => e.kind === 'p1');
+  const history = [...mine].sort((a, b) => b.at - a.at);
   const lastThree = p1.slice(-3);
   const recent = lastThree.length ? Math.round(lastThree.reduce((a, e) => a + e.pct, 0) / lastThree.length) : null;
   const weak = weakestUnit(p1, stats.unitPct);
   const acc = weak ? accuracyByUnit(p1)[weak.unit.id] : null;
-  const usedFree = !pro && mocksThisWeek(progress.exams) >= FREE_MOCKS_PER_WEEK;
+  const usedFree = !pro && mocksThisWeek(progress.exams, subject) >= FREE_MOCKS_PER_WEEK;
 
-  const startP1 = () => navigation.navigate(usedFree ? 'Paywall' : 'Paper1', usedFree ? { reason: 'mocks' } : undefined);
+  const startP1 = () => navigation.navigate(usedFree ? 'Paywall' : 'Paper1', usedFree ? { reason: 'mocks' } : { subject });
   const openAssignment = (a) => {
-    if (a.kind === 'mock') startP1();
-    else if (a.kind === 'lab' && labById(a.ref)) navigation.navigate('LabRun', { labId: a.ref });
+    if (a.kind === 'mock') {
+      const s = mockSubject(a.ref) || subject;
+      if (s !== subject) setSubject(s);
+      const used = !pro && mocksThisWeek(progress.exams, s) >= FREE_MOCKS_PER_WEEK;
+      navigation.navigate(used ? 'Paywall' : 'Paper1', used ? { reason: 'mocks' } : { subject: s });
+    } else if (a.kind === 'lab' && labById(a.ref)) navigation.navigate('LabRun', { labId: a.ref });
     else if (unitById(a.ref)) navigation.navigate('Quiz', { unitId: a.ref });
   };
 
   return (
-    <Screen header={<TabHeader title={L('Exams', 'Examens')} subtitle={`GCE ${L('June', 'juin')} ${user?.examYear || ''}, ${days} ${L('days', 'jours')}`} />} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}>
+    <Screen header={<TabHeader switcher title={L('Exams', 'Examens')} subtitle={`GCE ${L('June', 'juin')} ${user?.examYear || ''}, ${days} ${L('days', 'jours')}`} />} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}>
       <V c="gap-space-lg pt-space-md pb-space-xl">
-        <Section title={L('Practice papers', 'Épreuves d’entraînement')}>
+        <Section title={`${name}: ${L('practice papers', 'épreuves d’entraînement')}`}>
           <V c="bg-surface-container-lowest rounded-xl shadow-sm">
             <PaperRow
               first
               title={L('Paper 1, multiple choice', 'Épreuve 1, QCM')}
-              sub={`${P1.count} ${L('questions in 1 hour 30 minutes. A new paper each time.', 'questions en 1 h 30. Une nouvelle épreuve à chaque fois.')}`}
+              sub={`${P1.count} ${L('questions in', 'questions en')} ${minutesLabel(P1.minutes, L)}. ${L('A new paper each time.', 'Une nouvelle épreuve à chaque fois.')}`}
               note={usedFree ? L('This week’s free paper is used. The full course gives unlimited papers.', 'L’épreuve gratuite de la semaine est utilisée. Le cours complet donne des épreuves illimitées.') : !pro ? L('One free paper each week.', 'Une épreuve gratuite par semaine.') : null}
               onPress={startP1}
             />
             <PaperRow
               title={L('Paper 2, structured questions', 'Épreuve 2, questions structurées')}
-              sub={`${L('2 hours. Section A: three questions. Section B: two of four. 20 marks each.', '2 heures. Section A : trois questions. Section B : deux sur quatre. 20 points chacune.')}`}
+              sub={`${minutesLabel(P2.minutes, L)}. ${L('Section A', 'Section A')}: ${P2.a} ${L('questions', 'questions')}. ${L('Section B', 'Section B')}: ${P2.b.answer < P2.b.offered ? `${P2.b.answer} ${L('of', 'sur')} ${P2.b.offered}` : `${P2.b.answer} ${L('questions', 'questions')}`}. ${L('20 marks each.', '20 points chacune.')}`}
               note={pro ? L('Marked point by point against the mark scheme.', 'Corrigée point par point selon le barème.') : L('You mark it yourself with the mark scheme.', 'Vous la corrigez vous-même avec le barème.')}
-              onPress={() => navigation.navigate('Paper2')}
+              onPress={() => navigation.navigate('Paper2', { subject })}
             />
             <PaperRow title={L('Practicals', 'Travaux pratiques')} sub={L('The standard practicals, with results to record and explain.', 'Les TP du programme, avec résultats à noter et expliquer.')} onPress={() => navigation.navigate('Lab')} />
-            <PaperRow title={L('Mark a written answer', 'Corriger une réponse écrite')} sub={L('Type an answer or photograph your handwriting.', 'Tapez une réponse ou photographiez votre écriture.')} onPress={() => navigation.navigate('MarkAnswer')} />
+            <PaperRow title={L('Mark a written answer', 'Corriger une réponse écrite')} sub={L('Type an answer or photograph your handwriting.', 'Tapez une réponse ou photographiez votre écriture.')} onPress={() => navigation.navigate('MarkAnswer', { subject })} />
           </V>
         </Section>
 
@@ -144,7 +154,7 @@ export default function Exams({ navigation }) {
           {history.length ? (
             <V c="bg-surface-container-lowest rounded-xl shadow-sm">
               {history.slice(0, 8).map((e, i) => (
-                <P key={e.id || i} c={`p-space-md flex-row items-center gap-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => (e.kind === 'p1' ? navigation.navigate('Results', { exam: e }) : navigation.navigate('Paper2'))} scale={0.99}>
+                <P key={e.id || i} c={`p-space-md flex-row items-center gap-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => (e.kind === 'p1' ? navigation.navigate('Results', { exam: e }) : navigation.navigate('Paper2', { subject }))} scale={0.99}>
                   <V c="flex-1 gap-0.5">
                     <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
                       {e.kind === 'p1' ? L('Paper 1', 'Épreuve 1') : L('Paper 2', 'Épreuve 2')}, {e.score} / {e.total}

@@ -10,7 +10,9 @@ import { hmac, safeEqual } from '../lib/crypto.js';
 
 // model -> syllabus unit, and the units that are free (keep in step with src/data/plan.js)
 const MODEL_UNIT = { heart: 'transport', lungs: 'gas', digestive: 'nutrition', urinary: 'kidney', brain: 'nervous', arm: 'locomotion' };
-const FREE_UNITS = ['cell', 'nutrition', 'transport'];
+// The digestive system and the heart belong to free units (2 and 3) in both
+// Biology and Human Biology; the other anatomy models are in the full course.
+const FREE_MODELS = ['digestive', 'heart'];
 const TTL = 3600;
 
 const base = (request, env) => (env.PUBLIC_API_URL || new URL(request.url).origin).replace(/\/+$/, '');
@@ -24,7 +26,7 @@ export async function modelLink(request, env, name) {
   const user = await requireUser(request, env);
   const unit = MODEL_UNIT[name];
   if (!unit) throw new HttpError(404, 'Model not found.', 'not_found');
-  if (!FREE_UNITS.includes(unit) && !isPro(user)) throw new HttpError(402, 'This 3D model is part of the full course.', 'premium_required');
+  if (!FREE_MODELS.includes(name) && !isPro(user)) throw new HttpError(402, 'This 3D model is part of the full course.', 'premium_required');
   const exp = Math.floor(now() / 1000) + TTL;
   const sig = await hmac(secret(env), `${name}:${exp}`);
   return json({ url: `${base(request, env)}/v1/models/${name}.glb?e=${exp}&s=${sig}`, expires: exp * 1000 });

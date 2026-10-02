@@ -1,14 +1,18 @@
 import { Ic, P, T, V } from '../../ui/kit';
 import { Screen, TabHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
-import { LABS } from '../../data/labs';
+import { useL, useLang } from '../../i18n';
+import { labsFor, labUnitN } from '../../data/labs';
 import { labLocked } from '../../data/plan';
+import { subjectName } from '../../data/subjects';
 import { Section } from './Home';
 
 export default function Lab({ navigation }) {
-  const { pro, progress } = useApp();
+  const { pro, progress, subject } = useApp();
   const L = useL();
+  const lang = useLang();
+  const LABS = labsFor(subject);
+  if (!LABS.length) return <Screen header={<TabHeader switcher title={L('Practicals', 'Travaux pratiques')} />} />;
   const done = LABS.filter((l) => progress.labs[l.id]).length;
   // The first practical not yet completed, else the first one.
   const next = LABS.find((l) => !progress.labs[l.id] && !labLocked(l.id, pro)) || LABS[0];
@@ -32,7 +36,7 @@ export default function Lab({ navigation }) {
   })();
 
   return (
-    <Screen header={<TabHeader title={L('Practicals', 'Travaux pratiques')} subtitle={L('GCE Biology methods', 'Méthodes du GCE')} />}>
+    <Screen header={<TabHeader switcher title={L('Practicals', 'Travaux pratiques')} subtitle={`GCE ${subjectName(subject, lang)}, ${L('Paper 3 methods', 'méthodes de l’épreuve 3')}`} />}>
       <V c="gap-space-lg pt-space-md pb-space-xl">
         <V c="flex-row items-end justify-between">
           <T c="font-body-md text-body-md text-on-surface-variant">
@@ -53,7 +57,7 @@ export default function Lab({ navigation }) {
             <V c="p-space-md gap-space-sm">
               <V c="gap-1">
                 <T c="font-label-md text-label-md text-on-surface-variant">
-                  {L('Unit', 'Unité')} {next.unitN}, {next.minutes} min{recorded ? `, ${L('recorded', 'noté')} ${recorded}×` : ''}
+                  {L('Unit', 'Unité')} {labUnitN(next)}, {next.minutes} min{recorded ? `, ${L('recorded', 'noté')} ${recorded}×` : ''}
                 </T>
                 <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
                   {next.title}
@@ -81,7 +85,7 @@ export default function Lab({ navigation }) {
                       {l.title}
                     </T>
                     <T c="font-body-sm text-body-sm text-on-surface-variant">
-                      {L('Unit', 'Unité')} {l.unitN}, {l.minutes} min
+                      {L('Unit', 'Unité')} {labUnitN(l)}, {l.minutes} min
                       {isDone ? `. ${L('Done', 'Fait')}` : locked ? `. ${L('Full course', 'Cours complet')}` : ''}
                     </T>
                   </V>

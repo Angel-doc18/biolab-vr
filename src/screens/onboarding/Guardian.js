@@ -64,8 +64,8 @@ export default function Guardian({ navigation, route }) {
 
   const message = (link) =>
     L(
-      `Hello, I registered on BioSpatial VR to revise GCE Biology. Because I am under 18 the app needs your approval. Please read what it stores and reply here: ${link}`,
-      `Bonjour, je me suis inscrit(e) sur BioSpatial VR pour réviser la biologie du GCE. Comme j’ai moins de 18 ans, l’application a besoin de votre accord. Lisez ce qui est enregistré et répondez ici : ${link}`
+      `Hello, I registered on SciAid to revise for the GCE science papers. Because I am under 18 the app needs your approval. Please read what it stores and reply here: ${link}`,
+      `Bonjour, je me suis inscrit(e) sur SciAid pour réviser les sciences du GCE. Comme j’ai moins de 18 ans, l’application a besoin de votre accord. Lisez ce qui est enregistré et répondez ici : ${link}`
     );
   const whatsapp = () => Linking.openURL(`https://wa.me/237${sent.phone}?text=${encodeURIComponent(message(sent.link))}`).catch(() => {});
   const share = () => Share.share({ message: message(sent.link) }).catch(() => {});
@@ -155,7 +155,7 @@ export default function Guardian({ navigation, route }) {
                 {L('Parent or guardian', 'Parent ou tuteur')}
               </T>
               <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
-                {L('They receive a link to a page that explains what the app stores, and approve it there. They can also approve by linking to you from their own BioSpatial account.', 'Il ou elle reçoit un lien vers une page qui explique ce que l’application enregistre, et l’approuve là. Il ou elle peut aussi approuver en se liant à vous depuis son propre compte BioSpatial.')}
+                {L('They receive a link to a page that explains what the app stores, and approve it there. They can also approve by linking to you from their own SciAid account.', 'Il ou elle reçoit un lien vers une page qui explique ce que l’application enregistre, et l’approuve là. Il ou elle peut aussi approuver en se liant à vous depuis son propre compte SciAid.')}
               </T>
             </V>
             <Field label={L('Their full name', 'Son nom complet')} value={gName} onChangeText={setGName} autoCapitalize="words" maxLength={80} bg="bg-surface-container-lowest" />

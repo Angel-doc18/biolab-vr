@@ -3,28 +3,26 @@ import { ScrollView } from 'react-native';
 import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, TabHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
-import { units } from '../../data/units';
+import { useL, useLang } from '../../i18n';
+import { groupsFor, unitsFor } from '../../data/units';
 import { lessonsFor } from '../../data/lessons';
 import { labsForUnit } from '../../data/labs';
+import { subjectById, subjectName } from '../../data/subjects';
 import { unitStatus } from '../../state/selectors';
 
-const FILTERS = [
-  { id: 'all', en: 'All units', fr: 'Toutes' },
-  { id: 'cyto', en: 'Cells and genetics', fr: 'Cellules et génétique' },
-  { id: 'phys', en: 'Physiology', fr: 'Physiologie' },
-  { id: 'eco', en: 'Ecology and health', fr: 'Écologie et santé' },
-];
-
 export default function Learn({ navigation }) {
-  const { pro, progress, stats } = useApp();
+  const { pro, progress, stats, subject } = useApp();
   const L = useL();
+  const lang = useLang();
   const [filter, setFilter] = useState('all');
-  const list = units.filter((u) => filter === 'all' || u.group === filter);
+  const units = unitsFor(subject);
+  const FILTERS = [{ id: 'all', en: 'All units', fr: 'Toutes' }, ...groupsFor(subject)];
+  const active = FILTERS.some((f) => f.id === filter) ? filter : 'all';
+  const list = units.filter((u) => active === 'all' || u.group === active);
   const mastered = units.filter((u) => (stats.unitPct[u.id] || 0) >= 85).length;
 
   return (
-    <Screen header={<TabHeader title={L('Syllabus', 'Programme')} subtitle={L('GCE Ordinary Level Biology', 'GCE Ordinary Level Biologie')} />}>
+    <Screen header={<TabHeader switcher title={L('Syllabus', 'Programme')} subtitle={`GCE Ordinary Level ${subjectName(subject, lang)} (${subjectById(subject).code})`} />}>
       <V c="pb-space-lg">
         <V c="mt-space-md gap-1.5">
           <V c="flex-row items-end justify-between">
@@ -40,7 +38,7 @@ export default function Learn({ navigation }) {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16, marginTop: 20 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 20 }}>
           {FILTERS.map((f) => {
-            const on = filter === f.id;
+            const on = active === f.id;
             return (
               <P key={f.id} c={`pb-1.5 ${on ? 'border-b-2 border-primary-container' : 'border-b-2 border-transparent'}`} onPress={() => setFilter(f.id)} scale={1} accessibilityRole="tab" accessibilityState={{ selected: on }}>
                 <T c={`font-label-lg text-label-lg ${on ? 'text-on-surface' : 'text-on-surface-variant'}`} style={{ fontWeight: on ? '700' : '500' }}>

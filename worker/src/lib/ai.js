@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { HttpError } from './http.js';
 import { clean, groqChat, groqConfigured } from './groq.js';
+import { SUBJECTS, subjectOr } from './subjects.js';
 
 export const aiProvider = (env) => {
   if (env.AI_PROVIDER === 'anthropic' && env.ANTHROPIC_API_KEY) return 'anthropic';
@@ -18,23 +19,26 @@ const MODEL = 'claude-opus-5-5';
 // retries on a suitable model inside the same call.
 const FALLBACK = { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' };
 
-const TUTOR_SYSTEM = `You are the BioSpatial VR Biology tutor: patient, precise and friendly for secondary school students preparing for the Cameroon GCE Biology examinations (Ordinary and Advanced Level).
+const TUTOR_SYSTEM = `You are the SciAid science tutor: patient, precise and friendly for secondary school students preparing for the Cameroon GCE Ordinary Level science examinations (Biology, Chemistry, Physics and Human Biology).
 
 How to answer:
 - Explain clearly in language a teenager can follow, without oversimplifying to the point of being wrong.
 - Use short paragraphs or numbered steps when a process has stages. Put key scientific terms in bold with **asterisks**.
 - Where it helps, point out how an examiner awards marks and common mistakes that lose marks.
 - Keep answers focused and exam relevant. Do not pad.
-- Only answer Biology questions at secondary school level. For anything else, politely steer back to Biology.
+- Only answer science questions at secondary school level: Biology, Chemistry, Physics, Human Biology and the mathematics they need. For anything else, politely steer back to the student's subject.
+- In calculations, show the formula, the substitution with units and the answer with its unit, as examiners expect.
+- For chemical equations, give balanced equations with state symbols where they matter.
 - Never invent statistics, past paper references or quotations from the GCE Board.
 - Never use em dashes in your writing. Use commas, colons or full stops instead.
 - If the student writes in French, answer in French.`;
 
-const MARK_SYSTEM = `You are an experienced Cameroon GCE Biology examiner marking a single structured answer.
+const MARK_SYSTEM = `You are an experienced Cameroon GCE Ordinary Level science examiner marking a single structured answer.
 
 Rules:
 - Mark strictly against the mark scheme points provided. Award whole or half marks per point, never more than the point is worth.
-- Credit correct biology expressed in the student's own words. Do not credit vague or contradictory statements.
+- Credit correct science expressed in the student's own words. Do not credit vague or contradictory statements.
+- In calculations, credit correct method and substitution as the scheme allows, and check units.
 - If an image is supplied, first transcribe the handwriting faithfully (including errors), then mark the transcription.
 - If the answer is illegible or blank, award 0 and say so plainly.
 - Feedback must be specific and actionable, written to the student, in the language of the question.
@@ -45,8 +49,9 @@ const client = (env) => {
   return new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2, timeout: 90_000 });
 };
 
-export async function tutorReply(env, history, question, { lang, context, level } = {}) {
+export async function tutorReply(env, history, question, { lang, context, level, subject } = {}) {
   const notes = [
+    `The student is revising GCE Ordinary Level ${SUBJECTS[subjectOr(subject)].en}.`,
     lang === 'fr' ? 'The student has chosen French: answer in French unless they write in English.' : null,
     level ? `The student is in ${level}.` : null,
     context ? `The student is currently studying: ${context}.` : null,
@@ -71,7 +76,7 @@ export async function tutorReply(env, history, question, { lang, context, level 
     messages: [...history, { role: 'user', content: question }],
   });
   if (response.stop_reason === 'refusal') {
-    return 'I can only help with secondary school Biology questions. Try asking about a topic from your syllabus.';
+    return 'I can only help with secondary school science questions. Try asking about a topic from your syllabus.';
   }
   const text = response.content
     .filter((b) => b.type === 'text')
@@ -122,8 +127,10 @@ const GroqMark = z.object({
   modelAnswer: z.coerce.string(),
 });
 
+const subjectLine = (subject) => `Subject: GCE Ordinary Level ${SUBJECTS[subjectOr(subject)].en}.`;
+
 async function groqMark(env, input) {
-  const { question, markScheme, maxMarks, answerText, image } = input;
+  const { question, markScheme, maxMarks, answerText, image, subject } = input;
   let answer = answerText;
   if (image) {
     const { text } = await groqChat(env, {
@@ -145,7 +152,7 @@ async function groqMark(env, input) {
     });
     answer = clean(text);
   }
-  const prompt = `Question (${maxMarks} marks):\n${question}\n\nMark scheme:\n${schemeLines(markScheme)}\n\nStudent answer:\n${answer || '[NO ANSWER]'}\n\nReply with JSON only, in exactly this shape:\n{"criteria":[{"awarded":number,"comment":string}],"feedback":string,"modelAnswer":string}\n"criteria" must have exactly ${markScheme.length} entries, one per mark scheme point in order. "awarded" is the marks for that point (whole or half). "comment" says briefly why marks were given or lost. "feedback" is two or three sentences to the student. "modelAnswer" is a short full-mark answer.`;
+  const prompt = `${subjectLine(subject)}\n\nQuestion (${maxMarks} marks):\n${question}\n\nMark scheme:\n${schemeLines(markScheme)}\n\nStudent answer:\n${answer || '[NO ANSWER]'}\n\nReply with JSON only, in exactly this shape:\n{"criteria":[{"awarded":number,"comment":string}],"feedback":string,"modelAnswer":string}\n"criteria" must have exactly ${markScheme.length} entries, one per mark scheme point in order. "awarded" is the marks for that point (whole or half). "comment" says briefly why marks were given or lost. "feedback" is two or three sentences to the student. "modelAnswer" is a short full-mark answer.`;
   for (const temperature of [0.2, 0]) {
     const { text } = await groqChat(env, {
       json: true,
@@ -170,12 +177,12 @@ export async function markAnswer(env, input) {
   const provider = aiProvider(env);
   if (!provider) throw new HttpError(503, 'Marking is not available yet.', 'ai_unavailable');
   if (provider === 'groq') return groqMark(env, input);
-  const { question, markScheme, maxMarks, answerText, image } = input;
+  const { question, markScheme, maxMarks, answerText, image, subject } = input;
   const content = [];
   if (image) content.push({ type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } });
   content.push({
     type: 'text',
-    text: `Question (${maxMarks} marks):\n${question}\n\nMark scheme:\n${schemeLines(markScheme)}\n\n${
+    text: `${subjectLine(subject)}\n\nQuestion (${maxMarks} marks):\n${question}\n\nMark scheme:\n${schemeLines(markScheme)}\n\n${
       image ? "The student's handwritten answer is in the image above." : `Student answer:\n${answerText}`
     }\n\nReturn the marking. "criteria" must contain one entry per mark scheme point in order, "awarded" is the total.`,
   });

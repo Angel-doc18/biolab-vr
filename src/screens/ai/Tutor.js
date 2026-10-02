@@ -10,6 +10,7 @@ import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { focusUnit } from '../../state/selectors';
 import { unitById } from '../../data/units';
+import { subjectName } from '../../data/subjects';
 
 const KEYWORDS = {
   cell: ['cell', 'mitochond', 'organelle', 'osmosis', 'plasmolys', 'nucleus', 'ribosome', 'membrane', 'turgid', 'cellule'],
@@ -90,17 +91,20 @@ function Rich({ text, own }) {
 const REASONS = [
   ['wrong', 'It is wrong', 'C’est faux'],
   ['harmful', 'It is harmful or rude', 'C’est blessant ou grossier'],
-  ['off_topic', 'It is not about Biology', 'Ce n’est pas de la biologie'],
+  ['off_topic', 'It is not about the subject', 'Ce n’est pas sur la matière'],
   ['other', 'Something else', 'Autre chose'],
 ];
 
 export default function Tutor({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const { user, pro, progress, stats, quota, setQuota, refreshQuota, consentOk } = useApp();
+  const { user, pro, progress, stats, quota, setQuota, refreshQuota, consentOk, subject: current } = useApp();
   const L = useL();
   const lang = useLang();
-  const key = `bs:tutor:${user?.id || 'guest'}`;
-  const focus = focusUnit(progress, stats.unitPct, pro);
+  const subject = route.params?.subject || current;
+  const name = subjectName(subject, lang);
+  // One conversation per subject (Biology keeps its original key).
+  const key = `bs:tutor:${user?.id || 'guest'}${subject === 'biology' ? '' : `:${subject}`}`;
+  const focus = focusUnit(progress, stats.unitPct, pro, subject);
   const context = route.params?.context || `${focus.short}`;
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState(route.params?.prefill || '');
@@ -137,7 +141,7 @@ export default function Tutor({ navigation, route }) {
     setDraft('');
     setBusy(true);
     try {
-      const r = await post('/v1/ai/ask', { question: q, history, context }, { timeout: 90000 });
+      const r = await post('/v1/ai/ask', { question: q, history, context, subject }, { timeout: 90000 });
       setMessages((m) => [...m, { id: `a${Date.now()}`, role: 'assistant', content: r.text, at: Date.now(), unit: matchUnit(`${q} ${r.text}`), q }]);
       setQuota((x) => (x ? { ...x, asksLeft: r.asksLeft } : x));
     } catch (e) {
@@ -180,7 +184,7 @@ export default function Tutor({ navigation, route }) {
   return (
     <V c="flex-1 bg-surface">
       <StackHeader
-        title={L('Tutor', 'Tuteur')}
+        title={`${name} ${L('tutor', 'tuteur')}`}
         subtitle={context}
         subtitleColor="on-surface-variant"
         avatar={false}
@@ -208,7 +212,7 @@ export default function Tutor({ navigation, route }) {
 
           {!messages.length && (
             <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-              {L('Ask any GCE Biology question. Answers explain step by step and point out what examiners give marks for.', 'Posez une question de biologie du GCE. Les réponses expliquent étape par étape et indiquent ce que les examinateurs notent.')}
+              {L(`Ask any GCE ${name} question. Answers explain step by step and point out what examiners give marks for.`, `Posez une question de ${name.toLowerCase()} du GCE. Les réponses expliquent étape par étape et indiquent ce que les examinateurs notent.`)}
             </T>
           )}
 
@@ -273,7 +277,7 @@ export default function Tutor({ navigation, route }) {
           <V c="flex-row items-end gap-space-xs">
             <Input
               c="flex-1 min-h-[44px] max-h-[120px] bg-surface-container-low px-3 py-2.5 rounded-xl text-body-md"
-              placeholder={L('Ask a Biology question', 'Posez une question de biologie')}
+              placeholder={L(`Ask a ${name} question`, `Posez une question de ${name.toLowerCase()}`)}
               value={draft}
               onChangeText={setDraft}
               multiline

@@ -135,14 +135,14 @@ export default function Paywall({ navigation, route }) {
     ? L('You have used this week’s free Paper 1. The full course has no weekly limit.', 'Vous avez utilisé l’épreuve 1 gratuite de la semaine. Le cours complet n’a pas de limite.')
     : reason === 'mark' || reason === 'ai'
     ? L('Answer marking and more tutor questions each day come with the full course.', 'La correction des réponses et plus de questions au tuteur viennent avec le cours complet.')
-    : L('Every unit, every practical, unlimited papers and answer marking.', 'Toutes les unités, tous les TP, des épreuves illimitées et la correction des réponses.');
+    : L('Every unit and practical in Biology, Chemistry, Physics and Human Biology, unlimited papers and answer marking. One pass covers all four.', 'Toutes les unités et tous les TP en biologie, chimie, physique et biologie humaine, des épreuves illimitées et la correction des réponses. Un seul pass couvre les quatre.');
 
   return (
     <V c="flex-1">
       <Screen bg="bg-surface" keyboard header={<StackHeader close title={L('Full course', 'Cours complet')} avatar={false} />}>
         <V c="pb-space-xl gap-space-lg pt-space-md">
           <V c="gap-space-xs">
-            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{pro ? L('You have the full course', 'Vous avez le cours complet') : L('The full GCE Biology course', 'Le cours complet de biologie GCE')}</T>
+            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{pro ? L('You have the full course', 'Vous avez le cours complet') : L('The full SciAid course', 'Le cours complet SciAid')}</T>
             <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
               {intro}
             </T>
@@ -158,9 +158,9 @@ export default function Paywall({ navigation, route }) {
                 {L('Full course', 'Complet')}
               </T>
             </V>
-            <Compare title={L('Units', 'Unités')} free={L('1 to 3, and first lessons', '1 à 3, et premières leçons')} full={L('All 10', 'Les 10')} />
-            <Compare title={L('Practicals', 'TP')} free="2" full={L('All', 'Tous')} />
-            <Compare title={L('Paper 1', 'Épreuve 1')} free={L('1 a week', '1 par semaine')} full={L('Unlimited', 'Illimitée')} />
+            <Compare title={L('Units', 'Unités')} free={L('1 to 3 in each subject, and first lessons', '1 à 3 par matière, et premières leçons')} full={L('All, in all four subjects', 'Toutes, dans les quatre matières')} />
+            <Compare title={L('Practicals', 'TP')} free={L('2 in each subject', '2 par matière')} full={L('All', 'Tous')} />
+            <Compare title={L('Paper 1', 'Épreuve 1')} free={L('1 a week in each subject', '1 par semaine et par matière')} full={L('Unlimited', 'Illimitée')} />
             <Compare title={L('Paper 2 marking', 'Correction épreuve 2')} free={L('Yourself', 'Vous-même')} full={L('By the app', 'Par l’application')} />
             <Compare title={L('Tutor questions', 'Questions au tuteur')} free={L('5 a day', '5 par jour')} full={L('30 a day', '30 par jour')} />
             <Compare title={L('Answer marking', 'Correction de réponses')} free="-" full={L('30 typed and 6 photos a day', '30 tapées et 6 photos par jour')} />

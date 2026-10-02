@@ -1,6 +1,5 @@
-// Offline-first study record. Everything is computed on the device and synced
-// to the server (when signed in) so parents and teachers see real numbers.
-import { units } from '../data/units';
+// The study record. Everything is computed on the device and saved to the
+// account (when signed in and allowed) so parents and teachers see real numbers.
 
 export const EMPTY = {
   v: 2,
@@ -12,7 +11,7 @@ export const EMPTY = {
   lessons: {}, // lessonId -> completedAt
   labs: {}, // labId -> { at, result }
   workbook: [], // { id, labId, title, observation, conclusion, at }
-  exams: [], // { id, kind: 'p1'|'p2', score, total, pct, secs, byUnit, at }
+  exams: [], // { id, kind: 'p1'|'p2', subject, score, total, pct, secs, byUnit, at }
   models: {}, // modelId -> viewedAt
   bookmarks: {}, // lessonId -> savedAt
 };
@@ -58,14 +57,18 @@ export function unitMastery(p, unit, lessonIds = []) {
   return Math.round(quiz * 0.7 + read * 100 * 0.3);
 }
 
-export function syllabusMastery(p, lessonsByUnit) {
-  const total = units.reduce((a, u) => a + u.weight, 0);
-  const got = units.reduce((a, u) => a + (unitMastery(p, u, lessonsByUnit(u.id)) * u.weight) / 100, 0);
-  return Math.round((got / total) * 100);
+// Mastery of one subject's syllabus: the mean of its unit mastery scores.
+export function syllabusMastery(p, subjectUnits, lessonIdsFor) {
+  if (!subjectUnits.length) return 0;
+  const sum = subjectUnits.reduce((a, u) => a + unitMastery(p, u, lessonIdsFor(u.id)), 0);
+  return Math.round(sum / subjectUnits.length);
 }
 
-export function bestExam(p, kind) {
-  const list = p.exams.filter((e) => !kind || e.kind === kind);
+// Exams written before subjects existed were all Biology.
+export const examSubject = (e) => e.subject || 'biology';
+
+export function bestExam(p, kind, subject) {
+  const list = p.exams.filter((e) => (!kind || e.kind === kind) && (!subject || examSubject(e) === subject));
   return list.length ? Math.max(...list.map((e) => e.pct)) : null;
 }
 
@@ -100,7 +103,7 @@ export function merge(local, remote) {
   };
 }
 
-// GCE Ordinary Level Biology is written in late May / June. Counts down to
+// GCE Ordinary Level papers are written in late May and June. Counts down to
 // 1 June of the student's exam year.
 export function daysToExam(examYear) {
   const now = new Date();

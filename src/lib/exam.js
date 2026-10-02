@@ -1,12 +1,16 @@
-// Paper 1 engine: builds papers from the question bank and scores attempts.
+// Paper 1 engine: builds papers from a subject's question bank and scores attempts.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { units, unitById } from '../data/units';
+import { subjectById } from '../data/subjects';
 
-export const BANK = units.flatMap((u) => u.quiz.map((q, qi) => ({ ...q, unit: u.id, qi, key: `${u.id}:${qi}` })));
-export const byKey = (key) => BANK.find((q) => q.key === key);
+export const BANK = units.flatMap((u) => u.quiz.map((q, qi) => ({ ...q, unit: u.id, subject: u.subject, qi, key: `${u.id}:${qi}` })));
+const byKeyMap = new Map(BANK.map((q) => [q.key, q]));
+export const byKey = (key) => byKeyMap.get(key);
+export const bankFor = (subject) => BANK.filter((q) => q.subject === subject);
 
-export const P1 = { count: 50, minutes: 90 };
-const SESSION = 'bs:p1:session';
+export const p1For = (subject) => subjectById(subject).p1;
+// Biology keeps its original key so an unfinished paper survives the update.
+const sessionKey = (subject) => (subject === 'biology' ? 'bs:p1:session' : `bs:p1:session:${subject}`);
 
 function shuffle(list) {
   const a = [...list];
@@ -18,8 +22,8 @@ function shuffle(list) {
 }
 
 // Spreads questions across units, then fills at random.
-export function buildPaper(count = P1.count, unitIds) {
-  const pool = unitIds ? BANK.filter((q) => unitIds.includes(q.unit)) : BANK;
+export function buildPaper(subject, count = p1For(subject).count, unitIds) {
+  const pool = unitIds ? BANK.filter((q) => unitIds.includes(q.unit)) : bankFor(subject);
   const byUnit = {};
   for (const q of shuffle(pool)) (byUnit[q.unit] = byUnit[q.unit] || []).push(q);
   const picked = [];
@@ -32,19 +36,20 @@ export function buildPaper(count = P1.count, unitIds) {
   return shuffle(picked).map((q) => ({ key: q.key, order: shuffle(q.a.map((_, i) => i)) }));
 }
 
-export async function loadSession() {
+export async function loadSession(subject) {
   try {
-    const raw = await AsyncStorage.getItem(SESSION);
+    const raw = await AsyncStorage.getItem(sessionKey(subject));
     if (!raw) return null;
     const s = JSON.parse(raw);
-    if (Date.now() - s.startedAt > P1.minutes * 60000 + 5 * 60000) return null;
+    if (Date.now() - s.startedAt > (s.minutes || p1For(subject).minutes) * 60000 + 5 * 60000) return null;
+    if (!s.paper?.every((p) => byKey(p.key))) return null;
     return s;
   } catch {
     return null;
   }
 }
-export const saveSession = (s) => AsyncStorage.setItem(SESSION, JSON.stringify(s)).catch(() => {});
-export const clearSession = () => AsyncStorage.removeItem(SESSION).catch(() => {});
+export const saveSession = (subject, s) => AsyncStorage.setItem(sessionKey(subject), JSON.stringify(s)).catch(() => {});
+export const clearSession = (subject) => AsyncStorage.removeItem(sessionKey(subject)).catch(() => {});
 
 // answers[i] = original option index picked (0 is always the correct option in the bank).
 export function score(paper, answers, flags = {}) {
@@ -64,3 +69,7 @@ export function score(paper, answers, flags = {}) {
 }
 
 export const unitLabel = (id) => unitById(id)?.short || id;
+
+// Assignment reference for a teacher-set Paper 1 in a subject.
+export const mockRef = (subject) => (subject === 'biology' ? 'paper1' : `paper1-${subject}`);
+export const mockSubject = (ref) => (ref === 'paper1' ? 'biology' : ref?.startsWith('paper1-') ? ref.slice(7) : null);

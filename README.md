@@ -1,13 +1,15 @@
-# BioSpatial VR: Cameroon GCE Biology
+# SciAid: Cameroon GCE Ordinary Level sciences
 
-Offline-first mobile app (Expo SDK 57, React Native) for Cameroon GCE Ordinary Level Biology,
-with a Cloudflare Worker API for accounts, progress sync, classes, parent reports, payments and AI.
+Mobile app (Expo SDK 57, React Native) for the Cameroon GCE Ordinary Level sciences, with a
+Cloudflare Worker API for accounts, progress, classes, parent reports, payments and the AI tutor.
+Biology (0510) is complete; Chemistry (0515), Physics (0580) and Human Biology (0565) are being
+added and are switched on in `src/data/subjects.js` once their content is finished.
 
 ## Download (Android)
 
 Direct download, no GitHub account needed:
 
-**https://github.com/Angel-doc18/biolab-vr/releases/latest/download/BioSpatial-VR.apk**
+**https://github.com/Angel-doc18/biolab-vr/releases/latest/download/SciAid.apk**
 
 Every push to `main` builds a new APK and publishes it as release `v1.0.<build>`
 (`.github/workflows/android-release.yml`).
@@ -16,15 +18,13 @@ Every push to `main` builds a new APK and publishes it as release `v1.0.<build>`
 
 | Area | Screens |
 | --- | --- |
-| Start | Animated splash, welcome carousel, language (English / Français), register, login, SMS code, forgot and reset password |
-| Onboarding | Role (student, parent, teacher), exam and class, school search or class code, goals and daily reminder, setup complete |
-| Home | Streak, syllabus mastery, XP, GCE countdown, today's lesson, tutor shortcut, teacher assignments. Parents see their children's reports; teachers see the classroom portal |
-| Learn | 10 units, 30 lessons with read-aloud narration, 3D specimen viewer with stereo VR, unit quizzes |
-| Lab | Osmosis, food tests, enzyme, photosynthesis and transpiration practicals, workbook with drawing and labelling, PDF export |
-| Exams | Timed Paper 1 (50 questions, 90 minutes, flag, eliminate, matrix), Paper 2 structured questions with mark schemes, results analysis, Mark my answer from a photo |
-| Me | Profile and analytics, offline manager, parent WhatsApp report and PDF, join a class, Premium, settings, help, terms and privacy |
-
-Course content ships inside the app and works without data. The AI tutor, marking, payments and sync need a connection.
+| Start | Splash, welcome, language (English / Français), register, login, SMS or WhatsApp code, forgot and reset password |
+| Onboarding | Role (student, parent, teacher), class, exam year and subjects, parental approval for under-18s, school, goals and reminder |
+| Home | Countdown to the exam, subject mastery, next lesson with its labelled diagram, tutor, work from the teacher. Parents see their children's progress; teachers see their classes |
+| Learn | Units and lessons per subject with labelled diagrams and read-aloud, 3D models (real anatomy from BodyParts3D), unit quizzes |
+| Lab | Practicals with labelled apparatus, method, results and a workbook with drawing and PDF export |
+| Exams | Timed Paper 1 and Paper 2 per subject, results analysis, answer marking from typed text or a photo |
+| Me | Subjects, parent reports, downloads and storage, join a class, full course, settings, help, terms and privacy |
 
 ## Project layout
 

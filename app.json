@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "BioSpatial VR",
-    "slug": "biospatial-vr",
+    "name": "SciAid",
+    "slug": "sciaid",
     "version": "2.0.0",
     "orientation": "default",
     "icon": "./assets/img/app-icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.biospatial.vr",
+      "bundleIdentifier": "com.sciaid.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "BioSpatial VR uses the camera to photograph your handwritten answers for marking.",
-        "NSPhotoLibraryUsageDescription": "BioSpatial VR lets you choose a photo of your handwritten answer for marking."
+        "NSCameraUsageDescription": "SciAid uses the camera to photograph your handwritten answers for marking.",
+        "NSPhotoLibraryUsageDescription": "SciAid lets you choose a photo of your handwritten answer for marking."
       }
     },
     "android": {
@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/img/adaptive-foreground.png",
         "backgroundColor": "#0369a1"
       },
-      "package": "com.biospatial.vr",
+      "package": "com.sciaid.app",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.POST_NOTIFICATIONS",
@@ -51,8 +51,8 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "BioSpatial VR uses the camera to photograph your handwritten answers for marking.",
-          "photosPermission": "BioSpatial VR lets you choose a photo of your handwritten answer for marking.",
+          "cameraPermission": "SciAid uses the camera to photograph your handwritten answers for marking.",
+          "photosPermission": "SciAid lets you choose a photo of your handwritten answer for marking.",
           "microphonePermission": false
         }
       ],

@@ -3,8 +3,9 @@ import { Animated, BackHandler, Modal, ScrollView } from 'react-native';
 import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, Spinner, StackHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
-import { P1, buildPaper, byKey, clearSession, loadSession, saveSession, score, unitLabel } from '../../lib/exam';
+import { useL, useLang } from '../../i18n';
+import { subjectName } from '../../data/subjects';
+import { buildPaper, byKey, clearSession, loadSession, mockRef, p1For, saveSession, score, unitLabel } from '../../lib/exam';
 import { unitById } from '../../data/units';
 import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
 import { completeMatchingAssignment } from '../../lib/assignments';
@@ -72,9 +73,12 @@ function Dialog({ visible, icon, iconBg, title, body, cancel, confirm, confirmC 
   );
 }
 
-export default function Paper1({ navigation }) {
-  const { pro, progress, recordExam } = useApp();
+export default function Paper1({ navigation, route }) {
+  const { pro, progress, recordExam, subject: current } = useApp();
   const L = useL();
+  const subject = route.params?.subject || current;
+  const P1 = p1For(subject);
+  const title = `${subjectName(subject, useLang())} ${L('Paper 1', 'épreuve 1')}`;
   const [s, setS] = useState(null); // { startedAt, paper, answers, flags, struck, index }
   const [now, setNow] = useState(Date.now());
   const [big, setBig] = useState(false);
@@ -85,12 +89,12 @@ export default function Paper1({ navigation }) {
 
   useEffect(() => {
     (async () => {
-      const existing = await loadSession();
+      const existing = await loadSession(subject);
       if (existing) return setS(existing);
-      if (!pro && mocksThisWeek(progress.exams) >= FREE_MOCKS_PER_WEEK) return navigation.replace('Paywall', { reason: 'mocks' });
-      const fresh = { startedAt: Date.now(), paper: buildPaper(), answers: {}, flags: {}, struck: {}, index: 0 };
+      if (!pro && mocksThisWeek(progress.exams, subject) >= FREE_MOCKS_PER_WEEK) return navigation.replace('Paywall', { reason: 'mocks' });
+      const fresh = { startedAt: Date.now(), minutes: P1.minutes, paper: buildPaper(subject), answers: {}, flags: {}, struck: {}, index: 0 };
       setS(fresh);
-      saveSession(fresh);
+      saveSession(subject, fresh);
     })();
   }, []);
 
@@ -99,7 +103,7 @@ export default function Paper1({ navigation }) {
     return () => clearInterval(t);
   }, []);
   useEffect(() => {
-    if (s) saveSession(s);
+    if (s) saveSession(subject, s);
   }, [s]);
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -116,10 +120,10 @@ export default function Paper1({ navigation }) {
     done.current = true;
     const r = score(s.paper, s.answers, s.flags);
     const secs = Math.min(P1.minutes * 60, Math.round((Date.now() - s.startedAt) / 1000));
-    const exam = { kind: 'p1', score: r.correct, total: r.total, pct: r.pct, byUnit: r.byUnit, items: r.items, secs };
+    const exam = { kind: 'p1', subject, score: r.correct, total: r.total, pct: r.pct, byUnit: r.byUnit, items: r.items, secs };
     recordExam(exam);
-    clearSession();
-    completeMatchingAssignment('mock', 'paper1', r.pct);
+    clearSession(subject);
+    completeMatchingAssignment('mock', mockRef(subject), r.pct);
     navigation.replace('Results', { exam: { ...exam, at: Date.now() } });
   };
 
@@ -127,7 +131,7 @@ export default function Paper1({ navigation }) {
     if (s && left === 0) submit();
   }, [left, s]);
 
-  if (!s) return <Screen header={<StackHeader title={L('MCQ simulator', 'Simulateur QCM')} />}><Spinner /></Screen>;
+  if (!s) return <Screen header={<StackHeader title={title} />}><Spinner /></Screen>;
 
   const i = s.index;
   const item = s.paper[i];
@@ -146,7 +150,7 @@ export default function Paper1({ navigation }) {
     <V c="flex-1">
       <Screen
         bg="bg-surface"
-        header={<StackHeader title={L('MCQ simulator', 'Simulateur QCM')} subtitle={L('Paper 1 · practice mock', 'Épreuve 1 · examen blanc')} logo onBack={() => setExit(true)} />}
+        header={<StackHeader title={title} subtitle={L('Multiple choice, practice paper', 'QCM, épreuve d’entraînement')} logo onBack={() => setExit(true)} />}
         footer={
           <V c="px-margin py-3 bg-surface-container-lowest flex-row items-center gap-space-sm" style={{ shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 16, elevation: 10 }}>
             <P c="h-12 px-space-md rounded-xl bg-surface-container flex-row items-center gap-1" onPress={() => go(i - 1)} disabled={i === 0}>

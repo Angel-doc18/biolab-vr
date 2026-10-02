@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { P, T, V } from '../../ui/kit';
+import { Ic, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
+import { useL, useLang } from '../../i18n';
 import { nextStep } from '../../navigation/routes';
+import { OPEN_SUBJECTS as SUBJECTS, chosenSubjects } from '../../data/subjects';
 import { OnbHeader, StepBar } from './Steps';
 
 const CLASSES = ['Form 3', 'Form 4', 'Form 5'];
@@ -33,17 +34,21 @@ function Choice({ on, label, sub, onPress }) {
 export default function ExamClass({ navigation, route }) {
   const { user, updateMe } = useApp();
   const L = useL();
+  const lang = useLang();
   const years = examYears();
   const [year, setYear] = useState(user?.examYear || years[0]);
   const [cls, setCls] = useState(CLASSES.includes(user?.className) ? user.className : 'Form 5');
+  const [subjects, setSubjects] = useState(user?.subjects?.length || user?.onboarded ? chosenSubjects(user) : []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const toggle = (id) => setSubjects((list) => (list.includes(id) ? list.filter((s) => s !== id) : [...list, id]));
 
   const submit = async () => {
+    if (!subjects.length) return setError(L('Choose at least one subject.', 'Choisissez au moins une matière.'));
     setBusy(true);
     setError(null);
     try {
-      await updateMe({ level: 'O', examYear: year, className: cls });
+      await updateMe({ level: 'O', examYear: year, className: cls, subjects });
       if (route.params?.fromSettings) navigation.goBack();
       else navigation.navigate(nextStep('student', 'ExamClass'));
     } catch (e) {
@@ -65,8 +70,8 @@ export default function ExamClass({ navigation, route }) {
     >
       {!route.params?.fromSettings && <StepBar screen="ExamClass" />}
       <V c="gap-space-xs mb-space-lg">
-        <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Your class and exam', 'Votre classe et votre examen')}</T>
-        <T c="font-body-md text-body-md text-on-surface-variant">{L('We use this to count down to your exam and plan your revision.', 'Nous l’utilisons pour le compte à rebours et le plan de révision.')}</T>
+        <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Your class, exam and subjects', 'Votre classe, votre examen et vos matières')}</T>
+        <T c="font-body-md text-body-md text-on-surface-variant">{L('We use this to count down to your exam and show the syllabus of each subject you take.', 'Nous l’utilisons pour le compte à rebours et pour afficher le programme de chaque matière.')}</T>
       </V>
 
       <V c="gap-space-lg">
@@ -84,6 +89,21 @@ export default function ExamClass({ navigation, route }) {
             {years.map((y) => (
               <Choice key={y} on={year === y} label={`June ${y}`} onPress={() => setYear(y)} />
             ))}
+          </V>
+        </V>
+        <V c="gap-space-sm">
+          <T c="font-label-lg text-label-lg text-on-surface">{L('Science subjects you are taking', 'Matières scientifiques que vous présentez')}</T>
+          <V c="bg-surface-container-lowest rounded-xl border border-outline-variant">
+            {SUBJECTS.map((s, i) => {
+              const on = subjects.includes(s.id);
+              return (
+                <P key={s.id} c={`flex-row items-center gap-space-sm px-space-md py-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => toggle(s.id)} scale={1} accessibilityRole="checkbox" accessibilityState={{ checked: on }}>
+                  <V c={`w-6 h-6 rounded items-center justify-center ${on ? 'bg-primary-container' : 'border-2 border-outline-variant'}`}>{on && <Ic n="check" s={16} c="on-primary" />}</V>
+                  <T c="font-label-lg text-label-lg text-on-surface flex-1">{lang === 'fr' ? s.fr : s.en}</T>
+                  <T c="font-body-sm text-body-sm text-on-surface-variant">{s.code}</T>
+                </P>
+              );
+            })}
           </V>
         </V>
       </V>

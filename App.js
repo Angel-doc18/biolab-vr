@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,8 +13,15 @@ import AppNavigator from './src/navigation/AppNavigator';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
+// Development only: ?gallery in the web preview shows every labelled diagram.
+const GALLERY = __DEV__ && Platform.OS === 'web' && typeof window !== 'undefined' && window.location.search.includes('gallery');
+
 function Root() {
   const { prefs } = useApp();
+  if (GALLERY) {
+    const DiagramGallery = require('./src/dev/DiagramGallery').default;
+    return <DiagramGallery />;
+  }
   return (
     <LangContext.Provider value={prefs.lang}>
       <AppNavigator />

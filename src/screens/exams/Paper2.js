@@ -1,5 +1,6 @@
-// Paper 2 in the exam format: 2 hours; Section A, three compulsory questions;
-// Section B, choose any two of four; 20 marks each, 100 in total.
+// Paper 2 practice: structured questions in the subject's layout (subjects.js):
+// compulsory Section A questions, then Section B, where the student may choose
+// some of the questions offered. Every question is worth 20 marks.
 import { useEffect, useRef, useState } from 'react';
 import { BackHandler, Image, Modal, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,17 +9,22 @@ import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, Spinner, StackHeader, useToast } from '../../ui/chrome';
 import DrawPad, { Drawing } from '../../ui/DrawPad';
 import { CriterionRow, ModelAnswer, ScoreCard } from '../../ui/MarkReport';
-import { AnimalCell } from '../../ui/art';
-import { OsmosisCell } from '../../ui/labArt';
+import { Diagram } from '../../diagrams';
 import { post } from '../../api/client';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
-import { P2, buildPaper2, p2ById, questionMarks } from '../../data/paper2';
+import { useL, useLang } from '../../i18n';
+import { buildPaper2, p2ById, paper2Config, paper2Total, questionMarks } from '../../data/paper2';
+import { subjectName } from '../../data/subjects';
 import { pickAnswerPhoto } from '../../lib/photo';
 
-const KEY = 'bs:p2:session:v2';
-const SYMBOLS = ['→', '×', '÷', '°C', 'CO₂', 'O₂', 'H₂O', 'C₆H₁₂O₆', 'µm', 'm²'];
-const TOTAL = P2.marksEach * (P2.sectionA + P2.sectionB.answer);
+// Biology keeps its original key so an unfinished paper survives the update.
+const keyFor = (subject) => (subject === 'biology' ? 'bs:p2:session:v2' : `bs:p2:session:v2:${subject}`);
+const SYMBOLS = {
+  biology: ['→', '×', '÷', '°C', 'CO₂', 'O₂', 'H₂O', 'C₆H₁₂O₆', 'µm', 'm²'],
+  humanbio: ['→', '×', '÷', '°C', 'CO₂', 'O₂', 'H₂O', 'C₆H₁₂O₆', 'µm', 'mmHg'],
+  chemistry: ['→', '⇌', '₂', '₃', '₄', '⁺', '²⁺', '⁻', '²⁻', '°C', 'dm³', 'mol'],
+  physics: ['×', '÷', '²', '³', '⁻¹', '⁻²', '√', 'Δ', 'λ', 'Ω', '°', 'm/s²'],
+};
 
 function Rich({ text, c }) {
   return (
@@ -30,28 +36,6 @@ function Rich({ text, c }) {
       ))}
     </T>
   );
-}
-
-function Figure({ kind }) {
-  if (kind === 'osmosis') {
-    return (
-      <V c="flex-row gap-space-sm">
-        {[
-          ['C', 0],
-          ['D', 1],
-        ].map(([k, p]) => (
-          <V key={k} c="flex-1 items-center gap-1">
-            <V c="w-full h-28 rounded-lg bg-surface-container items-center justify-center">
-              <OsmosisCell p={p} size={96} />
-            </V>
-            <T c="font-label-md text-label-md text-on-surface">Cell {k} (×400)</T>
-          </V>
-        ))}
-      </V>
-    );
-  }
-  if (kind === 'cell') return <V c="h-44 rounded-lg overflow-hidden"><AnimalCell /></V>;
-  return null;
 }
 
 function SelfMark({ part, value, onChange }) {
@@ -77,10 +61,18 @@ const clock = (ms) => {
   return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
 };
 
-export default function Paper2({ navigation }) {
+export default function Paper2({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const { pro, recordExam } = useApp();
+  const { pro, recordExam, subject: current } = useApp();
   const L = useL();
+  const lang = useLang();
+  const subject = route.params?.subject || current;
+  const P2 = paper2Config(subject);
+  const TOTAL = paper2Total(subject);
+  const KEY = keyFor(subject);
+  // Section B with no choice (all of it compulsory) skips the choice page.
+  const choosing = P2.b.answer < P2.b.offered;
+  const title = `${subjectName(subject, lang)} ${L('Paper 2', 'épreuve 2')}`;
   const [s, setS] = useState(null); // { startedAt, a, b, chosen, answers, drawings, photos, index }
   const [now, setNow] = useState(Date.now());
   const [canvas, setCanvas] = useState(null);
@@ -97,11 +89,12 @@ export default function Paper2({ navigation }) {
       try {
         const raw = await AsyncStorage.getItem(KEY);
         const saved = raw ? JSON.parse(raw) : null;
-        if (saved && Date.now() - saved.startedAt < P2.minutes * 60000 * 2) return setS({ photos: {}, ...saved });
+        if (saved && Date.now() - saved.startedAt < P2.minutes * 60000 * 2 && [...saved.a, ...saved.b].every((id) => p2ById(id))) return setS({ photos: {}, ...saved });
       } catch {
         // start fresh
       }
-      setS({ startedAt: Date.now(), ...buildPaper2(), chosen: [], answers: {}, drawings: {}, photos: {}, index: 0 });
+      const paper = buildPaper2(subject);
+      setS({ startedAt: Date.now(), ...paper, chosen: choosing ? [] : paper.b, answers: {}, drawings: {}, photos: {}, index: 0 });
     })();
     const t = setInterval(() => setNow(Date.now()), 15000);
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -124,11 +117,12 @@ export default function Paper2({ navigation }) {
     return undefined;
   }, [s, phase]);
 
-  if (!s) return <Screen header={<StackHeader title={L('Paper 2', 'Épreuve 2')} />}><Spinner /></Screen>;
+  if (!s) return <Screen header={<StackHeader title={title} />}><Spinner /></Screen>;
 
-  // Pages: Section A questions, then the Section B choice, then the chosen B questions.
+  // Pages: Section A questions, then the Section B choice (when there is one),
+  // then the Section B questions being answered.
   const answered = [...s.a, ...s.chosen];
-  const pages = [...s.a.map((id) => ({ id })), { choose: true }, ...s.chosen.map((id) => ({ id }))];
+  const pages = [...s.a.map((id) => ({ id })), ...(choosing ? [{ choose: true }] : []), ...s.chosen.map((id) => ({ id }))];
   const page = pages[Math.min(s.index, pages.length - 1)];
   const go = (i) => {
     setS((x) => ({ ...x, index: i }));
@@ -147,7 +141,7 @@ export default function Paper2({ navigation }) {
   const toggleChoice = (id) =>
     setS((x) => {
       if (x.chosen.includes(id)) return { ...x, chosen: x.chosen.filter((c) => c !== id) };
-      if (x.chosen.length >= P2.sectionB.answer) return x;
+      if (x.chosen.length >= P2.b.answer) return x;
       return { ...x, chosen: [...x.chosen, id] };
     });
 
@@ -168,6 +162,7 @@ export default function Paper2({ navigation }) {
           const r = await post(
             '/v1/ai/mark',
             {
+              subject,
               question: `${qq.stem}\n\n${textParts.map((p) => `(${p.label}) ${p.prompt} [${p.marks}]`).join('\n')}`,
               markScheme: textParts.flatMap((p) => p.scheme.map((sc) => ({ point: `(${p.label}) ${sc.point}`, marks: sc.marks }))),
               maxMarks: textParts.reduce((a, p) => a + p.marks, 0),
@@ -189,7 +184,7 @@ export default function Paper2({ navigation }) {
         for (const p of qq.parts.filter((pp) => pp.kind === 'drawing')) {
           const photo = s.photos[key(id, p.label)];
           if (photo) {
-            const r = await post('/v1/ai/mark', { question: `${qq.stem}\n\n(${p.label}) ${p.prompt}`, markScheme: p.scheme, maxMarks: p.marks, image: { mediaType: photo.mediaType, data: photo.base64 } }, { timeout: 120000 });
+            const r = await post('/v1/ai/mark', { subject, question: `${qq.stem}\n\n(${p.label}) ${p.prompt}`, markScheme: p.scheme, maxMarks: p.marks, image: { mediaType: photo.mediaType, data: photo.base64 } }, { timeout: 120000 });
             res.parts[p.label] = { awarded: r.result.awarded, max: p.marks, criteria: r.result.criteria };
           } else {
             res.parts[p.label] = { self: true, max: p.marks };
@@ -223,7 +218,7 @@ export default function Paper2({ navigation }) {
       byUnit[qq.unit][1] += questionMarks(qq);
     }
     const pct = Math.round((awarded / TOTAL) * 100);
-    recordExam({ kind: 'p2', score: Math.round(awarded * 10) / 10, total: TOTAL, pct, byUnit, secs: Math.round((Date.now() - s.startedAt) / 1000), marked: pro ? 'ai' : 'self' });
+    recordExam({ kind: 'p2', subject, score: Math.round(awarded * 10) / 10, total: TOTAL, pct, byUnit, secs: Math.round((Date.now() - s.startedAt) / 1000), marked: pro ? 'ai' : 'self' });
     await AsyncStorage.removeItem(KEY).catch(() => {});
     showToast(L('Paper 2 saved to your results', 'Épreuve 2 enregistrée'));
     setTimeout(() => navigation.navigate('Main', { screen: 'Exams' }), 700);
@@ -232,7 +227,7 @@ export default function Paper2({ navigation }) {
   const qLabel = (id) => {
     const ai = s.a.indexOf(id);
     if (ai >= 0) return `${L('Question', 'Question')} ${ai + 1}`;
-    return `${L('Question', 'Question')} ${P2.sectionA + 1 + s.b.indexOf(id)}`;
+    return `${L('Question', 'Question')} ${P2.a + 1 + s.b.indexOf(id)}`;
   };
 
   // ---------- results ----------
@@ -240,7 +235,7 @@ export default function Paper2({ navigation }) {
     const awarded = answered.reduce((a, id) => a + scoreOf(id), 0);
     return (
       <V c="flex-1">
-        <Screen bg="bg-surface" header={<StackHeader title={L('Paper 2 marking', 'Correction de l’épreuve 2')} subtitle={pro ? L('Marked against the mark scheme', 'Corrigé selon le barème') : L('Tick the points your answer covers', 'Cochez les points couverts')} />}>
+        <Screen bg="bg-surface" header={<StackHeader title={`${title}: ${L('marking', 'correction')}`} subtitle={pro ? L('Marked against the mark scheme', 'Corrigé selon le barème') : L('Tick the points your answer covers', 'Cochez les points couverts')} />}>
           <V c="pt-space-md pb-space-lg gap-space-md">
             {phase === 'marking' && (
               <V c="bg-surface-container-low rounded-xl p-space-md items-center gap-2">
@@ -336,7 +331,7 @@ export default function Paper2({ navigation }) {
       ) : (
         <P c="flex-1 h-12 bg-primary-container rounded-xl items-center justify-center" onPress={() => go(s.index + 1)}>
           <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
-            {page.choose ? L('Start Section B', 'Commencer la section B') : s.index === P2.sectionA - 1 ? L('Go to Section B', 'Aller à la section B') : L('Next question', 'Question suivante')}
+            {page.choose ? L('Start Section B', 'Commencer la section B') : s.index === P2.a - 1 ? L('Go to Section B', 'Aller à la section B') : L('Next question', 'Question suivante')}
           </T>
         </P>
       )}
@@ -345,7 +340,7 @@ export default function Paper2({ navigation }) {
 
   const header = (
     <StackHeader
-      title={L('Paper 2', 'Épreuve 2')}
+      title={title}
       subtitle={`${page.choose || !s.a.includes(page.id) ? L('Section B', 'Section B') : L('Section A', 'Section A')}, ${left > 0 ? `${clock(left)} ${L('left', 'restant')}` : L('time is up', 'temps écoulé')}`}
       subtitleColor={left < 10 * 60000 ? 'error' : 'on-surface-variant'}
       onBack={() => (save(), navigation.goBack())}
@@ -359,9 +354,9 @@ export default function Paper2({ navigation }) {
           <V c="pt-space-md pb-space-md gap-space-md">
             <V c="gap-space-xs">
               <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
-                {L('Section B: answer any two questions', 'Section B : répondez à deux questions')}
+                {L(`Section B: answer ${P2.b.answer} of the ${P2.b.offered} questions`, `Section B : répondez à ${P2.b.answer} des ${P2.b.offered} questions`)}
               </T>
-              <T c="font-body-md text-body-md text-on-surface-variant">{L('Read all four, then choose the two you can answer best. You can change your choice until you submit.', 'Lisez les quatre, puis choisissez les deux auxquelles vous répondez le mieux. Vous pouvez changer jusqu’à la remise.')}</T>
+              <T c="font-body-md text-body-md text-on-surface-variant">{L('Read them all, then choose the ones you can answer best. You can change your choice until you submit.', 'Lisez-les toutes, puis choisissez celles auxquelles vous répondez le mieux. Vous pouvez changer jusqu’à la remise.')}</T>
             </V>
             {s.b.map((id) => {
               const qq = p2ById(id);
@@ -387,7 +382,7 @@ export default function Paper2({ navigation }) {
               );
             })}
             <T c="font-body-sm text-body-sm text-on-surface-variant">
-              {s.chosen.length} {L('of', 'sur')} {P2.sectionB.answer} {L('chosen', 'choisies')}
+              {s.chosen.length} {L('of', 'sur')} {P2.b.answer} {L('chosen', 'choisies')}
             </T>
           </V>
         </Screen>
@@ -426,7 +421,7 @@ export default function Paper2({ navigation }) {
             </T>
             {q.figure && (
               <V c="bg-surface-container-lowest rounded-xl p-space-sm mt-space-xs">
-                <Figure kind={q.figure} />
+                <Diagram id={q.figure} />
               </V>
             )}
             {!!q.hint && <Rich text={q.hint} c="font-body-sm text-body-sm text-on-surface-variant" />}
@@ -459,7 +454,7 @@ export default function Paper2({ navigation }) {
                       maxLength={3000}
                     />
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" contentContainerStyle={{ gap: 4, alignItems: 'center' }}>
-                      {SYMBOLS.map((sym) => (
+                      {(SYMBOLS[subject] || SYMBOLS.biology).map((sym) => (
                         <P key={sym} c="bg-surface-container px-2.5 py-1 rounded" onPress={() => insert(q.id, p.label, sym)} accessibilityLabel={`Insert ${sym}`}>
                           <T c="text-on-surface" style={{ fontSize: 13, fontWeight: '600' }}>
                             {sym}

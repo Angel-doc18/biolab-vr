@@ -70,8 +70,8 @@ export async function requestConsent(request, env) {
     params: [fresh.name, link],
     lang: fresh.lang,
     text: fr
-      ? `BioSpatial VR : ${fresh.name} s’est inscrit(e) pour réviser la biologie du GCE et vous indique comme parent ou tuteur. Lisez et répondez ici : ${link}`
-      : `BioSpatial VR: ${fresh.name} registered to revise GCE Biology and named you as parent or guardian. Please read and reply here: ${link}`,
+      ? `SciAid : ${fresh.name} s’est inscrit(e) pour réviser les sciences du GCE et vous indique comme parent ou tuteur. Lisez et répondez ici : ${link}`
+      : `SciAid: ${fresh.name} registered to revise GCE sciences and named you as parent or guardian. Please read and reply here: ${link}`,
   }).catch(() => null);
   return ok({ status: 'pending', link, sentVia, user: publicUser(fresh), pro: isPro(fresh) });
 }
@@ -82,8 +82,8 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 
 const TEXT = {
   en: {
-    title: (n) => `Approve ${n}'s BioSpatial VR account`,
-    intro: (n, where) => `${n}${where} created an account on BioSpatial VR, a revision app for GCE Ordinary Level Biology, and gave this number as their parent or guardian. Because ${n} is under 18, the account needs your approval before we store their progress or let them use the tutor.`,
+    title: (n) => `Approve ${n}'s SciAid account`,
+    intro: (n, where) => `${n}${where} created an account on SciAid, a revision app for the GCE Ordinary Level sciences, and gave this number as their parent or guardian. Because ${n} is under 18, the account needs your approval before we store their progress or let them use the tutor.`,
     whatH: 'What we keep',
     what: [
       'Name, phone number and, if given, email address',
@@ -110,8 +110,8 @@ const TEXT = {
     other: 'Version française',
   },
   fr: {
-    title: (n) => `Approuver le compte BioSpatial VR de ${n}`,
-    intro: (n, where) => `${n}${where} a créé un compte sur BioSpatial VR, une application de révision de la biologie du GCE Ordinary Level, et a donné ce numéro comme parent ou tuteur. Comme ${n} a moins de 18 ans, le compte doit être approuvé avant que nous enregistrions sa progression ou qu’il ou elle utilise le tuteur.`,
+    title: (n) => `Approuver le compte SciAid de ${n}`,
+    intro: (n, where) => `${n}${where} a créé un compte sur SciAid, une application de révision des sciences du GCE Ordinary Level, et a donné ce numéro comme parent ou tuteur. Comme ${n} a moins de 18 ans, le compte doit être approuvé avant que nous enregistrions sa progression ou qu’il ou elle utilise le tuteur.`,
     whatH: 'Ce que nous conservons',
     what: [
       'Nom, numéro de téléphone et, s’il est donné, e-mail',
@@ -151,7 +151,7 @@ form{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
 button{flex:1 1 200px;min-height:50px;border-radius:10px;font:600 16px system-ui,sans-serif;cursor:pointer}
 .yes{background:#0369a1;color:#fff;border:0}.no{background:#fff;color:#0f1d2b;border:1px solid #c5d1db}
 a{color:#0369a1}
-</style></head><body><main><div class="brand">BioSpatial VR</div>${body}</main></body></html>`;
+</style></head><body><main><div class="brand">SciAid</div>${body}</main></body></html>`;
   return new Response(html, {
     status,
     headers: {
@@ -179,7 +179,7 @@ export async function consentPage(request, env, token) {
   const found = await load(env, token);
   const lang = pickLang(url, found?.student);
   const t = TEXT[lang];
-  if (!found) return page(lang, 'BioSpatial VR', `<p>${esc(t.gone)}</p>`, 410);
+  if (!found) return page(lang, 'SciAid', `<p>${esc(t.gone)}</p>`, 410);
   const { student } = found;
   const first = student.name.split(' ')[0];
   const where = [student.class_name, student.school_name].filter(Boolean).join(', ');
@@ -204,10 +204,10 @@ export async function consentDecision(request, env, token) {
   const found = await load(env, token);
   const lang = pickLang(url, found?.student);
   const t = TEXT[lang];
-  if (!found) return page(lang, 'BioSpatial VR', `<p>${esc(t.gone)}</p>`, 410);
+  if (!found) return page(lang, 'SciAid', `<p>${esc(t.gone)}</p>`, 410);
   const form = await request.formData().catch(() => null);
   const decision = form?.get('decision');
-  if (decision !== 'approve' && decision !== 'decline') return page(lang, 'BioSpatial VR', `<p>${esc(t.gone)}</p>`, 400);
+  if (decision !== 'approve' && decision !== 'decline') return page(lang, 'SciAid', `<p>${esc(t.gone)}</p>`, 400);
   const { row, student } = found;
   const at = now();
   const approve = decision === 'approve';
@@ -235,5 +235,5 @@ export async function consentDecision(request, env, token) {
       ? 'Votre parent n’a pas approuvé le compte. Parlez-en ensemble, puis envoyez une nouvelle demande si besoin.'
       : 'Your parent did not approve the account. Talk it over, then send a new request if needed.'
   ).catch(() => {});
-  return page(lang, 'BioSpatial VR', `<h1>${esc(approve ? t.approved(first) : t.declined(first))}</h1>`);
+  return page(lang, 'SciAid', `<h1>${esc(approve ? t.approved(first) : t.declined(first))}</h1>`);
 }

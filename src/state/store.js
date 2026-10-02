@@ -1,9 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { get, loadSession, onSessionLost, patch as apiPatch, post, put, setSession } from '../api/client';
-import { EMPTY, merge, minutesThisWeek, streak, syllabusMastery, touchDay, unitMastery, bestExam } from './progress';
-import { units } from '../data/units';
+import { EMPTY, examSubject, merge, minutesThisWeek, streak, syllabusMastery, touchDay, unitMastery, bestExam } from './progress';
+import { units, unitsFor } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
+import { SUBJECT_IDS, chosenSubjects } from '../data/subjects';
 
 const PREFS = 'bs:prefs';
 const USER = 'bs:user';
@@ -141,19 +142,38 @@ export function AppProvider({ children }) {
   // Students under 18 need a parent's approval before anything is stored on the
   // server; until then progress stays on this phone only.
   const consentOk = !user || user.role !== 'student' || user.consentStatus === 'granted' || user.consentStatus === 'not_needed';
+
+  // The sciences this student takes, and the one the tabs are showing now.
+  const subjects = useMemo(() => chosenSubjects(user), [user]);
+  const subject = subjects.includes(prefs.subject) ? prefs.subject : subjects[0];
+  const setSubject = useCallback((id) => SUBJECT_IDS.includes(id) && savePrefs({ subject: id }), [savePrefs]);
+
   const stats = useMemo(() => {
     const unitPct = Object.fromEntries(units.map((u) => [u.id, unitMastery(progress, u, lessonIdsFor(u.id))]));
+    const bySubject = Object.fromEntries(
+      SUBJECT_IDS.map((id) => [
+        id,
+        {
+          mastery: syllabusMastery(progress, unitsFor(id), lessonIdsFor),
+          bestMock: bestExam(progress, 'p1', id),
+          mocksDone: progress.exams.filter((e) => examSubject(e) === id).length,
+        },
+      ])
+    );
+    const taken = subjects.map((id) => bySubject[id].mastery);
     return {
-      mastery: syllabusMastery(progress, lessonIdsFor),
+      mastery: bySubject[subject].mastery,
+      overall: Math.round(taken.reduce((a, b) => a + b, 0) / taken.length),
+      bySubject,
       unitPct,
       streak: streak(progress.days),
       minutesWeek: minutesThisWeek(progress.minutes),
       labsDone: Object.keys(progress.labs).length,
       mocksDone: progress.exams.length,
-      bestMock: bestExam(progress),
+      bestMock: bySubject[subject].bestMock,
       lastActive: progress.days.length ? Date.now() : null,
     };
-  }, [progress]);
+  }, [progress, subjects, subject]);
 
   useEffect(() => {
     if (!user || loadedFor.current !== user.id) return;
@@ -166,19 +186,20 @@ export function AppProvider({ children }) {
         // Drawings stay on the device; the server only needs the study record.
         data: { ...progress, workbook: progress.workbook.map(({ drawing, ...w }) => w) },
         stats: {
-          mastery: stats.mastery,
+          mastery: stats.overall,
           xp: progress.xp,
           streak: stats.streak,
           labsDone: stats.labsDone,
           mocksDone: stats.mocksDone,
-          bestMock: stats.bestMock,
+          bestMock: bestExam(progress, 'p1'),
           minutesWeek: stats.minutesWeek,
           lastActive: lastDay ? new Date(`${lastDay}T12:00:00`).getTime() : null,
           unitMastery: stats.unitPct,
+          subjects: Object.fromEntries(subjects.map((id) => [id, stats.bySubject[id]])),
         },
       }).catch(() => {});
     }, 3000);
-  }, [progress, user, stats, prefs.autoSync, consentOk]);
+  }, [progress, user, stats, subjects, prefs.autoSync, consentOk]);
 
   const actions = useMemo(
     () => ({
@@ -285,6 +306,9 @@ export function AppProvider({ children }) {
       user,
       pro: auth.pro,
       consentOk,
+      subjects,
+      subject,
+      setSubject,
       applyUser,
       register,
       login,
@@ -302,7 +326,7 @@ export function AppProvider({ children }) {
       refreshUnread,
       ...actions,
     }),
-    [ready, prefs, savePrefs, auth, user, consentOk, applyUser, register, login, logout, updateMe, refreshMe, startSession, progress, stats, quota, refreshQuota, unread, refreshUnread, actions]
+    [ready, prefs, savePrefs, auth, user, consentOk, subjects, subject, setSubject, applyUser, register, login, logout, updateMe, refreshMe, startSession, progress, stats, quota, refreshQuota, unread, refreshUnread, actions]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

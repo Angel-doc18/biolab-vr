@@ -1,11 +1,12 @@
 import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader } from '../../ui/chrome';
 import { StaticTabBar } from '../../ui/TabBar';
-import { SpecimenPreview } from '../../ui/previews';
+import { UnitPicture } from '../../diagrams';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
+import { useL, useLang } from '../../i18n';
 import { unitById } from '../../data/units';
-import { lessonsFor } from '../../data/lessons';
+import { lessonNumber, lessonsFor } from '../../data/lessons';
+import { subjectName } from '../../data/subjects';
 import { labsForUnit } from '../../data/labs';
 import { lessonLocked, labLocked } from '../../data/plan';
 import { gradeFor, nextLesson } from '../../state/selectors';
@@ -28,7 +29,9 @@ function Row({ title, sub, icon = 'chevron_right', iconC = 'outline', onPress, f
 export default function Unit({ navigation, route }) {
   const { pro, progress, stats } = useApp();
   const L = useL();
+  const lang = useLang();
   const unit = unitById(route.params?.unitId || 'cell');
+  const vr = lang === 'fr' && unit.vr.fr ? { ...unit.vr, ...unit.vr.fr } : unit.vr;
   const lessons = lessonsFor(unit.id);
   const labs = labsForUnit(unit.id);
   const pct = stats.unitPct[unit.id] || 0;
@@ -38,12 +41,12 @@ export default function Unit({ navigation, route }) {
 
   const openLesson = (l, i) => {
     if (lessonLocked(unit.id, i, pro)) navigation.navigate('Paywall');
-    else navigation.navigate('Lesson', { lessonId: l.id });
+    else navigation.navigate('Lesson', { lessonId: l.id, unitId: unit.id });
   };
 
   return (
     <V c="flex-1">
-      <Screen header={<StackHeader title={`${L('Unit', 'Unité')} ${unit.n}`} subtitle={unit.papers} subtitleColor="on-surface-variant" avatar={false} />}>
+      <Screen header={<StackHeader title={`${L('Unit', 'Unité')} ${unit.n}`} subtitle={subjectName(unit.subject, lang)} subtitleColor="on-surface-variant" avatar={false} />}>
         <V c="pt-space-md pb-space-lg gap-space-lg">
           <V c="gap-space-xs">
             <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight" style={{ lineHeight: 32 }}>
@@ -59,23 +62,23 @@ export default function Unit({ navigation, route }) {
             </V>
           </V>
 
-          <P c="rounded-xl overflow-hidden bg-surface-container-low" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} scale={0.99}>
-            <V c="w-full h-48">
-              <SpecimenPreview unitId={unit.id} />
-            </V>
-            <V c="p-space-md gap-0.5 bg-surface-container-lowest">
+          <UnitPicture unit={unit} />
+
+          <P c="rounded-xl bg-surface-container-low p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} scale={0.99}>
+            <V c="flex-1 gap-0.5">
               <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-                {L('3D model', 'Modèle 3D')}: {unit.vr.title}
+                {L('3D model', 'Modèle 3D')}: {vr.title}
               </T>
               <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={2}>
-                {unit.vr.parts.map((p) => p.name).join(', ')}
+                {unit.vr.parts.map((p) => (lang === 'fr' && p.fr?.name) || p.name).join(', ')}
               </T>
             </V>
+            <Ic n="view_in_ar" s={22} c="primary-container" />
           </P>
 
           <P c="w-full h-12 bg-primary-container rounded-xl items-center justify-center" onPress={() => openLesson(next, lessons.indexOf(next))}>
             <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
-              {doneCount === lessons.length ? L('Review lesson', 'Revoir la leçon') : doneCount ? L('Continue with lesson', 'Continuer avec la leçon') : L('Start lesson', 'Commencer la leçon')} {next.n}
+              {doneCount === lessons.length ? L('Review lesson', 'Revoir la leçon') : doneCount ? L('Continue with lesson', 'Continuer avec la leçon') : L('Start lesson', 'Commencer la leçon')} {lessonNumber(unit.id, next)}
             </T>
           </P>
 
@@ -88,7 +91,7 @@ export default function Unit({ navigation, route }) {
                   <Row
                     key={l.id}
                     first={i === 0}
-                    title={`${l.n}. ${l.title}`}
+                    title={`${lessonNumber(unit.id, l)}. ${l.title}`}
                     sub={`${l.minutes} min${done ? `, ${L('read', 'lue')}` : locked ? `, ${L('full course', 'cours complet')}` : ''}`}
                     icon={done ? 'check' : locked ? 'lock' : 'chevron_right'}
                     iconC={done ? 'secondary' : 'outline'}

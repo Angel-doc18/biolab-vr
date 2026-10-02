@@ -1,48 +1,56 @@
 import { useCallback, useState } from 'react';
-import { Linking, RefreshControl } from 'react-native';
+import { Linking, RefreshControl, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
-import { Avatar, Bar, Ic, P, T, V } from '../../ui/kit';
+import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, Spinner, StackHeader, TabHeader, useToast } from '../../ui/chrome';
 import { get, post } from '../../api/client';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
-import { units, unitById } from '../../data/units';
-import { LABS } from '../../data/labs';
+import { useL, useLang } from '../../i18n';
+import { unitById, unitsFor } from '../../data/units';
+import { labsFor } from '../../data/labs';
+import { mockRef, p1For } from '../../lib/exam';
+import { minutesLabel, subjectName } from '../../data/subjects';
+import { Section } from './Home';
 
 const DAY = 86400000;
 
-function Metric({ label, icon, iconC, value, suffix, foot, footC = 'on-surface-variant' }) {
-  return (
-    <V c="flex-1 bg-surface-container-lowest p-3 rounded-xl shadow-sm justify-between">
-      <V c="flex-row items-center justify-between">
-        <T c="font-label-sm text-label-sm text-on-surface-variant">{label}</T>
-        <Ic n={icon} s={16} c={iconC} />
-      </V>
-      <V c="my-2 flex-row items-end">
-        <T c="font-display-lg text-display-lg text-on-surface tracking-tight">{value}</T>
-        {!!suffix && <T c="font-body-sm text-body-sm text-on-surface-variant mb-1.5">{suffix}</T>}
-      </V>
-      <T c={`font-label-sm text-label-sm text-${footC}`} numberOfLines={1}>
-        {foot}
-      </T>
-    </V>
-  );
-}
-
-// Class-wide weakest unit from students' synced unit mastery.
-function cohortWeakUnit(students) {
+// The class's weakest unit, from the unit mastery its students have saved.
+function weakUnit(students, subject) {
   const sum = {};
-  for (const s of students) for (const [u, v] of Object.entries(s.unitMastery || {})) (sum[u] = sum[u] || []).push(v);
+  for (const s of students) {
+    for (const [u, v] of Object.entries(s.unitMastery || {})) {
+      if (unitById(u)?.subject === subject) (sum[u] = sum[u] || []).push(v);
+    }
+  }
   const avg = Object.entries(sum).map(([u, list]) => [u, list.reduce((a, b) => a + b, 0) / list.length]);
   if (!avg.length) return null;
   const [u, v] = avg.sort((a, b) => a[1] - b[1])[0];
   return { unit: unitById(u), pct: Math.round(v) };
 }
 
+function Row({ title, sub, right, onPress, first, disabled }) {
+  return (
+    <P c={`p-space-md flex-row items-center gap-space-sm ${first ? '' : 'border-t border-surface-container'}`} onPress={onPress} disabled={disabled || !onPress} scale={0.99}>
+      <V c="flex-1 gap-0.5">
+        <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '600' }} numberOfLines={2}>
+          {title}
+        </T>
+        {!!sub && <T c="font-body-sm text-body-sm text-on-surface-variant">{sub}</T>}
+      </V>
+      {!!right && (
+        <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+          {right}
+        </T>
+      )}
+    </P>
+  );
+}
+
 export function TeacherPortal({ navigation, standalone }) {
   const { user } = useApp();
   const L = useL();
+  const lang = useLang();
   const [classes, setClasses] = useState(null);
   const [active, setActive] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -85,7 +93,7 @@ export function TeacherPortal({ navigation, standalone }) {
     setAssigning(ref);
     try {
       await post(`/v1/classes/${detail.class.id}/assignments`, { kind, ref, title, dueInDays });
-      showToast(L('Sent to every student in the class', 'Envoyé à tous les élèves'));
+      showToast(L('Sent to every student in the class', 'Envoyé à tous les élèves de la classe'));
       await loadDetail(detail.class.id);
     } catch (e) {
       showToast(e.message, 'error');
@@ -94,295 +102,188 @@ export function TeacherPortal({ navigation, standalone }) {
     }
   };
 
+  const subject = detail?.class.subject || 'biology';
+  const name = subjectName(subject, lang);
   const students = detail?.students || [];
-  const top = [...students].sort((a, b) => b.mastery - a.mastery).slice(0, 3).filter((s) => s.mastery > 0);
-  const atRisk = students.filter((s) => s.mastery < 50 || !s.lastActive || Date.now() - s.lastActive > 3 * DAY);
-  const weak = cohortWeakUnit(students);
-  const header = standalone ? <StackHeader title={L('Teacher & Classroom Portal', 'Portail enseignant')} logo /> : <TabHeader subtitle={L('Classroom portal', 'Portail de classe')} />;
+  const sorted = [...students].sort((a, b) => a.mastery - b.mastery);
+  const quiet = (s) => !s.lastActive || Date.now() - s.lastActive > 3 * DAY;
+  const weak = weakUnit(students, subject);
+  const P1 = p1For(subject);
+  const header = standalone ? <StackHeader title={L('Classes', 'Classes')} logo /> : <TabHeader subtitle={[L('Teacher', 'Enseignant'), user?.schoolName].filter(Boolean).join(', ')} />;
+  const sending = (ref) => (assigning === ref ? L('Sending', 'Envoi') : L('Set', 'Donner'));
 
   if (classes === null) return <Screen header={header}><Spinner /></Screen>;
 
   return (
     <V c="flex-1">
       <Screen header={header} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}>
-        <V c="pt-space-md pb-space-lg gap-space-md">
-          <V c="bg-surface-container-lowest p-space-md rounded-xl shadow-sm gap-space-sm">
-            <V c="flex-row items-start justify-between gap-space-sm">
-              <V c="flex-row items-center gap-space-sm flex-1">
-                <V>
-                  <Avatar name={user?.name} size={48} />
-                  <V c="absolute bottom-0 right-0 w-3.5 h-3.5 bg-secondary rounded-full items-center justify-center" style={{ borderRadius: 7 }}>
-                    <V c="w-2 h-2 bg-surface-container-lowest rounded-full" />
-                  </V>
-                </V>
-                <V c="flex-1">
-                  <T c="font-headline-sm text-headline-sm text-on-surface" numberOfLines={1}>
-                    {user?.name}
-                  </T>
-                  <T c="font-label-md text-label-md text-primary">{L('Biology teacher', 'Enseignant de biologie')}</T>
-                </V>
-              </V>
-              <V c="bg-surface-container px-2.5 py-1 rounded-full flex-row items-center gap-1">
-                <Ic n="co_present" s={14} c="primary" />
-                <T c="font-label-sm text-label-sm text-primary">
-                  {classes.length} {classes.length === 1 ? L('class', 'classe') : L('classes', 'classes')}
-                </T>
-              </V>
-            </V>
-            <V c="bg-surface-container-low p-space-sm rounded-lg gap-1">
-              <V c="flex-row items-center gap-1.5">
-                <Ic n="account_balance" s={16} c="primary" />
-                <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={1}>
-                  {user?.schoolName || L('No school selected', 'Aucune école')}
-                </T>
-              </V>
-              {detail && (
-                <V c="flex-row items-center gap-1.5">
-                  <Ic n="groups" s={16} c="secondary" />
-                  <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={1}>
-                    {detail.class.name} · {detail.summary.students} {L('registered', 'inscrits')}
-                  </T>
-                </V>
-              )}
-            </V>
-            {classes.length > 1 && (
-              <V c="flex-row flex-wrap gap-2">
-                {classes.map((c) => (
-                  <P key={c.id} c={`px-3 py-1.5 rounded-full ${c.id === active ? 'bg-primary-container' : 'bg-surface-container-low'}`} onPress={() => (setActive(c.id), setDetail(null), loadDetail(c.id))}>
-                    <T c={`font-label-md text-label-md ${c.id === active ? 'text-on-primary' : 'text-on-surface-variant'}`}>{c.name}</T>
-                  </P>
-                ))}
-              </V>
-            )}
-            {detail && (
-              <V c="flex-row items-center justify-between bg-primary-fixed/30 px-3 py-2.5 rounded-lg">
-                <V>
-                  <T c="font-label-sm text-label-sm text-on-primary-fixed-variant">{L('Student join code', 'Code d’accès élève')}</T>
-                  <T c="font-headline-sm text-headline-sm text-on-surface tracking-wider" style={{ fontWeight: '700' }}>
-                    {detail.class.joinCode}
-                  </T>
-                </V>
-                <P
-                  c="bg-primary px-3 py-2 rounded-lg flex-row items-center gap-1.5 shadow-sm"
-                  onPress={async () => {
-                    await Clipboard.setStringAsync(detail.class.joinCode);
-                    showToast(L('Code copied', 'Code copié'));
-                  }}
-                >
-                  <Ic n="content_copy" s={18} c="on-primary" />
-                  <T c="font-label-lg text-label-lg text-on-primary">{L('Copy', 'Copier')}</T>
-                </P>
-              </V>
-            )}
-          </V>
-
+        <V c="pt-space-md pb-space-xl gap-space-lg">
           <ErrorNote error={error} />
 
           {!classes.length ? (
-            <V c="bg-surface-container-lowest p-space-md rounded-xl shadow-sm items-center gap-space-sm">
-              <Ic n="group_add" s={36} c="primary-container" />
-              <T c="font-headline-sm text-headline-sm text-on-surface">{L('Create your first class', 'Créez votre première classe')}</T>
-              <T c="font-body-sm text-body-sm text-on-surface-variant text-center">{L('You get a join code to share with students.', 'Vous obtenez un code à partager avec vos élèves.')}</T>
-              <Cta h="h-12" label={L('Create class', 'Créer une classe')} icon="add" onPress={() => navigation.navigate('CreateClass', { fromPortal: true })} />
+            <V c="gap-space-sm">
+              <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
+                {L('Create your first class', 'Créez votre première classe')}
+              </T>
+              <T c="font-body-md text-body-md text-on-surface-variant">{L('Each class is for one subject. You get a code to share with your students.', 'Chaque classe porte sur une matière. Vous obtenez un code à partager avec vos élèves.')}</T>
+              <Cta variant="dark" icon={null} label={L('Create a class', 'Créer une classe')} onPress={() => navigation.navigate('CreateClass', { fromPortal: true })} />
             </V>
           ) : (
             <>
-              {detail && (
-                <V c="bg-surface-container-lowest p-space-md rounded-xl shadow-sm gap-space-sm">
-                  <V c="flex-row items-center gap-2">
-                    <V c="w-8 h-8 rounded-full bg-secondary-container items-center justify-center">
-                      <Ic n="share" s={20} c="on-secondary-container" />
-                    </V>
-                    <V c="flex-1">
-                      <T c="font-headline-sm text-headline-sm text-on-surface">{L('Invite your class', 'Invitez votre classe')}</T>
-                      <T c="font-label-sm text-label-sm text-secondary">{L('Share the code on your class WhatsApp group', 'Partagez le code sur le groupe WhatsApp')}</T>
-                    </V>
-                  </V>
-                  <P
-                    c="w-full bg-primary-container py-3 rounded-lg flex-row items-center justify-center gap-2 shadow-sm"
-                    onPress={() =>
-                      Linking.openURL(
-                        `https://wa.me/?text=${encodeURIComponent(
-                          `${L('Join my Biology class on BioSpatial VR', 'Rejoignez ma classe de biologie sur BioSpatial VR')}: ${detail.class.name}. ${L('Code', 'Code')}: ${detail.class.joinCode}`
-                        )}`
-                      )
-                    }
-                  >
-                    <Ic n="send" s={20} c="on-primary" />
-                    <T c="font-label-lg text-label-lg text-on-primary">{L('Share join code', 'Partager le code')}</T>
-                  </P>
-                </V>
+              {classes.length > 1 && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 20 }}>
+                  {classes.map((c) => {
+                    const on = c.id === active;
+                    return (
+                      <P key={c.id} c={`pb-1.5 border-b-2 ${on ? 'border-primary-container' : 'border-transparent'}`} onPress={() => (setActive(c.id), setDetail(null), loadDetail(c.id))} scale={1} accessibilityRole="tab" accessibilityState={{ selected: on }}>
+                        <T c={`font-label-lg text-label-lg ${on ? 'text-on-surface' : 'text-on-surface-variant'}`} style={{ fontWeight: on ? '700' : '500' }}>
+                          {c.name}
+                        </T>
+                      </P>
+                    );
+                  })}
+                </ScrollView>
               )}
 
-              {detail && (
-                <V c="gap-space-xs">
-                  <V c="flex-row items-center justify-between px-1">
-                    <T c="font-headline-sm text-headline-sm text-on-surface">{L('Cohort diagnostics', 'Diagnostic de la classe')}</T>
-                    <T c="font-label-sm text-label-sm text-on-surface-variant">{detail.summary.students} {L('students', 'élèves')}</T>
+              {!detail ? (
+                <Spinner />
+              ) : (
+                <>
+                  <V c="gap-space-xs">
+                    <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{detail.class.name}</T>
+                    <T c="font-body-md text-body-md text-on-surface-variant">
+                      {name}, {detail.summary.students} {detail.summary.students === 1 ? L('student', 'élève') : L('students', 'élèves')}
+                    </T>
                   </V>
-                  <V c="flex-row gap-2">
-                    <Metric label={L('Mastery', 'Maîtrise')} icon="donut_large" iconC="secondary" value={`${detail.summary.mastery}%`} foot={L('Class average', 'Moyenne')} footC="secondary" />
-                    <Metric label={L('Practical', 'TP')} icon="biotech" iconC="primary" value={`${detail.summary.practicalRate}%`} foot={L('Did a lab', 'Ont fait un TP')} />
-                    <Metric
-                      label={L('Paper 1', 'Épreuve 1')}
-                      icon="assignment_turned_in"
-                      iconC="tertiary"
-                      value={detail.summary.mockAverage == null ? '-' : `${detail.summary.mockAverage}`}
-                      suffix={detail.summary.mockAverage == null ? '' : '%'}
-                      foot={L('Best mock avg', 'Moyenne')}
-                      footC="primary"
-                    />
-                  </V>
-                </V>
-              )}
 
-              {detail && students.length > 0 && (
-                <V c="gap-space-xs">
-                  <V c="flex-row items-center justify-between px-1">
-                    <T c="font-headline-sm text-headline-sm text-on-surface">{L('Student performance', 'Performance des élèves')}</T>
-                    <T c="font-label-sm text-label-sm text-primary">{students.length} {L('screened', 'suivis')}</T>
+                  <V c="bg-surface-container-lowest rounded-xl shadow-sm p-space-md gap-space-sm">
+                    <V c="flex-row items-center justify-between">
+                      <V>
+                        <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Join code', 'Code d’accès')}</T>
+                        <T c="font-headline-md text-headline-md text-on-surface tracking-wider" style={{ fontWeight: '700' }}>
+                          {detail.class.joinCode}
+                        </T>
+                      </V>
+                      <P
+                        c="h-10 px-3 rounded-lg bg-surface-container flex-row items-center gap-1.5"
+                        onPress={async () => {
+                          await Clipboard.setStringAsync(detail.class.joinCode);
+                          showToast(L('Code copied', 'Code copié'));
+                        }}
+                      >
+                        <Ic n="content_copy" s={18} c="on-surface" />
+                        <T c="font-label-md text-label-md text-on-surface">{L('Copy', 'Copier')}</T>
+                      </P>
+                    </V>
+                    <P
+                      c="self-start py-1"
+                      hitSlop={8}
+                      onPress={() =>
+                        Linking.openURL(
+                          `https://wa.me/?text=${encodeURIComponent(L(`Join my ${name} class on SciAid: ${detail.class.name}. Code: ${detail.class.joinCode}`, `Rejoignez ma classe de ${name.toLowerCase()} sur SciAid : ${detail.class.name}. Code : ${detail.class.joinCode}`))}`
+                        )
+                      }
+                    >
+                      <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+                        {L('Share the code on WhatsApp', 'Partager le code sur WhatsApp')}
+                      </T>
+                    </P>
                   </V>
-                  {top.length > 0 && (
-                    <V c="bg-surface-container-lowest p-space-md rounded-xl shadow-sm gap-2">
-                      <V c="flex-row items-center justify-between">
-                        <V c="flex-row items-center gap-1.5">
-                          <Ic n="workspace_premium" s={18} c="secondary" />
-                          <T c="font-label-lg text-label-lg text-secondary" style={{ fontWeight: '700' }}>
-                            {L('Top performers', 'Meilleurs élèves')}
-                          </T>
-                        </V>
-                      </V>
-                      <V c="flex-row gap-2 pt-1">
-                        {top.map((s, i) => (
-                          <V key={s.id} c="flex-1 bg-surface-container-low p-2 rounded-lg items-center">
-                            <T c="font-label-md text-label-md text-on-surface" numberOfLines={1}>
-                              {s.name}
-                            </T>
-                            <T c="font-headline-sm text-headline-sm text-secondary" style={{ fontWeight: '700' }}>
-                              {s.mastery}%
-                            </T>
-                            <T c="font-label-sm text-label-sm text-on-surface-variant">#{i + 1}</T>
-                          </V>
-                        ))}
-                      </V>
-                    </V>
-                  )}
-                  {atRisk.length > 0 && (
-                    <V c="bg-surface-container-lowest p-space-md rounded-xl shadow-sm gap-space-sm">
-                      <V c="flex-row items-start justify-between gap-space-sm">
-                        <V c="flex-row items-center gap-2 flex-1">
-                          <V c="w-7 h-7 rounded-full bg-error-container items-center justify-center">
-                            <Ic n="crisis_alert" s={18} c="on-error-container" />
-                          </V>
-                          <V c="flex-1">
-                            <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-                              {L('Needs support', 'À accompagner')}
-                            </T>
-                            <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={1}>
-                              {weak ? `${L('Weakest unit', 'Unité la plus faible')}: ${weak.unit?.short} (${weak.pct}%)` : L('Low mastery or inactive for 3+ days', 'Faible maîtrise ou inactif')}
-                            </T>
-                          </V>
-                        </V>
-                        <V c="bg-error-container px-2 py-0.5 rounded-full">
-                          <T c="font-label-md text-label-md text-on-error-container">
-                            {atRisk.length} {L('students', 'élèves')}
-                          </T>
-                        </V>
-                      </V>
-                      <T c="font-body-sm text-body-sm text-on-surface-variant">{atRisk.slice(0, 6).map((s) => s.name).join(', ')}</T>
-                      {weak?.unit && (
-                        <V c="bg-surface-container-low p-2.5 rounded-lg flex-row items-center justify-between">
-                          <V c="flex-row items-center gap-2 flex-1">
-                            <Ic n="priority_high" s={20} c="tertiary" />
-                            <T c="font-body-sm text-body-sm text-on-surface flex-1">{L('Set a practice quiz on this unit', 'Donner un quiz sur cette unité')}</T>
-                          </V>
-                          <P c="bg-surface-container-lowest px-3 py-1.5 rounded-lg shadow-sm" onPress={() => assign('quiz', weak.unit.id, `${weak.unit.short}: practice quiz`, 5)} disabled={!!assigning}>
-                            <T c="font-label-sm text-label-sm text-primary">{assigning === weak.unit.id ? '...' : L('Send quiz', 'Envoyer')}</T>
-                          </P>
-                        </V>
-                      )}
-                    </V>
-                  )}
-                </V>
-              )}
 
-              {detail && (
-                <V c="gap-space-xs">
-                  <V c="flex-row items-center justify-between px-1">
-                    <T c="font-headline-sm text-headline-sm text-on-surface">{L('Assignment hub', 'Devoirs')}</T>
-                    <T c="font-label-sm text-label-sm text-on-surface-variant">{detail.assignments.length} {L('set', 'donnés')}</T>
-                  </V>
-                  <V c="bg-surface-container-lowest p-space-md rounded-xl shadow-sm gap-space-md">
-                    {detail.assignments.slice(0, 4).map((a) => {
-                      const left = Math.ceil((a.dueAt - Date.now()) / DAY);
-                      return (
-                        <V key={a.id} c="gap-2">
-                          <V c="flex-row items-center justify-between">
-                            <V c="bg-primary-fixed px-2 py-0.5 rounded">
-                              <T c="font-label-sm text-label-sm text-on-primary-fixed-variant">
-                                {a.kind === 'lab' ? L('Practical', 'TP') : a.kind === 'mock' ? L('Paper 1 mock', 'Épreuve 1') : L('Quiz', 'Quiz')}
+                  <Section title={L('Class progress', 'Progression de la classe')}>
+                    {students.length ? (
+                      <V c="gap-space-sm">
+                        <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+                          {L('Average mastery', 'Maîtrise moyenne')} {detail.summary.mastery}%. {detail.summary.practicalRate}% {L('have done a practical.', 'ont fait un TP.')}{' '}
+                          {detail.summary.mockAverage != null ? `${L('Average best Paper 1', 'Moyenne des meilleures épreuves 1')}: ${detail.summary.mockAverage}%.` : L('No Paper 1 done yet.', 'Aucune épreuve 1 faite.')}
+                        </T>
+                        {weak?.unit && (
+                          <V c="flex-row items-center gap-space-sm">
+                            <T c="font-body-md text-body-md text-on-surface flex-1">
+                              {L('Weakest unit', 'Unité la plus faible')}: {weak.unit.n}. {weak.unit.short} ({weak.pct}%)
+                            </T>
+                            <P onPress={() => assign('quiz', weak.unit.id, `${weak.unit.short}: practice quiz`, 5)} disabled={!!assigning} hitSlop={8}>
+                              <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                                {assigning === weak.unit.id ? L('Sending', 'Envoi') : L('Set a quiz', 'Donner un quiz')}
                               </T>
-                            </V>
-                            <V c="flex-row items-center gap-1">
-                              <Ic n="schedule" s={16} c={left <= 2 ? 'error' : 'on-surface-variant'} />
-                              <T c={`font-label-md text-label-md ${left <= 2 ? 'text-error' : 'text-on-surface-variant'}`}>
-                                {left > 0 ? `${L('Due in', 'Dans')} ${left} ${left === 1 ? L('day', 'jour') : L('days', 'jours')}` : L('Closed', 'Terminé')}
-                              </T>
-                            </V>
+                            </P>
                           </V>
-                          <T c="font-headline-sm text-headline-sm text-on-surface" numberOfLines={1}>
-                            {a.title}
-                          </T>
-                          <V c="flex-row items-center gap-2">
-                            <V c="flex-1">
-                              <Bar pct={students.length ? (a.done / students.length) * 100 : 0} c="h-2 bg-surface-container" fill="bg-primary" />
-                            </V>
-                            <T c="font-label-sm text-label-sm text-on-surface">
-                              {a.done}/{students.length} {L('done', 'faits')}
-                            </T>
-                          </V>
+                        )}
+                        <V c="bg-surface-container-lowest rounded-xl shadow-sm">
+                          {sorted.map((s, i) => {
+                            const days = s.lastActive ? Math.floor((Date.now() - s.lastActive) / DAY) : null;
+                            return (
+                              <V key={s.id} c={`px-space-md py-space-sm gap-1 ${i ? 'border-t border-surface-container' : ''}`}>
+                                <V c="flex-row items-center justify-between gap-2">
+                                  <T c="font-body-md text-body-md text-on-surface flex-1" numberOfLines={1}>
+                                    {s.name}
+                                  </T>
+                                  <T c="font-label-md text-label-md text-on-surface-variant">
+                                    {s.mastery}%{s.bestMock != null ? `, P1 ${s.bestMock}%` : ''}
+                                  </T>
+                                </V>
+                                <Bar pct={s.mastery} c="h-1 bg-surface-container-high" fill={s.mastery >= 70 ? 'bg-secondary' : s.mastery < 40 ? 'bg-error' : 'bg-primary-container'} />
+                                <T c={`font-body-sm text-body-sm ${quiet(s) ? 'text-error' : 'text-on-surface-variant'}`}>
+                                  {days == null
+                                    ? L('Has not studied yet', 'N’a pas encore révisé')
+                                    : days === 0
+                                    ? L('Active today', 'Actif aujourd’hui')
+                                    : `${L('Last active', 'Dernière activité :')} ${days} ${days === 1 ? L('day ago', 'jour') : L('days ago', 'jours')}`}
+                                </T>
+                              </V>
+                            );
+                          })}
                         </V>
-                      );
-                    })}
-                    <V c="gap-2 pt-space-xs">
-                      <T c="font-label-md text-label-md text-on-surface-variant">{L('Set new work', 'Donner du travail')}</T>
-                      <V c="flex-row gap-2">
-                        <P c="flex-1 bg-surface-container-low p-3 rounded-lg gap-1" onPress={() => assign('mock', 'paper1', L('Paper 1 timed mock', 'Épreuve 1 chronométrée'))} disabled={!!assigning}>
-                          <V c="flex-row items-center gap-1.5">
-                            <Ic n="quiz" s={18} c="primary" />
-                            <T c="font-label-lg text-label-lg text-primary" style={{ fontWeight: '700' }}>
-                              {L('Paper 1 mock', 'Épreuve 1')}
-                            </T>
-                          </V>
-                          <T c="font-body-sm text-body-sm text-on-surface-variant">{assigning === 'paper1' ? L('Sending...', 'Envoi...') : L('50 MCQs · 90 min', '50 QCM · 90 min')}</T>
-                        </P>
-                        <P c="flex-1 bg-surface-container-low p-3 rounded-lg gap-1" onPress={() => assign('lab', 'osmosis', L('Practical: osmosis and plasmolysis', 'TP : osmose et plasmolyse'))} disabled={!!assigning}>
-                          <V c="flex-row items-center gap-1.5">
-                            <Ic n="science" s={18} c="secondary" />
-                            <T c="font-label-lg text-label-lg text-secondary" style={{ fontWeight: '700' }}>
-                              {L('Paper 3 lab', 'TP épreuve 3')}
-                            </T>
-                          </V>
-                          <T c="font-body-sm text-body-sm text-on-surface-variant">{assigning === 'osmosis' ? L('Sending...', 'Envoi...') : L('Osmosis practical', 'TP osmose')}</T>
-                        </P>
                       </V>
-                      <V c="flex-row flex-wrap gap-1.5">
-                        {LABS.filter((l) => l.id !== 'osmosis').map((l) => (
-                          <P key={l.id} c="px-2.5 py-1.5 rounded-lg bg-surface-container" onPress={() => assign('lab', l.id, `${L('Practical', 'TP')}: ${l.short}`)} disabled={!!assigning}>
-                            <T c="font-label-sm text-label-sm text-on-surface-variant">+ {l.short}</T>
-                          </P>
-                        ))}
-                        {units.map((u) => (
-                          <P key={u.id} c="px-2.5 py-1.5 rounded-lg bg-surface-container" onPress={() => assign('quiz', u.id, `${u.short}: practice quiz`)} disabled={!!assigning}>
-                            <T c="font-label-sm text-label-sm text-on-surface-variant">+ {L('Quiz', 'Quiz')} {u.n}</T>
-                          </P>
-                        ))}
+                    ) : (
+                      <T c="font-body-md text-body-md text-on-surface-variant">{L('No students yet. Share the join code with your class.', 'Aucun élève pour le moment. Partagez le code avec votre classe.')}</T>
+                    )}
+                  </Section>
+
+                  {detail.assignments.length > 0 && (
+                    <Section title={L('Work set', 'Travaux donnés')}>
+                      <V c="bg-surface-container-lowest rounded-xl shadow-sm">
+                        {detail.assignments.slice(0, 8).map((a, i) => {
+                          const left = Math.ceil((a.dueAt - Date.now()) / DAY);
+                          return (
+                            <Row
+                              key={a.id}
+                              first={i === 0}
+                              title={a.title}
+                              sub={`${a.done}/${students.length} ${L('done', 'faits')}. ${left > 0 ? `${L('Due in', 'Dans')} ${left} ${left === 1 ? L('day', 'jour') : L('days', 'jours')}` : L('Closed', 'Terminé')}`}
+                            />
+                          );
+                        })}
                       </V>
+                    </Section>
+                  )}
+
+                  <Section title={L('Set new work', 'Donner du travail')}>
+                    <V c="bg-surface-container-lowest rounded-xl shadow-sm">
+                      <Row
+                        first
+                        title={`${name} ${L('Paper 1, timed', 'épreuve 1, chronométrée')}`}
+                        sub={`${P1.count} ${L('questions in', 'questions en')} ${minutesLabel(P1.minutes, L)}`}
+                        right={sending(mockRef(subject))}
+                        disabled={!!assigning}
+                        onPress={() => assign('mock', mockRef(subject), `${subjectName(subject, 'en')} Paper 1, timed`)}
+                      />
+                      {labsFor(subject).map((l) => (
+                        <Row key={l.id} title={`${L('Practical', 'TP')}: ${l.title}`} sub={`${l.minutes} min`} right={sending(l.id)} disabled={!!assigning} onPress={() => assign('lab', l.id, `Practical: ${l.short}`)} />
+                      ))}
+                      {unitsFor(subject).map((u) => (
+                        <Row key={u.id} title={`${L('Quiz', 'Quiz')}: ${u.n}. ${u.short}`} sub={`${u.quiz.length} ${L('questions', 'questions')}`} right={sending(u.id)} disabled={!!assigning} onPress={() => assign('quiz', u.id, `${u.short}: practice quiz`)} />
+                      ))}
                     </V>
-                  </V>
-                </V>
+                  </Section>
+                </>
               )}
-              <Cta variant="soft" h="h-11" icon="add" label={L('Create another class', 'Créer une autre classe')} onPress={() => navigation.navigate('CreateClass', { fromPortal: true })} />
+
+              <P c="self-start py-1" onPress={() => navigation.navigate('CreateClass', { fromPortal: true })} hitSlop={8}>
+                <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+                  {L('Create another class', 'Créer une autre classe')}
+                </T>
+              </P>
             </>
           )}
         </V>

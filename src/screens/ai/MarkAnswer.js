@@ -7,16 +7,18 @@ import { CriterionRow, ModelAnswer, ScoreCard, VoiceFeedback } from '../../ui/Ma
 import { post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { PAPER2 } from '../../data/paper2';
+import { bankFor } from '../../data/paper2';
 import { unitById } from '../../data/units';
 import { pickAnswerPhoto } from '../../lib/photo';
 
-const PARTS = PAPER2.flatMap((q) => q.parts.filter((p) => p.kind === 'text').map((p) => ({ q, p, key: `${q.id}:${p.label}` })));
+const partsFor = (subject) => bankFor(subject).flatMap((q) => q.parts.filter((p) => p.kind === 'text').map((p) => ({ q, p, key: `${q.id}:${p.label}` })));
 
 export default function MarkAnswer({ navigation, route }) {
-  const { pro, quota, setQuota, refreshQuota } = useApp();
+  const { pro, quota, setQuota, refreshQuota, subject: current } = useApp();
   const L = useL();
   const lang = useLang();
+  const subject = route.params?.subject || current;
+  const PARTS = partsFor(subject);
   const initial = PARTS.findIndex((x) => x.key === route.params?.key);
   const [sel, setSel] = useState(initial >= 0 ? initial : 0);
   const [picking, setPicking] = useState(route.params?.key == null);
@@ -63,6 +65,7 @@ export default function MarkAnswer({ navigation, route }) {
       const r = await post(
         '/v1/ai/mark',
         {
+          subject,
           question: `${item.q.stem}\n\n(${item.p.label}) ${item.p.prompt}`,
           markScheme: item.p.scheme,
           maxMarks: item.p.marks,

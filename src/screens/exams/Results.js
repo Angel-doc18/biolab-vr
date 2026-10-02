@@ -6,9 +6,11 @@ import * as Sharing from 'expo-sharing';
 import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader, useToast } from '../../ui/chrome';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
-import { byKey, unitLabel } from '../../lib/exam';
+import { useL, useLang } from '../../i18n';
+import { byKey, p1For, unitLabel } from '../../lib/exam';
 import { unitById } from '../../data/units';
+import { subjectName } from '../../data/subjects';
+import { examSubject } from '../../state/progress';
 import { gradeFor } from '../../state/selectors';
 import { Section } from '../tabs/Home';
 
@@ -17,7 +19,11 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 export default function Results({ navigation, route }) {
   const { user, progress } = useApp();
   const L = useL();
+  const lang = useLang();
   const exam = route.params?.exam || progress.exams.filter((e) => e.kind === 'p1').slice(-1)[0];
+  const subject = exam ? examSubject(exam) : 'biology';
+  const name = subjectName(subject, lang);
+  const minutes = p1For(subject).minutes;
   const [filter, setFilter] = useState('incorrect');
   const [speaking, setSpeaking] = useState(null);
   const [toast, showToast] = useToast();
@@ -39,7 +45,7 @@ export default function Results({ navigation, route }) {
     .map(([u, [c, t]]) => ({ u, c, t, pct: Math.round((c / t) * 100) }))
     .sort((a, b) => unitById(a.u).n - unitById(b.u).n);
   const weakest = [...units].sort((a, b) => a.pct - b.pct)[0];
-  const previous = progress.exams.filter((e) => e.kind === 'p1' && e.at < (exam.at || Date.now()));
+  const previous = progress.exams.filter((e) => e.kind === 'p1' && examSubject(e) === subject && e.at < (exam.at || Date.now()));
   const prevBest = previous.length ? Math.max(...previous.map((e) => e.pct)) : null;
   const grade = gradeFor(exam.pct);
 
@@ -63,8 +69,8 @@ export default function Results({ navigation, route }) {
         )
         .join('');
       const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Helvetica,Arial;margin:28px;color:#0f1d2b}h1{font-size:20px}table{width:100%;border-collapse:collapse;font-size:11px}td{border-bottom:1px solid #d7e1e9;padding:6px;vertical-align:top}.k{color:#40474f;margin-top:4px}</style></head><body>
-      <h1>Paper 1 practice: ${exam.score}/${exam.total} (${exam.pct}%)</h1><div>${esc(user?.name)}, ${new Date(exam.at || Date.now()).toLocaleString('en-GB')}</div><br/><table>${rows}</table>
-      <p style="font-size:10px;color:#707881">Practice estimate by BioSpatial VR. Not an official GCE Board result.</p></body></html>`;
+      <h1>${esc(subjectName(subject, 'en'))} Paper 1 practice: ${exam.score}/${exam.total} (${exam.pct}%)</h1><div>${esc(user?.name)}, ${new Date(exam.at || Date.now()).toLocaleString('en-GB')}</div><br/><table>${rows}</table>
+      <p style="font-size:10px;color:#707881">Practice estimate by SciAid. Not an official GCE Board result.</p></body></html>`;
       const { uri } = await Print.printToFileAsync({ html });
       if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
     } catch {
@@ -78,14 +84,14 @@ export default function Results({ navigation, route }) {
         bg="bg-surface"
         header={
           <StackHeader
-            title={L('Paper 1 result', 'Résultat de l’épreuve 1')}
+            title={`${name} ${L('Paper 1 result', 'résultat de l’épreuve 1')}`}
             subtitle={new Date(exam.at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
             subtitleColor="on-surface-variant"
             avatar={false}
             right={
               <P
                 c="w-11 h-11 items-center justify-center"
-                onPress={() => Share.share({ message: `${L('I scored', 'J’ai obtenu')} ${exam.score}/${exam.total} (${exam.pct}%) ${L('in a GCE Biology Paper 1 practice paper on BioSpatial VR.', 'à une épreuve 1 de biologie GCE sur BioSpatial VR.')}` })}
+                onPress={() => Share.share({ message: L(`I scored ${exam.score}/${exam.total} (${exam.pct}%) in a GCE ${name} Paper 1 practice paper on SciAid.`, `J’ai obtenu ${exam.score}/${exam.total} (${exam.pct} %) à une épreuve 1 d’entraînement de ${name} du GCE sur SciAid.`) })}
                 accessibilityLabel="Share result"
               >
                 <Ic n="ios_share" s={20} c="on-surface" />
@@ -100,7 +106,7 @@ export default function Results({ navigation, route }) {
               {exam.score} / {exam.total}
             </T>
             <T c="font-body-md text-body-md text-on-surface-variant">
-              {exam.pct}%, {L('about grade', 'environ la note')} {grade}. {Math.round((exam.secs || 0) / 60)} {L('of 90 minutes used.', 'minutes sur 90 utilisées.')}
+              {exam.pct}%, {L('about grade', 'environ la note')} {grade}. {Math.round((exam.secs || 0) / 60)} {L(`of ${minutes} minutes used.`, `minutes sur ${minutes} utilisées.`)}
             </T>
             <T c="font-body-sm text-body-sm text-on-surface-variant">
               {prevBest == null

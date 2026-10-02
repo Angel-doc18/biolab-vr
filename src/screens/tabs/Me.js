@@ -1,10 +1,10 @@
 import { Avatar, Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, TabHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
-import { iso } from '../../state/progress';
-import { accuracyByUnit, gradeFor } from '../../state/selectors';
-import { units } from '../../data/units';
+import { useL, useLang } from '../../i18n';
+import { examSubject, iso } from '../../state/progress';
+import { gradeFor } from '../../state/selectors';
+import { subjectName } from '../../data/subjects';
 import { Section } from './Home';
 
 function MenuRow({ title, sub, onPress, first }) {
@@ -29,12 +29,15 @@ const DAYS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const DAYS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
 export default function Me({ navigation }) {
-  const { user, pro, progress, stats, logout, prefs } = useApp();
+  const { user, pro, progress, stats, logout, prefs, subjects, setSubject } = useApp();
   const L = useL();
+  const lang = useLang();
   const student = user?.role === 'student';
-  const p1 = progress.exams.filter((e) => e.kind === 'p1');
-  const predicted = p1.length ? gradeFor(Math.round(p1.slice(-3).reduce((a, e) => a + e.pct, 0) / Math.min(3, p1.length))) : null;
-  const acc = accuracyByUnit(p1);
+  // Practice grade per subject from the last three Paper 1 attempts.
+  const predicted = (id) => {
+    const p1 = progress.exams.filter((e) => e.kind === 'p1' && examSubject(e) === id).slice(-3);
+    return p1.length ? gradeFor(Math.round(p1.reduce((a, e) => a + e.pct, 0) / p1.length)) : null;
+  };
   // This week, Monday first.
   const monday = new Date();
   monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
@@ -81,29 +84,38 @@ export default function Me({ navigation }) {
               </V>
               <T c="font-body-sm text-body-sm text-on-surface-variant">
                 {stats.streak > 1 ? `${stats.streak} ${L('days in a row', 'jours de suite')}. ` : ''}
-                {stats.minutesWeek} {L('minutes of revision this week', 'minutes de révision cette semaine')}
-                {predicted ? `. ${L('Recent Paper 1 results suggest grade', 'Les dernières épreuves 1 indiquent la note')} ${predicted}, ${L('target', 'objectif')} ${user?.targetGrade || 'A'}.` : '.'}
+                {stats.minutesWeek} {L('minutes of revision this week', 'minutes de révision cette semaine')}. {L('Target grade', 'Note visée')} {user?.targetGrade || 'A'}.
               </T>
             </V>
           </Section>
         )}
 
         {student && (
-          <Section title={L('Units', 'Unités')} action={L('Syllabus', 'Programme')} onAction={() => navigation.navigate('Learn')}>
+          <Section title={L('Subjects', 'Matières')} action={L('Change', 'Modifier')} onAction={() => navigation.navigate('ExamClass', { fromSettings: true })}>
             <V c="bg-surface-container-lowest rounded-xl shadow-sm">
-              {units.map((u, i) => {
-                const pct = stats.unitPct[u.id] || 0;
+              {subjects.map((id, i) => {
+                const s = stats.bySubject[id];
+                const grade = predicted(id);
                 return (
-                  <P key={u.id} c={`px-space-md py-space-sm gap-1 ${i ? 'border-t border-surface-container' : ''}`} onPress={() => navigation.navigate('Unit', { unitId: u.id })} scale={0.99}>
+                  <P
+                    key={id}
+                    c={`px-space-md py-space-sm gap-1 ${i ? 'border-t border-surface-container' : ''}`}
+                    onPress={() => {
+                      setSubject(id);
+                      navigation.navigate('Learn');
+                    }}
+                    scale={0.99}
+                  >
                     <V c="flex-row justify-between items-center gap-2">
-                      <T c="font-body-md text-body-md text-on-surface flex-1" numberOfLines={1}>
-                        {u.n}. {u.short}
+                      <T c="font-body-md text-body-md text-on-surface flex-1" style={{ fontWeight: '600' }} numberOfLines={1}>
+                        {subjectName(id, lang)}
                       </T>
                       <T c="font-label-md text-label-md text-on-surface-variant">
-                        {pct}%{acc[u.id] != null ? `, ${L('papers', 'épreuves')} ${acc[u.id]}%` : ''}
+                        {s.mastery}% {L('mastered', 'maîtrisé')}
+                        {grade ? `, ${L('Paper 1 grade', 'note épreuve 1')} ${grade}` : ''}
                       </T>
                     </V>
-                    <Bar pct={pct} c="h-1 bg-surface-container-high" fill={pct >= 85 ? 'bg-secondary' : 'bg-primary-container'} />
+                    <Bar pct={s.mastery} c="h-1 bg-surface-container-high" fill={s.mastery >= 85 ? 'bg-secondary' : 'bg-primary-container'} />
                   </P>
                 );
               })}

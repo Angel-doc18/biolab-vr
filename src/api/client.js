@@ -1,4 +1,4 @@
-// HTTPS client for the BioSpatial API. Tokens live in the OS keychain
+// HTTPS client for the SciAid API (the Worker keeps its original address). Tokens live in the OS keychain
 // (expo-secure-store); the access token is short-lived and refreshed on demand.
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';

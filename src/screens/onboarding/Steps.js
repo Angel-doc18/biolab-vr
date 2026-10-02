@@ -24,7 +24,7 @@ export function OnbHeader({ label, canBack = true }) {
           <V c="flex-row items-center gap-space-xs">
             <Logo size={30} />
             <T c="font-headline-sm text-headline-sm text-primary tracking-tight" style={{ fontWeight: '700' }}>
-              BioSpatial
+              SciAid
             </T>
           </V>
         </V>

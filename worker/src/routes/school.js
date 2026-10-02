@@ -4,6 +4,7 @@ import { randomCode, uuid } from '../lib/crypto.js';
 import { int, oneOf, str } from '../lib/validate.js';
 import { notify } from '../lib/notify.js';
 import { buildReport } from './me.js';
+import { SUBJECT_IDS, userSubjects } from '../lib/subjects.js';
 
 const REGIONS = ['Adamawa', 'Centre', 'East', 'Far North', 'Littoral', 'North', 'North West', 'South', 'South West', 'West'];
 
@@ -42,6 +43,7 @@ export async function createClass(request, env) {
   await limit(env.WRITE_LIMITER, `class:${user.id}`);
   const b = await readJson(request);
   const name = str(b.name, 'Class name', { min: 2, max: 60 });
+  const subject = oneOf(b.subject ?? 'biology', 'Subject', SUBJECT_IDS);
   const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?').bind(user.id).first();
   if (count.n >= 30) throw new HttpError(400, 'You have reached the limit of 30 classes.', 'limit');
   const prefix = (user.school_name || 'CLASS').replace(/[^A-Za-z]/g, '').slice(0, 4).toUpperCase() || 'CLASS';
@@ -52,16 +54,16 @@ export async function createClass(request, env) {
     if (!clash) break;
   }
   const id = uuid();
-  await env.DB.prepare('INSERT INTO classes (id, school_id, teacher_id, name, join_code, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-    .bind(id, user.school_id, user.id, name, code, now())
+  await env.DB.prepare('INSERT INTO classes (id, school_id, teacher_id, name, join_code, subject, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .bind(id, user.school_id, user.id, name, code, subject, now())
     .run();
-  return created({ class: { id, name, joinCode: code, students: 0 } });
+  return created({ class: { id, name, subject, joinCode: code, students: 0 } });
 }
 
 export async function listMyClasses(request, env) {
   const user = await requireUser(request, env, ['teacher']);
   const { results } = await env.DB.prepare(
-    `SELECT c.id, c.name, c.join_code AS joinCode,
+    `SELECT c.id, c.name, c.subject, c.join_code AS joinCode,
        (SELECT COUNT(*) FROM class_members m WHERE m.class_id = c.id) AS students
      FROM classes c WHERE c.teacher_id = ? ORDER BY c.created_at`
   )
@@ -76,12 +78,12 @@ async function ownedClass(env, user, classId) {
   return cls;
 }
 
-// Cohort diagnostics for the teacher portal.
+// Class progress for the teacher portal, in the class's subject.
 export async function classDetail(request, env, classId) {
   const user = await requireUser(request, env, ['teacher']);
   const cls = await ownedClass(env, user, classId);
   const { results: students } = await env.DB.prepare(
-    `SELECT u.id, u.name, p.mastery, p.xp, p.streak, p.labs_done, p.mocks_done, p.best_mock, p.unit_mastery, p.last_active
+    `SELECT u.id, u.name, p.mastery, p.xp, p.streak, p.labs_done, p.mocks_done, p.best_mock, p.unit_mastery, p.subject_stats, p.last_active
      FROM class_members m JOIN users u ON u.id = m.student_id AND u.deleted_at IS NULL
      LEFT JOIN progress p ON p.user_id = u.id WHERE m.class_id = ? ORDER BY u.name`
   )
@@ -94,22 +96,26 @@ export async function classDetail(request, env, classId) {
   )
     .bind(classId)
     .all();
-  const rows = students.map((s) => ({
-    id: s.id,
-    name: s.name,
-    mastery: s.mastery ?? 0,
-    xp: s.xp ?? 0,
-    streak: s.streak ?? 0,
-    labsDone: s.labs_done ?? 0,
-    mocksDone: s.mocks_done ?? 0,
-    bestMock: s.best_mock,
-    unitMastery: s.unit_mastery ? JSON.parse(s.unit_mastery) : {},
-    lastActive: s.last_active,
-  }));
+  const subject = cls.subject || 'biology';
+  const rows = students.map((s) => {
+    // Numbers for the class's subject; records saved before subjects existed were Biology.
+    const own = (s.subject_stats ? JSON.parse(s.subject_stats) : {})[subject] || (subject === 'biology' && !s.subject_stats ? { mastery: s.mastery, bestMock: s.best_mock, mocksDone: s.mocks_done } : {});
+    return {
+      id: s.id,
+      name: s.name,
+      mastery: own.mastery ?? 0,
+      streak: s.streak ?? 0,
+      labsDone: s.labs_done ?? 0,
+      mocksDone: own.mocksDone ?? 0,
+      bestMock: own.bestMock ?? null,
+      unitMastery: s.unit_mastery ? JSON.parse(s.unit_mastery) : {},
+      lastActive: s.last_active,
+    };
+  });
   const n = rows.length || 1;
   const withMock = rows.filter((r) => r.bestMock != null);
   return ok({
-    class: { id: cls.id, name: cls.name, joinCode: cls.join_code },
+    class: { id: cls.id, name: cls.name, subject, joinCode: cls.join_code },
     summary: {
       students: rows.length,
       mastery: Math.round(rows.reduce((a, r) => a + r.mastery, 0) / n),
@@ -132,11 +138,18 @@ export async function joinClass(request, env) {
     .first();
   if (!cls) throw new HttpError(404, 'No class uses that code. Check it with your teacher.', 'not_found');
   await env.DB.prepare('INSERT OR IGNORE INTO class_members (class_id, student_id, joined_at) VALUES (?, ?, ?)').bind(cls.id, user.id, now()).run();
+  // Joining a class adds its subject to the subjects the student takes.
+  const mine = userSubjects(user);
+  const subject = cls.subject || 'biology';
+  if (!mine.includes(subject)) {
+    const next = SUBJECT_IDS.filter((s) => s === subject || mine.includes(s)).join(',');
+    await env.DB.prepare('UPDATE users SET subjects = ?, updated_at = ? WHERE id = ?').bind(next, now(), user.id).run();
+  }
   if (cls.school_id) {
     await env.DB.prepare('UPDATE users SET school_id = ?, school_name = ?, updated_at = ? WHERE id = ?').bind(cls.school_id, cls.school_name, now(), user.id).run();
   }
   await notify(env, cls.teacher_id, 'class', 'New student joined', `${user.name} joined ${cls.name}.`);
-  return ok({ class: { id: cls.id, name: cls.name, schoolName: cls.school_name } });
+  return ok({ class: { id: cls.id, name: cls.name, subject, schoolName: cls.school_name } });
 }
 
 export async function myClasses(request, env) {

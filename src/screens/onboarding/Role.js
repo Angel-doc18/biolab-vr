@@ -17,7 +17,7 @@ export default function Role({ navigation }) {
     {
       id: 'student',
       name: L('Student', 'Élève'),
-      body: L('Preparing for GCE Ordinary Level Biology, Forms 3 to 5.', 'Préparation du GCE Ordinary Level Biologie, Form 3 à 5.'),
+      body: L('Preparing for GCE Ordinary Level sciences, Forms 3 to 5.', 'Préparation des sciences du GCE Ordinary Level, Form 3 à 5.'),
     },
     {
       id: 'parent',

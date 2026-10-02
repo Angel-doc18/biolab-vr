@@ -1,7 +1,7 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { P, T, V } from '../../ui/kit';
 import { Cta } from '../../ui/chrome';
-import { AnimalCell } from '../../ui/art';
+import { Diagram } from '../../diagrams';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 
@@ -34,19 +34,19 @@ export default function Welcome({ navigation }) {
 
   return (
     <V c="flex-1 bg-surface-container-lowest" style={{ paddingTop: insets.top, paddingBottom: insets.bottom + 12 }}>
-      <V c="h-60 mx-margin mt-space-md rounded-xl overflow-hidden bg-surface-container-low">
-        <AnimalCell />
+      <V c="mx-margin mt-space-md p-space-sm rounded-xl bg-surface-container-lowest border border-surface-container">
+        <Diagram id="heart-section" caption={false} maxHeight={230} />
       </V>
       <V c="flex-1 px-margin pt-space-lg gap-space-lg">
         <V c="gap-space-xs">
-          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('GCE Biology, from Form 3 to the exam hall', 'La biologie du GCE, de la Form 3 à l’examen')}</T>
+          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('GCE sciences, from Form 3 to the exam hall', 'Les sciences du GCE, de la Form 3 à l’examen')}</T>
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-            {L('Written for the Cameroon GCE Ordinary Level syllabus, in English and French.', 'Conçu pour le programme du GCE Ordinary Level du Cameroun, en anglais et en français.')}
+            {L('Biology, Chemistry, Physics and Human Biology, written for the Cameroon GCE Ordinary Level syllabuses.', 'Biologie, chimie, physique et biologie humaine, conçues pour les programmes du GCE Ordinary Level du Cameroun.')}
           </T>
         </V>
         <V c="gap-space-md">
-          <Point title={L('Specimens in 3D', 'Spécimens en 3D')} body={L('Turn, open and label organs and cells the way the exam asks you to draw them.', 'Tournez, ouvrez et annotez organes et cellules comme l’examen demande de les dessiner.')} />
-          <Point title={L('Practicals', 'Travaux pratiques')} body={L('Run the standard practicals step by step and record your results.', 'Réalisez les TP du programme pas à pas et notez vos résultats.')} />
+          <Point title={L('Labelled diagrams and 3D models', 'Schémas annotés et modèles 3D')} body={L('Every structure labelled the way the exam expects: organs, cells, molecules and apparatus you can turn and open.', 'Chaque structure annotée comme l’attend l’examen : organes, cellules, molécules et appareils à tourner et ouvrir.')} />
+          <Point title={L('Practicals', 'Travaux pratiques')} body={L('Run the standard practicals of each science step by step and record your results.', 'Réalisez les TP de chaque matière pas à pas et notez vos résultats.')} />
           <Point title={L('Papers 1 and 2', 'Épreuves 1 et 2')} body={L('Timed papers in the exam format, with answers marked against a mark scheme.', 'Épreuves chronométrées au format de l’examen, corrigées selon un barème.')} />
         </V>
       </V>

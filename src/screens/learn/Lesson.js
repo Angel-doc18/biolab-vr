@@ -3,12 +3,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
 import { Ic, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader, useToast } from '../../ui/chrome';
-import { AnimalCell, Mitochondrion } from '../../ui/art';
-import { OsmosisCell } from '../../ui/labArt';
-import { SpecimenPreview } from '../../ui/previews';
+import { Diagram } from '../../diagrams';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { lessonById, lessonsFor, plain } from '../../data/lessons';
+import { lessonById, lessonNumber, lessonsFor, plain } from '../../data/lessons';
 import { unitById } from '../../data/units';
 import { lessonLocked } from '../../data/plan';
 
@@ -30,33 +28,15 @@ function Rich({ text, c = 'font-body-lg text-body-lg text-on-surface' }) {
   );
 }
 
-function Figure({ lesson, unitId }) {
-  if (lesson.figure === 'osmosis') {
-    return (
-      <V c="flex-row justify-around py-2">
-        {[0, 0.12, 1].map((p) => (
-          <OsmosisCell key={p} p={p} size={92} />
-        ))}
-      </V>
-    );
-  }
-  if (lesson.figure === 'cell') return <V c="h-48"><AnimalCell /></V>;
-  if (lesson.figure === 'mito') return <V c="h-44 items-center justify-center"><Mitochondrion /></V>;
-  return (
-    <V c="h-44">
-      <SpecimenPreview unitId={unitId} />
-    </V>
-  );
-}
-
 export default function Lesson({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { pro, progress, completeLesson, answer, toggleBookmark } = useApp();
   const L = useL();
   const lang = useLang();
   const lesson = lessonById(route.params?.lessonId) || lessonsFor('cell')[0];
-  const unit = unitById(lesson.unit);
-  const siblings = lessonsFor(lesson.unit);
+  // A shared lesson is read inside the unit it was opened from.
+  const unit = unitById(route.params?.unitId) || unitById(lesson.unit);
+  const siblings = lessonsFor(unit.id);
   const idx = siblings.indexOf(lesson);
   const nextLesson = siblings[idx + 1];
   const done = !!progress.lessons[lesson.id];
@@ -107,8 +87,8 @@ export default function Lesson({ navigation, route }) {
     []
   );
   useEffect(() => {
-    if (lessonLocked(lesson.unit, idx, pro)) navigation.replace('Paywall');
-  }, [lesson.unit, idx, pro, navigation]);
+    if (lessonLocked(unit.id, idx, pro)) navigation.replace('Paywall');
+  }, [unit.id, idx, pro, navigation]);
 
   // Check question (options shuffled once per visit).
   const options = useMemo(() => lesson.check.a.map((t, i) => ({ t, ok: i === 0 })).sort(() => Math.random() - 0.5), [lesson]);
@@ -121,14 +101,14 @@ export default function Lesson({ navigation, route }) {
   };
 
   const goNext = () =>
-    nextLesson ? navigation.replace(lessonLocked(unit.id, idx + 1, pro) ? 'Paywall' : 'Lesson', { lessonId: nextLesson.id }) : navigation.replace('Quiz', { unitId: unit.id });
+    nextLesson ? navigation.replace(lessonLocked(unit.id, idx + 1, pro) ? 'Paywall' : 'Lesson', { lessonId: nextLesson.id, unitId: unit.id }) : navigation.replace('Quiz', { unitId: unit.id });
 
   return (
     <V c="flex-1">
       <Screen
         header={
           <StackHeader
-            title={`${L('Lesson', 'Leçon')} ${lesson.n}`}
+            title={`${L('Lesson', 'Leçon')} ${lessonNumber(unit.id, lesson)}`}
             subtitle={unit.short}
             subtitleColor="on-surface-variant"
             avatar={false}
@@ -163,17 +143,14 @@ export default function Lesson({ navigation, route }) {
 
           {lesson.figure && (
             <V c="gap-space-xs">
-              <V c="rounded-xl overflow-hidden bg-surface-container-low">
-                <Figure lesson={lesson} unitId={unit.id} />
-              </V>
-              {lesson.stages && (
-                <T c="font-body-sm text-body-sm text-on-surface-variant">
-                  {lesson.stages.map(([h, s]) => `${h}: ${s.toLowerCase()}`).join('. ')}.
-                </T>
-              )}
+              {[].concat(lesson.figure).map((id) => (
+                <V key={id} c="rounded-xl overflow-hidden bg-surface-container-lowest border border-surface-container p-space-sm">
+                  <Diagram id={id} maxHeight={360} />
+                </V>
+              ))}
               <P c="self-start py-1" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} hitSlop={8}>
                 <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
-                  {L('Open the 3D model', 'Ouvrir le modèle 3D')}: {unit.vr.title}
+                  {L('Open the 3D model', 'Ouvrir le modèle 3D')}: {(lang === 'fr' && unit.vr.fr?.title) || unit.vr.title}
                 </T>
               </P>
             </V>
@@ -245,7 +222,7 @@ export default function Lesson({ navigation, route }) {
             ))}
           </V>
 
-          <P c="self-start py-1" onPress={() => navigation.navigate('Tutor', { context: `${unit.short}: ${lesson.title}` })} hitSlop={8}>
+          <P c="self-start py-1" onPress={() => navigation.navigate('Tutor', { context: `${unit.short}: ${lesson.title}`, subject: unit.subject })} hitSlop={8}>
             <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
               {L('Ask the tutor about this lesson', 'Poser une question au tuteur')}
             </T>

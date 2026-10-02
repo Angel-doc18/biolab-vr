@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Avatar, C, Ic, Logo, P, T, V } from './kit';
 import { useApp } from '../state/store';
-import { useL } from '../i18n';
+import { useL, useLang } from '../i18n';
+import { subjectName } from '../data/subjects';
 
 const HEADER_SHADOW = { shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 1 }, elevation: 2 };
 
@@ -31,9 +32,36 @@ function Me({ ring = 'secondary' }) {
   );
 }
 
-// Top bar of the five tab roots: logo and wordmark, notifications, profile.
-export function TabHeader({ title = 'BioSpatial', subtitle = 'GCE Biology' }) {
+// The sciences a student takes, as text tabs under the tab header. Hidden when
+// there is only one.
+export function SubjectTabs() {
+  const { user, subjects, subject, setSubject } = useApp();
+  const lang = useLang();
+  if (user?.role !== 'student' || subjects.length < 2) return null;
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 22 }}>
+      {subjects.map((id) => {
+        const on = id === subject;
+        return (
+          <P key={id} c={`pb-2 border-b-2 ${on ? 'border-primary-container' : 'border-transparent'}`} onPress={() => setSubject(id)} scale={1} accessibilityRole="tab" accessibilityState={{ selected: on }}>
+            <T c={`font-label-lg text-label-lg ${on ? 'text-on-surface' : 'text-on-surface-variant'}`} style={{ fontWeight: on ? '700' : '500' }}>
+              {subjectName(id, lang)}
+            </T>
+          </P>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+// Top bar of the five tab roots: logo and wordmark, notifications, profile, and
+// (with `switcher`) the subject tabs.
+export function TabHeader({ title = 'SciAid', subtitle, switcher }) {
   const insets = useSafeAreaInsets();
+  const { subject } = useApp();
+  const lang = useLang();
+  const L = useL();
+  const sub = subtitle ?? `GCE ${L('Ordinary Level', 'Ordinary Level')} ${subjectName(subject, lang)}`;
   return (
     <View style={[{ paddingTop: insets.top, backgroundColor: 'rgba(255,255,255,0.96)', zIndex: 50 }, HEADER_SHADOW]}>
       <V c="h-14 px-margin flex-row items-center justify-between">
@@ -44,7 +72,7 @@ export function TabHeader({ title = 'BioSpatial', subtitle = 'GCE Biology' }) {
               {title}
             </T>
             <T c="font-label-sm text-label-sm text-on-surface-variant mt-0.5" style={{ fontWeight: '400', lineHeight: 12 }} numberOfLines={1}>
-              {subtitle}
+              {sub}
             </T>
           </V>
         </V>
@@ -53,6 +81,7 @@ export function TabHeader({ title = 'BioSpatial', subtitle = 'GCE Biology' }) {
           <Me />
         </V>
       </V>
+      {switcher && <SubjectTabs />}
     </View>
   );
 }
@@ -106,7 +135,7 @@ export function AuthHeader({ title, onBack, back = true, iosArrow }) {
             <V c="w-2" />
           )}
           <Logo size={30} />
-          <T c="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">BioSpatial</T>
+          <T c="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">SciAid</T>
         </V>
         <V c="flex-1 px-space-xs items-end">
           {!!title && (

@@ -4,6 +4,7 @@ import { int, oneOf, str } from '../lib/validate.js';
 import { uuid } from '../lib/crypto.js';
 import { markAnswer, tutorReply } from '../lib/ai.js';
 import { today } from '../lib/notify.js';
+import { subjectOr } from '../lib/subjects.js';
 
 // Fair daily use. A photo marking costs about six times a typed one (it is read
 // by a vision model first), so photos have their own, smaller allowance.
@@ -56,7 +57,8 @@ export async function ask(request, env) {
     .map((h) => ({ role: h.role, content: h.content }));
   while (history.length && history[0].role !== 'user') history.shift();
   const context = str(b.context, 'Context', { max: 200, optional: true });
-  const text = await tutorReply(env, history, question, { lang: user.lang, context, level: user.class_name });
+  const subject = subjectOr(b.subject);
+  const text = await tutorReply(env, history, question, { lang: user.lang, context, level: user.class_name, subject });
   await consume(env, user.id, 'asks');
   return ok({ text, asksLeft: Math.max(0, AI_LIMITS[tier].asks - used.asks - 1) });
 }
@@ -96,7 +98,7 @@ export async function mark(request, env) {
   } else {
     answerText = str(b.answerText, 'Answer', { min: 3, max: 4000 });
   }
-  const result = await markAnswer(env, { question, markScheme, maxMarks, answerText, image });
+  const result = await markAnswer(env, { question, markScheme, maxMarks, answerText, image, subject: subjectOr(b.subject) });
   await consume(env, user.id, kind);
   return ok({
     result,

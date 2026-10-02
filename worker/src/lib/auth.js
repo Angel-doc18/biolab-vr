@@ -3,6 +3,7 @@
 // session of that user (token theft detection).
 import { HttpError, now } from './http.js';
 import { randomToken, sha256, signJwt, uuid, verifyJwt } from './crypto.js';
+import { userSubjects } from './subjects.js';
 
 const ACCESS_TTL = 15 * 60; // seconds
 const REFRESH_TTL_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
@@ -97,6 +98,7 @@ export function publicUser(u) {
     birthMonth: u.birth_month || null,
     consentStatus: u.consent_status || null,
     guardianName: u.guardian_name || null,
+    subjects: userSubjects(u),
     proUntil: u.pro_until || null,
     createdAt: u.created_at,
   };

@@ -1,4 +1,4 @@
-// "BioSpatial Precision" design tokens, taken verbatim from the Stitch Tailwind config,
+// Design tokens, taken verbatim from the Stitch Tailwind config,
 // so screens can keep the exact utility classes of the approved design.
 import { create } from 'twrnc';
 

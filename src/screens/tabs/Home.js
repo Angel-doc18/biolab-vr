@@ -3,29 +3,17 @@ import { RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, TabHeader } from '../../ui/chrome';
-import { SpecimenPreview } from '../../ui/previews';
+import { UnitPicture } from '../../diagrams';
 import { useApp } from '../../state/store';
-import { useL } from '../../i18n';
+import { useL, useLang } from '../../i18n';
 import { get } from '../../api/client';
 import { daysToExam } from '../../state/progress';
 import { firstName, focusUnit, greeting, nextLesson, recentUnits } from '../../state/selectors';
-import { units } from '../../data/units';
-import { lessonsFor } from '../../data/lessons';
+import { unitsFor } from '../../data/units';
+import { lessonNumber, lessonsFor } from '../../data/lessons';
+import { subjectName } from '../../data/subjects';
 import ParentHome from './ParentHome';
 import TeacherHome from './TeacherHome';
-
-const SUGGEST = {
-  cell: 'Why are mitochondria called the powerhouse of the cell?',
-  nutrition: 'What does bile do if it is not an enzyme?',
-  transport: 'Why is the left ventricle wall thicker than the right?',
-  gas: 'How are alveoli adapted for gas exchange?',
-  kidney: 'What is the difference between ultrafiltration and reabsorption?',
-  nervous: 'Can you explain the reflex arc step by step?',
-  locomotion: 'How do the biceps and triceps work as an antagonistic pair?',
-  reproduction: 'What is the difference between pollination and fertilisation?',
-  genetics: 'How do I lay out a monohybrid cross for full marks?',
-  ecology: 'Why do food chains rarely have more than five links?',
-};
 
 export function Section({ title, action, onAction, children }) {
   return (
@@ -46,8 +34,9 @@ export function Section({ title, action, onAction, children }) {
 }
 
 function StudentHome({ navigation }) {
-  const { user, pro, progress, stats, quota, refreshQuota, refreshUnread, refreshMe, consentOk } = useApp();
+  const { user, pro, progress, stats, quota, refreshQuota, refreshUnread, refreshMe, consentOk, subject, subjects } = useApp();
   const L = useL();
+  const lang = useLang();
   const [assignments, setAssignments] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -69,17 +58,18 @@ function StudentHome({ navigation }) {
     }, [load])
   );
 
-  const focus = focusUnit(progress, stats.unitPct, pro);
+  const focus = focusUnit(progress, stats.unitPct, pro, subject);
   const lesson = nextLesson(progress, focus.id, pro);
-  const recent = recentUnits(progress, 2);
-  const continueList = recent.length ? recent : units.slice(0, 2);
+  const recent = recentUnits(progress, 2, subject);
+  const continueList = recent.length ? recent : unitsFor(subject).slice(0, 2);
+  const taking = subjects.map((id) => subjectName(id, lang)).join(', ');
   const days = daysToExam(user?.examYear);
   const due = assignments[0];
   const reviewed = !!progress.lessons[lesson?.id];
 
   return (
     <Screen
-      header={<TabHeader />}
+      header={<TabHeader switcher />}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}
     >
       <V c="gap-space-lg pb-space-xl">
@@ -88,7 +78,7 @@ function StudentHome({ navigation }) {
             {greeting(L)}, {firstName(user?.name)}
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant" numberOfLines={1}>
-            {[user?.className, user?.schoolName].filter(Boolean).join(', ') || L('GCE Biology candidate', 'Candidat GCE Biologie')}
+            {[user?.className, user?.schoolName].filter(Boolean).join(', ') || `GCE O Level: ${taking}`}
           </T>
         </V>
 
@@ -113,7 +103,7 @@ function StudentHome({ navigation }) {
           <V c="flex-row items-end justify-between gap-space-sm">
             <V c="flex-1">
               <T c="font-body-sm text-body-sm text-on-primary" style={{ opacity: 0.85 }}>
-                {L('GCE Biology, June', 'GCE Biologie, juin')} {user?.examYear || ''}
+                {`GCE O Level ${subjectName(subject, lang)}, ${L('June', 'juin')} ${user?.examYear || ''}`}
               </T>
               <T c="font-headline-lg text-on-primary" style={{ fontSize: 34, lineHeight: 40 }}>
                 {days} {days === 1 ? L('day', 'jour') : L('days', 'jours')}
@@ -128,7 +118,7 @@ function StudentHome({ navigation }) {
               <V c="h-full rounded-full bg-on-primary" style={{ width: `${Math.max(2, stats.mastery)}%` }} />
             </V>
             <T c="font-body-sm text-body-sm text-on-primary" style={{ opacity: 0.85 }}>
-              {stats.mastery}% {L('of the syllabus mastered', 'du programme maîtrisé')}
+              {stats.mastery}% {L('of the', 'du programme de')} {subjectName(subject, lang)} {L('syllabus mastered', 'maîtrisé')}
               {stats.streak > 1 ? `, ${stats.streak} ${L('days in a row', 'jours de suite')}` : ''}
             </T>
           </V>
@@ -136,13 +126,13 @@ function StudentHome({ navigation }) {
 
         <Section title={reviewed ? L('Revise next', 'À revoir') : L('Next lesson', 'Prochaine leçon')}>
           <V c="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-            <P c="w-full h-40 bg-surface-container-low items-center justify-center" onPress={() => navigation.navigate('Specimen', { unitId: focus.id })} accessibilityLabel={L('Open the 3D model', 'Ouvrir le modèle 3D')}>
-              <SpecimenPreview unitId={focus.id} />
+            <P c="w-full bg-surface-container-lowest items-center justify-center p-space-sm" onPress={() => navigation.navigate('Lesson', { lessonId: lesson.id, unitId: focus.id })} accessibilityLabel={lesson?.title}>
+              <UnitPicture unit={focus} />
             </P>
             <V c="p-space-md gap-space-sm">
               <V c="gap-1">
                 <T c="font-label-md text-label-md text-on-surface-variant">
-                  {L('Unit', 'Unité')} {focus.n}, {L('lesson', 'leçon')} {lesson?.n}, {lesson?.minutes} min
+                  {L('Unit', 'Unité')} {focus.n}, {L('lesson', 'leçon')} {lesson ? lessonNumber(focus.id, lesson) : ''}, {lesson?.minutes} min
                 </T>
                 <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700', lineHeight: 26 }}>
                   {lesson?.title}
@@ -150,7 +140,7 @@ function StudentHome({ navigation }) {
                 <T c="font-body-sm text-body-sm text-on-surface-variant">{focus.title}</T>
               </V>
               <V c="flex-row gap-space-xs">
-                <P c="flex-1 h-12 bg-primary-container rounded-xl items-center justify-center" onPress={() => navigation.navigate('Lesson', { lessonId: lesson.id })}>
+                <P c="flex-1 h-12 bg-primary-container rounded-xl items-center justify-center" onPress={() => navigation.navigate('Lesson', { lessonId: lesson.id, unitId: focus.id })}>
                   <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
                     {reviewed ? L('Review lesson', 'Revoir la leçon') : L('Start lesson', 'Commencer la leçon')}
                   </T>
@@ -169,11 +159,11 @@ function StudentHome({ navigation }) {
         <Section
           title={L('Ask the tutor', 'Demander au tuteur')}
           action={quota ? `${quota.asksLeft} ${L('left today', 'restantes')}` : null}
-          onAction={() => navigation.navigate('Tutor', { context: focus.title })}
+          onAction={() => navigation.navigate('Tutor', { context: focus.title, subject })}
         >
-          <P c="flex-row items-center justify-between bg-surface-container-lowest p-space-sm pl-space-md rounded-xl shadow-sm" onPress={() => navigation.navigate('Tutor', { prefill: SUGGEST[focus.id], context: focus.title })}>
+          <P c="flex-row items-center justify-between bg-surface-container-lowest p-space-sm pl-space-md rounded-xl shadow-sm" onPress={() => navigation.navigate('Tutor', { prefill: focus.ask, context: focus.title, subject })}>
             <T c="font-body-md text-body-md text-on-surface flex-1 mr-2" numberOfLines={2}>
-              {SUGGEST[focus.id]}
+              {focus.ask}
             </T>
             <V c="w-10 h-10 rounded-xl bg-primary-container items-center justify-center">
               <Ic n="arrow_upward" s={20} c="on-primary" />
@@ -221,10 +211,10 @@ function StudentHome({ navigation }) {
           </Section>
         ) : (
           <Section title={L('Practice paper', 'Épreuve d’entraînement')}>
-            <P c="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex-row items-center gap-space-sm" onPress={() => navigation.navigate('Paper1')}>
+            <P c="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex-row items-center gap-space-sm" onPress={() => navigation.navigate('Paper1', { subject })}>
               <V c="flex-1 gap-0.5">
                 <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-                  {L('Paper 1, multiple choice', 'Épreuve 1, QCM')}
+                  {subjectName(subject, lang)} {L('Paper 1, multiple choice', 'épreuve 1, QCM')}
                 </T>
                 <T c="font-body-sm text-body-sm text-on-surface-variant">{L('50 questions in 1 hour 30 minutes, as in the exam', '50 questions en 1 h 30, comme à l’examen')}</T>
               </V>
@@ -236,7 +226,7 @@ function StudentHome({ navigation }) {
         {!pro && (
           <P c="flex-row items-center justify-between gap-space-sm py-space-sm" onPress={() => navigation.navigate('Paywall')}>
             <T c="font-body-md text-body-md text-on-surface-variant flex-1">
-              {L('Units 4 to 10, every practical and unlimited mock papers come with the full course.', 'Les unités 4 à 10, tous les TP et les épreuves illimitées font partie du cours complet.')}
+              {L('From unit 4 on in every subject, all practicals and unlimited practice papers come with the full course.', 'À partir de l’unité 4 dans chaque matière, tous les TP et les épreuves illimitées font partie du cours complet.')}
             </T>
             <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
               {L('Prices', 'Prix')}

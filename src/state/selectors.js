@@ -1,6 +1,6 @@
 // Derived study information shared by several screens.
-import { units, unitById } from '../data/units';
-import { lessonsFor } from '../data/lessons';
+import { unitById, unitsFor } from '../data/units';
+import { lessonById, lessonsFor } from '../data/lessons';
 import { unitLocked, lessonLocked } from '../data/plan';
 
 export function unitStatus(progress, unitPct, unit, pro) {
@@ -18,8 +18,10 @@ export function nextLesson(progress, unitId, pro) {
   return list[i >= 0 ? i : 0];
 }
 
-// The unit to revise today: lowest mastery among unlocked units, prefering units already started.
-export function focusUnit(progress, unitPct, pro) {
+// The unit to revise today in a subject: lowest mastery among unlocked units,
+// preferring units already started.
+export function focusUnit(progress, unitPct, pro, subject) {
+  const units = unitsFor(subject);
   const open = units.filter((u) => !unitLocked(u.id, pro));
   const started = open.filter((u) => (unitPct[u.id] || 0) > 0 && (unitPct[u.id] || 0) < 85);
   const pool = started.length ? started : open.filter((u) => (unitPct[u.id] || 0) < 85);
@@ -27,17 +29,18 @@ export function focusUnit(progress, unitPct, pro) {
   return pool.sort((a, b) => (unitPct[a.id] || 0) - (unitPct[b.id] || 0) || a.n - b.n)[0];
 }
 
-// Units studied most recently (by last lesson or quiz activity).
-export function recentUnits(progress, count = 2) {
+// Units of a subject studied most recently (by last lesson read or quiz taken).
+export function recentUnits(progress, count = 2, subject) {
+  const ids = new Set(unitsFor(subject).map((u) => u.id));
   const last = {};
+  const bump = (u, at) => ids.has(u) && (last[u] = Math.max(last[u] || 0, at || 0));
   for (const [id, at] of Object.entries(progress.lessons)) {
-    const u = id.split('-')[0];
-    last[u] = Math.max(last[u] || 0, at);
+    const l = lessonById(id);
+    if (!l) continue;
+    // A shared lesson counts for every unit that lists it.
+    for (const u of unitsFor(subject)) if (u.id === l.unit || u.lessonIds?.includes(id)) bump(u.id, at);
   }
-  for (const w of progress.workbook) {
-    const u = w.unit;
-    if (u) last[u] = Math.max(last[u] || 0, w.at);
-  }
+  for (const w of progress.workbook) if (w.unit) bump(w.unit, w.at);
   return Object.entries(last)
     .sort((a, b) => b[1] - a[1])
     .slice(0, count)
@@ -90,5 +93,3 @@ export function greeting(L) {
 }
 
 export const firstName = (name = '') => name.trim().split(/\s+/)[0] || '';
-
-export const levelFromXp = (xp) => Math.floor(Math.sqrt(xp / 50)) + 1;
