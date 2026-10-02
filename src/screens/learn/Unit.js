@@ -1,6 +1,7 @@
 import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader } from '../../ui/chrome';
 import { StaticTabBar } from '../../ui/TabBar';
+import { StepLine } from '../../ui/hub';
 import { UnitPicture } from '../../diagrams';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
@@ -46,8 +47,11 @@ export default function Unit({ navigation, route }) {
 
   return (
     <V c="flex-1">
-      <Screen header={<StackHeader title={`${L('Unit', 'Unité')} ${unit.n}`} subtitle={subjectName(unit.subject, lang)} subtitleColor="on-surface-variant" avatar={false} />}>
+      <Screen header={<StackHeader title={`${L('Topic', 'Thème')} ${unit.n}`} subtitle={subjectName(unit.subject, lang)} subtitleColor="on-surface-variant" avatar={false} />}>
         <V c="pt-space-md pb-space-lg gap-space-lg">
+          <V c="gap-space-xs">
+            <StepLine step={L('Step 3 of 3', 'Étape 3 sur 3')} text={L('Choose a subtopic to read', 'Choisissez un sous-thème à lire')} />
+          </V>
           <V c="gap-space-xs">
             <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight" style={{ lineHeight: 32 }}>
               {unit.short}
@@ -56,11 +60,31 @@ export default function Unit({ navigation, route }) {
             <V c="gap-1 pt-space-xs">
               <Bar pct={pct} c="h-2 bg-surface-container-high" />
               <T c="font-body-sm text-body-sm text-on-surface-variant">
-                {pct}% {L('mastered', 'maîtrisé')}, {doneCount} {L('of', 'sur')} {lessons.length} {L('lessons read', 'leçons lues')}
+                {pct}% {L('mastered', 'maîtrisé')}, {doneCount} {L('of', 'sur')} {lessons.length} {L('subtopics read', 'sous-thèmes lus')}
                 {quiz?.best != null ? `, ${L('best quiz', 'meilleur quiz')} ${quiz.best}% (${L('grade', 'note')} ${gradeFor(quiz.best)})` : ''}
               </T>
             </V>
           </V>
+
+          <Section title={L('Subtopics', 'Sous-thèmes')}>
+            <V c="bg-surface-container-lowest rounded-xl shadow-sm">
+              {lessons.map((l, i) => {
+                const done = !!progress.lessons[l.id];
+                const locked = lessonLocked(unit.id, i, pro);
+                return (
+                  <Row
+                    key={l.id}
+                    first={i === 0}
+                    title={`${lessonNumber(unit.id, l)}. ${l.title}`}
+                    sub={`${l.minutes} min${done ? `, ${L('read', 'lue')}` : locked ? `, ${L('full course', 'cours complet')}` : ''}`}
+                    icon={done ? 'check' : locked ? 'lock' : 'chevron_right'}
+                    iconC={done ? 'secondary' : 'outline'}
+                    onPress={() => openLesson(l, i)}
+                  />
+                );
+              })}
+            </V>
+          </Section>
 
           <UnitPicture unit={unit} explain maxHeight={320} />
 
@@ -82,25 +106,6 @@ export default function Unit({ navigation, route }) {
             </T>
           </P>
 
-          <Section title={L('Lessons', 'Leçons')}>
-            <V c="bg-surface-container-lowest rounded-xl shadow-sm">
-              {lessons.map((l, i) => {
-                const done = !!progress.lessons[l.id];
-                const locked = lessonLocked(unit.id, i, pro);
-                return (
-                  <Row
-                    key={l.id}
-                    first={i === 0}
-                    title={`${lessonNumber(unit.id, l)}. ${l.title}`}
-                    sub={`${l.minutes} min${done ? `, ${L('read', 'lue')}` : locked ? `, ${L('full course', 'cours complet')}` : ''}`}
-                    icon={done ? 'check' : locked ? 'lock' : 'chevron_right'}
-                    iconC={done ? 'secondary' : 'outline'}
-                    onPress={() => openLesson(l, i)}
-                  />
-                );
-              })}
-            </V>
-          </Section>
 
           <Section title={L('Practice', 'Entraînement')}>
             <V c="bg-surface-container-lowest rounded-xl shadow-sm">

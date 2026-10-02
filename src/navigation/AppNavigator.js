@@ -49,6 +49,10 @@ import Search from '../screens/me/Search';
 import Settings from '../screens/me/Settings';
 import JoinClass from '../screens/me/JoinClass';
 import Legal from '../screens/me/Legal';
+import Topics from '../screens/learn/Topics';
+import Models from '../screens/learn/Models';
+import LabList from '../screens/lab/LabList';
+import ExamMenu from '../screens/exams/ExamMenu';
 
 export const navRef = createNavigationContainerRef();
 
@@ -156,6 +160,10 @@ export default function AppNavigator() {
         <Stack.Screen name="CreateClass" component={CreateClass} />
 
         <Stack.Screen name="Main" component={MainTabs} options={{ gestureEnabled: false }} />
+        <Stack.Screen name="Topics" component={Topics} />
+        <Stack.Screen name="Models" component={Models} />
+        <Stack.Screen name="LabList" component={LabList} />
+        <Stack.Screen name="ExamMenu" component={ExamMenu} />
         <Stack.Screen name="Unit" component={Unit} />
         <Stack.Screen name="Lesson" component={Lesson} />
         <Stack.Screen name="Specimen" component={Specimen} options={{ gestureEnabled: false }} />

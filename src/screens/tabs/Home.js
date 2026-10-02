@@ -12,6 +12,8 @@ import { firstName, focusUnit, greeting, nextLesson, recentUnits } from '../../s
 import { unitsFor } from '../../data/units';
 import { lessonNumber, lessonsFor } from '../../data/lessons';
 import { subjectName } from '../../data/subjects';
+import { SubjectGrid, TileGrid } from '../../ui/hub';
+import { useSubjectCards } from '../subjectCards';
 import ParentHome from './ParentHome';
 import TeacherHome from './TeacherHome';
 
@@ -66,10 +68,11 @@ function StudentHome({ navigation }) {
   const days = daysToExam(user?.examYear);
   const due = assignments[0];
   const reviewed = !!progress.lessons[lesson?.id];
+  const cards = useSubjectCards('learn');
 
   return (
     <Screen
-      header={<TabHeader switcher />}
+      header={<TabHeader />}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}
     >
       <V c="gap-space-lg pb-space-xl">
@@ -78,9 +81,64 @@ function StudentHome({ navigation }) {
             {greeting(L)}, {firstName(user?.name)}
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant" numberOfLines={1}>
-            {[user?.className, user?.schoolName].filter(Boolean).join(', ') || `GCE O Level: ${taking}`}
+            GCE O Level: {taking}
           </T>
         </V>
+
+        <V c="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container">
+          <P c="p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('ExamClass', { fromSettings: true })} accessibilityRole="button" accessibilityLabel={L('Change your class', 'Changer de classe')}>
+            <V c="w-12 h-12 rounded-xl bg-surface-container-low items-center justify-center">
+              <Ic n="school" s={26} c="primary-container" fill />
+            </V>
+            <V c="flex-1 gap-0.5">
+              <T c="font-label-md text-label-md text-on-surface-variant">{L('Your class', 'Votre classe')}</T>
+              <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {user?.className || L('Not set', 'Non indiquée')}
+              </T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={2}>
+                {[`GCE ${L('June', 'juin')} ${user?.examYear || ''}`, user?.schoolName].filter(Boolean).join(', ')}
+              </T>
+            </V>
+            <V c="h-10 px-3 rounded-lg border-2 border-primary-container flex-row items-center gap-1">
+              <Ic n="edit" s={16} c="primary-container" />
+              <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                {L('Change', 'Changer')}
+              </T>
+            </V>
+          </P>
+          {!user?.schoolName && (
+            <P c="px-space-md py-space-sm border-t border-surface-container flex-row items-center gap-2" onPress={() => navigation.navigate('JoinClass')}>
+              <Ic n="group_add" s={18} c="primary-container" />
+              <T c="font-label-md text-label-md text-primary-container flex-1" style={{ fontWeight: '700' }}>
+                {L('Join your teacher’s class with a code', 'Rejoindre la classe de votre enseignant avec un code')}
+              </T>
+              <Ic n="chevron_right" s={18} c="outline" />
+            </P>
+          )}
+        </V>
+
+        <Section title={L('Your subjects', 'Vos matières')}>
+          <SubjectGrid
+            items={cards}
+            currentLabel={L('Studying now', 'En cours')}
+            onPick={(id) => navigation.navigate('Topics', { subject: id, mode: 'learn' })}
+            manage={L('Add or change subjects', 'Ajouter ou changer de matière')}
+            onManage={() => navigation.navigate('ExamClass', { fromSettings: true })}
+          />
+        </Section>
+
+        <Section title={L('Go straight to', 'Accès direct')}>
+          <TileGrid
+            items={[
+              { icon: 'experiment', title: L('Practicals', 'Travaux pratiques'), sub: L('Experiments with real readings', 'Expériences avec de vraies mesures'), onPress: () => navigation.navigate('Lab') },
+              { icon: 'view_in_ar', title: L('3D models', 'Modèles 3D'), sub: L('Turn and open every model', 'Tournez et ouvrez chaque modèle'), onPress: () => navigation.navigate('Models', { subject }) },
+              { icon: 'timer', title: L('Practice papers', 'Épreuves'), sub: L('Paper 1, Paper 2, topic quizzes', 'Épreuves 1 et 2, quiz'), onPress: () => navigation.navigate('ExamMenu', { subject }) },
+              { icon: 'forum', title: L('Ask the tutor', 'Demander au tuteur'), sub: quota ? `${quota.asksLeft} ${L('questions left today', 'questions restantes')}` : L('Answers read aloud', 'Réponses lues à voix haute'), onPress: () => navigation.navigate('Tutor', { context: focus.title, subject }) },
+              { icon: 'grading', title: L('Mark my answer', 'Corriger ma réponse'), sub: L('Typed or photographed', 'Tapée ou photographiée'), onPress: () => navigation.navigate('MarkAnswer', { subject }) },
+              { icon: 'menu_book', title: L('Lab workbook', 'Cahier de TP'), sub: L('Your saved results', 'Vos résultats enregistrés'), onPress: () => navigation.navigate('Workbook') },
+            ]}
+          />
+        </Section>
 
         {!consentOk && (
           <P c="bg-surface-container-low border border-outline-variant p-space-md rounded-xl gap-1" onPress={() => navigation.navigate('Guardian', { fromHome: true })}>
@@ -156,20 +214,6 @@ function StudentHome({ navigation }) {
           </V>
         </Section>
 
-        <Section
-          title={L('Ask the tutor', 'Demander au tuteur')}
-          action={quota ? `${quota.asksLeft} ${L('left today', 'restantes')}` : null}
-          onAction={() => navigation.navigate('Tutor', { context: focus.title, subject })}
-        >
-          <P c="flex-row items-center justify-between bg-surface-container-lowest p-space-sm pl-space-md rounded-xl shadow-sm" onPress={() => navigation.navigate('Tutor', { prefill: focus.ask, context: focus.title, subject })}>
-            <T c="font-body-md text-body-md text-on-surface flex-1 mr-2" numberOfLines={2}>
-              {focus.ask}
-            </T>
-            <V c="w-10 h-10 rounded-xl bg-primary-container items-center justify-center">
-              <Ic n="arrow_upward" s={20} c="on-primary" />
-            </V>
-          </P>
-        </Section>
 
         <Section title={recent.length ? L('Continue', 'Continuer') : L('Start with', 'Commencez par')} action={L('All units', 'Toutes les unités')} onAction={() => navigation.navigate('Learn')}>
           <V c="bg-surface-container-lowest rounded-xl shadow-sm">
