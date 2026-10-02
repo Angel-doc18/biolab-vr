@@ -2,7 +2,7 @@ import { HttpError, clientIp, created, limit, now, ok, readJson } from '../lib/h
 import { hashPassword, randomDigits, sha256, uuid, verifyPassword, safeEqual } from '../lib/crypto.js';
 import { issueSession, publicUser, requireUser, revokeRefresh, rotateRefresh } from '../lib/auth.js';
 import { email, oneOf, password, phone, str } from '../lib/validate.js';
-import { sendSms, smsConfigured } from '../lib/providers.js';
+import { channels, messagingConfigured, sendCode } from '../lib/messaging.js';
 
 const GENERIC_LOGIN_ERROR = 'Phone number, email or password is incorrect.';
 const OTP_TTL = 10 * 60 * 1000;
@@ -36,7 +36,7 @@ export async function register(request, env) {
     .run();
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
   const session = await issueSession(env, user);
-  return created({ user: publicUser(user), ...session, otpAvailable: smsConfigured(env) });
+  return created({ user: publicUser(user), ...session, otpAvailable: messagingConfigured(env) });
 }
 
 export async function login(request, env) {
@@ -74,7 +74,10 @@ export async function logout(request, env) {
   return ok();
 }
 
-async function storeAndSendOtp(env, ph, purpose) {
+// The channel a code is expected to arrive on, without revealing whether an account exists.
+const usualChannel = (env) => (channels(env)[0] === 'whatsapp' ? 'whatsapp' : 'sms');
+
+async function storeAndSendOtp(env, ph, purpose, lang) {
   const code = randomDigits(6);
   await env.DB.prepare(
     `INSERT INTO otp_codes (phone, purpose, code_hash, expires_at, attempts) VALUES (?, ?, ?, ?, 0)
@@ -82,7 +85,7 @@ async function storeAndSendOtp(env, ph, purpose) {
   )
     .bind(ph, purpose, await sha256(`${ph}:${code}`), now() + OTP_TTL)
     .run();
-  await sendSms(env, ph, `BioSpatial VR code: ${code}. It expires in 10 minutes. Never share this code.`);
+  return sendCode(env, ph, code, lang);
 }
 
 async function checkOtp(env, ph, purpose, code) {
@@ -103,8 +106,8 @@ async function checkOtp(env, ph, purpose, code) {
 export async function sendVerifyOtp(request, env) {
   const user = await requireUser(request, env);
   await limit(env.OTP_LIMITER, `otp:${user.phone}`, 'Please wait a minute before requesting another code.');
-  await storeAndSendOtp(env, user.phone, 'verify');
-  return ok({ sentTo: user.phone.slice(0, 5) + '••••' + user.phone.slice(-2) });
+  const channel = await storeAndSendOtp(env, user.phone, 'verify', user.lang);
+  return ok({ sentTo: user.phone.slice(0, 5) + '••••' + user.phone.slice(-2), channel });
 }
 
 export async function verifyOtp(request, env) {
@@ -120,11 +123,18 @@ export async function forgotPassword(request, env) {
   await limit(env.AUTH_LIMITER, `forgot:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
   const body = await readJson(request);
   const ph = phone(body.phone);
-  if (!smsConfigured(env)) throw new HttpError(503, 'Password reset by SMS is not available yet. Contact support.', 'sms_unavailable');
+  if (!messagingConfigured(env)) throw new HttpError(503, 'Password reset by code is not available yet. Contact support.', 'messaging_unavailable');
   await limit(env.OTP_LIMITER, `otp:${ph}`, 'Please wait a minute before requesting another code.');
-  const user = await env.DB.prepare('SELECT id FROM users WHERE phone = ? AND deleted_at IS NULL').bind(ph).first();
-  if (user) await storeAndSendOtp(env, ph, 'reset');
-  return ok({ sent: true });
+  const user = await env.DB.prepare('SELECT id, lang FROM users WHERE phone = ? AND deleted_at IS NULL').bind(ph).first();
+  if (user) {
+    try {
+      await storeAndSendOtp(env, ph, 'reset', user.lang);
+    } catch (e) {
+      // Same answer either way; delivery problems are logged, not revealed.
+      console.error('reset_code_failed', e?.code || e?.message);
+    }
+  }
+  return ok({ sent: true, channel: usualChannel(env) });
 }
 
 export async function resetPassword(request, env) {

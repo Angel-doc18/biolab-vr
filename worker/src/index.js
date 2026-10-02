@@ -6,13 +6,19 @@ import * as school from './routes/school.js';
 import * as billing from './routes/billing.js';
 import * as ai from './routes/ai.js';
 import * as admin from './routes/admin.js';
-import { paymentsConfigured, sendSms, smsConfigured } from './lib/providers.js';
+import { paymentsConfigured } from './lib/providers.js';
+import { channels, sendNotice } from './lib/messaging.js';
+import * as consent from './routes/consent.js';
 import { notify } from './lib/notify.js';
 import { aiProvider } from './lib/ai.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
 const routes = [
-  ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), sms: smsConfigured(env), payments: paymentsConfigured(env) })],
+  ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), messaging: channels(env), payments: paymentsConfigured(env) })],
+  ['POST', '/v1/me/consent', consent.requestConsent],
+  ['GET', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentPage],
+  ['POST', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentDecision],
+  ['POST', '/v1/ai/report', ai.report],
   ['POST', '/v1/auth/register', auth.register],
   ['POST', '/v1/auth/login', auth.login],
   ['POST', '/v1/auth/refresh', auth.refresh],
@@ -86,21 +92,26 @@ async function handle(request, env) {
 // Daily at 17:00 UTC (18:00 in Cameroon).
 async function scheduled(env) {
   const day = 86_400_000;
-  // Inactivity alerts to parents, on day 3 and day 7 of a break.
-  if (smsConfigured(env)) {
+  // Inactivity alerts to parents who approved the account, on day 3 and day 7 of a break.
+  if (channels(env).length) {
     const { results } = await env.DB.prepare(
-      `SELECT u.id, u.name, u.parent_phone, p.last_active FROM users u JOIN progress p ON p.user_id = u.id
-       WHERE u.role = 'student' AND u.deleted_at IS NULL AND u.inactivity_alert = 1 AND u.parent_phone IS NOT NULL AND p.last_active IS NOT NULL`
+      `SELECT u.id, u.name, u.parent_phone, u.parent_report_lang, p.last_active FROM users u JOIN progress p ON p.user_id = u.id
+       WHERE u.role = 'student' AND u.deleted_at IS NULL AND u.inactivity_alert = 1 AND u.parent_phone IS NOT NULL
+         AND u.consent_status IN ('granted', 'not_needed') AND p.last_active IS NOT NULL`
     ).all();
     for (const s of results) {
       const idle = Math.floor((now() - s.last_active) / day);
-      if (idle === 3 || idle === 7) {
-        try {
-          await sendSms(env, s.parent_phone, `BioSpatial VR: ${s.name} has not revised Biology for ${idle} days. A short session today keeps exam preparation on track.`);
-        } catch (e) {
-          console.error('inactivity_sms_failed');
-        }
-      }
+      if (idle !== 3 && idle !== 7) continue;
+      const fr = s.parent_report_lang === 'fr';
+      const sent = await sendNotice(env, s.parent_phone, {
+        templateEnv: 'WHATSAPP_ALERT_TEMPLATE',
+        params: [s.name, String(idle)],
+        lang: s.parent_report_lang,
+        text: fr
+          ? `BioSpatial VR : ${s.name} n'a pas révisé la biologie depuis ${idle} jours. Une courte séance aujourd'hui aide à rester prêt pour l'examen.`
+          : `BioSpatial VR: ${s.name} has not revised Biology for ${idle} days. A short session today keeps exam preparation on track.`,
+      }).catch(() => null);
+      if (!sent) console.error('inactivity_alert_failed');
     }
   }
   // Weekly report reminders on Fridays.

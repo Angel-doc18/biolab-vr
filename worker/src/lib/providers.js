@@ -1,26 +1,7 @@
-// External providers: SMS (Twilio) and mobile money (Fapshi). Both are optional:
-// when their secrets are missing the related features report "not configured"
-// instead of pretending to work.
+// Mobile money (Fapshi). Optional: without its secrets, payments report
+// "not configured" instead of pretending to work. Messaging is in messaging.js.
 import { HttpError } from './http.js';
 import { safeEqual } from './crypto.js';
-
-export const smsConfigured = (env) => Boolean(env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM);
-
-export async function sendSms(env, to, body) {
-  if (!smsConfigured(env)) throw new HttpError(503, 'SMS delivery is not configured yet.', 'sms_unavailable');
-  const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}/Messages.json`, {
-    method: 'POST',
-    headers: {
-      authorization: 'Basic ' + btoa(`${env.TWILIO_ACCOUNT_SID}:${env.TWILIO_AUTH_TOKEN}`),
-      'content-type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({ To: `+${to}`, From: env.TWILIO_FROM, Body: body }),
-  });
-  if (!res.ok) {
-    console.error('sms_failed', res.status);
-    throw new HttpError(502, 'We could not send the SMS. Please try again.', 'sms_failed');
-  }
-}
 
 // ---------- Fapshi ----------
 export const paymentsConfigured = (env) => Boolean(env.FAPSHI_API_USER && env.FAPSHI_API_KEY && env.FAPSHI_WEBHOOK_SECRET);

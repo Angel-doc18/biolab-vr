@@ -2,8 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Animated, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
-import { Ic, T, V } from '../../ui/kit';
-import { Cta } from '../../ui/chrome';
+import { T, V } from '../../ui/kit';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { routeAfterAuth } from '../../navigation/routes';
@@ -116,34 +115,19 @@ export default function Splash({ navigation }) {
   // Returning users skip ahead once the animation has played.
   useEffect(() => {
     if (!ready) return;
-    const t = setTimeout(go, auth.status === 'authed' || prefs.seenWelcome ? 1900 : 2600);
+    const t = setTimeout(go, 1800);
     return () => clearTimeout(t);
   }, [ready]);
 
   return (
-    <V c="flex-1 bg-surface-container-lowest" style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 16 }}>
-      <V c="flex-1 px-space-md justify-center">
-        <V c="w-full items-center py-space-xl rounded-3xl bg-surface-container-low shadow-sm overflow-hidden">
-          <V c="absolute w-48 h-48 rounded-full bg-surface-container-high opacity-70" style={{ top: 40, borderRadius: 96 }} />
-          <OrbitMark />
-          <Animated.View style={{ opacity: words, transform: [{ translateY: words.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }] }}>
-            <V c="mt-space-lg items-center">
-              <T c="font-display-lg text-display-lg text-on-surface tracking-tight">BioSpatial VR</T>
-              <T c="font-headline-sm text-headline-sm text-on-surface-variant mt-space-xs">{L('Biology you can walk around', 'La biologie en trois dimensions')}</T>
-              <V c="mt-space-md flex-row items-center gap-space-xs px-space-md py-1 rounded-full bg-surface-container">
-                <Ic n="verified" s={14} c="primary" fill />
-                <T c="font-label-md text-label-md text-primary tracking-wide uppercase">{L('Cameroon GCE · Biology', 'GCE Cameroun · Biologie')}</T>
-              </V>
-            </V>
-          </Animated.View>
+    <V c="flex-1 bg-surface-container-lowest items-center justify-center" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+      <OrbitMark />
+      <Animated.View style={{ opacity: words, transform: [{ translateY: words.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }] }}>
+        <V c="mt-space-md items-center gap-1">
+          <T c="font-display-lg text-display-lg text-on-surface tracking-tight">BioSpatial VR</T>
+          <T c="font-body-md text-body-md text-on-surface-variant">{L('GCE Biology, Cameroon', 'Biologie GCE, Cameroun')}</T>
         </V>
-      </V>
-      <V c="px-space-md">
-        <Cta label={L('Continue', 'Continuer')} onPress={go} disabled={!ready} />
-        <T c="font-body-sm text-body-sm text-on-surface-variant text-center mt-space-md">
-          {L('Offline first · English & French · Built for Cameroon GCE', 'Hors ligne · Anglais et français · Conçu pour le GCE')}
-        </T>
-      </V>
+      </Animated.View>
     </V>
   );
 }

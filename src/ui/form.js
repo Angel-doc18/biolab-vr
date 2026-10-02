@@ -38,10 +38,7 @@ export function Field({ label, right, icon, leftIcon, hint, error, secure, bg = 
         ) : null}
       </V>
       {!!hint && !error && (
-        <V c="flex-row items-center gap-1.5 pt-0.5">
-          <Ic n="verified_user" s={14} c="outline" />
-          <T c="font-body-sm text-body-sm text-outline flex-1">{hint}</T>
-        </V>
+        <T c="font-body-sm text-body-sm text-on-surface-variant pt-0.5">{hint}</T>
       )}
       {!!error && <T c="font-body-sm text-body-sm text-error">{error}</T>}
     </V>
@@ -56,8 +53,7 @@ export function PhoneField({ label, right, value, onChangeText, hint, error, bg 
     <V c="gap-1.5">
       {!!label && <Label right={right}>{label}</Label>}
       <V c={`flex-row items-center h-[52px] rounded-xl ${bg} shadow-sm overflow-hidden ${error ? 'border border-error' : ''}`}>
-        <V c="h-full px-3.5 flex-row items-center gap-1.5 bg-surface-container">
-          <T c="text-base">🇨🇲</T>
+        <V c="h-full px-3.5 flex-row items-center bg-surface-container">
           <T c="font-label-md text-label-md text-on-surface" style={{ fontWeight: '700' }}>
             +237
           </T>
@@ -74,10 +70,7 @@ export function PhoneField({ label, right, value, onChangeText, hint, error, bg 
         />
       </V>
       {!!hint && !error && (
-        <V c="flex-row items-center gap-1.5 pt-0.5">
-          <Ic n="verified_user" s={14} c="outline" />
-          <T c="font-body-sm text-body-sm text-outline flex-1">{hint}</T>
-        </V>
+        <T c="font-body-sm text-body-sm text-on-surface-variant pt-0.5">{hint}</T>
       )}
       {!!error && <T c="font-body-sm text-body-sm text-error">{error}</T>}
     </V>
@@ -118,16 +111,7 @@ export function StrengthMeter({ password, L, compact }) {
           <V key={i} c={`flex-1 h-full rounded-full ${i < score ? `bg-${col}` : 'bg-surface-container-high'}`} />
         ))}
       </V>
-      <V c="flex-row items-center justify-between">
-        <V c="flex-row items-center gap-1.5">
-          <Ic n={score >= 3 ? 'check_circle' : 'info'} s={15} c={col} fill={score >= 3} />
-          <T c={`font-label-sm text-label-sm text-${col}`}>
-            {labels[score]}
-            {score >= 3 ? L(' · includes numbers and capitals', ' · chiffres et majuscules') : ''}
-          </T>
-        </V>
-        <T c={`font-label-sm text-label-sm text-${col}`}>{score * 25}%</T>
-      </V>
+      <T c={`font-label-sm text-label-sm text-${col}`}>{labels[score]}</T>
     </V>
   );
 }

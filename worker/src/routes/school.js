@@ -1,5 +1,5 @@
 import { HttpError, created, limit, now, ok, readJson } from '../lib/http.js';
-import { requireUser } from '../lib/auth.js';
+import { requireUser, requireConsent } from '../lib/auth.js';
 import { randomCode, uuid } from '../lib/crypto.js';
 import { int, oneOf, str } from '../lib/validate.js';
 import { notify } from '../lib/notify.js';
@@ -123,6 +123,7 @@ export async function classDetail(request, env, classId) {
 
 export async function joinClass(request, env) {
   const user = await requireUser(request, env, ['student']);
+  requireConsent(user);
   await limit(env.AUTH_LIMITER, `join:${user.id}`, 'Too many attempts. Wait a minute and try again.');
   const b = await readJson(request);
   const code = str(b.code, 'Class code', { min: 6, max: 20 }).toUpperCase();
@@ -188,6 +189,7 @@ export async function myAssignments(request, env) {
 
 export async function completeAssignment(request, env, assignmentId) {
   const user = await requireUser(request, env, ['student']);
+  requireConsent(user);
   const b = await readJson(request);
   const score = int(b.score, 'Score', { min: 0, max: 100, optional: true });
   const a = await env.DB.prepare(
@@ -223,11 +225,25 @@ export async function linkChild(request, env) {
   const code = str(b.code, 'Link code', { min: 8, max: 8 }).toUpperCase();
   const row = await env.DB.prepare('SELECT * FROM link_codes WHERE code = ? AND expires_at > ?').bind(code, now()).first();
   if (!row) throw new HttpError(404, 'That code is not valid or has expired. Ask your child for a new one.', 'not_found');
+  const student = await env.DB.prepare('SELECT id, consent_status FROM users WHERE id = ? AND deleted_at IS NULL').bind(row.student_id).first();
+  if (!student) throw new HttpError(404, 'That code is not valid or has expired. Ask your child for a new one.', 'not_found');
+  // A parent linking their child in the app approves the child's account (the
+  // link screen shows what approving means). Adults stay 'not_needed'.
+  const approves = student.consent_status !== 'granted' && student.consent_status !== 'not_needed';
+  const t = now();
   await env.DB.batch([
-    env.DB.prepare('INSERT OR IGNORE INTO parent_links (parent_id, student_id, created_at) VALUES (?, ?, ?)').bind(user.id, row.student_id, now()),
+    env.DB.prepare('INSERT OR IGNORE INTO parent_links (parent_id, student_id, created_at) VALUES (?, ?, ?)').bind(user.id, row.student_id, t),
     env.DB.prepare('DELETE FROM link_codes WHERE code = ?').bind(code),
+    ...(approves
+      ? [
+          env.DB.prepare("UPDATE users SET consent_status = 'granted', consent_at = ?, guardian_name = COALESCE(guardian_name, ?), updated_at = ? WHERE id = ?").bind(t, user.name, t, row.student_id),
+          env.DB.prepare(
+            "INSERT INTO consent_requests (token_hash, user_id, guardian_name, guardian_phone, created_at, expires_at, decision, decided_at, decided_via) VALUES (?, ?, ?, ?, ?, ?, 'approved', ?, 'parent_app')"
+          ).bind(`app:${user.id}:${row.student_id}:${t}`, row.student_id, user.name, user.phone, t, t, t),
+        ]
+      : []),
   ]);
-  await notify(env, row.student_id, 'parent', 'Parent linked', `${user.name} can now see your progress reports.`);
+  await notify(env, row.student_id, 'parent', 'Parent linked', approves ? `${user.name} linked to your account and approved it. Your progress is now saved.` : `${user.name} can now see your progress reports.`);
   const child = await env.DB.prepare('SELECT id, name, class_name, school_name FROM users WHERE id = ?').bind(row.student_id).first();
   return ok({ child: { id: child.id, name: child.name, className: child.class_name, schoolName: child.school_name } });
 }

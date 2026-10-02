@@ -1,17 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ic, P, T, V } from '../../ui/kit';
-import { AuthHeader, Cta, ErrorNote, Pulse, Screen } from '../../ui/chrome';
+import { useEffect, useRef, useState } from 'react';
+import { TextInput } from 'react-native';
+import { P, T, V } from '../../ui/kit';
+import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-
-const KEYS = [
-  ['1', ''], ['2', 'ABC'], ['3', 'DEF'],
-  ['4', 'GHI'], ['5', 'JKL'], ['6', 'MNO'],
-  ['7', 'PQRS'], ['8', 'TUV'], ['9', 'WXYZ'],
-  [null], ['0', '+'], ['back'],
-];
 
 const mask = (p = '') => {
   const d = p.replace(/\D/g, '').replace(/^237/, '');
@@ -21,21 +14,22 @@ const mask = (p = '') => {
 // purpose 'verify': confirms the signed-in user's phone.
 // purpose 'reset': collects the code, which Reset submits with the new password.
 export default function Otp({ navigation, route }) {
-  const insets = useSafeAreaInsets();
   const { refreshMe } = useApp();
   const L = useL();
-  const { purpose = 'verify', phone, next = 'Role' } = route.params || {};
+  const { purpose = 'verify', phone, next = 'Role', channel: firstChannel } = route.params || {};
+  const input = useRef(null);
   const [digits, setDigits] = useState('');
   const [left, setLeft] = useState(60);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [channel, setChannel] = useState(purpose === 'reset' ? firstChannel || null : null);
   const [sent, setSent] = useState(purpose === 'reset');
 
   const send = async () => {
     setError(null);
     try {
-      if (purpose === 'verify') await post('/v1/auth/otp/send');
-      else await post('/v1/auth/password/forgot', { phone }, { auth: false });
+      const r = purpose === 'verify' ? await post('/v1/auth/otp/send') : await post('/v1/auth/password/forgot', { phone }, { auth: false });
+      setChannel(r?.channel || null);
       setSent(true);
       setLeft(60);
     } catch (e) {
@@ -53,24 +47,18 @@ export default function Otp({ navigation, route }) {
     return () => clearTimeout(t);
   }, [left]);
 
-  const press = (k) => {
-    setError(null);
-    if (k === 'back') setDigits((d) => d.slice(0, -1));
-    else if (k) setDigits((d) => (d.length < 6 ? d + k : d));
-  };
-
-  const submit = async () => {
-    if (digits.length !== 6) {
-      setError(L('Enter the 6 digit code from the SMS.', 'Entrez le code à 6 chiffres reçu par SMS.'));
+  const submit = async (code = digits) => {
+    if (code.length !== 6) {
+      setError(L('Enter the 6 digit code.', 'Entrez le code à 6 chiffres.'));
       return;
     }
     if (purpose === 'reset') {
-      navigation.navigate('Reset', { phone, code: digits });
+      navigation.navigate('Reset', { phone, code });
       return;
     }
     setBusy(true);
     try {
-      await post('/v1/auth/otp/verify', { code: digits });
+      await post('/v1/auth/otp/verify', { code });
       await refreshMe().catch(() => {});
       navigation.reset({ index: 0, routes: [{ name: next }] });
     } catch (e) {
@@ -81,120 +69,78 @@ export default function Otp({ navigation, route }) {
     }
   };
 
+  const onChange = (t) => {
+    const d = t.replace(/\D/g, '').slice(0, 6);
+    setError(null);
+    setDigits(d);
+    if (d.length === 6) submit(d);
+  };
+
+  const via = channel === 'whatsapp' ? L('on WhatsApp', 'sur WhatsApp') : channel === 'sms' ? L('by SMS', 'par SMS') : '';
+
   return (
-    <Screen
-      header={<AuthHeader title={L('Verify Identity', 'Vérification')} back={purpose === 'reset'} />}
-      footer={
-        <V c="pt-space-md px-margin bg-surface-container-low rounded-t-xl shadow-lg items-center" style={{ paddingBottom: 8 }}>
-          <V c="w-10 h-1 bg-outline-variant/60 rounded-full mb-space-sm" />
-          <V c="flex-row flex-wrap w-full" style={{ maxWidth: 340, gap: 8 }}>
-            {KEYS.map(([k, sub], i) => (
-              <V key={i} style={{ width: '31.5%' }}>
-                {k === null ? (
-                  <V c="h-12" />
-                ) : k === 'back' ? (
-                  <P c="h-12 items-center justify-center rounded-xl" onPress={() => press('back')} accessibilityLabel="Delete">
-                    <Ic n="backspace" s={24} c="on-surface" />
-                  </P>
-                ) : (
-                  <P c="h-12 bg-surface-container-lowest rounded-xl items-center justify-center shadow-sm" onPress={() => press(k)}>
-                    <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700', lineHeight: 20 }}>
-                      {k}
-                    </T>
-                    <T c="font-label-sm text-on-surface-variant uppercase tracking-widest" style={{ fontSize: 8, lineHeight: 9 }}>
-                      {sub || ' '}
-                    </T>
-                  </P>
-                )}
+    <Screen keyboard header={<AuthHeader back={purpose === 'reset'} />}>
+      <V c="pt-space-lg gap-space-lg">
+        <V c="gap-space-xs">
+          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{purpose === 'reset' ? L('Enter your code', 'Entrez votre code') : L('Confirm your number', 'Confirmez votre numéro')}</T>
+          <T c="font-body-md text-body-md text-on-surface-variant">
+            {sent
+              ? `${L('We sent a 6 digit code', 'Nous avons envoyé un code à 6 chiffres')}${via ? ` ${via}` : ''} ${L('to', 'au')} ${mask(phone)}.`
+              : `${L('Sending a code to', 'Envoi d’un code au')} ${mask(phone)}...`}
+          </T>
+        </V>
+
+        <P c="flex-row justify-between gap-1.5" scale={1} onPress={() => input.current?.focus()} accessibilityLabel={L('Code', 'Code')}>
+          {[0, 1, 2, 3, 4, 5].map((i) => {
+            const active = i === digits.length;
+            return (
+              <V key={i} c={`flex-1 h-14 rounded-xl items-center justify-center bg-surface-container-lowest ${active ? 'border-2 border-primary' : 'border border-outline-variant'}`}>
+                <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
+                  {digits[i] || ''}
+                </T>
               </V>
-            ))}
-          </V>
-        </V>
-      }
-    >
-      <V c="pt-space-md items-center">
-        <V c="mb-space-md items-center justify-center">
-          <V c="w-20 h-20 rounded-full bg-surface-container items-center justify-center shadow-sm">
-            <Ic n="sms" s={38} c="primary" />
-          </V>
-          <V c="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-secondary items-center justify-center shadow-md">
-            <Ic n="check" s={16} c="on-secondary" fill />
-          </V>
-          <V c="absolute -top-1 -left-2 px-2 py-0.5 rounded-full bg-secondary-container">
-            <T c="font-label-sm text-label-sm text-on-secondary-container">{L('SECURE', 'SÉCURISÉ')}</T>
-          </V>
-        </V>
-        <T c="font-headline-lg text-headline-lg text-on-surface text-center tracking-tight">{L('Verify your phone', 'Vérifiez votre numéro')}</T>
-        <T c="font-body-md text-body-md text-on-surface-variant text-center mt-space-xs" style={{ maxWidth: 280 }}>
-          {sent ? L('We sent a 6 digit code by SMS to:', 'Nous avons envoyé un code à 6 chiffres par SMS au :') : L('Sending a 6 digit code by SMS to:', 'Envoi d’un code à 6 chiffres par SMS au :')}
-        </T>
-        <V c="mt-space-md flex-row items-center justify-between gap-space-sm bg-surface-container-low px-space-md py-2.5 rounded-full w-full shadow-sm" style={{ maxWidth: 340 }}>
-          <V c="flex-row items-center gap-space-xs">
-            <Ic n="verified_user" s={18} c="primary" />
-            <T c="font-label-lg text-label-lg text-on-surface tracking-wide">{mask(phone)}</T>
-          </V>
-          {purpose === 'reset' && (
-            <P onPress={() => navigation.goBack()}>
-              <T c="font-label-md text-label-md text-primary">{L('Change number', 'Changer')}</T>
+            );
+          })}
+        </P>
+        <TextInput
+          ref={input}
+          value={digits}
+          onChangeText={onChange}
+          keyboardType="number-pad"
+          textContentType="oneTimeCode"
+          autoComplete="sms-otp"
+          maxLength={6}
+          autoFocus
+          caretHidden
+          style={{ position: 'absolute', opacity: 0, height: 1, width: 1 }}
+        />
+
+        <V c="flex-row items-center justify-between">
+          <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Valid for 10 minutes.', 'Valable 10 minutes.')}</T>
+          {left > 0 ? (
+            <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ fontVariant: ['tabular-nums'] }}>
+              {L('Resend in', 'Renvoyer dans')} 0:{String(left).padStart(2, '0')}
+            </T>
+          ) : (
+            <P onPress={send} hitSlop={8}>
+              <T c="font-label-md text-label-md text-primary" style={{ fontWeight: '700' }}>
+                {L('Send a new code', 'Nouveau code')}
+              </T>
             </P>
           )}
         </V>
-        <V c="mt-space-lg w-full" style={{ maxWidth: 340 }}>
-          <V c="flex-row justify-between items-center gap-1.5">
-            {[0, 1, 2, 3, 4, 5].map((i) => {
-              const filled = i < digits.length;
-              const active = i === digits.length;
-              return (
-                <V
-                  key={i}
-                  c={`w-12 h-14 rounded-xl items-center justify-center ${filled || active ? 'bg-surface-container-lowest' : 'bg-surface-container-low opacity-80'} ${active ? 'shadow-md' : 'shadow-sm'}`}
-                >
-                  {active && <V c="absolute inset-0 rounded-xl bg-primary/10" />}
-                  {filled ? (
-                    <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
-                      {digits[i]}
-                    </T>
-                  ) : active ? (
-                    <Pulse c="w-0.5 h-6 bg-primary rounded-full" />
-                  ) : (
-                    <V c="w-2 h-2 rounded-full bg-outline-variant" />
-                  )}
-                </V>
-              );
-            })}
-          </V>
-          <V c="flex-row items-center justify-between mt-space-sm px-1">
-            <V c="flex-row items-center gap-1">
-              <Ic n="lock" s={14} c="secondary" />
-              <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Code expires in 10 minutes', 'Code valable 10 minutes')}</T>
-            </V>
-            <P onPress={() => setDigits('')}>
-              <T c="font-label-sm text-label-sm text-primary">{L('Clear all', 'Effacer')}</T>
-            </P>
-          </V>
-        </V>
-        <V c="mt-space-md w-full bg-surface-container-low rounded-xl p-space-sm shadow-sm gap-2" style={{ maxWidth: 340 }}>
-          <V c="flex-row items-center justify-between">
-            <V c="flex-row items-center gap-1.5">
-              <Ic n="schedule" s={18} />
-              <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Resend code in', 'Renvoyer dans')}</T>
-            </V>
-            <T c={`font-label-md text-label-md ${left > 0 ? 'text-on-surface' : 'text-secondary'}`} style={{ fontWeight: '700', fontVariant: ['tabular-nums'] }}>
-              00:{String(Math.max(0, left)).padStart(2, '0')}
-            </T>
-          </V>
-          <P c="flex-row items-center gap-1 pt-1" onPress={send} disabled={left > 0}>
-            <Ic n="chat" s={16} c="primary" />
-            <T c="font-label-md text-label-md text-primary">{L('Resend via SMS', 'Renvoyer par SMS')}</T>
+
+        <ErrorNote error={error} />
+        <Cta icon={null} label={purpose === 'reset' ? L('Continue', 'Continuer') : L('Confirm', 'Confirmer')} loading={busy} onPress={() => submit()} />
+
+        {purpose === 'reset' && (
+          <P c="items-center py-2" onPress={() => navigation.goBack()} hitSlop={8}>
+            <T c="font-label-md text-label-md text-on-surface-variant">{L('Use a different number', 'Utiliser un autre numéro')}</T>
           </P>
-        </V>
-        <ErrorNote error={error} c="mt-space-sm w-full" />
-        <V c="w-full mt-space-md" style={{ maxWidth: 340 }}>
-          <Cta label={L('Verify & continue', 'Vérifier et continuer')} loading={busy} onPress={submit} />
-        </V>
+        )}
         {purpose === 'verify' && (
-          <P c="mt-space-sm py-2" onPress={() => navigation.reset({ index: 0, routes: [{ name: next }] })}>
-            <T c="font-label-md text-label-md text-on-surface-variant">{L('Verify later in Settings', 'Vérifier plus tard')}</T>
+          <P c="items-center py-2" onPress={() => navigation.reset({ index: 0, routes: [{ name: next }] })} hitSlop={8}>
+            <T c="font-label-md text-label-md text-on-surface-variant">{L('Do this later in Settings', 'Plus tard dans les réglages')}</T>
           </P>
         )}
       </V>

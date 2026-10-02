@@ -1,5 +1,5 @@
 import { HttpError, now, ok, readJson } from '../lib/http.js';
-import { publicUser, requireUser, isPro } from '../lib/auth.js';
+import { publicUser, requireUser, isPro, requireConsent } from '../lib/auth.js';
 import { bool, int, oneOf, phone, str } from '../lib/validate.js';
 import { verifyPassword } from '../lib/crypto.js';
 
@@ -79,6 +79,7 @@ export async function getProgress(request, env) {
 
 export async function putProgress(request, env) {
   const user = await requireUser(request, env, ['student']);
+  requireConsent(user);
   const b = await readJson(request, 512 * 1024);
   if (!b.data || typeof b.data !== 'object' || Array.isArray(b.data)) throw new HttpError(400, 'data must be an object.', 'invalid_input');
   const s = b.stats || {};

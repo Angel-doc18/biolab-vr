@@ -31,19 +31,15 @@ export default function LinkChild({ navigation, route }) {
   };
 
   return (
-    <Screen keyboard header={<OnbHeader label={L('Link your child', 'Lier votre enfant')} />}>
-      {!fromHome && <StepBar pct={60} left={L('Onboarding progress', 'Progression')} right={L('Step 2 of 3', 'Étape 2 sur 3')} />}
+    <Screen keyboard header={<OnbHeader />}>
+      {!fromHome && <StepBar screen="LinkChild" />}
       <V c="gap-space-xs mb-space-lg pt-space-sm">
-        <V c="self-start flex-row items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high">
-          <Ic n="family_restroom" s={14} c="primary" />
-          <T c="font-label-sm text-label-sm text-primary uppercase tracking-wider">{L('Parent link', 'Lien parent')}</T>
-        </V>
         <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Link your child', 'Liez votre enfant')}</T>
         <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-          {L('Ask your child to open Me › Parent reports › Link a parent. Enter the 8 character code shown there. Codes last 48 hours.', 'Demandez à votre enfant d’ouvrir Moi › Rapports parent › Lier un parent, puis saisissez le code à 8 caractères (valable 48 h).')}
+          {L('On your child’s phone, open Me, then Parent reports, then Link a parent. Type the 8 character code shown there. A code works for 48 hours.', 'Sur le téléphone de votre enfant, ouvrez Moi, puis Rapports parent, puis Lier un parent. Saisissez le code à 8 caractères affiché. Un code est valable 48 heures.')}
         </T>
       </V>
-      <V c="p-space-md rounded-xl bg-surface-container-low shadow-sm gap-space-sm mb-space-md">
+      <V c="p-space-md rounded-xl bg-surface-container-low gap-space-sm mb-space-md">
         <T c="font-label-md text-label-md text-on-surface">{L('Link code', 'Code de liaison')}</T>
         <Input
           c="h-14 px-4 rounded-xl bg-surface-container-lowest text-headline-md font-headline-md tracking-widest text-center"
@@ -54,16 +50,21 @@ export default function LinkChild({ navigation, route }) {
           maxLength={8}
         />
         <ErrorNote error={error} />
-        <Cta h="h-12" label={L('Link child', 'Lier l’enfant')} icon="link" loading={busy} onPress={submit} />
+        <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
+          {L(
+            'If your child is under 18, linking also approves their account: their name, class, study progress and the questions they send to the tutor are stored as described in the Privacy Policy. You can withdraw this at any time.',
+            'Si votre enfant a moins de 18 ans, la liaison approuve aussi son compte : son nom, sa classe, sa progression et les questions envoyées au tuteur sont enregistrés comme décrit dans la politique de confidentialité. Vous pouvez retirer cet accord à tout moment.'
+          )}
+        </T>
+        <Cta h="h-12" variant="dark" icon={null} label={L('Link and approve', 'Lier et approuver')} loading={busy} onPress={submit} />
       </V>
       {child && (
-        <V c="p-space-md rounded-xl bg-secondary-container/30 flex-row items-center gap-space-sm mb-space-md">
-          <Ic n="check_circle" s={24} c="secondary" fill />
+        <V c="p-space-md rounded-xl bg-surface-container-low flex-row items-center gap-space-sm mb-space-md">
           <V c="flex-1">
             <T c="font-label-lg text-label-lg text-on-surface">
               {child.name} {L('is linked', 'est lié(e)')}
             </T>
-            <T c="font-body-sm text-body-sm text-on-surface-variant">{[child.className, child.schoolName].filter(Boolean).join(' · ')}</T>
+            <T c="font-body-sm text-body-sm text-on-surface-variant">{[child.className, child.schoolName].filter(Boolean).join(', ')}</T>
           </V>
         </V>
       )}
@@ -72,7 +73,7 @@ export default function LinkChild({ navigation, route }) {
           <Cta variant={child ? 'primary' : 'soft'} icon={null} label={L('Done', 'Terminé')} onPress={() => navigation.goBack()} />
         ) : (
           <>
-            <Cta label={L('Continue', 'Continuer')} disabled={!child} onPress={() => navigation.navigate('SetupDone')} />
+            <Cta variant="dark" icon={null} label={L('Continue', 'Continuer')} disabled={!child} onPress={() => navigation.navigate('SetupDone')} />
             <P c="items-center py-2" onPress={() => navigation.navigate('SetupDone')}>
               <T c="font-label-md text-label-md text-on-surface-variant">{L('I will link later', 'Je lierai plus tard')}</T>
             </P>

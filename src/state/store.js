@@ -138,6 +138,9 @@ export function AppProvider({ children }) {
 
   // ---------- progress ----------
   const user = auth.user;
+  // Students under 18 need a parent's approval before anything is stored on the
+  // server; until then progress stays on this phone only.
+  const consentOk = !user || user.role !== 'student' || user.consentStatus === 'granted' || user.consentStatus === 'not_needed';
   const stats = useMemo(() => {
     const unitPct = Object.fromEntries(units.map((u) => [u.id, unitMastery(progress, u, lessonIdsFor(u.id))]));
     return {
@@ -155,7 +158,7 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (!user || loadedFor.current !== user.id) return;
     writeJson(progressKey(user.id), progress);
-    if (user.role !== 'student' || prefs.autoSync === false) return;
+    if (user.role !== 'student' || prefs.autoSync === false || !consentOk) return;
     clearTimeout(syncTimer.current);
     syncTimer.current = setTimeout(() => {
       const lastDay = progress.days[progress.days.length - 1];
@@ -175,7 +178,7 @@ export function AppProvider({ children }) {
         },
       }).catch(() => {});
     }, 3000);
-  }, [progress, user, stats, prefs.autoSync]);
+  }, [progress, user, stats, prefs.autoSync, consentOk]);
 
   const actions = useMemo(
     () => ({
@@ -281,6 +284,8 @@ export function AppProvider({ children }) {
       auth,
       user,
       pro: auth.pro,
+      consentOk,
+      applyUser,
       register,
       login,
       logout,
@@ -297,7 +302,7 @@ export function AppProvider({ children }) {
       refreshUnread,
       ...actions,
     }),
-    [ready, prefs, savePrefs, auth, user, register, login, logout, updateMe, refreshMe, startSession, progress, stats, quota, refreshQuota, unread, refreshUnread, actions]
+    [ready, prefs, savePrefs, auth, user, consentOk, applyUser, register, login, logout, updateMe, refreshMe, startSession, progress, stats, quota, refreshQuota, unread, refreshUnread, actions]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

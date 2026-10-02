@@ -8,16 +8,6 @@ import { useL } from '../i18n';
 
 const HEADER_SHADOW = { shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 1 }, elevation: 2 };
 
-export function OfflineChip({ label }) {
-  const L = useL();
-  return (
-    <V c="flex-row items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full">
-      <V c="w-2 h-2 rounded-full bg-secondary" />
-      <T c="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">{label || L('Offline', 'Hors ligne')}</T>
-    </V>
-  );
-}
-
 function Bell() {
   const nav = useNavigation();
   const { unread, auth } = useApp();
@@ -41,8 +31,8 @@ function Me({ ring = 'secondary' }) {
   );
 }
 
-// Top bar of the five tab roots (Stitch: h-14, logo + wordmark, offline chip, bell, avatar).
-export function TabHeader({ title = 'BioSpatial', subtitle = 'GCE Biology', chip }) {
+// Top bar of the five tab roots: logo and wordmark, notifications, profile.
+export function TabHeader({ title = 'BioSpatial', subtitle = 'GCE Biology' }) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[{ paddingTop: insets.top, backgroundColor: 'rgba(255,255,255,0.96)', zIndex: 50 }, HEADER_SHADOW]}>
@@ -59,7 +49,6 @@ export function TabHeader({ title = 'BioSpatial', subtitle = 'GCE Biology', chip
           </V>
         </V>
         <V c="flex-row items-center gap-space-xs">
-          {chip !== false && <OfflineChip label={chip} />}
           <Bell />
           <Me />
         </V>
@@ -101,7 +90,7 @@ export function StackHeader({ title, subtitle, subtitleColor = 'primary', logo =
   );
 }
 
-// Auth and onboarding bar: back, logo + wordmark, centred step title, person badge.
+// Auth and onboarding bar: back, logo and wordmark, step title.
 export function AuthHeader({ title, onBack, back = true, iosArrow }) {
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
@@ -125,9 +114,6 @@ export function AuthHeader({ title, onBack, back = true, iosArrow }) {
               {title}
             </T>
           )}
-        </V>
-        <V c="w-8 h-8 rounded-full bg-primary items-center justify-center ml-2">
-          <Ic n="person" s={18} c="on-primary" />
         </V>
       </V>
     </View>
@@ -235,7 +221,7 @@ export function Spinner({ c = 'py-10' }) {
   );
 }
 
-// Pulsing dot used by live/status chips.
+// Pulsing dot for a live recording or timer state.
 export function Pulse({ c = 'w-2 h-2 rounded-full bg-secondary' }) {
   const o = useRef(new Animated.Value(1)).current;
   useEffect(() => {

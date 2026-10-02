@@ -20,6 +20,7 @@ import ExamClass from '../screens/onboarding/ExamClass';
 import School from '../screens/onboarding/School';
 import Goals from '../screens/onboarding/Goals';
 import SetupDone from '../screens/onboarding/SetupDone';
+import Guardian from '../screens/onboarding/Guardian';
 import LinkChild from '../screens/onboarding/LinkChild';
 import CreateClass from '../screens/onboarding/CreateClass';
 
@@ -147,6 +148,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Reset" component={Reset} />
         <Stack.Screen name="Role" component={Role} options={{ gestureEnabled: false }} />
         <Stack.Screen name="ExamClass" component={ExamClass} />
+        <Stack.Screen name="Guardian" component={Guardian} />
         <Stack.Screen name="School" component={School} />
         <Stack.Screen name="Goals" component={Goals} />
         <Stack.Screen name="SetupDone" component={SetupDone} options={{ gestureEnabled: false }} />

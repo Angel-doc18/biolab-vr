@@ -1,19 +1,16 @@
 import { useState } from 'react';
 import { Ic, P, T, V } from '../../ui/kit';
-import { Cta, ErrorNote, Pulse, Screen } from '../../ui/chrome';
-import { PhoneField, Toggle, validPhone } from '../../ui/form';
-import { AnimalCell } from '../../ui/art';
+import { Cta, ErrorNote, Screen } from '../../ui/chrome';
+import { Toggle } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { scheduleDailyReminder } from '../../lib/reminders';
 import { OnbHeader, StepBar } from './Steps';
-import { units } from '../../data/units';
-import { lessonCount } from '../../data/lessons';
 
 const pad = (n) => String(n).padStart(2, '0');
 const twelve = (h, m) => `${((h + 11) % 12) + 1}:${pad(m)} ${h < 12 ? 'AM' : 'PM'}`;
 
-export function TimePicker({ value, onChange, L }) {
+export function TimePicker({ value, onChange }) {
   const [h, m] = value.split(':').map(Number);
   const set = (nh, nm) => onChange(`${pad((nh + 24) % 24)}:${pad((nm + 60) % 60)}`);
   const Btn = ({ icon, onPress, label }) => (
@@ -22,7 +19,7 @@ export function TimePicker({ value, onChange, L }) {
     </P>
   );
   return (
-    <V c="flex-row items-center justify-center gap-space-md p-space-sm rounded-xl bg-surface-container-lowest shadow-sm">
+    <V c="flex-row items-center justify-center gap-space-md p-space-sm rounded-xl bg-surface-container-lowest border border-outline-variant">
       <V c="items-center gap-1">
         <Btn icon="expand_less" onPress={() => set(h + 1, m)} label="Hour up" />
         <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
@@ -43,29 +40,36 @@ export function TimePicker({ value, onChange, L }) {
   );
 }
 
+function Choice({ on, label, sub, onPress }) {
+  return (
+    <P c={`flex-1 py-space-sm px-1 rounded-xl items-center justify-center ${on ? 'bg-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={onPress} accessibilityRole="radio" accessibilityState={{ checked: on }}>
+      <T c={`font-label-lg text-label-lg ${on ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
+        {label}
+      </T>
+      {!!sub && <T c={`font-body-sm text-body-sm ${on ? 'text-on-primary' : 'text-on-surface-variant'}`}>{sub}</T>}
+    </P>
+  );
+}
+
 export default function Goals({ navigation }) {
   const { user, updateMe, prefs } = useApp();
   const L = useL();
   const [grade, setGrade] = useState(user?.targetGrade || 'A');
   const [minutes, setMinutes] = useState(user?.dailyMinutes || 20);
   const [time, setTime] = useState(user?.reminderTime || '18:30');
+  const [remind, setRemind] = useState(true);
   const [editTime, setEditTime] = useState(false);
-  const [reports, setReports] = useState(true);
-  const [parentPhone, setParentPhone] = useState(user?.parentPhone ? user.parentPhone.replace(/^237/, '') : '');
+  const [reports, setReports] = useState(Boolean(user?.parentPhone));
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
   const GRADES = [
-    { id: 'A', sub: L('Top grade', 'Meilleure note'), icon: 'school', tag: L('Distinction', 'Mention') },
-    { id: 'B', sub: L('Strong pass', 'Très bien'), icon: 'check', tag: L('Credit', 'Crédit') },
-    { id: 'C', sub: L('Pass', 'Passable'), icon: 'done', tag: L('Pass', 'Admis') },
+    { id: 'A', sub: L('Distinction', 'Mention') },
+    { id: 'B', sub: L('Credit', 'Crédit') },
+    { id: 'C', sub: L('Pass', 'Admis') },
   ];
 
   const submit = async () => {
-    if (reports && parentPhone && !validPhone(parentPhone)) {
-      setError(L('Enter your parent’s 9 digit number, or turn reports off.', 'Entrez le numéro du parent (9 chiffres) ou désactivez.'));
-      return;
-    }
     setBusy(true);
     setError(null);
     try {
@@ -73,11 +77,10 @@ export default function Goals({ navigation }) {
         targetGrade: grade,
         dailyMinutes: minutes,
         reminderTime: time,
-        parentPhone: reports && parentPhone ? `237${parentPhone}` : null,
         parentReportFreq: 'weekly',
-        inactivityAlert: reports && Boolean(parentPhone),
+        inactivityAlert: reports && Boolean(user?.parentPhone),
       });
-      const reminder = await scheduleDailyReminder(time, minutes, prefs.lang);
+      const reminder = remind ? await scheduleDailyReminder(time, minutes, prefs.lang) : false;
       navigation.navigate('SetupDone', { reminder });
     } catch (e) {
       setError(e);
@@ -87,160 +90,68 @@ export default function Goals({ navigation }) {
   };
 
   return (
-    <Screen keyboard header={<OnbHeader label={L('Study goals', 'Objectifs')} />}>
-      <StepBar pct={80} left={L('Onboarding progress', 'Progression')} right={L('Steps 4 & 5 of 5', 'Étapes 4 et 5 sur 5')} />
+    <Screen
+      header={<OnbHeader />}
+      footer={
+        <V c="px-margin pt-space-sm" style={{ paddingBottom: 12 }}>
+          <ErrorNote error={error} c="mb-space-sm" />
+          <Cta variant="dark" icon={null} label={L('Finish', 'Terminer')} loading={busy} onPress={submit} />
+        </V>
+      }
+    >
+      <StepBar screen="Goals" />
       <V c="gap-space-xs mb-space-lg">
-        <V c="self-start flex-row items-center gap-1.5 px-space-sm py-1 bg-surface-container-high rounded-full">
-          <Pulse />
-          <T c="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{L('Goals & offline pack', 'Objectifs et contenu hors ligne')}</T>
-        </V>
-        <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Set your target & get offline ready', 'Fixez votre objectif')}</T>
-        <T c="font-body-md text-body-md text-on-surface-variant">{L('Choose your daily revision pace. Your starter pack is already on this phone.', 'Choisissez votre rythme quotidien. Votre contenu est déjà sur ce téléphone.')}</T>
+        <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Your study plan', 'Votre plan d’étude')}</T>
+        <T c="font-body-md text-body-md text-on-surface-variant">{L('You can change all of this later in Settings.', 'Vous pourrez tout changer dans les réglages.')}</T>
       </V>
 
-      <V c="gap-space-sm mb-space-lg">
-        <V c="flex-row items-center justify-between">
-          <T c="font-headline-sm text-headline-sm text-on-surface">{L('Target GCE Biology grade', 'Note visée')}</T>
-          <T c="font-label-sm text-label-sm text-secondary">{L('Aim high', 'Visez haut')}</T>
+      <V c="gap-space-lg pb-space-lg">
+        <V c="gap-space-sm">
+          <T c="font-label-lg text-label-lg text-on-surface">{L('Grade you are aiming for', 'Note visée')}</T>
+          <V c="flex-row gap-space-xs" accessibilityRole="radiogroup">
+            {GRADES.map((g) => (
+              <Choice key={g.id} on={grade === g.id} label={`${L('Grade', 'Note')} ${g.id}`} sub={g.sub} onPress={() => setGrade(g.id)} />
+            ))}
+          </V>
         </V>
-        <V c="flex-row gap-space-sm">
-          {GRADES.map((g) => {
-            const on = grade === g.id;
-            return (
-              <P key={g.id} c={`flex-1 items-center justify-center p-space-md rounded-xl shadow-sm ${on ? 'bg-primary' : 'bg-surface-container-low'}`} onPress={() => setGrade(g.id)} scale={0.95}>
-                <T c={`font-headline-md text-headline-md ${on ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
-                  {L('Grade', 'Note')} {g.id}
-                </T>
-                <T c={`font-label-sm text-label-sm mt-0.5 ${on ? 'text-primary-fixed' : 'text-on-surface-variant'}`}>{g.sub}</T>
-                <V c="mt-1 flex-row items-center gap-0.5">
-                  <Ic n={g.icon} s={14} c={on ? 'primary-fixed-dim' : 'on-surface-variant'} />
-                  <T c={`font-label-sm ${on ? 'text-primary-fixed-dim' : 'text-on-surface-variant'}`} style={{ fontSize: 10 }}>
-                    {g.tag}
-                  </T>
-                </V>
-              </P>
-            );
-          })}
-        </V>
-      </V>
 
-      <V c="gap-space-sm mb-space-lg">
-        <V c="flex-row items-center justify-between">
-          <T c="font-headline-sm text-headline-sm text-on-surface">{L('Daily study goal', 'Objectif quotidien')}</T>
-          <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Little and often works best', 'Peu mais souvent')}</T>
+        <V c="gap-space-sm">
+          <T c="font-label-lg text-label-lg text-on-surface">{L('Time each day', 'Temps par jour')}</T>
+          <V c="flex-row gap-space-xs" accessibilityRole="radiogroup">
+            {[10, 20, 30, 45].map((m) => (
+              <Choice key={m} on={minutes === m} label={`${m} min`} onPress={() => setMinutes(m)} />
+            ))}
+          </V>
         </V>
-        <V c="flex-row gap-space-xs">
-          {[10, 20, 30, 45].map((m) => {
-            const on = minutes === m;
-            return (
-              <P key={m} c={`flex-1 py-space-sm px-1 rounded-xl items-center ${on ? 'bg-primary shadow-sm' : 'bg-surface-container-low'}`} onPress={() => setMinutes(m)}>
-                <T c={`font-label-lg text-label-lg ${on ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: on ? '700' : '600' }}>
-                  {m} min
-                </T>
-              </P>
-            );
-          })}
-        </V>
-        <V c="mt-space-xs p-space-md rounded-xl bg-surface-container-low gap-space-sm">
-          <V c="flex-row items-center justify-between">
-            <V c="flex-row items-center gap-space-sm flex-1">
-              <V c="w-10 h-10 rounded-full bg-surface-container-high items-center justify-center">
-                <Ic n="alarm" s={22} c="primary" />
-              </V>
-              <V c="flex-1">
-                <T c="font-label-lg text-label-lg text-on-surface">{L('Daily revision alarm', 'Rappel quotidien')}</T>
-                <T c="font-body-sm text-body-sm text-on-surface-variant">{L('A reminder on this phone', 'Une notification sur ce téléphone')}</T>
-              </V>
+
+        <V c="gap-space-sm">
+          <V c="flex-row items-center justify-between gap-space-sm">
+            <V c="flex-1">
+              <T c="font-label-lg text-label-lg text-on-surface">{L('Daily reminder', 'Rappel quotidien')}</T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant">{L('A notification on this phone', 'Une notification sur ce téléphone')}</T>
             </V>
-            <P c="px-space-md py-1.5 rounded-full bg-surface-container-lowest shadow-sm flex-row items-center gap-1.5" onPress={() => setEditTime((e) => !e)} scale={0.95}>
-              <Ic n="schedule" s={18} c="secondary" />
-              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+            <Toggle on={remind} onPress={() => setRemind((r) => !r)} accessibilityLabel={L('Daily reminder', 'Rappel quotidien')} />
+          </V>
+          {remind && (
+            <P c="flex-row items-center justify-between px-space-md h-12 rounded-xl bg-surface-container-lowest border border-outline-variant" onPress={() => setEditTime((e) => !e)} scale={1}>
+              <T c="font-body-md text-body-md text-on-surface">{L('Remind me at', 'Me rappeler à')}</T>
+              <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
                 {time}
               </T>
             </P>
-          </V>
-          {editTime && <TimePicker value={time} onChange={setTime} L={L} />}
+          )}
+          {remind && editTime && <TimePicker value={time} onChange={setTime} />}
         </V>
-      </V>
 
-      <V c="p-space-md rounded-xl bg-surface-container-low shadow-sm gap-space-md mb-space-lg">
-        <V c="flex-row items-start justify-between gap-space-sm">
-          <V c="flex-row items-center gap-space-sm flex-1">
-            <V c="w-10 h-10 rounded-full bg-secondary-container items-center justify-center">
-              <Ic n="chat" s={22} c="on-secondary-container" />
-            </V>
+        {!!user?.parentPhone && (
+          <V c="flex-row items-center justify-between gap-space-sm">
             <V c="flex-1">
-              <T c="font-label-lg text-label-lg text-on-surface">{L('Weekly parent progress', 'Rapport hebdomadaire au parent')}</T>
-              <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Share your report on WhatsApp each week', 'Partagez votre rapport sur WhatsApp chaque semaine')}</T>
+              <T c="font-label-lg text-label-lg text-on-surface">{L('Weekly report to my parent', 'Rapport hebdomadaire au parent')}</T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Sent to your parent’s number, with a message if you stop revising for 3 days.', 'Envoyé au numéro de votre parent, avec un message après 3 jours sans révision.')}</T>
             </V>
+            <Toggle on={reports} onPress={() => setReports((r) => !r)} accessibilityLabel={L('Weekly report to my parent', 'Rapport hebdomadaire au parent')} />
           </V>
-          <Toggle on={reports} onPress={() => setReports((r) => !r)} accessibilityLabel="Weekly parent reports" />
-        </V>
-        <V style={{ opacity: reports ? 1 : 0.4 }} pointerEvents={reports ? 'auto' : 'none'} c="gap-1">
-          <PhoneField value={parentPhone} onChangeText={setParentPhone} bg="bg-surface-container-lowest" placeholder={L("Parent's WhatsApp number", 'Numéro WhatsApp du parent')} />
-          <T c="font-body-sm text-body-sm text-on-surface-variant px-1">
-            {L('Used for your weekly report and an SMS if you stop revising for 3 days.', 'Pour le rapport et un SMS après 3 jours sans révision.')}
-          </T>
-        </V>
-      </V>
-
-      <V c="gap-space-sm mb-space-xl">
-        <V c="flex-row items-center justify-between">
-          <T c="font-headline-sm text-headline-sm text-on-surface">{L('Offline pack', 'Contenu hors ligne')}</T>
-          <V c="px-2 py-0.5 rounded-full bg-secondary-fixed">
-            <T c="font-label-sm text-label-sm text-on-secondary-fixed">{L('No data needed', 'Sans données')}</T>
-          </V>
-        </V>
-        <V c="p-space-md rounded-xl bg-surface-container-low shadow-sm gap-space-md">
-          <V c="flex-row items-center justify-between">
-            <V c="flex-row items-center gap-space-sm">
-              <V c="w-11 h-11 rounded-xl bg-surface-container-high items-center justify-center">
-                <Ic n="download_done" s={24} c="primary" />
-              </V>
-              <V>
-                <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
-                  {L('Starter offline pack', 'Pack de démarrage')}
-                </T>
-                <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Built into the app', 'Intégré à l’application')}</T>
-              </V>
-            </V>
-            <V c="px-2.5 py-1 rounded-full bg-secondary-container">
-              <T c="font-label-sm text-label-sm text-on-secondary-container">{L('Installed', 'Installé')}</T>
-            </V>
-          </V>
-          <V c="flex-row gap-space-sm items-center bg-surface-container-lowest p-space-sm rounded-xl">
-            <V c="w-14 h-14 rounded-lg bg-surface-container overflow-hidden">
-              <AnimalCell />
-            </V>
-            <V c="flex-1">
-              <T c="font-label-md text-label-md text-on-surface" numberOfLines={1}>
-                {units.length} {L('units', 'unités')} · {lessonCount()} {L('lessons', 'leçons')}
-              </T>
-              <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={1}>
-                {L('3D models, labs and practice questions', 'Modèles 3D, TP et questions')}
-              </T>
-            </V>
-          </V>
-          <V c="gap-1.5 pt-space-xs">
-            <V c="flex-row items-center justify-between">
-              <V c="flex-row items-center gap-1.5">
-                <Ic n="check_circle" s={16} c="secondary" />
-                <T c="font-label-sm text-label-sm text-secondary">{L('Ready on this device', 'Prêt sur cet appareil')}</T>
-              </V>
-              <T c="font-label-sm text-label-sm text-secondary uppercase tracking-wider">{L('Ready offline', 'Hors ligne')}</T>
-            </V>
-            <V c="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
-              <V c="h-full w-full bg-secondary rounded-full" />
-            </V>
-          </V>
-        </V>
-      </V>
-      <ErrorNote error={error} c="mb-space-sm" />
-      <V c="gap-space-md pt-space-xs pb-8">
-        <Cta label={L('Complete setup & enter app', 'Terminer et entrer')} loading={busy} onPress={submit} />
-        <P c="w-full items-center py-2" onPress={() => navigation.navigate('SetupDone', { reminder: false })}>
-          <T c="font-label-md text-label-md text-on-surface-variant">{L('Later in Settings', 'Plus tard dans les paramètres')}</T>
-        </P>
+        )}
       </V>
     </Screen>
   );

@@ -55,6 +55,21 @@ export async function requireUser(request, env, roles) {
 
 export const isPro = (user) => Boolean(user.pro_until && user.pro_until > now());
 
+// Students under 18 need a parent's or guardian's approval before their data is
+// processed on the server (Cameroon Law No. 2024/017).
+export const consentOk = (user) => user.role !== 'student' || user.consent_status === 'granted' || user.consent_status === 'not_needed';
+export function requireConsent(user) {
+  if (!consentOk(user)) {
+    throw new HttpError(
+      403,
+      user.consent_status === 'refused'
+        ? 'Your parent or guardian has not approved your account, so this is not available.'
+        : 'A parent or guardian needs to approve your account first.',
+      'consent_required'
+    );
+  }
+}
+
 // Public shape of a user. Never includes hashes or internal flags.
 export function publicUser(u) {
   return {
@@ -78,6 +93,10 @@ export function publicUser(u) {
     parentReportLang: u.parent_report_lang,
     inactivityAlert: Boolean(u.inactivity_alert),
     onboarded: Boolean(u.onboarded),
+    birthYear: u.birth_year || null,
+    birthMonth: u.birth_month || null,
+    consentStatus: u.consent_status || null,
+    guardianName: u.guardian_name || null,
     proUntil: u.pro_until || null,
     createdAt: u.created_at,
   };

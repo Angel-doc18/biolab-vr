@@ -1,10 +1,11 @@
-// Shared pieces of the five onboarding steps.
+// Shared pieces of the onboarding steps.
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View } from 'react-native';
 import { Ic, Logo, P, T, V } from '../../ui/kit';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
+import { ONBOARDING } from '../../navigation/routes';
 
 export function OnbHeader({ label, canBack = true }) {
   const insets = useSafeAreaInsets();
@@ -15,7 +16,7 @@ export function OnbHeader({ label, canBack = true }) {
         <V c="flex-row items-center gap-space-sm">
           {canBack && nav.canGoBack() ? (
             <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={() => nav.goBack()} accessibilityLabel="Go back">
-              <Ic n="arrow_back_ios_new" s={20} c="on-surface" />
+              <Ic n="arrow_back" s={24} c="on-surface" />
             </P>
           ) : (
             <V c="w-1" />
@@ -27,25 +28,24 @@ export function OnbHeader({ label, canBack = true }) {
             </T>
           </V>
         </V>
-        <V c="flex-row items-center gap-space-md">
-          <T c="font-label-md text-label-md text-on-surface-variant">{label}</T>
-          <V c="w-8 h-8 rounded-full bg-primary items-center justify-center">
-            <Ic n="person" s={18} c="on-primary" />
-          </V>
-        </V>
+        {!!label && <T c="font-label-md text-label-md text-on-surface-variant">{label}</T>}
       </V>
     </View>
   );
 }
 
-export function StepBar({ pct, left, right, rightBold = true }) {
+// Thin progress line with "Step n of m" above it, worked out from the role's step list.
+export function StepBar({ screen, pct: fixedPct, right: fixedRight }) {
+  const { user } = useApp();
+  const L = useL();
+  const list = ['Role', ...(ONBOARDING[user?.role] || ONBOARDING.student).filter((s) => s !== 'SetupDone')];
+  const n = Math.max(1, list.indexOf(screen) + 1);
+  const pct = fixedPct ?? Math.round((n / list.length) * 100);
+  const right = fixedRight ?? L(`Step ${n} of ${list.length}`, `Étape ${n} sur ${list.length}`);
   return (
-    <V c="w-full gap-space-xs mb-space-md">
-      <V c="flex-row items-center justify-between">
-        <T c="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">{left}</T>
-        <T c={`font-label-sm text-label-sm ${rightBold ? 'text-primary' : 'text-on-surface-variant'}`}>{right}</T>
-      </V>
-      <V c="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+    <V c="w-full gap-1.5 pt-space-sm mb-space-md">
+      <T c="font-label-md text-label-md text-on-surface-variant">{right}</T>
+      <V c="w-full h-1 bg-surface-container rounded-full overflow-hidden">
         <V c="h-full bg-primary-container rounded-full" style={{ width: `${pct}%` }} />
       </V>
     </V>

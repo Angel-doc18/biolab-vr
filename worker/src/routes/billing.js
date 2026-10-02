@@ -1,5 +1,5 @@
 import { HttpError, created, limit, now, ok, readJson } from '../lib/http.js';
-import { isPro, publicUser, requireUser } from '../lib/auth.js';
+import { isPro, publicUser, requireUser, requireConsent } from '../lib/auth.js';
 import { sha256, uuid } from '../lib/crypto.js';
 import { int, oneOf, phone, str } from '../lib/validate.js';
 import { directPay, paymentStatus, paymentsConfigured, verifyFapshiWebhook } from '../lib/providers.js';
@@ -17,6 +17,7 @@ export async function plans(request, env) {
 
 export async function initiatePayment(request, env) {
   const user = await requireUser(request, env);
+  requireConsent(user);
   await limit(env.WRITE_LIMITER, `pay:${user.id}`, 'Please wait a moment before trying again.');
   const b = await readJson(request);
   const planId = oneOf(b.plan, 'Plan', Object.keys(PLANS));
@@ -122,6 +123,7 @@ export async function fapshiWebhook(request, env) {
 // ---------- vouchers (school licences) ----------
 export async function redeemVoucher(request, env) {
   const user = await requireUser(request, env);
+  requireConsent(user);
   await limit(env.AUTH_LIMITER, `voucher:${user.id}`, 'Too many attempts. Wait a minute and try again.');
   const b = await readJson(request);
   const code = str(b.code, 'Code', { min: 8, max: 24 }).toUpperCase().replace(/[^A-Z0-9]/g, '');

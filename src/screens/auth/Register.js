@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Ic, P, T, V } from '../../ui/kit';
-import { AuthHeader, Cta, ErrorNote, Pulse, Screen } from '../../ui/chrome';
+import { P, T, V } from '../../ui/kit';
+import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { Check, Field, PhoneField, StrengthMeter, passwordValid, validPhone } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-import { MODEL_COUNT } from '../../data/plan';
 
 export default function Register({ navigation }) {
   const { register } = useApp();
@@ -44,31 +43,18 @@ export default function Register({ navigation }) {
   };
 
   return (
-    <Screen keyboard header={<AuthHeader title={L('Create Account', 'Créer un compte')} />}>
-      <V c="pt-space-md pb-space-xl gap-space-lg">
-        <V c="flex-row items-center justify-between">
-          <V c="flex-row items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high">
-            <Pulse c="w-2 h-2 rounded-full bg-secondary-container" />
-            <T c="font-label-sm text-label-sm text-primary uppercase tracking-wider">{L('Get started · GCE Biology', 'Commencer · GCE Biologie')}</T>
-          </V>
-          <V c="flex-row items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-low">
-            <Ic n="wifi_off" s={15} c="secondary" />
-            <T c="font-label-sm text-label-sm text-on-surface-variant" style={{ fontWeight: '500' }}>
-              {L('Offline ready', 'Hors ligne')}
-            </T>
-          </V>
-        </V>
+    <Screen keyboard header={<AuthHeader />}>
+      <V c="pt-space-lg pb-space-xl gap-space-lg">
         <V c="gap-space-xs">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Create your account', 'Créez votre compte')}</T>
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-            {L('Revise GCE Biology from Form 3 to Form 5 with 3D specimens, virtual practicals and timed mocks.', 'Révisez la biologie du GCE avec des spécimens 3D, des TP virtuels et des examens chronométrés.')}
+            {L('Your account keeps your progress, marks and class work in one place.', 'Votre compte garde vos progrès, vos notes et vos devoirs au même endroit.')}
           </T>
         </V>
         <V c="gap-space-md">
           <Field
             label={L('Full name', 'Nom complet')}
-            icon="badge"
-            placeholder="e.g. Brenda Enow"
+            placeholder={L('As written on your school register', 'Comme sur le registre de l’école')}
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
@@ -79,17 +65,15 @@ export default function Register({ navigation }) {
           />
           <PhoneField
             label={L('Phone number', 'Numéro de téléphone')}
-            right={<T c="font-label-sm text-label-sm text-secondary">MTN / Orange</T>}
             value={phone}
             onChangeText={setPhone}
-            hint={L('Used to sign in, reset your password and pay by mobile money', 'Pour vous connecter, réinitialiser le mot de passe et payer')}
+            hint={L('You sign in with this number. Codes and payment requests are sent to it.', 'Vous vous connectez avec ce numéro. Les codes et demandes de paiement y sont envoyés.')}
             error={errors.phone}
           />
           <Field
             label={L('Email address', 'Adresse e-mail')}
-            right={<T c="font-label-sm text-label-sm text-outline">{L('Optional', 'Facultatif')}</T>}
-            icon="alternate_email"
-            placeholder="brenda@example.cm"
+            right={<T c="font-label-sm text-label-sm text-on-surface-variant">{L('Optional', 'Facultatif')}</T>}
+            placeholder="name@gmail.com"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -101,13 +85,14 @@ export default function Register({ navigation }) {
           />
           <V>
             <Field
-              label={L('Create password', 'Créer un mot de passe')}
+              label={L('Password', 'Mot de passe')}
               secure
               value={password}
               onChangeText={setPassword}
               textContentType="newPassword"
               autoComplete="password-new"
               autoCapitalize="none"
+              hint={L('At least 8 characters, with a capital letter, a small letter and a number.', 'Au moins 8 caractères, avec une majuscule, une minuscule et un chiffre.')}
               error={errors.password}
               maxLength={128}
             />
@@ -119,49 +104,22 @@ export default function Register({ navigation }) {
               <T c="font-body-sm text-body-sm text-primary underline" style={{ fontWeight: '600' }} onPress={() => navigation.navigate('Legal', { doc: 'terms' })}>
                 {L('Terms of Service', 'Conditions d’utilisation')}
               </T>
-              {L(' and ', ' et la ')}
+              {L(' and the ', ' et la ')}
               <T c="font-body-sm text-body-sm text-primary underline" style={{ fontWeight: '600' }} onPress={() => navigation.navigate('Legal', { doc: 'privacy' })}>
                 {L('Privacy Policy', 'Politique de confidentialité')}
               </T>
             </T>
           </Check>
           <ErrorNote error={error} />
-          <Cta variant="dark" label={L('Create account', 'Créer le compte')} icon="arrow_forward" loading={busy} onPress={submit} />
-          <V c="p-3.5 rounded-xl bg-surface-container flex-row items-center gap-3 shadow-sm">
-            <V c="w-12 h-12 rounded-lg bg-surface-container-lowest items-center justify-center shadow-sm">
-              <Ic n="view_in_ar" s={24} c="primary" />
-            </V>
-            <V c="flex-1">
-              <V c="flex-row items-center gap-1.5">
-                <T c="font-label-md text-label-md text-on-surface" numberOfLines={1}>
-                  {L('3D specimens and VR view', 'Spécimens 3D et vue VR')}
-                </T>
-                <V c="px-1.5 rounded bg-secondary">
-                  <T c="font-label-sm text-on-secondary" style={{ fontSize: 9 }}>
-                    {L('FREE', 'GRATUIT')}
-                  </T>
-                </V>
-              </V>
-              <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={1}>
-                {MODEL_COUNT} {L('interactive syllabus models included', 'modèles interactifs inclus')}
-              </T>
-            </V>
-          </V>
+          <Cta variant="dark" icon={null} label={L('Create account', 'Créer le compte')} loading={busy} onPress={submit} />
         </V>
         <V c="flex-row items-center justify-center pt-2">
-          <T c="font-body-md text-body-md text-on-surface-variant">{L('Already have an account?', 'Vous avez déjà un compte ?')} </T>
-          <P onPress={() => navigation.navigate('Login')}>
+          <T c="font-body-md text-body-md text-on-surface-variant">{L('Already registered?', 'Déjà inscrit ?')} </T>
+          <P onPress={() => navigation.navigate('Login')} hitSlop={8}>
             <T c="font-body-md text-body-md text-primary" style={{ fontWeight: '700' }}>
               {L('Log in', 'Se connecter')}
             </T>
           </P>
-        </V>
-        <V c="items-center gap-1.5 pt-2">
-          <V c="flex-row items-center gap-1.5">
-            <Ic n="lock" s={16} c="outline" />
-            <T c="font-label-sm text-label-sm text-outline uppercase tracking-wide">{L('Encrypted connection', 'Connexion chiffrée')}</T>
-          </V>
-          <T c="font-body-sm text-body-sm text-outline text-center">{L('Premium can be paid with MTN MoMo or Orange Money', 'Premium payable par MTN MoMo ou Orange Money')}</T>
         </V>
       </V>
     </Screen>

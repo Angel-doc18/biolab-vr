@@ -7,7 +7,7 @@ export function routeAfterAuth(user) {
 
 // Onboarding step order per role, after "Who are you".
 export const ONBOARDING = {
-  student: ['ExamClass', 'School', 'Goals', 'SetupDone'],
+  student: ['ExamClass', 'Guardian', 'School', 'Goals', 'SetupDone'],
   parent: ['LinkChild', 'SetupDone'],
   teacher: ['School', 'CreateClass', 'SetupDone'],
 };
