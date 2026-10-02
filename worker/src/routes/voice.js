@@ -7,13 +7,19 @@ import { oneOf, str } from '../lib/validate.js';
 import { sha256 } from '../lib/crypto.js';
 import { today } from '../lib/notify.js';
 
-// English: Deepgram Aura 2 voices with a British accent. French: MeloTTS.
-export const VOICES = { en: ['draco', 'pandora'], fr: ['melo'] };
+// Two engines. 'melo' (MeloTTS, the default) is a neural voice cheap enough to
+// run all day on the Workers free allowance (about 18 neurons per minute of
+// speech). 'aura' (Deepgram Aura 2, British voices) sounds better but costs
+// about 150 times more: set VOICE_ENGINE = "aura" only on the Workers Paid plan.
+// One engine is used for everything, so the voice never changes mid-lesson.
+const AURA_VOICES = ['draco', 'pandora'];
+export const voiceEngine = (env) => (env.VOICE_ENGINE === 'aura' ? 'aura' : 'melo');
+export const voiceChoices = (env) => (voiceEngine(env) === 'aura' ? AURA_VOICES : ['melo']);
 const MAX_TEXT = 600;
 // New speech made per day, in characters (cached sentences are free). The total
 // can be changed with the VOICE_DAILY_CHARS variable.
-const PER_USER_DAY = 20_000;
-const ALL_DAY = 150_000;
+const PER_USER_DAY = 40_000;
+const ALL_DAY = 400_000;
 
 async function toBytes(out) {
   if (!out) throw new Error('empty audio');
@@ -71,8 +77,8 @@ function smallerWav(u8) {
 }
 
 export async function synthesize(env, { text, lang, voice }) {
-  if (lang === 'en') return toBytes(await env.AI.run('@cf/deepgram/aura-2-en', { text, speaker: voice, encoding: 'mp3' }));
-  return smallerWav(await toBytes(await env.AI.run('@cf/myshell-ai/melotts', { prompt: text, lang: 'fr' })));
+  if (lang === 'en' && voice !== 'melo') return toBytes(await env.AI.run('@cf/deepgram/aura-2-en', { text, speaker: voice, encoding: 'mp3' }));
+  return smallerWav(await toBytes(await env.AI.run('@cf/myshell-ai/melotts', { prompt: text, lang })));
 }
 
 const isWav = (bytes) => {
@@ -91,10 +97,11 @@ export async function speak(request, env) {
   const body = await readJson(request, 8 * 1024);
   const lang = oneOf(body.lang || 'en', 'Language', ['en', 'fr']);
   const text = str(body.text, 'Text', { min: 1, max: MAX_TEXT }).replace(/\s+/g, ' ');
-  const voice = VOICES[lang].includes(body.voice) ? body.voice : VOICES[lang][0];
+  const choices = lang === 'fr' ? ['melo'] : voiceChoices(env);
+  const voice = choices.includes(body.voice) ? body.voice : choices[0];
   const keep = body.keep !== false;
 
-  const key = await sha256(`v2|${lang}|${voice}|${text}`);
+  const key = await sha256(`v3|${lang}|${voice}|${text}`);
   if (env.VOICE_CACHE) {
     const hit = await env.VOICE_CACHE.get(key, 'arrayBuffer');
     if (hit) return audio(hit, 'hit');
@@ -113,7 +120,10 @@ export async function speak(request, env) {
   try {
     bytes = await synthesize(env, { text, lang, voice });
   } catch (e) {
-    console.error('voice_failed', e?.message || e);
+    const msg = String(e?.message || e);
+    console.error('voice_failed', msg);
+    // 4006: the account's daily Workers AI allowance is used up until 00:00 UTC.
+    if (msg.includes('4006')) throw new HttpError(503, 'The natural voice has reached today’s limit.', 'voice_quota');
     throw new HttpError(503, 'The natural voice is not available right now.', 'voice_off');
   }
   if (bytes.byteLength < 256) throw new HttpError(503, 'The natural voice is not available right now.', 'voice_off');

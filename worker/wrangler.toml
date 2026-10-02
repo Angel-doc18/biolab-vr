@@ -19,7 +19,9 @@ FAPSHI_ENV = "sandbox"
 # Browser origins allowed to call the API (web preview only; the app is native).
 ALLOWED_ORIGINS = "http://localhost:8081"
 # Characters of new natural-voice speech allowed per day across all users.
-VOICE_DAILY_CHARS = "150000"
+VOICE_DAILY_CHARS = "400000"
+# "melo" fits the Workers free allowance; "aura" (British voices) needs Workers Paid.
+VOICE_ENGINE = "melo"
 
 [[d1_databases]]
 binding = "DB"

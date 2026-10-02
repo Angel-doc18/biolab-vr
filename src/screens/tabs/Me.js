@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Avatar, Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, TabHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
@@ -7,6 +8,7 @@ import { gradeFor } from '../../state/selectors';
 import { subjectName } from '../../data/subjects';
 import { Section } from './Home';
 import { VOICES, setVoice, speak } from '../../lib/voice';
+import { get } from '../../api/client';
 
 function MenuRow({ title, sub, onPress, first }) {
   return (
@@ -32,7 +34,15 @@ const DAYS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 export default function Me({ navigation }) {
   const { user, pro, progress, stats, logout, prefs, savePrefs, subjects, setSubject } = useApp();
   const L = useL();
-  // English has a man's and a woman's voice; each tap switches and plays a sample.
+  // The paid voice engine has a man's and a woman's English voice; the server
+  // says which voices it offers, and the choice is shown only when there is one.
+  const [voiceChoice, setVoiceChoice] = useState(false);
+  useEffect(() => {
+    get('/v1/health', { auth: false })
+      .then((h) => setVoiceChoice((h?.voices || []).length > 1))
+      .catch(() => {});
+  }, []);
+  // Each tap switches voice and plays a sample.
   const changeVoice = () => {
     const at = VOICES.en.findIndex((v) => v.id === prefs.voice);
     const next = VOICES.en[(Math.max(0, at) + 1) % VOICES.en.length].id;
@@ -148,7 +158,7 @@ export default function Me({ navigation }) {
           <MenuRow title={pro ? L('Subscription and payments', 'Abonnement et paiements') : L('Full course and prices', 'Cours complet et prix')} sub={pro && until ? `${L('Active until', 'Actif jusqu’au')} ${until}` : null} onPress={() => navigation.navigate('Paywall')} />
           {student && <MenuRow title={L('Downloads and storage', 'Téléchargements et stockage')} sub={L('3D models and data kept on this phone', '3D et données gardées sur ce téléphone')} onPress={() => navigation.navigate('Offline')} />}
           <MenuRow title={L('Language', 'Langue')} sub={prefs.lang === 'fr' ? 'Français' : 'English'} onPress={() => navigation.navigate('Language', { fromSettings: true })} />
-          {prefs.lang !== 'fr' && <MenuRow title={L('Tutor voice', 'Voix du tuteur')} sub={`${(VOICES.en.find((v) => v.id === prefs.voice) || VOICES.en[0])[prefs.lang === 'fr' ? 'fr' : 'en']}. ${L('Tap to hear the other voice', 'Touchez pour entendre l’autre voix')}`} onPress={changeVoice} />}
+          {voiceChoice && prefs.lang !== 'fr' && <MenuRow title={L('Tutor voice', 'Voix du tuteur')} sub={`${(VOICES.en.find((v) => v.id === prefs.voice) || VOICES.en[0])[prefs.lang === 'fr' ? 'fr' : 'en']}. ${L('Tap to hear the other voice', 'Touchez pour entendre l’autre voix')}`} onPress={changeVoice} />}
           <MenuRow title={L('Account and settings', 'Compte et réglages')} sub={L('Profile, reminders, password, deleting your account', 'Profil, rappels, mot de passe, suppression du compte')} onPress={() => navigation.navigate('Settings')} />
           <MenuRow title={L('Help, terms and privacy', 'Aide, conditions et confidentialité')} onPress={() => navigation.navigate('Legal', { doc: 'help' })} />
         </V>

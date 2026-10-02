@@ -69,7 +69,7 @@ function clip(text, lang, keep) {
     if (Date.now() < pauseUntil) throw new Error('natural voice paused');
     let got;
     try {
-      got = await postBytes('/v1/voice', { text, lang, voice, keep }, { timeout: 9000 });
+      got = await postBytes('/v1/voice', { text, lang, voice, keep }, { timeout: 20000 });
     } catch (e) {
       if (e.code === 'voice_off' || e.code === 'voice_quota') pauseUntil = Date.now() + 15 * 60_000;
       else if (e.status === 401 || e.code === 'unauthorized' || e.code === 'offline') pauseUntil = Date.now() + 60_000;
@@ -188,26 +188,46 @@ async function phoneSays(text, lang, rate) {
 let turn = 0;
 let pending = null;
 
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// The natural clip for one piece, trying a second time before giving up.
+async function naturalUri(piece, lang, keep) {
+  try {
+    return await clip(piece, lang, keep);
+  } catch {
+    if (Date.now() < pauseUntil) return null; // the server said no: do not ask again now
+    await wait(700);
+    try {
+      return await clip(piece, lang, keep);
+    } catch {
+      // Keep the phone's voice for a little while instead of switching back and forth.
+      pauseUntil = Math.max(pauseUntil, Date.now() + 30_000);
+      return null;
+    }
+  }
+}
+
+// One voice for the whole text: the natural voice when it can be had, otherwise
+// the phone's voice from start to finish, so it never changes mid-sentence.
 async function run(pieces, lang, rate, mine, keep) {
   await audioMode();
+  let phone = Date.now() < pauseUntil;
   for (let i = 0; i < pieces.length; i++) {
     if (mine !== turn) return false;
-    // Ask for the next piece while this one plays, so there is no gap.
-    if (i + 1 < pieces.length) clip(pieces[i + 1], lang, keep).catch(() => {});
-    let uri = null;
-    try {
-      uri = await clip(pieces[i], lang, keep);
-    } catch {
-      uri = null;
-    }
-    if (mine !== turn) return false;
-    if (uri) {
-      try {
-        await playUri(uri);
-        continue;
-      } catch {
-        if (mine !== turn) return false;
+    if (!phone) {
+      // Ask for the next pieces while this one plays, so there is no gap.
+      for (const k of [1, 2]) if (i + k < pieces.length) clip(pieces[i + k], lang, keep).catch(() => {});
+      const uri = await naturalUri(pieces[i], lang, keep);
+      if (mine !== turn) return false;
+      if (uri) {
+        try {
+          await playUri(uri);
+          continue;
+        } catch {
+          if (mine !== turn) return false;
+        }
       }
+      phone = true;
     }
     await phoneSays(pieces[i], lang, rate);
   }
@@ -243,6 +263,9 @@ export function stop() {
   Speech.stop();
   was?.onStopped?.();
 }
+
+// False while the natural voice is unavailable and the phone's voice is used.
+export const naturalVoiceOn = () => Date.now() >= pauseUntil;
 
 // Fetches the first part of a text ahead of time, for example the next step.
 export function prepare(text, options = {}) {
