@@ -3,6 +3,7 @@ import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView } 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Speech from '../../lib/voice';
+import ListenButton from '../../ui/ListenButton';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { StackHeader, useToast } from '../../ui/chrome';
 import { post } from '../../api/client';
@@ -236,10 +237,7 @@ export default function Tutor({ navigation, route }) {
               <V key={m.id} c="gap-2">
                 <Rich text={m.content} />
                 <V c="flex-row items-center gap-space-md flex-wrap">
-                  <P c="flex-row items-center gap-1" onPress={() => speak(m)} hitSlop={8} accessibilityLabel={speaking === m.id ? 'Stop reading' : 'Read aloud'}>
-                    <Ic n={speaking === m.id ? 'stop' : 'volume_up'} s={16} c="on-surface-variant" />
-                    <T c="font-label-md text-label-md text-on-surface-variant">{speaking === m.id ? L('Stop', 'Arrêter') : L('Listen', 'Écouter')}</T>
-                  </P>
+                  <ListenButton size="sm" label={L('Listen', 'Écouter')} stopLabel={L('Stop', 'Arrêter')} playing={speaking === m.id} onPress={() => speak(m)} />
                   {m.unit && (
                     <P c="flex-row items-center gap-1" onPress={() => navigation.navigate('Specimen', { unitId: m.unit })} hitSlop={8}>
                       <Ic n="view_in_ar" s={16} c="on-surface-variant" />

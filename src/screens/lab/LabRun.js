@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView } from 'react-native';
+import { ScrollView } from 'react-native';
 import { Ic, P, T, V } from '../../ui/kit';
 import { Cta, Screen, StackHeader, useToast } from '../../ui/chrome';
 import { Toggle } from '../../ui/form';
+import ListenButton from '../../ui/ListenButton';
 import Slider from '../../ui/Slider';
 import Graph from '../../ui/Graph';
 import { Diagram } from '../../diagrams';
@@ -118,8 +119,10 @@ export default function LabRun({ navigation, route }) {
 
   // ---------- voice: the method, and the tutor's explanation ----------
   const seg = voice.index >= 0 ? segments[voice.index] : null;
+  const [mode, setMode] = useState(null);
   const listenMethod = () => {
     if (voice.playing) return voice.stop();
+    setMode('method');
     const list = [{ text: `${lab.title}. ${lab.objective}`, at: null }, ...method.map((s, i) => ({ text: `${L('Step', 'Étape')} ${i + 1}. ${s}`, at: i }))];
     setSegments(list);
     voice.play(list);
@@ -146,6 +149,7 @@ export default function LabRun({ navigation, route }) {
     if (!e) return;
     const list = segmentsOf(e);
     setSegments(list);
+    setMode('explain');
     voice.play(list);
   };
 
@@ -220,21 +224,23 @@ export default function LabRun({ navigation, route }) {
 
           <Section title={L('Method', 'Méthode')}>
             <V c="gap-space-sm">
-              <V c="flex-row flex-wrap gap-x-space-lg gap-y-space-xs">
-                <P c="flex-row items-center gap-1.5 py-1" onPress={listenMethod} hitSlop={8}>
-                  <Ic n={voice.playing ? 'stop' : 'volume_up'} s={20} c="primary-container" />
-                  <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
-                    {voice.playing ? L('Stop', 'Arrêter') : L('Listen to the method', 'Écouter la méthode')}
-                  </T>
-                </P>
-                {!voice.playing && (
-                  <P c="flex-row items-center gap-1.5 py-1" onPress={explain} disabled={busy} hitSlop={8}>
-                    {busy ? <ActivityIndicator size="small" /> : <Ic n="record_voice_over" s={20} c="primary-container" />}
-                    <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
-                      {busy ? L('The tutor is preparing', 'Le tuteur prépare') : L('The tutor explains each step', 'Le tuteur explique chaque étape')}
-                    </T>
-                  </P>
-                )}
+              <V c="gap-space-sm">
+                <ListenButton
+                  label={L('Listen to the method', 'Écouter la méthode')}
+                  sub={L('Every step read aloud, one by one', 'Chaque étape lue à voix haute')}
+                  stopLabel={L('Stop listening', 'Arrêter l’écoute')}
+                  playing={voice.playing && mode === 'method'}
+                  onPress={listenMethod}
+                />
+                <ListenButton
+                  label={L('Listen: the tutor explains each step', 'Écouter : le tuteur explique chaque étape')}
+                  sub={L('Why each step is done and what to watch for', 'Pourquoi chaque étape et ce qu’il faut observer')}
+                  stopLabel={L('Stop listening', 'Arrêter l’écoute')}
+                  busyLabel={L('The tutor is preparing', 'Le tuteur prépare')}
+                  playing={voice.playing && mode === 'explain'}
+                  busy={busy}
+                  onPress={explain}
+                />
               </V>
               {!!note && <T c="font-body-sm text-body-sm text-on-surface-variant">{note}</T>}
               {seg?.at == null && !!seg && (
@@ -293,10 +299,18 @@ export default function LabRun({ navigation, route }) {
                     </P>
                   )}
                 </V>
-                <V c="flex-row items-center justify-between gap-space-sm">
-                  <T c="font-body-sm text-body-sm text-on-surface-variant flex-1">{L('Read each result aloud', 'Lire chaque résultat à voix haute')}</T>
+                <P c="flex-row items-center gap-space-sm p-space-sm rounded-xl border-2 border-secondary bg-surface-container-lowest" onPress={() => setAloud((x) => !x)} accessibilityRole="switch" accessibilityState={{ checked: aloud }}>
+                  <V c="w-9 h-9 rounded-full bg-secondary items-center justify-center">
+                    <Ic n="volume_up" s={20} c="on-primary" fill />
+                  </V>
+                  <V c="flex-1">
+                    <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                      {L('Read each result aloud', 'Lire chaque résultat à voix haute')}
+                    </T>
+                    <T c="font-body-sm text-body-sm text-on-surface-variant">{aloud ? L('On: you will hear every reading', 'Activé : chaque mesure est lue') : L('Off: tap to hear every reading', 'Désactivé : touchez pour entendre chaque mesure')}</T>
+                  </V>
                   <Toggle on={aloud} onPress={() => setAloud((x) => !x)} accessibilityLabel={L('Read results aloud', 'Lire les résultats')} />
-                </V>
+                </P>
                 {mine.length > 0 ? (
                   <Table columns={lab.columns} rows={mine} />
                 ) : (
@@ -322,12 +336,13 @@ export default function LabRun({ navigation, route }) {
                     <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22, fontWeight: '700' }}>
                       {analysis.conclusion}
                     </T>
-                    <P c="self-start flex-row items-center gap-1.5 py-1" onPress={() => voice.say(`${analysis.lines.join(' ')} ${analysis.conclusion}`, { keep: false })} hitSlop={8}>
-                      <Ic n="volume_up" s={18} c="primary-container" />
-                      <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
-                        {L('Listen to the result', 'Écouter le résultat')}
-                      </T>
-                    </P>
+                    <ListenButton
+                      label={L('Listen to the result', 'Écouter le résultat')}
+                      sub={L('The working and what it shows', 'Le calcul et ce qu’il montre')}
+                      stopLabel={L('Stop listening', 'Arrêter l’écoute')}
+                      playing={voice.saying === 'result'}
+                      onPress={() => (voice.saying === 'result' ? voice.stop() : voice.say(`${analysis.lines.join(' ')} ${analysis.conclusion}`, { keep: false, key: 'result' }))}
+                    />
                   </V>
                 ) : (
                   mine.length > 0 && (
@@ -365,19 +380,17 @@ export default function LabRun({ navigation, route }) {
                   <Panel panel={m.A} magnify={lab.magnify} />
                   <Panel panel={m.B} magnify={lab.magnify} />
                 </V>
-                <P
-                  c="self-start flex-row items-center gap-1.5 py-1"
-                  hitSlop={8}
+                <ListenButton
+                  label={L('Listen: what this result means', 'Écouter : ce que montre ce résultat')}
+                  sub={L('What you see and what it tells you', 'Ce que vous voyez et ce que cela montre')}
+                  stopLabel={L('Stop listening', 'Arrêter l’écoute')}
+                  playing={voice.saying === 'meaning'}
                   onPress={() => {
+                    if (voice.saying === 'meaning') return voice.stop();
                     const e = lab.record(r, t);
-                    voice.say(`${e.observation} ${e.conclusion}`);
+                    voice.say(`${e.observation} ${e.conclusion}`, { key: 'meaning' });
                   }}
-                >
-                  <Ic n="volume_up" s={18} c="primary-container" />
-                  <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
-                    {L('Listen: what this result means', 'Écouter : ce que montre ce résultat')}
-                  </T>
-                </P>
+                />
               </V>
             </Section>
           )}

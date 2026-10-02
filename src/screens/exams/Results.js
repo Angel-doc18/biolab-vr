@@ -6,6 +6,7 @@ import * as Sharing from 'expo-sharing';
 import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader, useToast } from '../../ui/chrome';
 import { useApp } from '../../state/store';
+import ListenButton from '../../ui/ListenButton';
 import { useL, useLang } from '../../i18n';
 import { byKey, p1For, unitLabel } from '../../lib/exam';
 import { unitById } from '../../data/units';
@@ -185,10 +186,7 @@ export default function Results({ navigation, route }) {
                           {it.q.why}
                         </T>
                         <V c="flex-row gap-space-md pt-space-xs flex-wrap">
-                          <P c="flex-row items-center gap-1" onPress={() => speak(it)} hitSlop={8}>
-                            <Ic n={speaking === it.n ? 'stop' : 'volume_up'} s={16} c="primary-container" />
-                            <T c="font-label-md text-label-md text-primary-container">{speaking === it.n ? L('Stop', 'Arrêter') : L('Listen', 'Écouter')}</T>
-                          </P>
+                          <ListenButton size="sm" label={L('Listen', 'Écouter')} stopLabel={L('Stop', 'Arrêter')} playing={speaking === it.n} onPress={() => speak(it)} />
                           <P onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} hitSlop={8}>
                             <T c="font-label-md text-label-md text-primary-container">{L('3D model', 'Modèle 3D')}</T>
                           </P>

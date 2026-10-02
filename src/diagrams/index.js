@@ -1,8 +1,8 @@
 // Every labelled diagram in the app, by key. Lessons name one in `figure`,
 // units in `diagram`, Paper 2 questions in `figure`, practicals in `diagram`.
 import { useState } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { Ic, P, T, V } from '../ui/kit';
+import { T, V } from '../ui/kit';
+import ListenButton from '../ui/ListenButton';
 import { useApp } from '../state/store';
 import { useL, useLang } from '../i18n';
 import { useNarrator } from '../lib/narrator';
@@ -83,12 +83,15 @@ export function Diagram({ id, caption = true, maxHeight, explain = false, subjec
       )}
       {explain && (
         <V c="gap-space-xs pt-space-xs">
-          <P c="self-start flex-row items-center gap-1.5 py-1" onPress={start} disabled={busy} hitSlop={8} accessibilityLabel={L('Explain this diagram aloud', 'Expliquer ce schéma à voix haute')}>
-            {busy ? <ActivityIndicator size="small" /> : <Ic n={voice.playing ? 'stop' : 'volume_up'} s={20} c="primary-container" />}
-            <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
-              {busy ? L('The tutor is preparing the explanation', 'Le tuteur prépare l’explication') : voice.playing ? L('Stop', 'Arrêter') : L('Listen: the tutor explains this diagram', 'Écouter : le tuteur explique ce schéma')}
-            </T>
-          </P>
+          <ListenButton
+            label={L('Listen: the tutor explains this diagram', 'Écouter : le tuteur explique ce schéma')}
+            sub={L('Or tap any label to hear about that part', 'Ou touchez une légende pour entendre cette partie')}
+            stopLabel={L('Stop listening', 'Arrêter l’écoute')}
+            busyLabel={L('The tutor is preparing the explanation', 'Le tuteur prépare l’explication')}
+            playing={voice.playing}
+            busy={busy}
+            onPress={start}
+          />
           {!!note && <T c="font-body-sm text-body-sm text-on-surface-variant">{note}</T>}
           {!!seg && (
             <V c="p-space-sm rounded-lg bg-surface-container-low">
@@ -101,9 +104,6 @@ export function Diagram({ id, caption = true, maxHeight, explain = false, subjec
                 {seg.text}
               </T>
             </V>
-          )}
-          {!voice.playing && !busy && (
-            <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Tap any label to hear about that part.', 'Touchez une légende pour entendre l’explication de cette partie.')}</T>
           )}
         </V>
       )}

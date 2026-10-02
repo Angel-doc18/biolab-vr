@@ -8,6 +8,7 @@ import Viewport from '../../three/Viewport';
 import VRView from '../../three/VRView';
 import { ANATOMY, ANATOMY_CREDIT, UNIT_MODEL, arSupported, openInAR } from '../../three/anatomy';
 import { useApp } from '../../state/store';
+import ListenButton from '../../ui/ListenButton';
 import { useL, useLang } from '../../i18n';
 import { unitById } from '../../data/units';
 
@@ -108,7 +109,6 @@ export default function Specimen({ navigation, route }) {
             <Tool icon="visibility" label={L('See inside', 'Voir dedans')} on={xray} onPress={() => setXray((x) => !x)} />
             <Tool icon="open_in_full" label={L('Separate', 'Séparer')} on={explode} onPress={() => setExplode((x) => !x)} />
             <Tool icon="label" label={L('Labels', 'Légendes')} on={labels} onPress={() => setLabels((x) => !x)} />
-            <Tool icon={speaking ? 'stop' : 'volume_up'} label={speaking ? L('Stop', 'Stop') : L('Listen', 'Écouter')} on={speaking} onPress={speak} />
           </V>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 4 }}>
@@ -134,6 +134,14 @@ export default function Specimen({ navigation, route }) {
             <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 23 }}>
               {part.desc}
             </T>
+            <ListenButton
+              c="mt-space-xs"
+              label={L('Listen: about this part', 'Écouter : cette partie')}
+              sub={part.title}
+              stopLabel={L('Stop listening', 'Arrêter l’écoute')}
+              playing={speaking}
+              onPress={speak}
+            />
           </V>
 
           <V c="gap-space-xs pt-space-md">

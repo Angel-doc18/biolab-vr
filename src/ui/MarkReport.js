@@ -1,7 +1,8 @@
 // Point-by-point breakdown of a marked answer (by the app or by the student).
 import { useEffect, useState } from 'react';
 import * as Speech from '../lib/voice';
-import { Ic, P, T, V } from './kit';
+import ListenButton from './ListenButton';
+import { Ic, T, V } from './kit';
 
 const fmt = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
@@ -54,14 +55,11 @@ export function VoiceFeedback({ text, L, lang }) {
         <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
           {L('Feedback', 'Commentaire')}
         </T>
-        <P c="flex-row items-center gap-1" onPress={toggle} accessibilityLabel={on ? 'Stop reading' : 'Read aloud'} hitSlop={8}>
-          <Ic n={on ? 'stop' : 'volume_up'} s={18} c="primary-container" />
-          <T c="font-label-md text-label-md text-primary-container">{on ? L('Stop', 'Arrêter') : L('Listen', 'Écouter')}</T>
-        </P>
       </V>
       <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 21 }}>
         {text}
       </T>
+      <ListenButton label={L('Listen to the feedback', 'Écouter le commentaire')} sub={L('What you got right and how to gain the missing marks', 'Ce qui est juste et comment gagner les points manquants')} stopLabel={L('Stop listening', 'Arrêter l’écoute')} playing={on} onPress={toggle} />
     </V>
   );
 }

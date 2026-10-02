@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Speech from '../../lib/voice';
 import { Ic, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader, useToast } from '../../ui/chrome';
+import ListenButton from '../../ui/ListenButton';
 import { Diagram } from '../../diagrams';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
@@ -132,13 +133,23 @@ export default function Lesson({ navigation, route }) {
             </T>
           </V>
 
+          <ListenButton
+            label={L('Listen to this lesson', 'Écouter cette leçon')}
+            sub={L('The tutor reads it to you; follow the highlighted paragraph', 'Le tuteur la lit ; suivez le paragraphe surligné')}
+            stopLabel={L('Pause listening', 'Mettre en pause')}
+            playing={playing}
+            onPress={toggle}
+          />
+
           {lang === 'fr' && (
             <T c="font-body-sm text-body-sm text-on-surface-variant">Les leçons sont en anglais, comme l’examen du GCE. Vous pouvez poser vos questions au tuteur en français.</T>
           )}
 
           <V c="gap-4">
             {lesson.body.map((p, i) => (
-              <Rich key={i} text={p} />
+              <V key={i} c={playing && para === i + 1 ? 'p-space-sm rounded-lg bg-surface-container-low border-l-4 border-secondary' : ''}>
+                <Rich text={p} />
+              </V>
             ))}
           </V>
 
@@ -233,9 +244,13 @@ export default function Lesson({ navigation, route }) {
 
       <V c="absolute left-0 right-0 bottom-0 bg-surface-container-lowest border-t border-surface-container" style={{ paddingBottom: insets.bottom }}>
         <V c="h-16 px-margin flex-row items-center gap-space-sm">
-          <P c="h-11 px-space-sm rounded-lg bg-surface-container flex-row items-center gap-1.5" onPress={toggle} accessibilityLabel={playing ? 'Pause reading' : 'Read aloud'}>
-            <Ic n={playing ? 'pause' : 'volume_up'} s={20} c="on-surface" />
-            <T c="font-label-md text-label-md text-on-surface">{playing ? L('Pause', 'Pause') : L('Listen', 'Écouter')}</T>
+          <P c="h-11 pl-1.5 pr-3 rounded-lg bg-secondary flex-row items-center gap-2" onPress={toggle} accessibilityLabel={playing ? L('Pause listening', 'Mettre en pause') : L('Listen to this lesson', 'Écouter cette leçon')}>
+            <V c="w-8 h-8 rounded-full bg-surface-container-lowest items-center justify-center">
+              <Ic n={playing ? 'pause' : 'volume_up'} s={20} c="secondary" fill />
+            </V>
+            <T c="font-label-md text-label-md text-on-primary" style={{ fontWeight: '700' }}>
+              {playing ? L('Pause', 'Pause') : L('Listen', 'Écouter')}
+            </T>
           </P>
           {done ? (
             <P c="flex-1 h-11 rounded-lg bg-primary-container items-center justify-center" onPress={goNext}>
