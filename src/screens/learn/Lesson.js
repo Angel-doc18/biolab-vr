@@ -145,7 +145,7 @@ export default function Lesson({ navigation, route }) {
             <V c="gap-space-xs">
               {[].concat(lesson.figure).map((id) => (
                 <V key={id} c="rounded-xl overflow-hidden bg-surface-container-lowest border border-surface-container p-space-sm">
-                  <Diagram id={id} maxHeight={360} />
+                  <Diagram id={id} maxHeight={360} explain subject={unit.subject} />
                 </V>
               ))}
               <P c="self-start py-1" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} hitSlop={8}>

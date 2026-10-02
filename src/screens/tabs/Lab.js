@@ -5,6 +5,7 @@ import { useL, useLang } from '../../i18n';
 import { labsFor, labUnitN } from '../../data/labs';
 import { labLocked } from '../../data/plan';
 import { subjectName } from '../../data/subjects';
+import { Diagram } from '../../diagrams';
 import { Section } from './Home';
 
 export default function Lab({ navigation }) {
@@ -23,7 +24,10 @@ export default function Lab({ navigation }) {
     else navigation.navigate('LabRun', { labId: l.id });
   };
 
+  // The practical's labelled apparatus, or its two conditions side by side.
   const preview = (() => {
+    if (next.diagram) return <Diagram id={next.diagram} caption={false} maxHeight={220} />;
+    if (next.kind === 'readings') return next.view?.(next.input?.def ?? 0, 0, []) || null;
     const a = next.model(next.control ?? 0, next.slider.def);
     const b = next.model(next.def, next.slider.def);
     return (
@@ -51,7 +55,7 @@ export default function Lab({ navigation }) {
 
         <Section title={progress.labs[next.id] ? L('Practise again', 'Refaire') : L('Next practical', 'Prochain TP')}>
           <V c="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-            <P c="w-full h-44 bg-surface-container-low items-center justify-center" onPress={() => open(next)} scale={1}>
+            <P c="w-full bg-surface-container-lowest items-center justify-center p-space-sm" style={{ minHeight: 160 }} onPress={() => open(next)} scale={1}>
               {preview}
             </P>
             <V c="p-space-md gap-space-sm">

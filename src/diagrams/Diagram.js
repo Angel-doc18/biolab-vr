@@ -12,9 +12,11 @@ import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
 
 export const INK = '#1f2933';
 const RULE = '#3d4852';
+const LIT = '#0369a1';
 const SIZE = 10.5;
 
-function Label({ text, tx, ty, px, py, size = SIZE }) {
+// state: 'lit' (being explained), 'dim' (another label is) or undefined.
+function Label({ text, tx, ty, px, py, size = SIZE, state, onPress }) {
   const lines = String(text).split('\n');
   const step = size * 1.3;
   const height = (lines.length - 1) * step;
@@ -26,12 +28,15 @@ function Label({ text, tx, ty, px, py, size = SIZE }) {
   let y0 = ty;
   if (vertical) y0 = py > ty ? ty + height / 2 + size * 0.55 : ty - height / 2 - size * 0.85;
   else if (!none) x0 = tx < px ? tx + 3 : tx - 3;
+  const lit = state === 'lit';
+  const ink = lit ? LIT : INK;
+  const rule = lit ? LIT : RULE;
   return (
-    <G>
-      {!none && <Line x1={x0} y1={y0} x2={px} y2={py} stroke={RULE} strokeWidth={0.8} />}
-      {!none && <Circle cx={px} cy={py} r={1.6} fill={RULE} />}
+    <G opacity={state === 'dim' ? 0.32 : 1} onPress={onPress}>
+      {!none && <Line x1={x0} y1={y0} x2={px} y2={py} stroke={rule} strokeWidth={lit ? 1.6 : 0.8} />}
+      {!none && <Circle cx={px} cy={py} r={lit ? 3.2 : 1.6} fill={rule} />}
       {lines.map((t, i) => (
-        <SvgText key={i} x={tx} y={top + i * step + size * 0.35} fontSize={size} fill={INK} fontFamily="Inter_500Medium" textAnchor={anchor}>
+        <SvgText key={i} x={tx} y={top + i * step + size * 0.35} fontSize={size} fill={ink} fontFamily={lit ? 'Inter_700Bold' : 'Inter_500Medium'} textAnchor={anchor}>
           {t}
         </SvgText>
       ))}
@@ -64,19 +69,38 @@ function frame(w, h, list) {
   return { x: x0 - 3, y: y0 - 2, w: x1 - x0 + 6, h: y1 - y0 + 4 };
 }
 
-export function DiagramView({ spec, maxHeight, labels = true }) {
+// active: index of the label being explained (the others fade); onLabel(i) when
+// a label with a ruled line is tapped.
+export function DiagramView({ spec, maxHeight, labels = true, active = null, onLabel, state }) {
   if (!spec) return null;
   const { w, h, art, labels: list = [] } = spec;
   const f = labels ? frame(w, h, list) : { x: 0, y: 0, w, h };
   return (
     <View style={{ width: '100%', aspectRatio: f.w / f.h, maxHeight, alignSelf: 'center' }}>
       <Svg width="100%" height="100%" viewBox={`${f.x} ${f.y} ${f.w} ${f.h}`}>
-        {art()}
-        {labels && list.map(([text, tx, ty, px, py, size], i) => <Label key={i} text={text} tx={tx} ty={ty} px={px} py={py} size={size} />)}
+        {art(state)}
+        {labels &&
+          list.map(([text, tx, ty, px, py, size], i) => (
+            <Label
+              key={i}
+              text={text}
+              tx={tx}
+              ty={ty}
+              px={px}
+              py={py}
+              size={size}
+              state={active == null ? undefined : active === i ? 'lit' : 'dim'}
+              onPress={onLabel && px != null ? () => onLabel(i) : undefined}
+            />
+          ))}
       </Svg>
     </View>
   );
 }
+
+// The labels that name structures (those with a ruled line), as plain text.
+export const labelTexts = (spec) => (spec?.labels || []).filter((l) => l[3] != null).map((l) => String(l[0]).replace(/\n/g, ' '));
+export const labelIndexes = (spec) => (spec?.labels || []).map((l, i) => (l[3] != null ? i : null)).filter((i) => i != null);
 
 // Plain text inside a drawing (axis titles, symbols, captions), not a label.
 export function Txt({ x, y, children, size = 10, anchor = 'middle', fill = INK, weight = '500', rotate, italic }) {

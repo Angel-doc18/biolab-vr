@@ -62,7 +62,7 @@ export default function Unit({ navigation, route }) {
             </V>
           </V>
 
-          <UnitPicture unit={unit} />
+          <UnitPicture unit={unit} explain maxHeight={320} />
 
           <P c="rounded-xl bg-surface-container-low p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} scale={0.99}>
             <V c="flex-1 gap-0.5">

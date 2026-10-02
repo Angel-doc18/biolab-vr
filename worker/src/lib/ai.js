@@ -200,3 +200,59 @@ export async function markAnswer(env, input) {
   }
   return finalize(result, input);
 }
+
+// ---------- spoken explanations of diagrams and practicals ----------
+
+const EXPLAIN_SYSTEM = `You are the SciAid science tutor explaining something out loud to a Cameroon GCE Ordinary Level student while they look at it on their phone.
+
+How to speak:
+- Short, simple sentences that anyone can follow, as in a friendly lesson. Explain any technical word the first time you use it.
+- Be accurate to the GCE syllabus. Never invent facts, numbers or quotations.
+- Everything is read aloud by a speech engine, so write words, not symbols: "degrees Celsius", "centimetres cubed", "carbon dioxide", "H two O". No lists, no markdown, no brackets, no emojis.
+- Never use em dashes. Use commas or full stops.`;
+
+const Explained = z.object({
+  intro: z.coerce.string(),
+  items: z.array(z.coerce.string()),
+  summary: z.coerce.string(),
+});
+
+// kind: 'diagram' (items are the labels) or 'practical' (items are the method steps).
+export async function explainItems(env, { kind, subject, lang, title, items, context }) {
+  const what = kind === 'diagram' ? 'a labelled diagram' : 'a practical experiment';
+  const each =
+    kind === 'diagram'
+      ? 'For each label say what the structure is, what it does, and how it helps the whole work.'
+      : 'For each method step say what to do and why it is done, and what to watch for so the result is accurate and safe.';
+  const prompt = `${subjectLine(subject)}
+You are explaining ${what}: "${title}".${context ? `\nAbout it: ${context}` : ''}
+${kind === 'diagram' ? 'Labels' : 'Method steps'}, in order:
+${items.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+
+Write in ${lang === 'fr' ? 'French' : 'English'}.
+"intro": two or three sentences saying what this ${kind === 'diagram' ? 'diagram shows' : 'experiment finds out'} and why it matters.
+"items": exactly ${items.length} entries, one per ${kind === 'diagram' ? 'label' : 'step'} in the same order, each two or three sentences. ${each}
+"summary": two or three sentences pulling it together${kind === 'practical' ? ', including what the results show' : ''}, and one thing examiners look for.
+Reply with JSON only: {"intro": string, "items": [string], "summary": string}`;
+  const provider = aiProvider(env);
+  if (!provider) throw new HttpError(503, 'The tutor is not available yet.', 'ai_unavailable');
+  for (const temperature of [0.3, 0]) {
+    let text;
+    if (provider === 'groq') {
+      ({ text } = await groqChat(env, { json: true, maxTokens: 3500, temperature, messages: [{ role: 'system', content: EXPLAIN_SYSTEM }, { role: 'user', content: prompt }] }));
+    } else {
+      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 6000, system: EXPLAIN_SYSTEM, output_config: { effort: 'low' }, ...FALLBACK, messages: [{ role: 'user', content: prompt }] });
+      text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+    }
+    try {
+      const raw = clean(text).replace(/^```(?:json)?\s*|\s*```$/g, '');
+      const parsed = Explained.parse(JSON.parse(raw));
+      if (parsed.items.length !== items.length) continue;
+      const tidy = (t) => clean(t).replace(/\*\*/g, '');
+      return { intro: tidy(parsed.intro), items: parsed.items.map(tidy), summary: tidy(parsed.summary) };
+    } catch {
+      // malformed reply: try once more at temperature 0
+    }
+  }
+  throw new HttpError(502, 'The tutor could not prepare this explanation. Try again.', 'explain_failed');
+}

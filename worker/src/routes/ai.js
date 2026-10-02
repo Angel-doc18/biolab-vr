@@ -1,8 +1,8 @@
 import { HttpError, limit, now, ok, readJson } from '../lib/http.js';
 import { isPro, requireUser, requireConsent } from '../lib/auth.js';
 import { int, oneOf, str } from '../lib/validate.js';
-import { uuid } from '../lib/crypto.js';
-import { markAnswer, tutorReply } from '../lib/ai.js';
+import { sha256, uuid } from '../lib/crypto.js';
+import { explainItems, markAnswer, tutorReply } from '../lib/ai.js';
 import { today } from '../lib/notify.js';
 import { subjectOr } from '../lib/subjects.js';
 
@@ -120,4 +120,26 @@ export async function report(request, env) {
     .bind(uuid(), user.id, reason, question || null, answer, now())
     .run();
   return ok({ reported: true });
+}
+
+// Spoken explanation of a diagram or a practical. Shared and cached, so it does
+// not use the student's daily questions; the rate limiter still applies.
+export async function explain(request, env) {
+  const user = await requireUser(request, env);
+  requireConsent(user);
+  const b = await readJson(request, 32 * 1024);
+  const kind = oneOf(b.kind, 'Kind', ['diagram', 'practical']);
+  const subject = subjectOr(b.subject);
+  const lang = oneOf(b.lang ?? user.lang ?? 'en', 'Language', ['en', 'fr']);
+  const title = str(b.title, 'Title', { min: 3, max: 200 });
+  const context = str(b.context, 'Context', { max: 600, optional: true });
+  if (!Array.isArray(b.items) || b.items.length < 1 || b.items.length > 16) throw new HttpError(400, 'Between 1 and 16 items are needed.', 'invalid_input');
+  const items = b.items.map((t, i) => str(t, `Item ${i + 1}`, { min: 1, max: 300 }));
+  const key = await sha256(JSON.stringify([kind, subject, lang, title, items, context || '']));
+  const hit = await env.DB.prepare('SELECT body FROM ai_explanations WHERE key = ?').bind(key).first();
+  if (hit) return ok({ explanation: JSON.parse(hit.body), cached: true });
+  await limit(env.AI_LIMITER, `ai:${user.id}`, 'Please wait a moment before asking for another explanation.');
+  const explanation = await explainItems(env, { kind, subject, lang, title, items, context });
+  await env.DB.prepare('INSERT OR REPLACE INTO ai_explanations (key, kind, body, created_at) VALUES (?, ?, ?, ?)').bind(key, kind, JSON.stringify(explanation), now()).run();
+  return ok({ explanation, cached: false });
 }

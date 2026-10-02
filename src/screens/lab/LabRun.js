@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { ScrollView } from 'react-native';
-import { P, T, V } from '../../ui/kit';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, ScrollView } from 'react-native';
+import { Ic, P, T, V } from '../../ui/kit';
 import { Cta, Screen, StackHeader, useToast } from '../../ui/chrome';
+import { Toggle } from '../../ui/form';
 import Slider from '../../ui/Slider';
+import Graph from '../../ui/Graph';
 import { Diagram } from '../../diagrams';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
@@ -10,19 +12,20 @@ import { labById, labSteps, labUnitN } from '../../data/labs';
 import { subjectName } from '../../data/subjects';
 import { labLocked } from '../../data/plan';
 import { completeMatchingAssignment } from '../../lib/assignments';
+import { useNarrator } from '../../lib/narrator';
+import { fetchExplanation, segmentsOf } from '../../lib/explain';
 import { Section } from '../tabs/Home';
 
-// One side of the comparison: what the student sees and the readings taken.
+const show = (v, dp = 1) => (typeof v === 'number' ? v.toFixed(dp) : v);
+
+// One side of a control-and-treatment comparison.
 function Panel({ panel, magnify }) {
   return (
     <V c="flex-1 bg-surface-container-lowest rounded-xl border border-surface-container p-space-sm gap-space-xs">
       <T c="font-label-md text-label-md text-on-surface" style={{ fontWeight: '700' }} numberOfLines={2}>
         {panel.head}
       </T>
-      <V
-        c={`w-full h-36 bg-surface-container-low items-center justify-center overflow-hidden ${magnify ? 'rounded-full self-center' : 'rounded-lg'}`}
-        style={magnify ? { width: 144, borderRadius: 72 } : null}
-      >
+      <V c={`w-full h-36 bg-surface-container-low items-center justify-center overflow-hidden ${magnify ? 'rounded-full self-center' : 'rounded-lg'}`} style={magnify ? { width: 144, borderRadius: 72 } : null}>
         {panel.view}
       </V>
       {!!magnify && (
@@ -46,40 +49,159 @@ function Panel({ panel, magnify }) {
   );
 }
 
+function Choices({ options, value, onChange, control, L }) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 6, paddingHorizontal: 16 }}>
+      {options.map((o, i) => {
+        const on = i === value;
+        return (
+          <P key={o} c={`h-10 px-3 rounded-lg items-center justify-center ${on ? 'bg-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={() => onChange(i)} accessibilityRole="radio" accessibilityState={{ checked: on }}>
+            <T c={`font-label-md text-label-md ${on ? 'text-on-primary' : 'text-on-surface'}`}>
+              {o}
+              {i === control ? ` (${L('control', 'témoin')})` : ''}
+            </T>
+          </P>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+// The results table of a readings practical.
+function Table({ columns, rows }) {
+  return (
+    <V c="rounded-lg border border-outline-variant overflow-hidden">
+      <V c="flex-row bg-surface-container-low">
+        {columns.map((c) => (
+          <T key={c.key} c="flex-1 px-2 py-1.5 font-label-sm text-label-sm text-on-surface" style={{ fontWeight: '700' }}>
+            {c.label}
+          </T>
+        ))}
+      </V>
+      {rows.map((r, i) => (
+        <V key={i} c="flex-row border-t border-surface-container">
+          {columns.map((c) => (
+            <T key={c.key} c="flex-1 px-2 py-1.5 font-body-sm text-body-sm text-on-surface">
+              {show(r[c.key], c.dp ?? 1)}
+            </T>
+          ))}
+        </V>
+      ))}
+    </V>
+  );
+}
+
 export default function LabRun({ navigation, route }) {
   const { pro, recordLab } = useApp();
   const L = useL();
   const lang = useLang();
   const lab = labById(route.params?.labId || 'osmosis');
-  const [r, setR] = useState(lab.def);
-  const [t, setT] = useState(lab.slider.def);
+  const readings = lab.kind === 'readings';
+  const [r, setR] = useState(lab.def ?? 0);
+  const [t, setT] = useState(readings ? lab.input?.def ?? 0 : lab.slider.def);
+  const [rows, setRows] = useState({}); // option index -> readings
   const [recorded, setRecorded] = useState(false);
+  const [aloud, setAloud] = useState(true);
+  const [explained, setExplained] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState(null);
+  const [segments, setSegments] = useState([]);
   const [toast, showToast] = useToast();
+  const voice = useNarrator(lang);
   const started = useRef(Date.now());
+  const method = lab.method || labSteps(lang, lab);
 
   useEffect(() => {
     if (labLocked(lab.id, pro)) navigation.replace('Paywall');
   }, [lab.id, pro, navigation]);
-  useEffect(() => setRecorded(false), [r, t]);
+  useEffect(() => setRecorded(false), [r, t, rows]);
 
-  const m = lab.model(r, t);
-  const method = lab.method || labSteps(lang, lab);
+  // ---------- voice: the method, and the tutor's explanation ----------
+  const seg = voice.index >= 0 ? segments[voice.index] : null;
+  const listenMethod = () => {
+    if (voice.playing) return voice.stop();
+    const list = [{ text: `${lab.title}. ${lab.objective}`, at: null }, ...method.map((s, i) => ({ text: `${L('Step', 'Étape')} ${i + 1}. ${s}`, at: i }))];
+    setSegments(list);
+    voice.play(list);
+  };
+  const explain = async () => {
+    if (voice.playing) return voice.stop();
+    setNote(null);
+    let e = explained;
+    if (!e) {
+      setBusy(true);
+      try {
+        e = await fetchExplanation({ kind: 'practical', subject: lab.subject, title: lab.title, items: method, context: lab.objective, lang });
+        setExplained(e);
+      } catch (err) {
+        setNote(
+          err?.code === 'consent_required'
+            ? L('The tutor explains practicals once a parent approves your account. Use "Listen to the method" for now.', 'Le tuteur explique les TP après l’accord d’un parent. Utilisez « Écouter la méthode » pour l’instant.')
+            : err?.message || L('The tutor needs a connection the first time.', 'Le tuteur a besoin d’une connexion la première fois.')
+        );
+      } finally {
+        setBusy(false);
+      }
+    }
+    if (!e) return;
+    const list = segmentsOf(e);
+    setSegments(list);
+    voice.play(list);
+  };
+
+  // ---------- readings practicals ----------
+  const mine = rows[r] || [];
+  const take = () => {
+    const x = lab.input ? t : mine.length + 1;
+    const m = lab.measure(x, r, mine);
+    const row = { x, ...m };
+    setRows((all) => {
+      const list = (all[r] || []).filter((q) => !lab.input || q.x !== x);
+      return { ...all, [r]: [...list, row].sort((a, b) => a.x - b.x) };
+    });
+    if (aloud && lab.say) voice.say(lab.say(row, r));
+  };
+  const series = useMemo(
+    () =>
+      readings && lab.plot
+        ? Object.entries(rows)
+            .filter(([, list]) => list.length)
+            .map(([o, list]) => ({ name: lab.options?.[o] || '', points: list.map((q) => ({ x: q[lab.plot.x], y: q[lab.plot.y] })) }))
+        : [],
+    [rows, readings, lab]
+  );
+  const enough = readings && Object.values(rows).some((list) => list.length >= (lab.minReadings || 5));
+  const analysis = enough ? lab.analyse(rows, r) : null;
 
   const record = () => {
-    const entry = lab.record(r, t);
     const minutes = Math.max(1, Math.round((Date.now() - started.current) / 60000));
-    recordLab(lab.id, { ...entry, unit: lab.unit, condition: lab.options[r], time: t, timeUnit: lab.slider.unit, minutes });
+    if (readings) {
+      if (!analysis) return;
+      const table = (rows[r] || []).map((q) => lab.columns.map((c) => show(q[c.key], c.dp ?? 1)).join(', ')).join('; ');
+      recordLab(lab.id, {
+        title: lab.title,
+        observation: `${lab.columns.map((c) => c.label).join(', ')}: ${table}. ${analysis.lines.join(' ')}`,
+        conclusion: analysis.conclusion,
+        result: analysis.result,
+        unit: lab.unit,
+        condition: lab.options?.[r] || null,
+        minutes,
+      });
+    } else {
+      const entry = lab.record(r, t);
+      recordLab(lab.id, { ...entry, unit: lab.unit, condition: lab.options[r], time: t, timeUnit: lab.slider.unit, minutes });
+    }
     started.current = Date.now();
     setRecorded(true);
-    showToast(L('Observation saved to your workbook', 'Observation enregistrée dans le cahier'));
+    showToast(L('Saved to your workbook', 'Enregistré dans le cahier'));
     completeMatchingAssignment('lab', lab.id, 100);
   };
 
+  const m = readings ? null : lab.model(r, t);
+
   return (
     <V c="flex-1">
-      <Screen
-        header={<StackHeader title={lab.title} subtitle={`${subjectName(lab.subject, lang)} ${L('practical', 'TP')}, ${L('unit', 'unité')} ${labUnitN(lab)}`} subtitleColor="on-surface-variant" avatar={false} />}
-      >
+      <Screen header={<StackHeader title={lab.title} subtitle={`${subjectName(lab.subject, lang)} ${L('practical', 'TP')}, ${L('unit', 'unité')} ${labUnitN(lab)}`} subtitleColor="on-surface-variant" avatar={false} />}>
         <V c="pt-space-md pb-space-xl gap-space-lg">
           <V c="gap-space-xs">
             <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
@@ -92,62 +214,173 @@ export default function LabRun({ navigation, route }) {
 
           {!!lab.diagram && (
             <V c="rounded-xl bg-surface-container-lowest border border-surface-container p-space-sm">
-              <Diagram id={lab.diagram} />
+              <Diagram id={lab.diagram} explain subject={lab.subject} maxHeight={340} />
             </V>
           )}
 
           <Section title={L('Method', 'Méthode')}>
-            <V c="gap-space-xs">
-              {method.map((s, i) => (
-                <T key={i} c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
-                  {i + 1}. {s}
-                </T>
-              ))}
-            </V>
-          </Section>
-
-          <Section title={L('Your results', 'Vos résultats')}>
-            <V c="gap-space-md">
-              <V c="gap-space-xs">
-                <T c="font-label-lg text-label-lg text-on-surface">{lab.optionsLabel || L('Condition tested', 'Condition testée')}</T>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 6, paddingHorizontal: 16 }}>
-                  {lab.options.map((o, i) => {
-                    const on = i === r;
-                    return (
-                      <P key={o} c={`h-10 px-3 rounded-lg items-center justify-center ${on ? 'bg-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={() => setR(i)} accessibilityRole="radio" accessibilityState={{ checked: on }}>
-                        <T c={`font-label-md text-label-md ${on ? 'text-on-primary' : 'text-on-surface'}`}>
-                          {o}
-                          {i === lab.control ? ` (${L('control', 'témoin')})` : ''}
-                        </T>
-                      </P>
-                    );
-                  })}
-                </ScrollView>
-              </V>
-
-              <V c="gap-1">
-                <V c="flex-row items-center justify-between">
-                  <T c="font-label-lg text-label-lg text-on-surface">{lab.slider.label}</T>
+            <V c="gap-space-sm">
+              <V c="flex-row flex-wrap gap-x-space-lg gap-y-space-xs">
+                <P c="flex-row items-center gap-1.5 py-1" onPress={listenMethod} hitSlop={8}>
+                  <Ic n={voice.playing ? 'stop' : 'volume_up'} s={20} c="primary-container" />
                   <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
-                    {t} {lab.slider.unit}
+                    {voice.playing ? L('Stop', 'Arrêter') : L('Listen to the method', 'Écouter la méthode')}
+                  </T>
+                </P>
+                {!voice.playing && (
+                  <P c="flex-row items-center gap-1.5 py-1" onPress={explain} disabled={busy} hitSlop={8}>
+                    {busy ? <ActivityIndicator size="small" /> : <Ic n="record_voice_over" s={20} c="primary-container" />}
+                    <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+                      {busy ? L('The tutor is preparing', 'Le tuteur prépare') : L('The tutor explains each step', 'Le tuteur explique chaque étape')}
+                    </T>
+                  </P>
+                )}
+              </V>
+              {!!note && <T c="font-body-sm text-body-sm text-on-surface-variant">{note}</T>}
+              {seg?.at == null && !!seg && (
+                <V c="p-space-sm rounded-lg bg-surface-container-low">
+                  <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+                    {seg.text}
                   </T>
                 </V>
-                <Slider value={t} min={lab.slider.min} max={lab.slider.max} step={lab.slider.step} onChange={setT} accessibilityLabel={lab.slider.label} />
-                <V c="flex-row justify-between">
-                  {lab.slider.marks.map((mk) => (
-                    <T key={mk} c="font-body-sm text-body-sm text-on-surface-variant" style={{ fontSize: 11 }}>
-                      {mk}
+              )}
+              {method.map((s, i) => {
+                const on = seg?.at === i;
+                return (
+                  <V key={i} c={`gap-1 ${on ? 'p-space-sm rounded-lg bg-surface-container-low' : ''}`}>
+                    <T c={`font-body-md text-body-md ${on ? 'text-primary-container' : 'text-on-surface'}`} style={{ lineHeight: 22, fontWeight: on ? '700' : '400' }}>
+                      {i + 1}. {s}
                     </T>
-                  ))}
-                </V>
-              </V>
-
-              <V c="flex-row gap-space-sm">
-                <Panel panel={m.A} magnify={lab.magnify} />
-                <Panel panel={m.B} magnify={lab.magnify} />
-              </V>
+                    {on && explained && seg.text !== `${L('Step', 'Étape')} ${i + 1}. ${s}` && (
+                      <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+                        {seg.text}
+                      </T>
+                    )}
+                  </V>
+                );
+              })}
             </V>
           </Section>
+
+          {readings ? (
+            <Section title={L('Your experiment', 'Votre expérience')}>
+              <V c="gap-space-md">
+                {!!lab.options && (
+                  <V c="gap-space-xs">
+                    <T c="font-label-lg text-label-lg text-on-surface">{lab.optionsLabel || L('Condition', 'Condition')}</T>
+                    <Choices options={lab.options} value={r} onChange={setR} L={L} />
+                  </V>
+                )}
+                {!!lab.view && <V c="rounded-xl bg-surface-container-lowest border border-surface-container p-space-sm items-center">{lab.view(t, r, mine)}</V>}
+                {!!lab.input && (
+                  <V c="gap-1">
+                    <V c="flex-row items-center justify-between">
+                      <T c="font-label-lg text-label-lg text-on-surface">{lab.input.label}</T>
+                      <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+                        {show(t, lab.input.dp ?? 0)} {lab.input.unit}
+                      </T>
+                    </V>
+                    <Slider value={t} min={lab.input.min} max={lab.input.max} step={lab.input.step} onChange={(v) => setT(Math.round(v * 1000) / 1000)} accessibilityLabel={lab.input.label} />
+                  </V>
+                )}
+                <V c="flex-row items-center gap-space-sm">
+                  <V c="flex-1">
+                    <Cta variant="dark" icon={null} label={lab.action || L('Take a reading', 'Prendre une mesure')} onPress={take} />
+                  </V>
+                  {mine.length > 0 && (
+                    <P c="h-12 px-3 items-center justify-center" onPress={() => setRows((all) => ({ ...all, [r]: [] }))}>
+                      <T c="font-label-md text-label-md text-on-surface-variant">{L('Clear', 'Effacer')}</T>
+                    </P>
+                  )}
+                </V>
+                <V c="flex-row items-center justify-between gap-space-sm">
+                  <T c="font-body-sm text-body-sm text-on-surface-variant flex-1">{L('Read each result aloud', 'Lire chaque résultat à voix haute')}</T>
+                  <Toggle on={aloud} onPress={() => setAloud((x) => !x)} accessibilityLabel={L('Read results aloud', 'Lire les résultats')} />
+                </V>
+                {mine.length > 0 ? (
+                  <Table columns={lab.columns} rows={mine} />
+                ) : (
+                  <T c="font-body-md text-body-md text-on-surface-variant">
+                    {lab.input
+                      ? L(`Set the ${lab.input.label.toLowerCase()}, then take a reading. Take at least ${lab.minReadings || 5} readings across the range.`, `Réglez la grandeur, puis prenez une mesure. Prenez au moins ${lab.minReadings || 5} mesures sur toute la plage.`)
+                      : L(`Do at least ${lab.minReadings || 3} runs.`, `Faites au moins ${lab.minReadings || 3} essais.`)}
+                  </T>
+                )}
+                {series.length > 0 && series.some((s) => s.points.length >= 2) && (
+                  <Graph series={series} xLabel={lab.plot.xLabel} yLabel={lab.plot.yLabel} fit={lab.plot.fit} curve={lab.plot.curve} xMax={lab.plot.xMax} yMax={lab.plot.yMax} />
+                )}
+                {analysis ? (
+                  <V c="p-space-md rounded-xl bg-surface-container-low gap-space-xs">
+                    <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                      {L('Working out the result', 'Calcul du résultat')}
+                    </T>
+                    {analysis.lines.map((line) => (
+                      <T key={line} c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+                        {line}
+                      </T>
+                    ))}
+                    <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22, fontWeight: '700' }}>
+                      {analysis.conclusion}
+                    </T>
+                    <P c="self-start flex-row items-center gap-1.5 py-1" onPress={() => voice.say(`${analysis.lines.join(' ')} ${analysis.conclusion}`)} hitSlop={8}>
+                      <Ic n="volume_up" s={18} c="primary-container" />
+                      <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                        {L('Listen to the result', 'Écouter le résultat')}
+                      </T>
+                    </P>
+                  </V>
+                ) : (
+                  mine.length > 0 && (
+                    <T c="font-body-sm text-body-sm text-on-surface-variant">
+                      {mine.length} {L('of', 'sur')} {lab.minReadings || 5} {L('readings needed to work out the result.', 'mesures nécessaires pour calculer le résultat.')}
+                    </T>
+                  )
+                )}
+              </V>
+            </Section>
+          ) : (
+            <Section title={L('Your results', 'Vos résultats')}>
+              <V c="gap-space-md">
+                <V c="gap-space-xs">
+                  <T c="font-label-lg text-label-lg text-on-surface">{lab.optionsLabel || L('Condition tested', 'Condition testée')}</T>
+                  <Choices options={lab.options} value={r} onChange={setR} control={lab.control} L={L} />
+                </V>
+                <V c="gap-1">
+                  <V c="flex-row items-center justify-between">
+                    <T c="font-label-lg text-label-lg text-on-surface">{lab.slider.label}</T>
+                    <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+                      {t} {lab.slider.unit}
+                    </T>
+                  </V>
+                  <Slider value={t} min={lab.slider.min} max={lab.slider.max} step={lab.slider.step} onChange={setT} accessibilityLabel={lab.slider.label} />
+                  <V c="flex-row justify-between">
+                    {lab.slider.marks.map((mk) => (
+                      <T key={mk} c="font-body-sm text-body-sm text-on-surface-variant" style={{ fontSize: 11 }}>
+                        {mk}
+                      </T>
+                    ))}
+                  </V>
+                </V>
+                <V c="flex-row gap-space-sm">
+                  <Panel panel={m.A} magnify={lab.magnify} />
+                  <Panel panel={m.B} magnify={lab.magnify} />
+                </V>
+                <P
+                  c="self-start flex-row items-center gap-1.5 py-1"
+                  hitSlop={8}
+                  onPress={() => {
+                    const e = lab.record(r, t);
+                    voice.say(`${e.observation} ${e.conclusion}`);
+                  }}
+                >
+                  <Ic n="volume_up" s={18} c="primary-container" />
+                  <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                    {L('Listen: what this result means', 'Écouter : ce que montre ce résultat')}
+                  </T>
+                </P>
+              </V>
+            </Section>
+          )}
 
           <V c="p-space-md rounded-xl bg-surface-container-low gap-1">
             <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
@@ -163,7 +396,13 @@ export default function LabRun({ navigation, route }) {
           </V>
 
           <V c="gap-space-xs">
-            <Cta variant={recorded ? 'soft' : 'dark'} icon={null} label={recorded ? L('Observation recorded', 'Observation enregistrée') : L('Record this result in the workbook', 'Noter ce résultat dans le cahier')} onPress={record} />
+            <Cta
+              variant={recorded ? 'soft' : 'dark'}
+              icon={null}
+              label={recorded ? L('Saved to the workbook', 'Enregistré dans le cahier') : readings && !analysis ? L('Take enough readings to save', 'Prenez assez de mesures pour enregistrer') : L('Save this result in the workbook', 'Enregistrer ce résultat dans le cahier')}
+              onPress={record}
+              disabled={readings && !analysis}
+            />
             {recorded && (
               <P c="items-center py-2" onPress={() => navigation.navigate('Workbook')}>
                 <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>

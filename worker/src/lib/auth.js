@@ -16,7 +16,8 @@ export async function issueSession(env, user) {
     .bind(uuid(), user.id, await sha256(refresh), now() + REFRESH_TTL_MS, now())
     .run();
   const accessToken = await signJwt({ sub: user.id, role: user.role }, env.JWT_SECRET, ACCESS_TTL);
-  return { accessToken, refreshToken: refresh, expiresIn: ACCESS_TTL };
+  // `pro` lets the app open the full course straight after signing in.
+  return { accessToken, refreshToken: refresh, expiresIn: ACCESS_TTL, pro: isPro(user) };
 }
 
 export async function rotateRefresh(env, refreshToken) {
