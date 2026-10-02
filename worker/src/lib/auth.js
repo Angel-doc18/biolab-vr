@@ -55,7 +55,10 @@ export async function requireUser(request, env, roles) {
   return user;
 }
 
-export const isPro = (user) => Boolean(user.pro_until && user.pro_until > now());
+// While SciAid is being tested every account gets the full course. Set this to
+// false (and OPEN_FOR_TESTING in src/data/plan.js) to bring back the paywall.
+export const FREE_FOR_TESTING = true;
+export const isPro = (user) => FREE_FOR_TESTING || Boolean(user.pro_until && user.pro_until > now());
 
 // Students under 18 need a parent's or guardian's approval before their data is
 // processed on the server (Cameroon Law No. 2024/017).

@@ -5,7 +5,7 @@ import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
 import { get, post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-import { PLANS as LOCAL_PLANS, fcfa } from '../../data/plan';
+import { OPEN_FOR_TESTING, PLANS as LOCAL_PLANS, fcfa } from '../../data/plan';
 
 // Builds published on Google Play sell nothing inside the app (Play's payments
 // policy); students there unlock the course with a voucher from their school.
@@ -131,6 +131,8 @@ export default function Paywall({ navigation, route }) {
   const until = user?.proUntil ? new Date(user.proUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
   const intro = pro && until
     ? `${L('Your full course runs until', 'Votre cours complet court jusqu’au')} ${until}. ${L('Another pass adds its days to this date.', 'Un autre pass ajoute ses jours à cette date.')}`
+    : pro
+    ? L('Everything is open while SciAid is being tested, so you do not need a pass yet.', 'Tout est ouvert pendant les tests de SciAid, vous n’avez donc pas encore besoin d’un pass.')
     : reason === 'mocks'
     ? L('You have used this week’s free Paper 1. The full course has no weekly limit.', 'Vous avez utilisé l’épreuve 1 gratuite de la semaine. Le cours complet n’a pas de limite.')
     : reason === 'mark' || reason === 'ai'
@@ -166,7 +168,7 @@ export default function Paywall({ navigation, route }) {
             <Compare title={L('Answer marking', 'Correction de réponses')} free="-" full={L('30 typed and 6 photos a day', '30 tapées et 6 photos par jour')} />
           </V>
 
-          {!STORE_BUILD && (
+          {!STORE_BUILD && !OPEN_FOR_TESTING && (
             <V c="gap-space-sm">
               <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
                 {L('Choose a pass', 'Choisissez un pass')}
@@ -238,6 +240,7 @@ export default function Paywall({ navigation, route }) {
             </V>
           )}
 
+          {!OPEN_FOR_TESTING && (
           <V c="gap-space-sm">
             <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
               {L('Voucher from your school', 'Code de votre école')}
@@ -257,6 +260,7 @@ export default function Paywall({ navigation, route }) {
             </V>
             {STORE_BUILD && <ErrorNote error={error} />}
           </V>
+          )}
 
           <P c="flex-row items-center justify-between gap-space-sm py-space-xs" onPress={() => setLicence(true)}>
             <V c="flex-1 gap-0.5">

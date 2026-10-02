@@ -5,6 +5,7 @@ import { EMPTY, examSubject, merge, minutesThisWeek, streak, syllabusMastery, to
 import { units, unitsFor } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
 import { SUBJECT_IDS, chosenSubjects } from '../data/subjects';
+import { OPEN_FOR_TESTING } from '../data/plan';
 
 const PREFS = 'bs:prefs';
 const USER = 'bs:user';
@@ -304,7 +305,7 @@ export function AppProvider({ children }) {
       savePrefs,
       auth,
       user,
-      pro: auth.pro,
+      pro: OPEN_FOR_TESTING || auth.pro,
       consentOk,
       subjects,
       subject,
