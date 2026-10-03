@@ -102,6 +102,12 @@ const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect,
     const c = ctrl.current;
     const seen = new THREE.Vector3(...a).applyEuler(new THREE.Euler(c.trx, c.try, 0));
     if (seen.z > 0.05) return;
+    // Built-in models are laid out to be read from their default view, so return to it
+    // instead of turning a flat layout edge-on towards the part.
+    if (!spec.real) {
+      Object.assign(c, { trx: spec.rot[0], try: spec.rot[1] });
+      return;
+    }
     const yaw = -Math.atan2(a[0], a[2]);
     // shortest path from the current yaw
     let d = yaw - c.try;

@@ -53,7 +53,7 @@ export default function ExamMenu({ navigation, route }) {
   const history = [...mine].sort((a, b) => b.at - a.at);
   const lastThree = p1.slice(-3);
   const recent = lastThree.length ? Math.round(lastThree.reduce((a, e) => a + e.pct, 0) / lastThree.length) : null;
-  const weak = weakestUnit(p1, stats.unitPct);
+  const weak = weakestUnit(p1, stats.unitPct, subject);
   const acc = weak ? accuracyByUnit(p1)[weak.unit.id] : null;
 
   return (

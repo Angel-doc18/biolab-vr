@@ -61,14 +61,15 @@ export function accuracyByUnit(exams) {
   return Object.fromEntries(Object.entries(acc).map(([u, [c, t]]) => [u, t ? Math.round((c / t) * 100) : 0]));
 }
 
-export function weakestUnit(exams, unitPct) {
+// The exams passed in are already one subject's; `subject` limits the mastery fallback too.
+export function weakestUnit(exams, unitPct, subject) {
   const acc = accuracyByUnit(exams);
   const scored = Object.entries(acc).filter(([, v]) => v != null);
   if (scored.length) {
     const [u, pct] = scored.sort((a, b) => a[1] - b[1])[0];
     return { unit: unitById(u), pct, source: 'exams' };
   }
-  const touched = Object.entries(unitPct).filter(([, v]) => v > 0);
+  const touched = Object.entries(unitPct).filter(([u, v]) => v > 0 && (!subject || unitById(u)?.subject === subject));
   if (!touched.length) return null;
   const [u, pct] = touched.sort((a, b) => a[1] - b[1])[0];
   return { unit: unitById(u), pct, source: 'mastery' };

@@ -27,6 +27,7 @@ export const SUBJECTS = [
   {
     id: 'physics',
     code: '0580',
+    available: true,
     en: 'Physics',
     fr: 'Physique',
     p1: { count: 50, minutes: 90 },

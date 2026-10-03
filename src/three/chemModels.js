@@ -105,7 +105,7 @@ function half(m) {
   if (m.g === 'capsule') return [a[0], a[1] / 2 + a[0]];
   return [a[0], a[0]];
 }
-function fit(model, reach = 1.4) {
+export function fit(model, reach = 1.4) {
   const meshes = [...model.shell, ...Object.values(model.parts).flatMap((q) => q.meshes)];
   const extent = Math.max(
     ...meshes.map((m) => {

@@ -7,6 +7,7 @@
 
 import { ANATOMY, UNIT_MODEL } from './anatomy';
 import { CHEM_MODELS } from './chemModels';
+import { PHYS_MODELS } from './physModels';
 
 const PI = Math.PI;
 const range = (n, f) => Array.from({ length: n }, (_, i) => f(i));
@@ -28,6 +29,7 @@ function helix({ x = 0, steps = 14, h = 2, rad = 0.28, turns = 1.5, a = '#0369a1
 
 export const MODELS = {
   ...CHEM_MODELS,
+  ...PHYS_MODELS,
 
   // Unit 1: mitochondrion cut-away (matches the design's centrepiece)
   cell: {

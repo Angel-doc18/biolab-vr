@@ -56,7 +56,7 @@ export default function Unit({ navigation, route }) {
             <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight" style={{ lineHeight: 32 }}>
               {unit.short}
             </T>
-            <T c="font-body-md text-body-md text-on-surface-variant">{unit.title}</T>
+            {unit.title !== unit.short && <T c="font-body-md text-body-md text-on-surface-variant">{unit.title}</T>}
             <V c="gap-1 pt-space-xs">
               <Bar pct={pct} c="h-2 bg-surface-container-high" />
               <T c="font-body-sm text-body-sm text-on-surface-variant">
