@@ -1,4 +1,4 @@
-# SciAid: Cameroon GCE Ordinary Level sciences
+# ScienceAid: Cameroon GCE Ordinary Level sciences
 
 Mobile app (Expo SDK 57, React Native) for the Cameroon GCE Ordinary Level sciences, with a
 Cloudflare Worker API for accounts, progress, classes, parent reports, payments and the AI tutor.
@@ -9,7 +9,7 @@ added and are switched on in `src/data/subjects.js` once their content is finish
 
 Direct download, no GitHub account needed:
 
-**https://github.com/Angel-doc18/biolab-vr/releases/latest/download/SciAid.apk**
+**https://github.com/Angel-doc18/biolab-vr/releases/latest/download/ScienceAid.apk**
 
 Every push to `main` builds a new APK and publishes it as release `v1.0.<build>`
 (`.github/workflows/android-release.yml`).

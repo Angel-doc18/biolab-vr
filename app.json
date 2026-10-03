@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SciAid",
+    "name": "ScienceAid",
     "slug": "sciaid",
     "version": "2.0.0",
     "orientation": "default",
@@ -10,8 +10,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.sciaid.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "SciAid uses the camera to photograph your handwritten answers for marking.",
-        "NSPhotoLibraryUsageDescription": "SciAid lets you choose a photo of your handwritten answer for marking."
+        "NSCameraUsageDescription": "ScienceAid uses the camera to photograph your handwritten answers for marking.",
+        "NSPhotoLibraryUsageDescription": "ScienceAid lets you choose a photo of your handwritten answer for marking."
       }
     },
     "android": {
@@ -51,8 +51,8 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "SciAid uses the camera to photograph your handwritten answers for marking.",
-          "photosPermission": "SciAid lets you choose a photo of your handwritten answer for marking.",
+          "cameraPermission": "ScienceAid uses the camera to photograph your handwritten answers for marking.",
+          "photosPermission": "ScienceAid lets you choose a photo of your handwritten answer for marking.",
           "microphonePermission": false
         }
       ],

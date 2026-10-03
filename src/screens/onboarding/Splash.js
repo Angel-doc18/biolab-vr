@@ -36,7 +36,7 @@ export default function Splash({ navigation }) {
       <Animated.View style={{ opacity: shown, alignItems: 'center' }}>
         <Logo size={88} />
         <V c="mt-space-md items-center gap-1">
-          <T c="font-display-lg text-display-lg text-on-surface tracking-tight">SciAid</T>
+          <T c="font-display-lg text-display-lg text-on-surface tracking-tight">ScienceAid</T>
           <T c="font-body-md text-body-md text-on-surface-variant">{L('GCE Ordinary Level sciences, Cameroon', 'Sciences du GCE Ordinary Level, Cameroun')}</T>
         </V>
       </Animated.View>

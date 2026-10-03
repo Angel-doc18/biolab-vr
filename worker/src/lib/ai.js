@@ -19,7 +19,7 @@ const MODEL = 'claude-opus-5-5';
 // retries on a suitable model inside the same call.
 const FALLBACK = { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' };
 
-const TUTOR_SYSTEM = `You are the SciAid science tutor: patient, precise and friendly for secondary school students preparing for the Cameroon GCE Ordinary Level science examinations (Biology, Chemistry, Physics and Human Biology).
+const TUTOR_SYSTEM = `You are the ScienceAid science tutor: patient, precise and friendly for secondary school students preparing for the Cameroon GCE Ordinary Level science examinations (Biology, Chemistry, Physics and Human Biology).
 
 How to answer:
 - Explain clearly in language a teenager can follow, without oversimplifying to the point of being wrong.
@@ -203,7 +203,7 @@ export async function markAnswer(env, input) {
 
 // ---------- spoken explanations of diagrams and practicals ----------
 
-const EXPLAIN_SYSTEM = `You are the SciAid science tutor explaining something out loud to a Cameroon GCE Ordinary Level student while they look at it on their phone.
+const EXPLAIN_SYSTEM = `You are the ScienceAid science tutor explaining something out loud to a Cameroon GCE Ordinary Level student while they look at it on their phone.
 
 How to speak:
 - Short, simple sentences that anyone can follow, as in a friendly lesson. Explain any technical word the first time you use it.

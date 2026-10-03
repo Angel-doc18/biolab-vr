@@ -180,7 +180,7 @@ export function TeacherPortal({ navigation, standalone }) {
                       hitSlop={8}
                       onPress={() =>
                         Linking.openURL(
-                          `https://wa.me/?text=${encodeURIComponent(L(`Join my ${name} class on SciAid: ${detail.class.name}. Code: ${detail.class.joinCode}`, `Rejoignez ma classe de ${name.toLowerCase()} sur SciAid : ${detail.class.name}. Code : ${detail.class.joinCode}`))}`
+                          `https://wa.me/?text=${encodeURIComponent(L(`Join my ${name} class on ScienceAid: ${detail.class.name}. Code: ${detail.class.joinCode}`, `Rejoignez ma classe de ${name.toLowerCase()} sur ScienceAid : ${detail.class.name}. Code : ${detail.class.joinCode}`))}`
                         )
                       }
                     >

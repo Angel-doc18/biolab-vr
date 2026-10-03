@@ -43,23 +43,28 @@ jobs:
           ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
 
       - name: Collect APK
-        run: cp android/app/build/outputs/apk/release/app-release.apk SciAid.apk
+        # ScienceAid.apk is the current name; SciAid.apk keeps links shared before the rename working.
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk ScienceAid.apk
+          cp ScienceAid.apk SciAid.apk
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sciaid-android
-          path: SciAid.apk
+          name: scienceaid-android
+          path: ScienceAid.apk
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: SciAid v1.0.${{ github.run_number }}
+          name: ScienceAid v1.0.${{ github.run_number }}
           make_latest: true
           body: |
-            Android APK for SciAid (Cameroon GCE Ordinary Level sciences).
-            Download **SciAid.apk** below, open it on your phone and allow "install unknown apps" when asked.
-          files: SciAid.apk
+            Android APK for ScienceAid (Cameroon GCE sciences).
+            Download **ScienceAid.apk** below, open it on your phone and allow "install unknown apps" when asked.
+          files: |
+            ScienceAid.apk
+            SciAid.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

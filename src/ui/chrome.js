@@ -56,7 +56,7 @@ export function SubjectTabs() {
 
 // Top bar of the five tab roots: logo and wordmark, notifications, profile, and
 // (with `switcher`) the subject tabs.
-export function TabHeader({ title = 'SciAid', subtitle, switcher }) {
+export function TabHeader({ title = 'ScienceAid', subtitle, switcher }) {
   const insets = useSafeAreaInsets();
   const { subject } = useApp();
   const lang = useLang();
@@ -135,7 +135,7 @@ export function AuthHeader({ title, onBack, back = true, iosArrow }) {
             <V c="w-2" />
           )}
           <Logo size={30} />
-          <T c="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">SciAid</T>
+          <T c="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">ScienceAid</T>
         </V>
         <V c="flex-1 px-space-xs items-end">
           {!!title && (

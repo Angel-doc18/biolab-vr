@@ -153,7 +153,7 @@ export function Avatar({ name = '', size = 32, c = '', ring }) {
 }
 
 // Brand mark: the orbit cell from the approved logo.
-// The SciAid mark: a white S on a rounded brand-blue tile (white S alone when mono).
+// The ScienceAid mark: a white S on a rounded brand-blue tile (white S alone when mono).
 export function Logo({ size = 32, mono }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">

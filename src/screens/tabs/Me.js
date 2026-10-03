@@ -83,7 +83,7 @@ export default function Me({ navigation }) {
               </T>
             )}
             <P onPress={() => navigation.navigate('Paywall')} hitSlop={6}>
-              <T c="font-body-sm text-body-sm text-primary-container">{pro && until ? `${L('Full course until', 'Cours complet jusqu’au')} ${until}` : pro ? L('Everything is open while SciAid is being tested', 'Tout est ouvert pendant les tests de SciAid') : L('Free version. See the full course', 'Version gratuite. Voir le cours complet')}</T>
+              <T c="font-body-sm text-body-sm text-primary-container">{pro && until ? `${L('Full course until', 'Cours complet jusqu’au')} ${until}` : pro ? L('Everything is open while ScienceAid is being tested', 'Tout est ouvert pendant les tests de ScienceAid') : L('Free version. See the full course', 'Version gratuite. Voir le cours complet')}</T>
             </P>
           </V>
         </V>

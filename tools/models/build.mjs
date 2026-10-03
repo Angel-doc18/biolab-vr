@@ -391,7 +391,7 @@ async function buildModel(name, cfg) {
 
 const only = process.argv.slice(2);
 const existing = fs.existsSync(META) ? JSON.parse(fs.readFileSync(META, 'utf8')) : { models: {} };
-existing.credit = 'BodyParts3D, (c) The Database Center for Life Science, licensed CC BY-SA 2.1 Japan. Simplified and coloured for SciAid.';
+existing.credit = 'BodyParts3D, (c) The Database Center for Life Science, licensed CC BY-SA 2.1 Japan. Simplified and coloured for ScienceAid.';
 for (const [name, cfg] of Object.entries(MODELS)) {
   if (only.length && !only.includes(name)) continue;
   existing.models[name] = await buildModel(name, cfg);

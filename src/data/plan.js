@@ -14,7 +14,7 @@ export const FREE_LABS = Object.values(
 ).flatMap((ids) => ids.slice(0, 2));
 export const FREE_MOCKS_PER_WEEK = 1;
 
-// While SciAid is being tested every account gets the full course. Set this to
+// While ScienceAid is being tested every account gets the full course. Set this to
 // false (and FREE_FOR_TESTING in worker/src/lib/auth.js) to bring back the paywall.
 export const OPEN_FOR_TESTING = true;
 

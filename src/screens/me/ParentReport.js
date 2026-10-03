@@ -112,7 +112,7 @@ export default function ParentReport() {
                     </T>
                   </P>
                 </V>
-                <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Your parent signs up as “Parent” in SciAid and enters this code to follow your progress.', 'Votre parent s’inscrit comme « Parent » dans SciAid et saisit ce code pour suivre votre progression.')}</T>
+                <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Your parent signs up as “Parent” in ScienceAid and enters this code to follow your progress.', 'Votre parent s’inscrit comme « Parent » dans ScienceAid et saisit ce code pour suivre votre progression.')}</T>
               </V>
             )}
           </Section>

@@ -71,7 +71,7 @@ export default function Results({ navigation, route }) {
         .join('');
       const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Helvetica,Arial;margin:28px;color:#0f1d2b}h1{font-size:20px}table{width:100%;border-collapse:collapse;font-size:11px}td{border-bottom:1px solid #d7e1e9;padding:6px;vertical-align:top}.k{color:#40474f;margin-top:4px}</style></head><body>
       <h1>${esc(subjectName(subject, 'en'))} Paper 1 practice: ${exam.score}/${exam.total} (${exam.pct}%)</h1><div>${esc(user?.name)}, ${new Date(exam.at || Date.now()).toLocaleString('en-GB')}</div><br/><table>${rows}</table>
-      <p style="font-size:10px;color:#707881">Practice estimate by SciAid. Not an official GCE Board result.</p></body></html>`;
+      <p style="font-size:10px;color:#707881">Practice estimate by ScienceAid. Not an official GCE Board result.</p></body></html>`;
       const { uri } = await Print.printToFileAsync({ html });
       if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
     } catch {
@@ -92,7 +92,7 @@ export default function Results({ navigation, route }) {
             right={
               <P
                 c="w-11 h-11 items-center justify-center"
-                onPress={() => Share.share({ message: L(`I scored ${exam.score}/${exam.total} (${exam.pct}%) in a GCE ${name} Paper 1 practice paper on SciAid.`, `J’ai obtenu ${exam.score}/${exam.total} (${exam.pct} %) à une épreuve 1 d’entraînement de ${name} du GCE sur SciAid.`) })}
+                onPress={() => Share.share({ message: L(`I scored ${exam.score}/${exam.total} (${exam.pct}%) in a GCE ${name} Paper 1 practice paper on ScienceAid.`, `J’ai obtenu ${exam.score}/${exam.total} (${exam.pct} %) à une épreuve 1 d’entraînement de ${name} du GCE sur ScienceAid.`) })}
                 accessibilityLabel="Share result"
               >
                 <Ic n="ios_share" s={20} c="on-surface" />

@@ -1,4 +1,4 @@
-// SciAid API (Cloudflare Worker + D1).
+// ScienceAid API (Cloudflare Worker + D1).
 import { HttpError, json, now } from './lib/http.js';
 import * as auth from './routes/auth.js';
 import * as me from './routes/me.js';
@@ -114,8 +114,8 @@ async function scheduled(env) {
         params: [s.name, String(idle)],
         lang: s.parent_report_lang,
         text: fr
-          ? `SciAid : ${s.name} n'a pas révisé depuis ${idle} jours. Une courte séance aujourd'hui aide à rester prêt pour l'examen.`
-          : `SciAid: ${s.name} has not revised for ${idle} days. A short session today keeps exam preparation on track.`,
+          ? `ScienceAid : ${s.name} n'a pas révisé depuis ${idle} jours. Une courte séance aujourd'hui aide à rester prêt pour l'examen.`
+          : `ScienceAid: ${s.name} has not revised for ${idle} days. A short session today keeps exam preparation on track.`,
       }).catch(() => null);
       if (!sent) console.error('inactivity_alert_failed');
     }

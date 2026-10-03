@@ -9,7 +9,7 @@ import { ANATOMY_CREDIT } from '../../three/anatomy';
 const UPDATED = '2 October 2026';
 
 const TERMS = [
-  ['Using SciAid', 'SciAid is a revision app for the Cameroon GCE Ordinary Level sciences: Biology, Chemistry, Physics and Human Biology. You may use it for your own study. Give accurate details when you register and keep your password private. If you are under 18, a parent or guardian must approve your account before your progress is stored on our servers or you use the tutor.'],
+  ['Using ScienceAid', 'ScienceAid is a revision app for the Cameroon GCE Ordinary Level sciences: Biology, Chemistry, Physics and Human Biology. You may use it for your own study. Give accurate details when you register and keep your password private. If you are under 18, a parent or guardian must approve your account before your progress is stored on our servers or you use the tutor.'],
   ['Content', 'Lessons, diagrams, questions, mark schemes and practicals were written for this app to follow the GCE syllabuses. They are not official GCE Board papers, and grades shown in the app are practice estimates, not exam results. The 3D anatomy models are based on BodyParts3D (credit below); the molecule, apparatus and other models are drawn for this app.'],
   ['AI tutor and marking', 'The tutor and answer marking are produced by an AI system. They can contain mistakes. Check important facts against your lessons and your teacher, and use "Report" on any answer that is wrong or inappropriate. Do not include other people’s personal information in questions or photos.'],
   ['Full course and payments', 'The full course is a one-off pass for a fixed number of days, paid by MTN Mobile Money or Orange Money through our payment provider, Fapshi. Passes do not renew automatically. If a payment fails, no days are added. Contact support within 14 days if you were charged but the course did not open.'],
@@ -19,7 +19,7 @@ const TERMS = [
 ];
 
 const PRIVACY = [
-  ['Who is responsible', 'SciAid processes your personal data under Cameroon Law No. 2024/017 on personal data protection.'],
+  ['Who is responsible', 'ScienceAid processes your personal data under Cameroon Law No. 2024/017 on personal data protection.'],
   ['What we collect', 'Your name, phone number, optional email, role (student, parent or teacher), school, class, exam year, the subjects you take and study preferences. For students under 18 we also keep the birth month and year and the parent or guardian’s name and phone number, with the record of their approval. For students we store the study record: lessons read, quiz and paper scores, practicals completed and study minutes. Drawings and tutor conversations stay on your phone.'],
   ['Parents and guardians', 'Students under 18 need a parent’s or guardian’s approval. Until it is given, progress stays on the phone and the tutor, classes and payments are off. A parent can approve from the link we send, or by linking to the child from a parent account, and can withdraw approval at any time by contacting us.'],
   ['Why we use it', 'To sign you in, keep progress safe across phones, show progress to a teacher whose class you joined or a parent you linked, send codes and alerts you turn on, mark answers, and process payments.'],

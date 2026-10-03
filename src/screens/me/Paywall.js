@@ -132,7 +132,7 @@ export default function Paywall({ navigation, route }) {
   const intro = pro && until
     ? `${L('Your full course runs until', 'Votre cours complet court jusqu’au')} ${until}. ${L('Another pass adds its days to this date.', 'Un autre pass ajoute ses jours à cette date.')}`
     : pro
-    ? L('Everything is open while SciAid is being tested, so you do not need a pass yet.', 'Tout est ouvert pendant les tests de SciAid, vous n’avez donc pas encore besoin d’un pass.')
+    ? L('Everything is open while ScienceAid is being tested, so you do not need a pass yet.', 'Tout est ouvert pendant les tests de ScienceAid, vous n’avez donc pas encore besoin d’un pass.')
     : reason === 'mocks'
     ? L('You have used this week’s free Paper 1. The full course has no weekly limit.', 'Vous avez utilisé l’épreuve 1 gratuite de la semaine. Le cours complet n’a pas de limite.')
     : reason === 'mark' || reason === 'ai'
@@ -144,7 +144,7 @@ export default function Paywall({ navigation, route }) {
       <Screen bg="bg-surface" keyboard header={<StackHeader close title={L('Full course', 'Cours complet')} avatar={false} />}>
         <V c="pb-space-xl gap-space-lg pt-space-md">
           <V c="gap-space-xs">
-            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{pro ? L('You have the full course', 'Vous avez le cours complet') : L('The full SciAid course', 'Le cours complet SciAid')}</T>
+            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{pro ? L('You have the full course', 'Vous avez le cours complet') : L('The full ScienceAid course', 'Le cours complet ScienceAid')}</T>
             <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
               {intro}
             </T>
