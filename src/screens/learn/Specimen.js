@@ -10,7 +10,7 @@ import { ANATOMY, ANATOMY_CREDIT, UNIT_MODEL, arSupported, openInAR } from '../.
 import { useApp } from '../../state/store';
 import ListenButton from '../../ui/ListenButton';
 import { useL, useLang } from '../../i18n';
-import { modelOf, unitById } from '../../data/units';
+import { modelOf, topicLabel, unitById } from '../../data/units';
 
 function Tool({ icon, label, on, onPress }) {
   return (
@@ -87,7 +87,7 @@ export default function Specimen({ navigation, route }) {
       <StackHeader
         close
         title={title}
-        subtitle={`${L('Unit', 'Unité')} ${unit.n}, ${unit.short}`}
+        subtitle={`${topicLabel(unit, L)}, ${unit.short}`}
         subtitleColor="on-surface-variant"
         avatar={false}
         right={

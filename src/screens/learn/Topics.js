@@ -32,7 +32,21 @@ export default function Topics({ navigation, route }) {
   const own = user?.className;
   const all = unitsForForm(subject, forms.length ? form : null);
   const units = mode === 'lab' ? all.filter((u) => labsForUnit(u.id).length) : all;
+  // Class syllabuses keep their own topic order, with the module named each time
+  // it changes; older courses are grouped by module.
   const groups = groupsFor(subject).filter((g) => units.some((u) => u.group === g.id));
+  const runs = forms.length
+    ? [...units]
+        .sort((a, b) => a.n - b.n)
+        .reduce((acc, u) => {
+          const last = acc[acc.length - 1];
+          if (last && last.group?.id === u.group) last.units.push(u);
+          else acc.push({ group: groups.find((g) => g.id === u.group), units: [u] });
+          return acc;
+        }, [])
+    : groups.length
+      ? groups.map((g) => ({ group: g, units: units.filter((u) => u.group === g.id) }))
+      : [{ group: null, units }];
   const name = subjectName(subject, lang);
 
   const heading = {
@@ -90,7 +104,7 @@ export default function Topics({ navigation, route }) {
         n={u.n}
         title={u.short}
         tint={tint}
-        sub={`${lessons.length} ${L('subtopics', 'sous-thèmes')}${read ? `, ${read} ${L('read', 'lus')}` : ''}${pct ? `. ${pct}% ${L('mastered', 'maîtrisé')}` : ''}`}
+        sub={`${lessons.length} ${lessons.length === 1 ? L('subtopic', 'sous-thème') : L('subtopics', 'sous-thèmes')}${read ? `, ${read} ${L('read', 'lus')}` : ''}${pct ? `. ${pct}% ${L('mastered', 'maîtrisé')}` : ''}`}
         pct={pct}
         done={pct >= 85}
         onPress={() => open(u)}
@@ -138,15 +152,16 @@ export default function Topics({ navigation, route }) {
             </V>
           )}
 
-          {groups.map((g) => (
-            <V key={g.id} c="gap-space-sm">
-              <T c="font-label-lg text-label-lg text-on-surface-variant" style={{ fontWeight: '700' }}>
-                {L(g.en, g.fr)}
-              </T>
-              {units.filter((u) => u.group === g.id).map(card)}
+          {runs.map((run, i) => (
+            <V key={`${run.group?.id || 'all'}-${i}`} c="gap-space-sm">
+              {!!run.group && (
+                <T c="font-label-lg text-label-lg text-on-surface-variant" style={{ fontWeight: '700' }}>
+                  {L(run.group.en, run.group.fr)}
+                </T>
+              )}
+              {run.units.map(card)}
             </V>
           ))}
-          {!groups.length && units.map(card)}
         </V>
       </Screen>
       <StaticTabBar active={TAB[mode]} />

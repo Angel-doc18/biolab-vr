@@ -6,7 +6,7 @@ import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { subjectName } from '../../data/subjects';
 import { buildPaper, byKey, clearSession, loadSession, mockRef, p1For, saveSession, score, unitLabel } from '../../lib/exam';
-import { unitById } from '../../data/units';
+import { topicLabel, unitById } from '../../data/units';
 import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
 import { completeMatchingAssignment } from '../../lib/assignments';
 
@@ -194,7 +194,7 @@ export default function Paper1({ navigation, route }) {
                 {L('Question', 'Question')} {i + 1} {L('of', 'sur')} {s.paper.length}
               </T>
               <T c="font-body-sm text-body-sm text-on-surface-variant flex-shrink" numberOfLines={1}>
-                {L('Unit', 'Unité')} {unit.n}
+                {topicLabel(unit, L)}
               </T>
             </V>
             <Bar pct={(answered / s.paper.length) * 100} c="h-1 bg-surface-container" fill="bg-primary-container" />

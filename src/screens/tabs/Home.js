@@ -9,7 +9,7 @@ import { useL, useLang } from '../../i18n';
 import { get } from '../../api/client';
 import { daysToExam } from '../../state/progress';
 import { firstName, focusUnit, greeting, nextLesson, recentUnits } from '../../state/selectors';
-import { formFor, unitsFor } from '../../data/units';
+import { formFor, topicLabel, unitsFor } from '../../data/units';
 import { lessonNumber, lessonsFor } from '../../data/lessons';
 import { LEVELS, examLabel, subjectById, subjectName } from '../../data/subjects';
 import { SubjectGrid, TileGrid } from '../../ui/hub';
@@ -190,7 +190,7 @@ function StudentHome({ navigation }) {
             <V c="p-space-md gap-space-sm">
               <V c="gap-1">
                 <T c="font-label-md text-label-md text-on-surface-variant">
-                  {L('Unit', 'Unité')} {focus.n}, {L('lesson', 'leçon')} {lesson ? lessonNumber(focus.id, lesson) : ''}, {lesson?.minutes} min
+                  {topicLabel(focus, L)}, {L('lesson', 'leçon')} {lesson ? lessonNumber(focus.id, lesson) : ''}, {lesson?.minutes} min
                 </T>
                 <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700', lineHeight: 26 }}>
                   {lesson?.title}

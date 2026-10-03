@@ -8,7 +8,7 @@ import { post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { bankFor } from '../../data/paper2';
-import { unitById } from '../../data/units';
+import { topicLabel, unitById } from '../../data/units';
 import { pickAnswerPhoto } from '../../lib/photo';
 
 const partsFor = (subject) => bankFor(subject).flatMap((q) => q.parts.filter((p) => p.kind === 'text').map((p) => ({ q, p, key: `${q.id}:${p.label}` })));
@@ -90,7 +90,7 @@ export default function MarkAnswer({ navigation, route }) {
         <V c="gap-space-xs">
           <V c="flex-row items-center justify-between gap-space-sm">
             <T c="font-label-md text-label-md text-on-surface-variant flex-1" numberOfLines={1}>
-              {L('Unit', 'Unité')} {unit.n}, {item.q.topic}, {item.p.marks} {item.p.marks === 1 ? L('mark', 'point') : L('marks', 'points')}
+              {topicLabel(unit, L)}, {item.q.topic}, {item.p.marks} {item.p.marks === 1 ? L('mark', 'point') : L('marks', 'points')}
             </T>
             <P onPress={() => setPicking((x) => !x)} hitSlop={8}>
               <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>

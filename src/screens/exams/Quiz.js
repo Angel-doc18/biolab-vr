@@ -3,7 +3,7 @@ import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Cta, Screen, StackHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-import { unitById } from '../../data/units';
+import { topicLabel, unitById } from '../../data/units';
 import { gradeFor } from '../../state/selectors';
 import { completeMatchingAssignment } from '../../lib/assignments';
 import { unitLocked } from '../../data/plan';
@@ -89,7 +89,7 @@ export default function Quiz({ navigation, route }) {
 
   return (
     <Screen
-      header={<StackHeader title={`${L('Question', 'Question')} ${i + 1} ${L('of', 'sur')} ${questions.length}`} subtitle={`${L('Unit', 'Unité')} ${unit.n}, ${unit.short}`} subtitleColor="on-surface-variant" avatar={false} />}
+      header={<StackHeader title={`${L('Question', 'Question')} ${i + 1} ${L('of', 'sur')} ${questions.length}`} subtitle={`${topicLabel(unit, L)}, ${unit.short}`} subtitleColor="on-surface-variant" avatar={false} />}
       footer={
         <V c="px-margin py-3 bg-surface-container-lowest flex-row gap-space-sm" style={{ shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, elevation: 8 }}>
           <P c="h-12 px-space-md rounded-xl bg-surface-container items-center justify-center" onPress={() => setI((x) => Math.max(0, x - 1))} disabled={i === 0}>

@@ -113,7 +113,7 @@ export default function Unit({ navigation, route }) {
             <V c="bg-surface-container-lowest rounded-xl shadow-sm">
               <Row
                 first
-                title={L('Unit quiz', 'Quiz de l’unité')}
+                title={L('Topic quiz', 'Quiz du thème')}
                 sub={`${unit.quiz.length} ${L('questions with explanations', 'questions avec explications')}${quiz?.attempts ? `. ${quiz.attempts} ${quiz.attempts === 1 ? L('attempt', 'essai') : L('attempts', 'essais')}` : ''}`}
                 onPress={() => navigation.navigate('Quiz', { unitId: unit.id })}
               />

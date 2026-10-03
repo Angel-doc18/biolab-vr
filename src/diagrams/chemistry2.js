@@ -32,9 +32,9 @@ function OverWaterArt({ solid, lumps }) {
           ? [[44, 180], [56, 183], [68, 179], [80, 182], [62, 174]].map(([x, y], i) => <Rect key={i} x={x} y={y} width={9} height={6} rx={2} fill={solid} stroke={O} strokeWidth={0.6} />)
           : range(18, (i) => <Circle key={i} cx={44 + (i % 9) * 5} cy={182 + Math.floor(i / 9) * 4} r={1.6} fill={solid} />)}
       </ConicalFlask>
-      <Tube d="M76 92 L76 64 L214 64 L214 196 L234 196 L234 178" />
-      {/* trough */}
+      {/* trough of water; the delivery tube runs under the water into the jar */}
       <Rect x={150} y={150} width={180} height={64} fill={WATER} />
+      <Tube d="M76 92 L76 64 L204 64 L204 200 L234 200 L234 178" />
       <Path d="M150 136 L150 214 L330 214 L330 136" fill="none" stroke={O} strokeWidth={1.6} />
       {/* beehive shelf and inverted gas jar */}
       <Rect x={220} y={176} width={34} height={10} fill="#c9a36b" stroke={O} strokeWidth={0.8} />
@@ -69,16 +69,15 @@ function ChlorineArt() {
       <Path d="M28 152 A34 34 0 0 0 92 152 Z" fill="#f4f1d8" />
       {range(14, (i) => <Circle key={i} cx={40 + (i % 7) * 6} cy={164 + Math.floor(i / 7) * 5} r={1.8} fill="#2f2f2f" />)}
       <Rect x={50} y={92} width={22} height={8} rx={2} fill="#9aa3ab" stroke={O} strokeWidth={0.8} />
-      <Bunsen x={60} y={206} h={30} />
-      {/* wash bottles */}
-      <Tube d="M68 96 L68 78 L150 78 L150 172" />
+      <Bunsen x={60} y={224} h={30} />
+      {/* wash bottles and the gas jar, then the tubes that dip into them */}
       <Bottle x={134} fill={WATER} />
-      <Tube d="M168 102 L168 78 L222 78 L222 172" />
       <Bottle x={206} fill="#efe4c6" />
-      {/* gas jar, downward delivery */}
-      <Tube d="M240 102 L240 78 L304 78 L304 192" />
       <Rect x={282} y={100} width={44} height={98} fill={GLASS} stroke={O} strokeWidth={1.3} />
       <Rect x={283} y={140} width={42} height={57} fill="#dfe8a8" opacity={0.85} />
+      <Tube d="M68 96 L68 78 L150 78 L150 172" />
+      <Tube d="M168 102 L168 78 L222 78 L222 172" />
+      <Tube d="M240 102 L240 78 L304 78 L304 192" />
       <Rect x={276} y={96} width={56} height={5} fill="#c4cbd2" stroke={O} strokeWidth={0.8} />
     </G>
   );
@@ -176,12 +175,12 @@ export const CHEMISTRY_MORE = {
   'chlorine-preparation': {
     title: 'Preparing dry chlorine in a fume cupboard',
     w: 340,
-    h: 238,
+    h: 256,
     art: ChlorineArt,
     labels: [
       ['Concentrated\nhydrochloric acid', 30, 30, 46, 26],
-      ['Manganese(IV) oxide', 30, 160, 40, 166],
-      ['Heat', 30, 196, 56, 190],
+      ['Manganese(IV) oxide', 14, 160, 42, 166],
+      ['Heat', 30, 212, 55, 206],
       ['Water removes\nhydrogen chloride', 154, 214, 154, 188],
       ['Concentrated sulphuric\nacid dries the gas', 226, 22, 226, 98],
       ['Chlorine collects by\ndownward delivery', 340, 150, 326, 150],
@@ -196,7 +195,7 @@ export const CHEMISTRY_MORE = {
   },
   'haber-process': {
     title: 'The Haber process for making ammonia',
-    w: 400,
+    w: 424,
     h: 190,
     art: HaberArt,
     labels: [],

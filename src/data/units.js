@@ -40,3 +40,6 @@ export function formFor(subject, className) {
 // The key of the 3D model a unit shows (its own, or one it borrows).
 export const modelOf = (unitId) => unitById(unitId)?.model || unitId;
 export const hasModel = (unit) => !!unit?.vr;
+
+// "Form 4, Topic 3" (or "Topic 3" for a subject not yet organised by class).
+export const topicLabel = (unit, L) => `${unit?.form ? `${unit.form}, ` : ''}${L('Topic', 'Thème')} ${unit?.n ?? ''}`;

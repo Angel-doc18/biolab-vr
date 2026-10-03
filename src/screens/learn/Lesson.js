@@ -283,7 +283,7 @@ export default function Lesson({ navigation, route }) {
           {done ? (
             <P c="flex-1 h-11 rounded-lg bg-primary-container items-center justify-center" onPress={goNext}>
               <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
-                {nextLesson ? L('Next lesson', 'Leçon suivante') : L('Unit quiz', 'Quiz de l’unité')}
+                {nextLesson ? L('Next lesson', 'Leçon suivante') : L('Topic quiz', 'Quiz du thème')}
               </T>
             </P>
           ) : (
