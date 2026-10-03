@@ -10,6 +10,7 @@ import { get } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { daysToExam } from '../../state/progress';
+import { examLabel } from '../../data/subjects';
 import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
 import { unitById } from '../../data/units';
 import { labById } from '../../data/labs';
@@ -51,7 +52,7 @@ export default function Exams({ navigation }) {
 
   return (
     <Screen
-      header={<TabHeader title={L('Exams', 'Examens')} subtitle={`GCE ${L('June', 'juin')} ${user?.examYear || ''}, ${days} ${days === 1 ? L('day', 'jour') : L('days', 'jours')}`} />}
+      header={<TabHeader title={L('Exams', 'Examens')} subtitle={`${examLabel(user, L)}, ${days} ${days === 1 ? L('day', 'jour') : L('days', 'jours')}`} />}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}
     >
       <V c="pt-space-md pb-space-xl gap-space-lg">

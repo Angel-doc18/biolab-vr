@@ -4,6 +4,10 @@ import { Cta } from '../../ui/chrome';
 import { Diagram } from '../../diagrams';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
+import { OPEN_SUBJECTS } from '../../data/subjects';
+
+// "Biology, Chemistry and Physics" from the subjects that are open.
+const listOf = (names, and) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} ${and} ${names[names.length - 1]}` : names[0]);
 
 function Point({ title, body }) {
   return (
@@ -39,9 +43,9 @@ export default function Welcome({ navigation }) {
       </V>
       <V c="flex-1 px-margin pt-space-lg gap-space-lg">
         <V c="gap-space-xs">
-          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('GCE sciences, from Form 3 to the exam hall', 'Les sciences du GCE, de la Form 3 à l’examen')}</T>
+          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('GCE sciences, from Form 1 to the exam hall', 'Les sciences du GCE, de la Form 1 à l’examen')}</T>
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-            {L('Biology, Chemistry, Physics and Human Biology, written for the Cameroon GCE Ordinary Level syllabuses.', 'Biologie, chimie, physique et biologie humaine, conçues pour les programmes du GCE Ordinary Level du Cameroun.')}
+            {L(`${listOf(OPEN_SUBJECTS.map((s) => s.en), 'and')}, written for the Cameroon GCE syllabuses.`, `${listOf(OPEN_SUBJECTS.map((s, i) => (i ? s.fr.toLowerCase() : s.fr)), 'et')}, conçues pour les programmes du GCE du Cameroun.`)}
           </T>
         </V>
         <V c="gap-space-md">

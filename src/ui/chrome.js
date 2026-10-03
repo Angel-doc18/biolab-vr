@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Avatar, C, Ic, Logo, P, T, V } from './kit';
 import { useApp } from '../state/store';
 import { useL, useLang } from '../i18n';
-import { subjectName } from '../data/subjects';
+import { LEVELS, subjectById, subjectName } from '../data/subjects';
 
 const HEADER_SHADOW = { shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 1 }, elevation: 2 };
 
@@ -61,7 +61,7 @@ export function TabHeader({ title = 'SciAid', subtitle, switcher }) {
   const { subject } = useApp();
   const lang = useLang();
   const L = useL();
-  const sub = subtitle ?? `GCE ${L('Ordinary Level', 'Ordinary Level')} ${subjectName(subject, lang)}`;
+  const sub = subtitle ?? `GCE ${LEVELS[subjectById(subject).level].en} ${subjectName(subject, lang)}`;
   return (
     <View style={[{ paddingTop: insets.top, backgroundColor: 'rgba(255,255,255,0.96)', zIndex: 50 }, HEADER_SHADOW]}>
       <V c="h-14 px-margin flex-row items-center justify-between">

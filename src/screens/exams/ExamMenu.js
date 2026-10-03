@@ -14,7 +14,7 @@ import { p1For } from '../../lib/exam';
 import { paper2Config } from '../../data/paper2';
 import { labsFor } from '../../data/labs';
 import { unitsFor } from '../../data/units';
-import { minutesLabel, subjectById, subjectName } from '../../data/subjects';
+import { LEVELS, minutesLabel, subjectById, subjectName } from '../../data/subjects';
 import { Section } from '../tabs/Home';
 
 function Choice({ icon, title, sub, note, tint, onPress }) {
@@ -58,7 +58,7 @@ export default function ExamMenu({ navigation, route }) {
 
   return (
     <V c="flex-1">
-      <Screen header={<StackHeader title={`${name}: ${L('exams', 'examens')}`} subtitle={`GCE Ordinary Level (${subjectById(subject).code})`} subtitleColor="on-surface-variant" avatar={false} />}>
+      <Screen header={<StackHeader title={`${name}: ${L('exams', 'examens')}`} subtitle={`GCE ${LEVELS[subjectById(subject).level].en} (${subjectById(subject).code})`} subtitleColor="on-surface-variant" avatar={false} />}>
         <V c="pt-space-md pb-space-xl gap-space-lg">
           <V c="flex-row items-center gap-space-sm">
             <SubjectIcon id={subject} size={52} />

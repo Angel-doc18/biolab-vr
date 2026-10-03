@@ -11,7 +11,7 @@ import { daysToExam } from '../../state/progress';
 import { firstName, focusUnit, greeting, nextLesson, recentUnits } from '../../state/selectors';
 import { unitsFor } from '../../data/units';
 import { lessonNumber, lessonsFor } from '../../data/lessons';
-import { subjectName } from '../../data/subjects';
+import { LEVELS, examLabel, subjectById, subjectName } from '../../data/subjects';
 import { SubjectGrid, TileGrid } from '../../ui/hub';
 import { useSubjectCards } from '../subjectCards';
 import ParentHome from './ParentHome';
@@ -81,7 +81,7 @@ function StudentHome({ navigation }) {
             {greeting(L)}, {firstName(user?.name)}
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant" numberOfLines={1}>
-            GCE O Level: {taking}
+            GCE {LEVELS[subjectById(subjects[0]).level].short}: {taking}
           </T>
         </V>
 
@@ -96,7 +96,7 @@ function StudentHome({ navigation }) {
                 {user?.className || L('Not set', 'Non indiquée')}
               </T>
               <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={2}>
-                {[`GCE ${L('June', 'juin')} ${user?.examYear || ''}`, user?.schoolName].filter(Boolean).join(', ')}
+                {[examLabel(user, L), user?.schoolName].filter(Boolean).join(', ')}
               </T>
             </V>
             <V c="h-10 px-3 rounded-lg border-2 border-primary-container flex-row items-center gap-1">
@@ -161,7 +161,7 @@ function StudentHome({ navigation }) {
           <V c="flex-row items-end justify-between gap-space-sm">
             <V c="flex-1">
               <T c="font-body-sm text-body-sm text-on-primary" style={{ opacity: 0.85 }}>
-                {`GCE O Level ${subjectName(subject, lang)}, ${L('June', 'juin')} ${user?.examYear || ''}`}
+                {`${subjectName(subject, lang)}, ${examLabel(user, L)}`}
               </T>
               <T c="font-headline-lg text-on-primary" style={{ fontSize: 34, lineHeight: 40 }}>
                 {days} {days === 1 ? L('day', 'jour') : L('days', 'jours')}

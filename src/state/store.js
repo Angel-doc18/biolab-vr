@@ -4,7 +4,7 @@ import { get, loadSession, onSessionLost, patch as apiPatch, post, put, setSessi
 import { EMPTY, examSubject, merge, minutesThisWeek, streak, syllabusMastery, touchDay, unitMastery, bestExam } from './progress';
 import { units, unitsFor } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
-import { SUBJECT_IDS, chosenSubjects } from '../data/subjects';
+import { OPEN_IDS, chosenSubjects } from '../data/subjects';
 import { OPEN_FOR_TESTING } from '../data/plan';
 import { setVoice } from '../lib/voice';
 
@@ -150,12 +150,12 @@ export function AppProvider({ children }) {
   // The sciences this student takes, and the one the tabs are showing now.
   const subjects = useMemo(() => chosenSubjects(user), [user]);
   const subject = subjects.includes(prefs.subject) ? prefs.subject : subjects[0];
-  const setSubject = useCallback((id) => SUBJECT_IDS.includes(id) && savePrefs({ subject: id }), [savePrefs]);
+  const setSubject = useCallback((id) => OPEN_IDS.includes(id) && savePrefs({ subject: id }), [savePrefs]);
 
   const stats = useMemo(() => {
     const unitPct = Object.fromEntries(units.map((u) => [u.id, unitMastery(progress, u, lessonIdsFor(u.id))]));
     const bySubject = Object.fromEntries(
-      SUBJECT_IDS.map((id) => [
+      OPEN_IDS.map((id) => [
         id,
         {
           mastery: syllabusMastery(progress, unitsFor(id), lessonIdsFor),

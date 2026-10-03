@@ -4,16 +4,15 @@ import { Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { nextStep } from '../../navigation/routes';
-import { OPEN_SUBJECTS as SUBJECTS, chosenSubjects } from '../../data/subjects';
+import { CLASSES, LEVELS, OPEN_SUBJECTS, chosenSubjects, classById, classLevel, examYearFor, subjectsForLevel } from '../../data/subjects';
 import { OnbHeader, StepBar } from './Steps';
 
-const CLASSES = ['Form 3', 'Form 4', 'Form 5'];
-
-function examYears() {
-  const now = new Date();
-  const first = now.getMonth() >= 5 ? now.getFullYear() + 1 : now.getFullYear();
+// The exam year that follows from the class, and the two after it for students
+// repeating a year or sitting later.
+const examYears = (cls) => {
+  const first = examYearFor(cls);
   return [first, first + 1, first + 2];
-}
+};
 
 function Choice({ on, label, sub, onPress }) {
   return (
@@ -35,20 +34,32 @@ export default function ExamClass({ navigation, route }) {
   const { user, updateMe } = useApp();
   const L = useL();
   const lang = useLang();
-  const years = examYears();
-  const [year, setYear] = useState(user?.examYear || years[0]);
-  const [cls, setCls] = useState(CLASSES.includes(user?.className) ? user.className : 'Form 5');
+  const [cls, setCls] = useState(classById(user?.className) ? user.className : 'Form 5');
+  const years = examYears(cls);
+  const [year, setYear] = useState(years.includes(user?.examYear) ? user.examYear : years[0]);
+  const level = classLevel(cls);
+  const levelName = LEVELS[level][lang === 'fr' ? 'fr' : 'en'];
+  // Open subjects of the class's level; Sixth Form students revise the open
+  // Ordinary Level subjects until their Advanced Level subjects are written.
+  const levelOpen = OPEN_SUBJECTS.filter((s) => s.level === level);
+  const choices = levelOpen.length ? levelOpen : OPEN_SUBJECTS.filter((s) => s.level === 'O');
+  const comingSoon = subjectsForLevel(level).filter((s) => !s.available);
+  const pickClass = (k) => {
+    setCls(k);
+    setYear(examYears(k)[0]);
+  };
   const [subjects, setSubjects] = useState(user?.subjects?.length || user?.onboarded ? chosenSubjects(user) : []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const toggle = (id) => setSubjects((list) => (list.includes(id) ? list.filter((s) => s !== id) : [...list, id]));
 
   const submit = async () => {
-    if (!subjects.length) return setError(L('Choose at least one subject.', 'Choisissez au moins une matière.'));
+    const picked = subjects.filter((id) => choices.some((s) => s.id === id));
+    if (!picked.length) return setError(L('Choose at least one subject.', 'Choisissez au moins une matière.'));
     setBusy(true);
     setError(null);
     try {
-      await updateMe({ level: 'O', examYear: year, className: cls, subjects });
+      await updateMe({ level, examYear: year, className: cls, subjects: picked });
       if (route.params?.fromSettings) navigation.goBack();
       else navigation.navigate(nextStep('student', 'ExamClass'));
     } catch (e) {
@@ -77,14 +88,21 @@ export default function ExamClass({ navigation, route }) {
       <V c="gap-space-lg">
         <V c="gap-space-sm">
           <T c="font-label-lg text-label-lg text-on-surface">{L('Class this school year', 'Classe cette année')}</T>
-          <V c="flex-row gap-space-xs" accessibilityRole="radiogroup">
-            {CLASSES.map((k) => (
-              <Choice key={k} on={cls === k} label={k} onPress={() => setCls(k)} />
-            ))}
+          <V c="gap-space-xs" accessibilityRole="radiogroup">
+            <V c="flex-row gap-space-xs">
+              {CLASSES.filter((k) => k.level === 'O').map((k) => (
+                <Choice key={k.id} on={cls === k.id} label={k.id} onPress={() => pickClass(k.id)} />
+              ))}
+            </V>
+            <V c="flex-row gap-space-xs">
+              {CLASSES.filter((k) => k.level === 'A').map((k) => (
+                <Choice key={k.id} on={cls === k.id} label={k.id} onPress={() => pickClass(k.id)} />
+              ))}
+            </V>
           </V>
         </V>
         <V c="gap-space-sm">
-          <T c="font-label-lg text-label-lg text-on-surface">{L('GCE Ordinary Level exam', 'Examen GCE Ordinary Level')}</T>
+          <T c="font-label-lg text-label-lg text-on-surface">{L(`GCE ${levelName} exam`, `Examen GCE ${levelName}`)}</T>
           <V c="flex-row gap-space-xs" accessibilityRole="radiogroup">
             {years.map((y) => (
               <Choice key={y} on={year === y} label={`June ${y}`} onPress={() => setYear(y)} />
@@ -92,9 +110,19 @@ export default function ExamClass({ navigation, route }) {
           </V>
         </V>
         <V c="gap-space-sm">
-          <T c="font-label-lg text-label-lg text-on-surface">{L('Science subjects you are taking', 'Matières scientifiques que vous présentez')}</T>
+          <T c="font-label-lg text-label-lg text-on-surface">
+            {levelOpen.length ? L('Subjects you are taking', 'Matières que vous présentez') : L('Ordinary Level subjects to study now', 'Matières Ordinary Level à étudier maintenant')}
+          </T>
+          {!levelOpen.length && (
+            <T c="font-body-md text-body-md text-on-surface-variant">
+              {L(
+                'The Advanced Level courses are being written. Until they are ready, study the Ordinary Level subjects your A Level courses build on.',
+                'Les cours de l’Advanced Level sont en préparation. En attendant, étudiez les matières de l’Ordinary Level sur lesquelles reposent vos cours.'
+              )}
+            </T>
+          )}
           <V c="bg-surface-container-lowest rounded-xl border border-outline-variant">
-            {SUBJECTS.map((s, i) => {
+            {choices.map((s, i) => {
               const on = subjects.includes(s.id);
               return (
                 <P key={s.id} c={`flex-row items-center gap-space-sm px-space-md py-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => toggle(s.id)} scale={1} accessibilityRole="checkbox" accessibilityState={{ checked: on }}>
@@ -105,6 +133,14 @@ export default function ExamClass({ navigation, route }) {
               );
             })}
           </V>
+          {!!comingSoon.length && (
+            <V c="gap-1 pt-space-xs">
+              <T c="font-label-md text-label-md text-on-surface-variant">{L(`Being written for the ${levelName}`, `En préparation pour l’${levelName}`)}</T>
+              <T c="font-body-md text-body-md text-on-surface-variant">
+                {comingSoon.map((s) => `${lang === 'fr' ? s.fr : s.en} (${s.code})`).join(', ')}.
+              </T>
+            </V>
+          )}
         </V>
       </V>
     </Screen>
