@@ -1,0 +1,293 @@
+// Form 4 and Form 5 Chemistry lessons for the MINESEC topics the first lessons did
+// not cover: solutions and titration, Groups I and II, the transition metals, salts,
+// the gaseous state, energy calculations and chemical industry in Cameroon.
+// Original text written for this app. `examples` are worked examples.
+
+export const LESSONS_45 = [
+  // ======================= Form 4 =======================
+  {
+    id: 'ch-titration-1',
+    unit: 'ch-f4-titration',
+    n: '3.1',
+    title: 'Solutions and their concentration',
+    minutes: 9,
+    paper: 'Paper 1, 2 & 3',
+    tags: ['Concentration', 'Standard solutions'],
+    body: [
+      'A **solution** forms when a **solute** dissolves in a **solvent**. Its **concentration** tells you how much solute is dissolved in a given volume of solution. It is measured in **grams per dm³ (g/dm³)** or, more usefully, in **moles per dm³ (mol/dm³)**.',
+      '**Concentration (mol/dm³) = number of moles ÷ volume (dm³)**. Since 1 dm³ = 1000 cm³, a volume in cm³ is divided by 1000 first. To change mol/dm³ into g/dm³, multiply by the molar mass.',
+      'A **standard solution** has an accurately known concentration. To make one, weigh the solute accurately, dissolve it in a little distilled water in a beaker, pour the solution and all the washings into a **volumetric flask**, add distilled water up to the mark and shake to mix.',
+      'When a solution is **diluted**, the number of moles of solute does not change. Since moles = concentration × volume, c₁V₁ = c₂V₂.',
+    ],
+    figure: 'mole-map',
+    tip: 'Always change **cm³ to dm³** (divide by 1000) before using concentration = moles ÷ volume.',
+    examples: [
+      {
+        q: 'What is the concentration of a solution that contains 4.0 g of sodium hydroxide in 500 cm³? (NaOH = 40)',
+        steps: ['Moles of NaOH = 4.0 ÷ 40 = 0.10 mol', 'Volume = 500 ÷ 1000 = 0.500 dm³', 'Concentration = 0.10 ÷ 0.500 = 0.20 mol/dm³'],
+      },
+      {
+        q: 'How many moles of acid are in 25.0 cm³ of 0.10 mol/dm³ hydrochloric acid?',
+        steps: ['Moles = concentration × volume in dm³', '= 0.10 × 25.0 ÷ 1000', '= 0.0025 mol'],
+      },
+    ],
+    check: {
+      q: 'What mass of sodium carbonate (Na₂CO₃ = 106) is needed to make 250 cm³ of a 0.10 mol/dm³ solution?',
+      a: ['2.65 g', '26.5 g', '10.6 g', '0.265 g'],
+      why: 'Moles = 0.10 × 0.250 = 0.025 mol; mass = 0.025 × 106 = 2.65 g.',
+    },
+    terms: [
+      ['Concentration', 'The amount of solute in a given volume of solution.'],
+      ['Standard solution', 'A solution of accurately known concentration.'],
+      ['Volumetric flask', 'A flask that holds an exact volume when filled to the mark.'],
+    ],
+  },
+  {
+    id: 'ch-titration-2',
+    unit: 'ch-f4-titration',
+    n: '3.2',
+    title: 'Acid-base titration and calculations',
+    minutes: 11,
+    paper: 'Paper 1, 2 & 3',
+    tags: ['Titration', 'Mole ratio'],
+    body: [
+      'A **titration** finds the exact volume of one solution that reacts with a known volume of another. A **pipette** delivers 25.0 cm³ of the alkali into a conical flask, a few drops of **indicator** are added, and acid is run in from a **burette** until the indicator just changes colour: the **end-point**.',
+      '**Methyl orange** is yellow in alkali and red in acid; **phenolphthalein** is pink in alkali and colourless in acid. The flask is swirled all the time and the acid is added drop by drop near the end-point. A rough titration is done first; the titration is repeated until two titres agree within 0.10 cm³, and their average is used.',
+      'The burette is rinsed with the acid and the pipette with the alkali before use, so that water left inside does not dilute them. Read the burette at the **bottom of the meniscus**, with your eye level with it, and record readings to the nearest 0.05 cm³.',
+      'To calculate an unknown concentration: write the balanced equation; find the moles of the solution whose concentration is known; use the **mole ratio** from the equation to find the moles of the other; divide by its volume in dm³.',
+    ],
+    figure: 'titration-apparatus',
+    tip: 'Show the **mole ratio** from the balanced equation. Many marks are lost by assuming 1 : 1 when it is not.',
+    examples: [
+      {
+        q: '25.0 cm³ of sodium hydroxide solution is neutralised by 20.0 cm³ of 0.125 mol/dm³ hydrochloric acid. Find the concentration of the sodium hydroxide. NaOH + HCl → NaCl + H₂O',
+        steps: ['Moles of HCl = 0.125 × 20.0 ÷ 1000 = 0.00250 mol', 'Ratio NaOH : HCl = 1 : 1, so moles of NaOH = 0.00250 mol', 'Concentration of NaOH = 0.00250 ÷ (25.0 ÷ 1000) = 0.100 mol/dm³'],
+      },
+      {
+        q: '25.0 cm³ of 0.100 mol/dm³ sodium carbonate needs 22.5 cm³ of hydrochloric acid. Find the concentration of the acid. Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂',
+        steps: ['Moles of Na₂CO₃ = 0.100 × 25.0 ÷ 1000 = 0.00250 mol', 'Ratio Na₂CO₃ : HCl = 1 : 2, so moles of HCl = 0.00500 mol', 'Concentration of HCl = 0.00500 ÷ (22.5 ÷ 1000) = 0.222 mol/dm³'],
+      },
+    ],
+    check: {
+      q: 'Why is the burette rinsed with the acid before it is filled?',
+      a: ['So that water left inside does not dilute the acid', 'To warm the burette', 'To remove the indicator', 'To make the reading easier'],
+      why: 'Any water left in the burette would lower the acid’s concentration and make the titre too large.',
+    },
+    terms: [
+      ['Titre', 'The volume of solution added from the burette to reach the end-point.'],
+      ['End-point', 'The point at which the indicator just changes colour.'],
+      ['Indicator', 'A substance whose colour shows whether a solution is acidic or alkaline.'],
+    ],
+  },
+  {
+    id: 'ch-group12-1',
+    unit: 'ch-f4-group12',
+    n: '4.1',
+    title: 'Group I: the alkali metals',
+    minutes: 9,
+    paper: 'Paper 1 & 2',
+    tags: ['Alkali metals', 'Reactivity trend'],
+    body: [
+      '**Lithium, sodium and potassium** belong to **Group I**, the alkali metals. Each atom has **one outer electron**, which it loses to form an ion with a charge of +1 (Li⁺, Na⁺, K⁺). They are soft enough to cut with a knife, have low densities and melting points, and tarnish quickly in air, so they are stored under oil.',
+      'They react with **cold water**, floating and moving about, to form hydrogen and an alkaline hydroxide: 2Na + 2H₂O → 2NaOH + H₂. Lithium reacts steadily, sodium melts into a silvery ball and fizzes, and potassium reacts so violently that the hydrogen catches fire with a lilac flame.',
+      '**Reactivity increases down the group**, because the outer electron is further from the nucleus and more shielded, so it is lost more easily. Their compounds are white and soluble and give **flame colours**: lithium red, sodium yellow-orange and potassium lilac.',
+      'Important sodium compounds include sodium chloride (common salt, the raw material for sodium hydroxide and chlorine), sodium hydroxide (used to make soap and paper), sodium carbonate (washing soda, used in glass making) and sodium hydrogencarbonate (baking soda).',
+    ],
+    figure: ['periodic-table', 'flame-test'],
+    tip: 'Explain the reactivity trend with **atomic size**: the outer electron is further from the nucleus, so it is lost more easily.',
+    check: {
+      q: 'Sodium is stored under oil because it:',
+      a: ['Reacts with air and water', 'Is a liquid', 'Is very dense', 'Dissolves in oil'],
+      why: 'Oil keeps air and moisture away from the very reactive metal.',
+    },
+    terms: [
+      ['Alkali metal', 'An element of Group I.'],
+      ['Tarnish', 'To lose shine as a layer of oxide forms on the surface.'],
+      ['Flame test', 'Identifying a metal ion by the colour it gives to a flame.'],
+    ],
+  },
+  {
+    id: 'ch-group12-2',
+    unit: 'ch-f4-group12',
+    n: '4.2',
+    title: 'Group II: the alkaline earth metals',
+    minutes: 8,
+    paper: 'Paper 1 & 2',
+    tags: ['Magnesium and calcium', 'Hard water'],
+    body: [
+      '**Magnesium and calcium** are typical **Group II** metals, the alkaline earth metals. Each atom has **two outer electrons** and forms an ion with a charge of +2 (Mg²⁺, Ca²⁺). They are harder and denser than the Group I metals and less reactive.',
+      'Magnesium reacts very slowly with cold water but burns in **steam** to give magnesium oxide and hydrogen. Calcium reacts steadily with cold water, giving a cloudy solution of calcium hydroxide: Ca + 2H₂O → Ca(OH)₂ + H₂. Both burn in air, magnesium with a brilliant white flame.',
+      'As in Group I, reactivity **increases down the group**. Calcium compounds give a **brick-red** flame. The oxides and hydroxides are basic: magnesium hydroxide (milk of magnesia) is used as an antacid, and calcium hydroxide (slaked lime) neutralises acid soils.',
+      'Calcium carbonate occurs as **limestone**, marble and chalk. Water that has flowed over limestone contains dissolved calcium and magnesium ions that make it **hard**: it does not lather easily with soap and leaves scale in kettles.',
+    ],
+    figure: 'flame-test',
+    tip: 'Compare the groups: Group II metals are **less reactive**, **harder** and form **2+** ions.',
+    check: {
+      q: 'Which metal reacts steadily with cold water to give hydrogen and a cloudy solution?',
+      a: ['Calcium', 'Copper', 'Iron', 'Zinc'],
+      why: 'Calcium hydroxide is only slightly soluble, so the solution turns cloudy.',
+    },
+    terms: [
+      ['Alkaline earth metal', 'An element of Group II.'],
+      ['Hard water', 'Water containing dissolved calcium or magnesium ions.'],
+      ['Milk of magnesia', 'A suspension of magnesium hydroxide used as an antacid.'],
+    ],
+  },
+  {
+    id: 'ch-transition-1',
+    unit: 'ch-f4-transition',
+    n: '5.1',
+    title: 'The transition metals',
+    minutes: 9,
+    paper: 'Paper 1 & 2',
+    tags: ['Coloured ions', 'Catalysts'],
+    body: [
+      'The **transition metals** are the block of elements between Groups II and III of the Periodic Table. Familiar examples are iron, copper, nickel, chromium, manganese, silver and gold.',
+      'Compared with the Group I metals they are **hard, dense and strong**, with **high melting points**, and they react slowly or not at all with water. They conduct heat and electricity well; copper is used for electrical wiring because it is an excellent conductor and can be drawn into wires.',
+      'They form **coloured compounds** and can have **more than one oxidation state**: iron forms pale green iron(II) ions (Fe²⁺) and yellow-brown iron(III) ions (Fe³⁺); copper(II) compounds are blue or green. Their hydroxides give coloured precipitates with sodium hydroxide, which are used to identify them.',
+      'Transition metals and their compounds are useful **catalysts**: iron in the Haber process, vanadium(V) oxide in the Contact process and nickel in hardening vegetable oils. They form useful **alloys**: steel (iron with a little carbon), brass (copper and zinc) and bronze (copper and tin).',
+    ],
+    figure: 'cation-tests',
+    tip: 'Give the **three typical properties** of transition metals: coloured compounds, more than one oxidation state and catalytic activity.',
+    check: {
+      q: 'With sodium hydroxide solution, iron(III) ions give a precipitate that is:',
+      a: ['Red-brown', 'Green', 'Blue', 'White'],
+      why: 'Iron(III) hydroxide is red-brown; iron(II) hydroxide is green and copper(II) hydroxide blue.',
+    },
+    terms: [
+      ['Transition metal', 'An element of the central block of the Periodic Table.'],
+      ['Oxidation state', 'The charge an atom has, or seems to have, in a compound.'],
+      ['Alloy', 'A mixture of a metal with other elements.'],
+    ],
+  },
+  {
+    id: 'ch-salts-1',
+    unit: 'ch-f4-salts',
+    n: '7.2',
+    title: 'Salts: types, solubility and uses',
+    minutes: 9,
+    paper: 'Paper 1 & 2',
+    tags: ['Solubility rules', 'Hydrated salts'],
+    body: [
+      'A **salt** forms when the hydrogen of an acid is replaced by a metal or by an ammonium ion. Hydrochloric acid gives **chlorides**, sulphuric acid **sulphates**, nitric acid **nitrates** and carbonic acid **carbonates**.',
+      'The **solubility rules** decide how a salt is prepared. All sodium, potassium and ammonium salts, and all nitrates, are soluble. Most chlorides are soluble except silver and lead chlorides. Most sulphates are soluble except barium, lead and calcium sulphates. Most carbonates are insoluble except those of sodium, potassium and ammonium.',
+      'Many salts crystallise with **water of crystallisation**, such as blue hydrated copper(II) sulphate, CuSO₄·5H₂O, which turns white when heated. Some substances take water from the air and become damp (**hygroscopic**); some take in so much that they dissolve (**deliquescent**), such as anhydrous calcium chloride; and some crystals lose water to the air (**efflorescent**), such as washing soda.',
+      'Salts have many uses: sodium chloride to flavour and preserve food; ammonium nitrate and potassium chloride as fertilisers; calcium sulphate as plaster of Paris; silver bromide in photography; and iron(II) sulphate in tablets for anaemia.',
+    ],
+    figure: 'filtration',
+    tip: 'Choose the method of making a salt from its **solubility**: soluble salts by titration or by adding excess base and filtering; insoluble salts by **precipitation**.',
+    check: {
+      q: 'Hydrated copper(II) sulphate crystals are heated. They turn:',
+      a: ['From blue to white', 'From white to blue', 'From green to black', 'From blue to black'],
+      why: 'Heating drives off the water of crystallisation, leaving white anhydrous copper(II) sulphate.',
+    },
+    terms: [
+      ['Water of crystallisation', 'Water chemically held in the crystals of a salt.'],
+      ['Deliquescent', 'Absorbing water from the air until it dissolves.'],
+      ['Efflorescent', 'Losing water of crystallisation to the air.'],
+    ],
+  },
+
+  // ======================= Form 5 =======================
+  {
+    id: 'ch-gases-1',
+    unit: 'ch-f5-gases',
+    n: '1.2',
+    title: 'The gas laws',
+    minutes: 10,
+    paper: 'Paper 1 & 2',
+    tags: ['Boyle and Charles', 'Molar volume'],
+    body: [
+      'The **kinetic theory** explains how gases behave: gas particles move rapidly and randomly, colliding with each other and with the walls of their container. These collisions produce the gas **pressure**. Raising the temperature makes the particles move faster.',
+      '**Boyle’s law**: for a fixed mass of gas at constant temperature, the volume is inversely proportional to the pressure, so **PV = constant**, or P₁V₁ = P₂V₂. Halving the volume doubles the number of collisions with the walls each second, so the pressure doubles.',
+      '**Charles’ law**: for a fixed mass of gas at constant pressure, the volume is directly proportional to the **absolute (kelvin) temperature**: V/T = constant. Temperatures must be in kelvin: T(K) = θ(°C) + 273. Together the laws give the **general gas equation**: P₁V₁/T₁ = P₂V₂/T₂.',
+      '**Avogadro’s law**: equal volumes of all gases at the same temperature and pressure contain the same number of molecules. One mole of any gas occupies **24 dm³ at room temperature and pressure** and 22.4 dm³ at s.t.p. (0 °C and 1 atmosphere). Lighter gases diffuse faster than heavier ones.',
+    ],
+    figure: 'particles-states',
+    tip: 'Always change temperatures to **kelvin** before using Charles’ law or the general gas equation.',
+    examples: [
+      {
+        q: 'A gas occupies 300 cm³ at 27 °C. What is its volume at 127 °C if the pressure does not change?',
+        steps: ['Change to kelvin: T₁ = 27 + 273 = 300 K and T₂ = 127 + 273 = 400 K', 'V₂ = V₁ × T₂ ÷ T₁', '= 300 × 400 ÷ 300 = 400 cm³'],
+      },
+      {
+        q: 'A gas has a volume of 200 cm³ at a pressure of 100 kPa. What is its volume at 250 kPa, at the same temperature?',
+        steps: ['P₁V₁ = P₂V₂', '100 × 200 = 250 × V₂', 'V₂ = 20 000 ÷ 250 = 80 cm³'],
+      },
+    ],
+    check: {
+      q: 'At constant pressure, the volume of a fixed mass of gas is directly proportional to its:',
+      a: ['Absolute (kelvin) temperature', 'Celsius temperature', 'Mass', 'Density'],
+      why: 'Charles’ law works only with the kelvin scale, which starts at absolute zero.',
+    },
+    terms: [
+      ['Boyle’s law', 'PV is constant for a fixed mass of gas at constant temperature.'],
+      ['Charles’ law', 'V/T is constant for a fixed mass of gas at constant pressure.'],
+      ['Absolute temperature', 'Temperature on the kelvin scale: °C + 273.'],
+    ],
+  },
+  {
+    id: 'ch-energetics-2',
+    unit: 'ch-energy',
+    n: '2.2',
+    title: 'Calculating energy changes',
+    minutes: 11,
+    paper: 'Paper 1, 2 & 3',
+    tags: ['ΔH', 'Bond energies'],
+    body: [
+      'The energy change of a reaction is called the **enthalpy change**, ΔH, measured in **kJ/mol**. For an **exothermic** reaction ΔH is **negative**, because energy is given out; for an **endothermic** reaction ΔH is **positive**.',
+      'In the laboratory, the heat given out is found from the temperature change of a known mass of water or solution: **heat (J) = mass (g) × specific heat capacity (4.2 J/g °C) × temperature change**, Q = mcΔT. Dividing by the number of moles that reacted gives the energy change per mole.',
+      '**Bond energies**: breaking bonds **takes in** energy and making bonds **gives out** energy. ΔH = energy taken in to break the bonds of the reactants − energy given out in making the bonds of the products. If more energy is given out than taken in, the reaction is exothermic.',
+      'The **enthalpy of combustion** is the energy given out when one mole of a substance burns completely in oxygen. The **enthalpy of neutralisation** is about −57 kJ for each mole of water formed from a strong acid and a strong alkali. Fuels are compared by the energy they give out per gram.',
+    ],
+    figure: 'energy-profile',
+    tip: 'Always give the **sign** of ΔH (negative for exothermic, positive for endothermic) and the unit **kJ/mol**.',
+    examples: [
+      {
+        q: '50 cm³ of 1.0 mol/dm³ HCl is mixed with 50 cm³ of 1.0 mol/dm³ NaOH and the temperature rises by 6.8 °C. Find the enthalpy of neutralisation. (Take the mass of solution as 100 g and c = 4.2 J/g °C.)',
+        steps: ['Q = mcΔT = 100 × 4.2 × 6.8 = 2856 J = 2.856 kJ', 'Moles of water formed = 1.0 × 50 ÷ 1000 = 0.050 mol', 'ΔH = −2.856 ÷ 0.050 = −57 kJ/mol (negative, because heat is given out)'],
+      },
+      {
+        q: 'Use bond energies to find ΔH for H₂ + Cl₂ → 2HCl. (H–H 436, Cl–Cl 242, H–Cl 431 kJ/mol)',
+        steps: ['Bonds broken: 436 + 242 = 678 kJ taken in', 'Bonds made: 2 × 431 = 862 kJ given out', 'ΔH = 678 − 862 = −184 kJ/mol, so the reaction is exothermic'],
+      },
+    ],
+    check: {
+      q: 'A reaction has ΔH = +50 kJ/mol. The reaction is:',
+      a: ['Endothermic', 'Exothermic', 'Neither exothermic nor endothermic', 'Explosive'],
+      why: 'A positive ΔH means energy is taken in from the surroundings.',
+    },
+    terms: [
+      ['Enthalpy change', 'The heat change of a reaction, ΔH, in kJ/mol.'],
+      ['Bond energy', 'The energy needed to break one mole of a particular bond.'],
+      ['Enthalpy of combustion', 'The energy given out when one mole of a substance burns completely.'],
+    ],
+  },
+  {
+    id: 'ch-industry-1',
+    unit: 'ch-nonmetals',
+    n: '5.2',
+    title: 'Chemical industry in Cameroon',
+    minutes: 9,
+    paper: 'Paper 1 & 2',
+    tags: ['Aluminium', 'Cement and soap'],
+    body: [
+      'A chemical industry turns **raw materials** into useful products on a large scale. A factory is sited near its raw materials, a supply of energy, transport and its markets, and it must deal safely with its wastes.',
+      '**Aluminium** is produced at Edéa, where the Sanaga river provides cheap **hydroelectric** power. Alumina (purified bauxite) is dissolved in molten **cryolite** and electrolysed with carbon electrodes: aluminium forms at the cathode, while the oxygen formed at the anode burns the carbon anodes away, so they must be replaced.',
+      '**Cement** is made by heating limestone with clay at about 1450 °C to form clinker, which is ground with a little gypsum. **Soap** is made by boiling vegetable oils such as palm oil with sodium hydroxide; this reaction is called **saponification**.',
+      'Crude oil is refined by **fractional distillation** into fuel gas, petrol, kerosene, diesel and residues, and long-chain fractions are **cracked** into smaller, more useful molecules; Cameroon’s refinery, SONARA, is at Limbe. Industries must treat their wastes, because sulphur dioxide, carbon monoxide, spilled oil and untreated effluent pollute the air, land and water.',
+    ],
+    figure: ['electrolysis', 'fractionating-column'],
+    tip: 'For any industrial process give the **raw materials**, the **conditions**, the **equation** and one way of controlling pollution.',
+    check: {
+      q: 'Why is aluminium produced at Edéa?',
+      a: ['Cheap hydroelectric power is available there', 'Bauxite is mined in the town', 'It is close to the sea for salt', 'The air there is very dry'],
+      why: 'Electrolysis uses a great deal of electricity, which the Sanaga river supplies cheaply.',
+    },
+    terms: [
+      ['Raw material', 'A substance from which a product is made.'],
+      ['Saponification', 'Making soap by boiling fats or oils with an alkali.'],
+      ['Cracking', 'Breaking long-chain hydrocarbons into smaller molecules.'],
+    ],
+  },
+];

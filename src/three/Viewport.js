@@ -3,6 +3,7 @@ import { Animated, PanResponder, Pressable, StyleSheet, View } from 'react-nativ
 import { Canvas, useFrame, useThree } from './r3f';
 import * as THREE from 'three';
 import { MODELS, realSpec } from './models';
+import { modelOf } from '../data/units';
 import { useAnatomy } from './anatomy';
 import Specimen, { Lights } from './Specimen';
 import { Ic, T } from '../ui/kit';
@@ -69,9 +70,9 @@ function Rig({ spec, geos, ctrl, active, xray, explodeRef, pinXY, pinOpacity, on
  */
 const Viewport = forwardRef(function Viewport({ unitId, parts, active, onSelect, xray, explode, notes, onInteract, onStatus }, ref) {
   // The real anatomy model when it has loaded, otherwise the simple diagram.
-  const real = useMemo(() => realSpec(unitId), [unitId]);
+  const real = useMemo(() => realSpec(modelOf(unitId)), [unitId]);
   const anat = useAnatomy(real?.real);
-  const spec = real && anat.status === 'ready' ? real : MODELS[unitId];
+  const spec = real && anat.status === 'ready' ? real : MODELS[modelOf(unitId)];
   const geos = spec.real ? anat.parts : null;
   const keys = Object.keys(spec.parts);
   const ctrl = useRef(null);

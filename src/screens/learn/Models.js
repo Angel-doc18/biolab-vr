@@ -6,7 +6,7 @@ import { StaticTabBar } from '../../ui/TabBar';
 import { SUBJECT_LOOK } from '../../ui/hub';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { unitsFor } from '../../data/units';
+import { modelOf, unitsFor } from '../../data/units';
 import { subjectName } from '../../data/subjects';
 
 export default function Models({ navigation, route }) {
@@ -37,7 +37,7 @@ export default function Models({ navigation, route }) {
             </V>
           )}
 
-          {unitsFor(subject).map((u) => {
+          {unitsFor(subject).filter((u, i, all) => u.vr && all.findIndex((x) => x.vr && modelOf(x.id) === modelOf(u.id)) === i).map((u) => {
             const vr = lang === 'fr' && u.vr.fr ? { ...u.vr, ...u.vr.fr } : u.vr;
             return (
               <P key={u.id} c="bg-surface-container-lowest rounded-xl p-space-md flex-row items-center gap-space-sm shadow-sm border border-surface-container" onPress={() => navigation.navigate('Specimen', { unitId: u.id })} scale={0.99} accessibilityRole="button" accessibilityLabel={vr.title}>
@@ -46,7 +46,7 @@ export default function Models({ navigation, route }) {
                 </V>
                 <V c="flex-1 gap-0.5">
                   <T c="font-label-md text-label-md text-on-surface-variant">
-                    {L('Topic', 'Thème')} {u.n}: {u.short}
+                    {u.form ? `${u.form}, ` : ''}{L('Topic', 'Thème')} {u.n}: {u.short}
                   </T>
                   <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
                     {vr.title}

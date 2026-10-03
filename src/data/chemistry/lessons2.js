@@ -32,7 +32,7 @@ export const LESSONS_2 = [
   },
   {
     id: 'ch-energy-2',
-    unit: 'ch-energy',
+    unit: 'ch-f5-rates',
     n: '7.2',
     title: 'Rates of reaction and collision theory',
     minutes: 10,
@@ -59,7 +59,7 @@ export const LESSONS_2 = [
   },
   {
     id: 'ch-energy-3',
-    unit: 'ch-energy',
+    unit: 'ch-f5-rates',
     n: '7.3',
     title: 'Reversible reactions and equilibrium',
     minutes: 9,
@@ -171,7 +171,7 @@ export const LESSONS_2 = [
   // ---------------- Unit 9: Non-metals, air and water ----------------
   {
     id: 'ch-nonmetals-1',
-    unit: 'ch-nonmetals',
+    unit: 'ch-f3-oxygen',
     n: '9.1',
     title: 'Air, oxygen and pollution',
     minutes: 9,
@@ -198,7 +198,7 @@ export const LESSONS_2 = [
   },
   {
     id: 'ch-nonmetals-2',
-    unit: 'ch-nonmetals',
+    unit: 'ch-f3-hydrogen',
     n: '9.2',
     title: 'Water: tests, purification and hardness',
     minutes: 8,

@@ -15,8 +15,10 @@ import { CHEMISTRY } from './chemistry';
 import { APPARATUS_CHEM } from './apparatusChem';
 import { PHYSICS } from './physics';
 import { APPARATUS_PHYS } from './apparatusPhys';
+import { CHEMISTRY_MORE } from './chemistry2';
+import { HUMANBIO } from './humanbio';
 
-export const DIAGRAMS = { ...BIOLOGY, ...BIOLOGY_MORE, ...APPARATUS_BIO, ...CHEMISTRY, ...APPARATUS_CHEM, ...PHYSICS, ...APPARATUS_PHYS };
+export const DIAGRAMS = { ...BIOLOGY, ...BIOLOGY_MORE, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...APPARATUS_CHEM, ...PHYSICS, ...APPARATUS_PHYS };
 
 // A labelled diagram. With `explain`, the tutor can explain it out loud: each
 // label lights up while it is being explained, and tapping a label explains just

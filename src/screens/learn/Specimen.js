@@ -10,7 +10,7 @@ import { ANATOMY, ANATOMY_CREDIT, UNIT_MODEL, arSupported, openInAR } from '../.
 import { useApp } from '../../state/store';
 import ListenButton from '../../ui/ListenButton';
 import { useL, useLang } from '../../i18n';
-import { unitById } from '../../data/units';
+import { modelOf, unitById } from '../../data/units';
 
 function Tool({ icon, label, on, onPress }) {
   return (
@@ -42,7 +42,7 @@ export default function Specimen({ navigation, route }) {
   const view = useRef(null);
   const part = parts.find((p) => p.key === active) || parts[0];
   const idx = parts.indexOf(part);
-  const modelName = UNIT_MODEL[unit.id];
+  const modelName = UNIT_MODEL[modelOf(unit.id)];
   const sizeKb = modelName ? Math.round(ANATOMY[modelName].bytes / 1024) : 0;
 
   useEffect(() => {

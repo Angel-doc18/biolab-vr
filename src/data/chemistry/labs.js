@@ -189,7 +189,7 @@ export const LABS = [
   // ---------------------------------------------------------------- separation
   {
     id: 'ch-chromatography',
-    unit: 'ch-matter',
+    unit: 'ch-analysis',
     short: 'Chromatography',
     title: 'Paper chromatography of inks and food colourings',
     desc: 'Run an ink beside known dyes, watch the colours separate as the solvent rises, and identify them from their Rf values.',
@@ -261,7 +261,7 @@ export const LABS = [
   },
   {
     id: 'ch-solubility',
-    unit: 'ch-matter',
+    unit: 'ch-f4-salts',
     kind: 'readings',
     short: 'Solubility curve',
     title: 'Solubility of potassium nitrate at different temperatures',
@@ -384,6 +384,7 @@ export const LABS = [
   {
     id: 'ch-water-crystallisation',
     unit: 'ch-moles',
+    units: ['ch-f4-salts'],
     kind: 'readings',
     short: 'Water of crystallisation',
     title: 'Water of crystallisation in copper(II) sulfate',
@@ -452,7 +453,7 @@ export const LABS = [
   // ---------------------------------------------------------------- acids
   {
     id: 'ch-titration',
-    unit: 'ch-acids',
+    unit: 'ch-f4-titration',
     kind: 'readings',
     short: 'Acid-alkali titration',
     title: 'Titration: finding the concentration of sodium hydroxide',
@@ -531,7 +532,7 @@ export const LABS = [
   },
   {
     id: 'ch-neutralisation',
-    unit: 'ch-acids',
+    unit: 'ch-f4-titration',
     units: ['ch-energy'],
     kind: 'readings',
     short: 'Neutralisation temperature',
@@ -699,7 +700,7 @@ export const LABS = [
   // ---------------------------------------------------------------- energy and rates
   {
     id: 'ch-rate-concentration',
-    unit: 'ch-energy',
+    unit: 'ch-f5-rates',
     kind: 'readings',
     short: 'Concentration and rate',
     title: 'Rate of reaction: magnesium and hydrochloric acid',
@@ -755,7 +756,7 @@ export const LABS = [
   },
   {
     id: 'ch-marble-surface',
-    unit: 'ch-energy',
+    unit: 'ch-f5-rates',
     kind: 'readings',
     short: 'Surface area and rate',
     title: 'Rate of reaction: marble chips of different sizes',
@@ -814,7 +815,7 @@ export const LABS = [
   },
   {
     id: 'ch-thiosulfate',
-    unit: 'ch-energy',
+    unit: 'ch-f5-rates',
     kind: 'readings',
     short: 'Temperature and rate',
     title: 'The disappearing cross: temperature and rate',

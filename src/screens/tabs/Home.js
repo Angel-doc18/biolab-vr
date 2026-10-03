@@ -9,7 +9,7 @@ import { useL, useLang } from '../../i18n';
 import { get } from '../../api/client';
 import { daysToExam } from '../../state/progress';
 import { firstName, focusUnit, greeting, nextLesson, recentUnits } from '../../state/selectors';
-import { unitsFor } from '../../data/units';
+import { formFor, unitsFor } from '../../data/units';
 import { lessonNumber, lessonsFor } from '../../data/lessons';
 import { LEVELS, examLabel, subjectById, subjectName } from '../../data/subjects';
 import { SubjectGrid, TileGrid } from '../../ui/hub';
@@ -60,7 +60,7 @@ function StudentHome({ navigation }) {
     }, [load])
   );
 
-  const focus = focusUnit(progress, stats.unitPct, pro, subject);
+  const focus = focusUnit(progress, stats.unitPct, pro, subject, formFor(subject, user?.className));
   const lesson = nextLesson(progress, focus.id, pro);
   const recent = recentUnits(progress, 2, subject);
   const continueList = recent.length ? recent : unitsFor(subject).slice(0, 2);

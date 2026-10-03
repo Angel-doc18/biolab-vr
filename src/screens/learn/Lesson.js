@@ -45,7 +45,10 @@ export default function Lesson({ navigation, route }) {
   const [toast, showToast] = useToast();
 
   // Read aloud paragraph by paragraph, so it can pause and resume on every platform.
-  const script = useMemo(() => [lesson.title, ...lesson.body.map(plain), `Exam tip. ${plain(lesson.tip)}`], [lesson]);
+  const script = useMemo(
+    () => [lesson.title, ...lesson.body.map(plain), ...(lesson.examples || []).map((e) => `Worked example. ${plain(e.q)} ${e.steps.map(plain).join('. ')}.`), `Exam tip. ${plain(lesson.tip)}`],
+    [lesson]
+  );
   const [playing, setPlaying] = useState(false);
   const [para, setPara] = useState(0);
   const playRef = useRef(false);
@@ -160,11 +163,36 @@ export default function Lesson({ navigation, route }) {
                   <Diagram id={id} maxHeight={360} explain subject={unit.subject} />
                 </V>
               ))}
-              <P c="self-start py-1" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} hitSlop={8}>
-                <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
-                  {L('Open the 3D model', 'Ouvrir le modèle 3D')}: {(lang === 'fr' && unit.vr.fr?.title) || unit.vr.title}
-                </T>
-              </P>
+              {!!unit.vr && (
+                <P c="self-start py-1" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} hitSlop={8}>
+                  <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                    {L('Open the 3D model', 'Ouvrir le modèle 3D')}: {(lang === 'fr' && unit.vr.fr?.title) || unit.vr.title}
+                  </T>
+                </P>
+              )}
+            </V>
+          )}
+
+          {!!lesson.examples?.length && (
+            <V c="gap-space-sm">
+              <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {lesson.examples.length === 1 ? L('Worked example', 'Exemple corrigé') : L('Worked examples', 'Exemples corrigés')}
+              </T>
+              {lesson.examples.map((e, i) => (
+                <V key={i} c="p-space-md rounded-xl bg-surface-container-lowest border border-surface-container gap-space-xs">
+                  <Rich text={e.q} c="font-body-md text-body-md text-on-surface" />
+                  {e.steps.map((st, j) => (
+                    <V key={j} c="flex-row gap-space-xs">
+                      <T c="font-label-lg text-label-lg text-secondary" style={{ fontWeight: '700', minWidth: 18 }}>
+                        {j + 1}.
+                      </T>
+                      <V c="flex-1">
+                        <Rich text={st} c="font-body-md text-body-md text-on-surface" />
+                      </V>
+                    </V>
+                  ))}
+                </V>
+              ))}
             </V>
           )}
 

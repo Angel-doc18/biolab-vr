@@ -11,7 +11,7 @@ export const PAPER2 = [
   {
     id: 'ca-separation',
     section: 'A',
-    unit: 'ch-matter',
+    unit: 'ch-f4-salts',
     topic: 'Particles, separation and purity',
     stem: 'Rock salt is a mixture of sodium chloride and sand. A student also investigates the dyes in a food colouring.',
     hint: 'Name each separation method and say which **property** it depends on.',
@@ -198,7 +198,7 @@ export const PAPER2 = [
   {
     id: 'ca-rates-energy',
     section: 'A',
-    unit: 'ch-energy',
+    unit: 'ch-f5-rates',
     topic: 'Rates of reaction and energy changes',
     stem: 'Magnesium ribbon (0.050 g) was added to 50 cm³ of 1.0 mol/dm³ hydrochloric acid, in excess, and the hydrogen collected in a gas syringe. Readings: 0 s, 0 cm³; 10 s, 16 cm³; 20 s, 27 cm³; 30 s, 35 cm³; 40 s, 40 cm³; 60 s, 46 cm³; 80 s, 48 cm³; 100 s, 48 cm³.',
     hint: 'For temperature give **two** reasons: more frequent collisions and more collisions with at least the **activation energy**.',

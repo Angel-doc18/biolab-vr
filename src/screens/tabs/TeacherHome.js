@@ -272,7 +272,7 @@ export function TeacherPortal({ navigation, standalone }) {
                         <Row key={l.id} title={`${L('Practical', 'TP')}: ${l.title}`} sub={`${l.minutes} min`} right={sending(l.id)} disabled={!!assigning} onPress={() => assign('lab', l.id, `Practical: ${l.short}`)} />
                       ))}
                       {unitsFor(subject).map((u) => (
-                        <Row key={u.id} title={`${L('Quiz', 'Quiz')}: ${u.n}. ${u.short}`} sub={`${u.quiz.length} ${L('questions', 'questions')}`} right={sending(u.id)} disabled={!!assigning} onPress={() => assign('quiz', u.id, `${u.short}: practice quiz`)} />
+                        <Row key={u.id} title={`${L('Quiz', 'Quiz')}: ${u.form ? `${u.form}, ` : ''}${u.n}. ${u.short}`} sub={`${u.quiz.length} ${L('questions', 'questions')}`} right={sending(u.id)} disabled={!!assigning} onPress={() => assign('quiz', u.id, `${u.short}: practice quiz`)} />
                       ))}
                     </V>
                   </Section>

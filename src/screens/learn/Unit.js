@@ -32,7 +32,7 @@ export default function Unit({ navigation, route }) {
   const L = useL();
   const lang = useLang();
   const unit = unitById(route.params?.unitId || 'cell');
-  const vr = lang === 'fr' && unit.vr.fr ? { ...unit.vr, ...unit.vr.fr } : unit.vr;
+  const vr = unit.vr && lang === 'fr' && unit.vr.fr ? { ...unit.vr, ...unit.vr.fr } : unit.vr;
   const lessons = lessonsFor(unit.id);
   const labs = labsForUnit(unit.id);
   const pct = stats.unitPct[unit.id] || 0;
@@ -47,7 +47,7 @@ export default function Unit({ navigation, route }) {
 
   return (
     <V c="flex-1">
-      <Screen header={<StackHeader title={`${L('Topic', 'Thème')} ${unit.n}`} subtitle={subjectName(unit.subject, lang)} subtitleColor="on-surface-variant" avatar={false} />}>
+      <Screen header={<StackHeader title={`${L('Topic', 'Thème')} ${unit.n}`} subtitle={unit.form ? `${subjectName(unit.subject, lang)}, ${unit.form}` : subjectName(unit.subject, lang)} subtitleColor="on-surface-variant" avatar={false} />}>
         <V c="pt-space-md pb-space-lg gap-space-lg">
           <V c="gap-space-xs">
             <StepLine step={L('Step 3 of 3', 'Étape 3 sur 3')} text={L('Choose a subtopic to read', 'Choisissez un sous-thème à lire')} />
@@ -88,6 +88,7 @@ export default function Unit({ navigation, route }) {
 
           <UnitPicture unit={unit} explain maxHeight={320} />
 
+          {!!vr && (
           <P c="rounded-xl bg-surface-container-low p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} scale={0.99}>
             <V c="flex-1 gap-0.5">
               <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
@@ -99,6 +100,7 @@ export default function Unit({ navigation, route }) {
             </V>
             <Ic n="view_in_ar" s={22} c="primary-container" />
           </P>
+          )}
 
           <P c="w-full h-12 bg-primary-container rounded-xl items-center justify-center" onPress={() => openLesson(next, lessons.indexOf(next))}>
             <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>

@@ -1,14 +1,14 @@
 // Step 2: the main topics (units) of one subject. The same screen serves
 // Learn (topic, then its subtopics), Lab (topics that have practicals) and
 // Exams (a quiz for each topic).
-import { useEffect } from 'react';
-import { T, V } from '../../ui/kit';
+import { useEffect, useState } from 'react';
+import { P, T, V } from '../../ui/kit';
 import { Screen, StackHeader } from '../../ui/chrome';
 import { StaticTabBar } from '../../ui/TabBar';
 import { StepLine, SUBJECT_LOOK, SubjectIcon, TopicCard } from '../../ui/hub';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { groupsFor, unitsFor } from '../../data/units';
+import { formFor, formsFor, groupsFor, unitsForForm } from '../../data/units';
 import { lessonsFor } from '../../data/lessons';
 import { labsForUnit } from '../../data/labs';
 import { LEVELS, subjectById, subjectName } from '../../data/subjects';
@@ -18,7 +18,7 @@ import { gradeFor } from '../../state/selectors';
 const TAB = { learn: 'Learn', lab: 'Lab', quiz: 'Exams' };
 
 export default function Topics({ navigation, route }) {
-  const { pro, progress, stats, setSubject } = useApp();
+  const { pro, progress, stats, setSubject, user } = useApp();
   const L = useL();
   const lang = useLang();
   const mode = route.params?.mode || 'learn';
@@ -26,7 +26,11 @@ export default function Topics({ navigation, route }) {
   const tint = (SUBJECT_LOOK[subject] || SUBJECT_LOOK.biology).tint;
   useEffect(() => setSubject(subject), [subject, setSubject]);
 
-  const all = unitsFor(subject);
+  // Subjects organised by class show one class at a time, starting with the student's own.
+  const forms = formsFor(subject);
+  const [form, setForm] = useState(() => formFor(subject, user?.className));
+  const own = user?.className;
+  const all = unitsForForm(subject, forms.length ? form : null);
   const units = mode === 'lab' ? all.filter((u) => labsForUnit(u.id).length) : all;
   const groups = groupsFor(subject).filter((g) => units.some((u) => u.group === g.id));
   const name = subjectName(subject, lang);
@@ -107,6 +111,32 @@ export default function Topics({ navigation, route }) {
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
             {heading[2]}
           </T>
+
+          {forms.length > 1 && (
+            <V c="gap-space-xs">
+              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                {L('Class', 'Classe')}
+              </T>
+              <V c="flex-row flex-wrap gap-space-xs" accessibilityRole="radiogroup">
+                {forms.map((f) => {
+                  const on = f === form;
+                  return (
+                    <P key={f} c={`min-h-[44px] px-space-md rounded-xl items-center justify-center ${on ? 'bg-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={() => setForm(f)} accessibilityRole="radio" accessibilityState={{ checked: on }}>
+                      <T c={`font-label-lg text-label-lg ${on ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
+                        {f}
+                        {f === own ? ` (${L('your class', 'votre classe')})` : ''}
+                      </T>
+                    </P>
+                  );
+                })}
+              </V>
+              {!!own && !forms.includes(own) && (
+                <T c="font-body-md text-body-md text-on-surface-variant">
+                  {L(`The ${own} topics for ${name} are being written. Until they are ready you can study the topics of ${form}.`, `Les thèmes de ${own} en ${name} sont en préparation. En attendant, vous pouvez étudier ceux de ${form}.`)}
+                </T>
+              )}
+            </V>
+          )}
 
           {groups.map((g) => (
             <V key={g.id} c="gap-space-sm">

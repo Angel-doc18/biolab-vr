@@ -5,7 +5,7 @@ export const LESSONS_1 = [
   // ---------------- Unit 1: Particles, states and separation ----------------
   {
     id: 'ch-matter-1',
-    unit: 'ch-matter',
+    unit: 'ch-f5-gases',
     n: '1.1',
     title: 'States of matter and the kinetic particle theory',
     minutes: 8,
@@ -32,7 +32,7 @@ export const LESSONS_1 = [
   },
   {
     id: 'ch-matter-2',
-    unit: 'ch-matter',
+    unit: 'ch-f4-salts',
     n: '1.2',
     title: 'Mixtures and how to separate them',
     minutes: 9,
@@ -59,7 +59,7 @@ export const LESSONS_1 = [
   },
   {
     id: 'ch-matter-3',
-    unit: 'ch-matter',
+    unit: 'ch-analysis',
     n: '1.3',
     title: 'Chromatography and testing purity',
     minutes: 8,
@@ -115,7 +115,7 @@ export const LESSONS_1 = [
   },
   {
     id: 'ch-atoms-2',
-    unit: 'ch-atoms',
+    unit: 'ch-f3-periodic',
     n: '2.2',
     title: 'Electron arrangement and the Periodic Table',
     minutes: 8,
@@ -142,7 +142,7 @@ export const LESSONS_1 = [
   },
   {
     id: 'ch-atoms-3',
-    unit: 'ch-atoms',
+    unit: 'ch-f3-periodic',
     n: '2.3',
     title: 'Trends in Groups I, VII and 0, and the transition metals',
     minutes: 9,
@@ -391,7 +391,7 @@ export const LESSONS_1 = [
   },
   {
     id: 'ch-acids-3',
-    unit: 'ch-acids',
+    unit: 'ch-f4-salts',
     n: '5.3',
     title: 'Preparing salts',
     minutes: 10,

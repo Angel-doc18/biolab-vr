@@ -13,7 +13,7 @@ import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
 import { p1For } from '../../lib/exam';
 import { paper2Config } from '../../data/paper2';
 import { labsFor } from '../../data/labs';
-import { unitsFor } from '../../data/units';
+import { formFor, unitsForForm } from '../../data/units';
 import { LEVELS, minutesLabel, subjectById, subjectName } from '../../data/subjects';
 import { Section } from '../tabs/Home';
 
@@ -36,7 +36,7 @@ function Choice({ icon, title, sub, note, tint, onPress }) {
 }
 
 export default function ExamMenu({ navigation, route }) {
-  const { pro, progress, stats, setSubject } = useApp();
+  const { pro, progress, stats, setSubject, user } = useApp();
   const L = useL();
   const lang = useLang();
   const subject = route.params?.subject || 'biology';
@@ -88,7 +88,7 @@ export default function ExamMenu({ navigation, route }) {
               icon="quiz"
               tint={tint}
               title={L('Topic quizzes', 'Quiz par thème')}
-              sub={`${unitsFor(subject).length} ${L('topics, ten questions each, with explanations', 'thèmes, dix questions chacun, avec explications')}`}
+              sub={`${formFor(subject, user?.className) ? `${formFor(subject, user?.className)}: ` : ''}${unitsForForm(subject, formFor(subject, user?.className)).length} ${L('topics, ten questions each, with explanations', 'thèmes, dix questions chacun, avec explications')}`}
               onPress={() => navigation.navigate('Topics', { subject, mode: 'quiz' })}
             />
             {labs.length > 0 && (

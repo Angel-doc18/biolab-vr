@@ -5,6 +5,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { DeviceMotion } from 'expo-sensors';
 import * as THREE from 'three';
 import { MODELS, realSpec } from './models';
+import { modelOf } from '../data/units';
 import { useAnatomy } from './anatomy';
 import Specimen, { Lights } from './Specimen';
 import { Ic, P, T } from '../ui/kit';
@@ -70,9 +71,9 @@ function StereoRig({ spec, geos, motion, drag }) {
 }
 
 export default function VRView({ unitId, onClose }) {
-  const real = useMemo(() => realSpec(unitId), [unitId]);
+  const real = useMemo(() => realSpec(modelOf(unitId)), [unitId]);
   const anat = useAnatomy(real?.real);
-  const spec = real && anat.status === 'ready' ? real : MODELS[unitId];
+  const spec = real && anat.status === 'ready' ? real : MODELS[modelOf(unitId)];
   const geos = spec.real ? anat.parts : null;
   const motion = useRef(null);
   const drag = useRef({ x: 0, y: 0 });

@@ -4,7 +4,7 @@ import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { unitById, units } from '../../data/units';
+import { modelOf, unitById, units } from '../../data/units';
 import { LESSONS, lessonNumber, lessonsFor, plain } from '../../data/lessons';
 import { LABS } from '../../data/labs';
 import { BANK } from '../../lib/exam';
@@ -64,7 +64,7 @@ export default function Search({ navigation }) {
       )
         .slice(0, 12)
         .map((l) => ({ l, u: lessonUnit.get(l.id) })),
-      models: rank(mine, (u) => score(`${u.vr.title} ${u.vr.subtitle} ${u.vr.parts.map((p) => `${p.name} ${p.title} ${p.fr?.name || ''}`).join(' ')}`, terms)),
+      models: rank(mine.filter((u, i, all) => u.vr && all.findIndex((x) => x.vr && modelOf(x.id) === modelOf(u.id)) === i), (u) => score(`${u.vr.title} ${u.vr.subtitle} ${u.vr.parts.map((p) => `${p.name} ${p.title} ${p.fr?.name || ''}`).join(' ')}`, terms)),
       questions: rank(
         BANK.filter((b) => subjects.includes(b.subject)),
         (b) => score(`${b.q} ${b.a[0]} ${b.why}`, terms)
