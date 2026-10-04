@@ -59,7 +59,7 @@ export const LESSONS_1 = [
   },
   {
     id: 'ph-measure-3',
-    unit: 'ph-measure',
+    unit: 'ph-f3-density',
     n: '1.3',
     title: 'Mass, weight and density',
     minutes: 8,
@@ -72,6 +72,15 @@ export const LESSONS_1 = [
       'An object **floats** in a liquid if it is less dense than the liquid, and sinks if it is denser. Ice (920 kg/m³) floats on water; a steel ship floats because its hollow shape gives it a low average density.',
     ],
     figure: 'density-apparatus',
+    examples: [
+      {
+        q: 'A stone of mass 75 g is lowered into a measuring cylinder, and the water rises from 40 cm³ to 70 cm³. Find the density of the stone.',
+        steps: [
+          'Volume of the stone = 70 − 40 = 30 cm³.',
+          'Density = mass ÷ volume = 75 ÷ 30 = 2.5 g/cm³ = 2500 kg/m³.',
+        ],
+      },
+    ],
     tip: 'Check the units: 1 g/cm³ = **1000 kg/m³**. Weight is a **force** in newtons; mass is in kilograms. They are not the same.',
     check: {
       q: 'A block of mass 540 g has a volume of 200 cm³. Its density is:',
@@ -88,7 +97,7 @@ export const LESSONS_1 = [
   // ---------------- Unit 2: Forces ----------------
   {
     id: 'ph-forces-1',
-    unit: 'ph-forces',
+    unit: 'ph-f5-vectors',
     n: '2.1',
     title: 'Forces and resultant force',
     minutes: 8,
@@ -128,6 +137,15 @@ export const LESSONS_1 = [
       'An object is **stable** if its centre of mass is low and its base is wide. It topples when its weight acts outside the base, because the weight then has a moment that turns it over. This is why buses and lorries are built with heavy parts low down.',
     ],
     figure: 'moments-beam',
+    examples: [
+      {
+        q: 'A 300 N girl sits 1.5 m from the pivot of a see-saw. Where must a 450 N boy sit to balance her?',
+        steps: [
+          'Anticlockwise moment = 300 × 1.5 = 450 N m.',
+          'Clockwise moment must equal it: 450 × d = 450, so d = 1.0 m on the other side.',
+        ],
+      },
+    ],
     tip: 'In moment calculations, take moments about the **pivot** and use the **perpendicular** distance from the pivot to the line of the force.',
     check: {
       q: 'A 400 N child sits 1.5 m from the pivot of a see-saw. Where must a 600 N adult sit to balance it?',
@@ -142,7 +160,7 @@ export const LESSONS_1 = [
   },
   {
     id: 'ph-forces-3',
-    unit: 'ph-forces',
+    unit: 'ph-f3-elastic',
     n: '2.3',
     title: 'Elasticity and Hooke’s law',
     minutes: 8,
@@ -155,6 +173,15 @@ export const LESSONS_1 = [
       'Extension = new length − original length. A stiff spring has a large k and stretches only a little. Springs are used in spring balances, car suspensions and mattresses.',
     ],
     figure: ['hooke-graph', 'hooke-apparatus'],
+    examples: [
+      {
+        q: 'A spring stretches 2 cm under a load of 4 N. Find its spring constant and the load that stretches it 5 cm.',
+        steps: [
+          'k = F ÷ e = 4 ÷ 2 = 2 N/cm = 200 N/m.',
+          'Load for 5 cm: F = ke = 2 × 5 = 10 N (if the limit of proportionality is not passed).',
+        ],
+      },
+    ],
     tip: 'Do not confuse **extension** with **length**. In a graph question, say the line is straight **and passes through the origin** to show proportionality.',
     check: {
       q: 'A spring with k = 40 N/m is stretched by a 2 N load. Its extension is:',
@@ -171,7 +198,7 @@ export const LESSONS_1 = [
   // ---------------- Unit 3: Motion ----------------
   {
     id: 'ph-motion-1',
-    unit: 'ph-motion',
+    unit: 'ph-f5-kinematics',
     n: '3.1',
     title: 'Speed, velocity, acceleration and motion graphs',
     minutes: 10,
@@ -184,6 +211,15 @@ export const LESSONS_1 = [
       'An object falling freely near the Earth, without air resistance, has a constant acceleration **g = 9.8 m/s²** (about 10 m/s²), whatever its mass.',
     ],
     figure: ['speed-time', 'distance-time'],
+    examples: [
+      {
+        q: 'A bus accelerates steadily from rest to 12 m/s in 6 s, then travels at 12 m/s for 10 s. Find its acceleration and the total distance.',
+        steps: [
+          'Acceleration = change in velocity ÷ time = 12 ÷ 6 = 2 m/s².',
+          'Distance = area under the speed-time graph = (½ × 6 × 12) + (12 × 10) = 36 + 120 = 156 m.',
+        ],
+      },
+    ],
     tip: 'Read graph questions carefully: **gradient** of distance-time is speed; **gradient** of speed-time is acceleration; **area** under speed-time is distance.',
     check: {
       q: 'A car accelerates uniformly from rest to 20 m/s in 10 s. How far does it travel in that time?',
@@ -211,6 +247,15 @@ export const LESSONS_1 = [
       'A falling object speeds up until **air resistance** equals its weight; then the resultant force is zero and it falls at a steady **terminal velocity**. Opening a parachute increases air resistance, so the skydiver slows to a lower terminal velocity.',
     ],
     figure: 'forces-car',
+    examples: [
+      {
+        q: 'The engine of a 1200 kg car gives a forward force of 3000 N while friction and air resistance total 600 N. Find its acceleration.',
+        steps: [
+          'Resultant force = 3000 − 600 = 2400 N.',
+          'a = F ÷ m = 2400 ÷ 1200 = 2 m/s².',
+        ],
+      },
+    ],
     tip: 'Use **resultant** force in F = ma, not just one of the forces. At terminal velocity the forces are **balanced**, but the object is still moving.',
     check: {
       q: 'A 1200 kg car has a driving force of 3000 N and resistive forces of 600 N. Its acceleration is:',
@@ -238,6 +283,16 @@ export const LESSONS_1 = [
       'Car safety features use this idea: **crumple zones**, **seat belts** and **air bags** increase the time it takes a passenger to stop, so the force on them is smaller. Bending your knees when landing from a jump does the same.',
     ],
     figure: null,
+    examples: [
+      {
+        q: 'A 3 kg ball moving at 4 m/s hits a 1 kg ball at rest. Afterwards the 3 kg ball moves on at 2 m/s. Find the velocity of the 1 kg ball.',
+        steps: [
+          'Momentum before = 3 × 4 + 1 × 0 = 12 kg m/s.',
+          'Momentum after = 3 × 2 + 1 × v = 6 + v.',
+          '6 + v = 12, so v = 6 m/s in the same direction.',
+        ],
+      },
+    ],
     tip: 'In conservation of momentum problems, choose one direction as positive and give velocities in the opposite direction a **minus sign**.',
     check: {
       q: 'A 2 kg trolley moving at 3 m/s collides with and sticks to a stationary 1 kg trolley. Their speed afterwards is:',
@@ -254,7 +309,7 @@ export const LESSONS_1 = [
   // ---------------- Unit 4: Energy ----------------
   {
     id: 'ph-energy-1',
-    unit: 'ph-energy',
+    unit: 'ph-f3-work',
     n: '4.1',
     title: 'Energy stores, transfers and efficiency',
     minutes: 8,
@@ -281,7 +336,7 @@ export const LESSONS_1 = [
   },
   {
     id: 'ph-energy-2',
-    unit: 'ph-energy',
+    unit: 'ph-f3-work',
     n: '4.2',
     title: 'Work, power, kinetic and potential energy',
     minutes: 9,
@@ -294,6 +349,21 @@ export const LESSONS_1 = [
       '**Power** is the rate of doing work or transferring energy: **P = W ÷ t**, in watts (1 W = 1 J/s). A 60 W lamp transfers 60 J every second.',
     ],
     figure: null,
+    examples: [
+      {
+        q: 'A 50 kg student climbs stairs 4 m high in 8 s. Find the potential energy gained and the power developed. (g = 10 N/kg)',
+        steps: [
+          'Ep = mgh = 50 × 10 × 4 = 2000 J.',
+          'Power = energy ÷ time = 2000 ÷ 8 = 250 W.',
+        ],
+      },
+      {
+        q: 'Find the kinetic energy of a 1000 kg car moving at 20 m/s.',
+        steps: [
+          'Ek = ½mv² = ½ × 1000 × 20² = 200 000 J.',
+        ],
+      },
+    ],
     tip: 'In energy-change questions, state which store **decreases** and which **increases**, and check the units: mass in kg, height in m, speed in m/s.',
     check: {
       q: 'A 50 kg student climbs 4 m of stairs in 8 s (g = 10 N/kg). Their power is:',
@@ -321,6 +391,15 @@ export const LESSONS_1 = [
       '**Renewable** resources are replaced naturally: **hydroelectric** power (important in Cameroon, as at Edea and Song Loulou), solar, wind, biomass and geothermal energy. Each has costs and limits, such as needing sunlight, wind or suitable rivers.',
     ],
     figure: ['pulley-system', 'pulley-apparatus'],
+    examples: [
+      {
+        q: 'A pulley system of velocity ratio 5 lifts an 800 N load with an effort of 200 N. Find its mechanical advantage and efficiency.',
+        steps: [
+          'MA = load ÷ effort = 800 ÷ 200 = 4.',
+          'Efficiency = MA ÷ VR × 100% = 4 ÷ 5 × 100% = 80%.',
+        ],
+      },
+    ],
     tip: 'Machines reduce the **force** needed, never the **work**: the effort moves further than the load.',
     check: {
       q: 'A machine has MA 3 and VR 4. Its efficiency is:',
@@ -350,6 +429,21 @@ export const LESSONS_1 = [
       '**Hydraulic** machines use the fact that liquids are almost incompressible and transmit pressure. A small force on a small piston creates a pressure that acts on a large piston and produces a large force: car brakes, jacks and presses work this way.',
     ],
     figure: 'hydraulic-press',
+    examples: [
+      {
+        q: 'A 50 kg girl stands on one stiletto heel of area 1 cm². Find the pressure on the floor. (g = 10 N/kg)',
+        steps: [
+          'Force = weight = 50 × 10 = 500 N; area = 1 cm² = 0.0001 m².',
+          'p = F ÷ A = 500 ÷ 0.0001 = 5 000 000 Pa, which is why such heels dent soft floors.',
+        ],
+      },
+      {
+        q: 'Find the pressure of the water at the bottom of a tank 2 m deep. (ρ = 1000 kg/m³, g = 10 N/kg)',
+        steps: [
+          'p = ρgh = 1000 × 10 × 2 = 20 000 Pa.',
+        ],
+      },
+    ],
     tip: 'Area must be in **m²** to get pascals: 1 cm² = 0.0001 m². In hydraulics, the **pressure** is the same on both pistons, not the force.',
     check: {
       q: 'A force of 20 N acts on a small piston of area 0.002 m². The pressure in the liquid is:',
@@ -377,6 +471,15 @@ export const LESSONS_1 = [
       'Drinking with a straw, using a suction cup and a syringe all depend on atmospheric pressure pushing where the pressure inside is lower.',
     ],
     figure: ['barometer', 'manometer'],
+    examples: [
+      {
+        q: 'A water manometer joined to a gas supply shows a difference in levels of 30 cm. By how much is the gas pressure above atmospheric pressure?',
+        steps: [
+          'p = ρgh = 1000 × 10 × 0.30.',
+          '= 3000 Pa above atmospheric pressure.',
+        ],
+      },
+    ],
     tip: 'A barometer measures **atmospheric** pressure; a manometer measures the **difference** between a gas pressure and atmospheric pressure.',
     check: {
       q: 'The levels in a water manometer differ by 0.20 m (ρ = 1000 kg/m³, g = 10 N/kg). The excess pressure of the gas is:',
@@ -404,6 +507,15 @@ export const LESSONS_1 = [
       'If a gas is heated at constant volume, its molecules move faster and hit the walls harder and more often, so the pressure rises. This is why aerosol cans must not be heated.',
     ],
     figure: 'boyle-apparatus',
+    examples: [
+      {
+        q: '200 cm³ of air at 100 kPa is squeezed to 50 cm³ at the same temperature. Find its new pressure.',
+        steps: [
+          'Boyle’s law: p₁V₁ = p₂V₂.',
+          'p₂ = 100 × 200 ÷ 50 = 400 kPa.',
+        ],
+      },
+    ],
     tip: 'State the conditions for Boyle’s law: **fixed mass** and **constant temperature**. Use p₁V₁ = p₂V₂ with the same units on both sides.',
     check: {
       q: 'A gas occupies 60 cm³ at 100 kPa. At constant temperature it is compressed to 20 cm³. Its pressure becomes:',
@@ -420,7 +532,7 @@ export const LESSONS_1 = [
   // ---------------- Unit 6: Thermal physics ----------------
   {
     id: 'ph-thermal-1',
-    unit: 'ph-thermal',
+    unit: 'ph-f4-temperature',
     n: '6.1',
     title: 'The kinetic model, expansion and thermometers',
     minutes: 8,
@@ -460,6 +572,16 @@ export const LESSONS_1 = [
       'A **heating curve** rises, flattens while the substance melts, rises again, then flattens while it boils. Steam burns are worse than boiling-water burns because steam releases its latent heat as it condenses on the skin.',
     ],
     figure: ['heating-curve', 'shc-apparatus'],
+    examples: [
+      {
+        q: 'How much energy is needed to heat 0.5 kg of water from 25 °C to 100 °C and then boil it all away? (c = 4200 J/(kg °C), L = 2 260 000 J/kg)',
+        steps: [
+          'Heating: Q = mcΔθ = 0.5 × 4200 × 75 = 157 500 J.',
+          'Boiling: Q = mL = 0.5 × 2 260 000 = 1 130 000 J.',
+          'Total = 1 287 500 J; boiling the water away takes far more energy than heating it.',
+        ],
+      },
+    ],
     tip: 'Use **Q = mcΔθ** when the temperature changes and **Q = mL** when the state changes. On a heating curve, the flat parts are changes of state.',
     check: {
       q: 'How much energy is needed to melt 0.5 kg of ice at 0 °C? (L = 334 000 J/kg)',

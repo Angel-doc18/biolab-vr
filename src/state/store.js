@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { get, loadSession, onSessionLost, patch as apiPatch, post, put, setSession } from '../api/client';
 import { EMPTY, examSubject, merge, minutesThisWeek, streak, syllabusMastery, touchDay, unitMastery, bestExam } from './progress';
-import { units, unitsFor } from '../data/units';
+import { units, unitsShown } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
 import { OPEN_IDS, chosenSubjects } from '../data/subjects';
 import { OPEN_FOR_TESTING } from '../data/plan';
@@ -158,7 +158,8 @@ export function AppProvider({ children }) {
       OPEN_IDS.map((id) => [
         id,
         {
-          mastery: syllabusMastery(progress, unitsFor(id), lessonIdsFor),
+          // Mastery of the topics the student sees: their class's.
+          mastery: syllabusMastery(progress, unitsShown(id, user?.className), lessonIdsFor),
           bestMock: bestExam(progress, 'p1', id),
           mocksDone: progress.exams.filter((e) => examSubject(e) === id).length,
         },
@@ -177,7 +178,7 @@ export function AppProvider({ children }) {
       bestMock: bySubject[subject].bestMock,
       lastActive: progress.days.length ? Date.now() : null,
     };
-  }, [progress, subjects, subject]);
+  }, [progress, subjects, subject, user?.className]);
 
   useEffect(() => {
     if (!user || loadedFor.current !== user.id) return;

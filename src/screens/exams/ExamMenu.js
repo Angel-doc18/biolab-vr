@@ -10,10 +10,10 @@ import { useL, useLang } from '../../i18n';
 import { examSubject } from '../../state/progress';
 import { accuracyByUnit, gradeFor, weakestUnit } from '../../state/selectors';
 import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
-import { p1For } from '../../lib/exam';
-import { paper2Config } from '../../data/paper2';
+import { paper1Plan } from '../../lib/exam';
+import { paper2Config, paper2Covers } from '../../data/paper2';
 import { labsFor } from '../../data/labs';
-import { formFor, unitsForForm } from '../../data/units';
+import { formsLabel, formsShown, unitsShown } from '../../data/units';
 import { LEVELS, minutesLabel, subjectById, subjectName } from '../../data/subjects';
 import { Section } from '../tabs/Home';
 
@@ -43,9 +43,15 @@ export default function ExamMenu({ navigation, route }) {
   useEffect(() => setSubject(subject), [subject, setSubject]);
   const tint = (SUBJECT_LOOK[subject] || SUBJECT_LOOK.biology).tint;
   const name = subjectName(subject, lang);
-  const P1 = p1For(subject);
+  const P1 = paper1Plan(subject, user?.className);
+  const scoped = !!P1.unitIds;
+  const p2Scoped = scoped && paper2Covers(subject, P1.unitIds);
+  const covers = formsLabel(P1.forms, L);
+  const shown = formsShown(subject, user?.className);
   const P2 = paper2Config(subject);
-  const labs = labsFor(subject);
+  // Practicals of the topics the student sees.
+  const seen = new Set(unitsShown(subject, user?.className).map((u) => u.id));
+  const labs = labsFor(subject).filter((l) => seen.has(l.unit) || l.units?.some((u) => seen.has(u)));
   const usedFree = !pro && mocksThisWeek(progress.exams, subject) >= FREE_MOCKS_PER_WEEK;
 
   const mine = progress.exams.filter((e) => examSubject(e) === subject);
@@ -72,7 +78,11 @@ export default function ExamMenu({ navigation, route }) {
               icon="timer"
               tint={tint}
               title={L('Paper 1: multiple choice', 'Épreuve 1 : QCM')}
-              sub={`${P1.count} ${L('questions in', 'questions en')} ${minutesLabel(P1.minutes, L)}, ${L('timed like the exam. A new paper each time.', 'chronométrée comme à l’examen. Une nouvelle épreuve à chaque fois.')}`}
+              sub={
+                scoped
+                  ? `${P1.count} ${L('questions in', 'questions en')} ${minutesLabel(P1.minutes, L)}, ${L(`on the ${covers} topics you have studied. The full exam paper opens in Form 5. A new paper each time.`, `sur les thèmes de ${covers} déjà étudiés. L’épreuve complète s’ouvre en Form 5. Une nouvelle épreuve à chaque fois.`)}`
+                  : `${P1.count} ${L('questions in', 'questions en')} ${minutesLabel(P1.minutes, L)}, ${L('timed like the exam. A new paper each time.', 'chronométrée comme à l’examen. Une nouvelle épreuve à chaque fois.')}`
+              }
               note={usedFree ? L('This week’s free paper is used.', 'L’épreuve gratuite de la semaine est utilisée.') : null}
               onPress={() => navigation.navigate(usedFree ? 'Paywall' : 'Paper1', usedFree ? { reason: 'mocks' } : { subject })}
             />
@@ -81,14 +91,20 @@ export default function ExamMenu({ navigation, route }) {
               tint={tint}
               title={L('Paper 2: structured questions', 'Épreuve 2 : questions structurées')}
               sub={`${minutesLabel(P2.minutes, L)}. ${L('Section A', 'Section A')}: ${P2.a} ${L('questions', 'questions')}; ${L('Section B', 'Section B')}: ${P2.b.answer < P2.b.offered ? `${P2.b.answer} ${L('of', 'sur')} ${P2.b.offered}` : P2.b.answer}. ${L('20 marks each.', '20 points chacune.')}`}
-              note={pro ? L('Marked point by point against the mark scheme.', 'Corrigée point par point selon le barème.') : null}
+              note={
+                scoped && !p2Scoped
+                  ? L('This is the full Form 5 paper, so some questions are on topics you will meet later.', 'C’est l’épreuve complète de Form 5 : certaines questions portent sur des thèmes que vous verrez plus tard.')
+                  : pro
+                    ? L('Marked point by point against the mark scheme.', 'Corrigée point par point selon le barème.')
+                    : null
+              }
               onPress={() => navigation.navigate('Paper2', { subject })}
             />
             <Choice
               icon="quiz"
               tint={tint}
               title={L('Topic quizzes', 'Quiz par thème')}
-              sub={`${formFor(subject, user?.className) ? `${formFor(subject, user?.className)}: ` : ''}${unitsForForm(subject, formFor(subject, user?.className)).length} ${L('topics, ten questions each, with explanations', 'thèmes, dix questions chacun, avec explications')}`}
+              sub={`${shown.length ? `${formsLabel(shown, L)}: ` : ''}${unitsShown(subject, user?.className).length} ${L('topics, each with a quiz that explains every answer', 'thèmes, chacun avec un quiz qui explique chaque réponse')}`}
               onPress={() => navigation.navigate('Topics', { subject, mode: 'quiz' })}
             />
             {labs.length > 0 && (

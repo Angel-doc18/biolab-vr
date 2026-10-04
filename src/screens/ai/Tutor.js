@@ -10,7 +10,7 @@ import { post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { focusUnit } from '../../state/selectors';
-import { formFor, unitById } from '../../data/units';
+import { unitById, unitsShown } from '../../data/units';
 import { subjectName } from '../../data/subjects';
 
 const KEYWORDS = {
@@ -105,7 +105,7 @@ export default function Tutor({ navigation, route }) {
   const name = subjectName(subject, lang);
   // One conversation per subject (Biology keeps its original key).
   const key = `bs:tutor:${user?.id || 'guest'}${subject === 'biology' ? '' : `:${subject}`}`;
-  const focus = focusUnit(progress, stats.unitPct, pro, subject, formFor(subject, user?.className));
+  const focus = focusUnit(progress, stats.unitPct, pro, subject, unitsShown(subject, user?.className));
   const context = route.params?.context || `${focus.short}`;
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState(route.params?.prefill || '');

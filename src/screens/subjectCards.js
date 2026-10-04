@@ -2,7 +2,7 @@
 // subject the student takes, with what is inside and how far they have got.
 import { useApp } from '../state/store';
 import { useL, useLang } from '../i18n';
-import { formFor, unitsForForm } from '../data/units';
+import { formsLabel, formsShown, unitsShown } from '../data/units';
 import { lessonsFor } from '../data/lessons';
 import { labsFor } from '../data/labs';
 import { examSubject } from '../state/progress';
@@ -14,14 +14,15 @@ export function useSubjectCards(mode = 'learn') {
   const lang = useLang();
   return subjects.map((id) => {
     // Subjects organised by class count the topics of the student's class.
-    const form = formFor(id, user?.className);
-    const units = unitsForForm(id, form);
-    const forClass = form ? `${form}: ` : '';
+    const forms = formsShown(id, user?.className);
+    const units = unitsShown(id, user?.className);
+    const forClass = forms.length ? `${formsLabel(forms, L)}: ` : '';
     const base = { id, name: subjectName(id, lang), code: `GCE ${subjectById(id).code}`, current: id === subject };
     if (mode === 'lab') {
-      const labs = labsFor(id);
+      const seen = new Set(units.map((u) => u.id));
+      const labs = labsFor(id).filter((l) => seen.has(l.unit) || l.units?.some((u) => seen.has(u)));
       const done = labs.filter((l) => progress.labs[l.id]).length;
-      return { ...base, line: `${labs.length} ${L('practicals', 'travaux pratiques')}`, pct: labs.length ? Math.round((done / labs.length) * 100) : 0, pctLabel: `${done} ${L('of', 'sur')} ${labs.length} ${L('done', 'faits')}` };
+      return { ...base, line: `${forClass}${labs.length} ${labs.length === 1 ? L('practical', 'travail pratique') : L('practicals', 'travaux pratiques')}`, pct: labs.length ? Math.round((done / labs.length) * 100) : 0, pctLabel: `${done} ${L('of', 'sur')} ${labs.length} ${L('done', 'faits')}` };
     }
     if (mode === 'exams') {
       const papers = progress.exams.filter((e) => examSubject(e) === id).length;

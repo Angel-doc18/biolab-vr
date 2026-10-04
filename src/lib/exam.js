@@ -1,6 +1,6 @@
 // Paper 1 engine: builds papers from a subject's question bank and scores attempts.
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { units, unitById } from '../data/units';
+import { units, unitById, unitsCovered, unitsFor } from '../data/units';
 import { subjectById } from '../data/subjects';
 
 export const BANK = units.flatMap((u) => u.quiz.map((q, qi) => ({ ...q, unit: u.id, subject: u.subject, qi, key: `${u.id}:${qi}` })));
@@ -9,6 +9,19 @@ export const byKey = (key) => byKeyMap.get(key);
 export const bankFor = (subject) => BANK.filter((q) => q.subject === subject);
 
 export const p1For = (subject) => subjectById(subject).p1;
+
+// The Paper 1 a student sits: the full exam paper once they have covered the
+// whole course (Form 5 and above); before that, a shorter paper on the classes
+// they have done, with the time cut in proportion.
+export function paper1Plan(subject, className) {
+  const P1 = p1For(subject);
+  const covered = unitsCovered(subject, className);
+  if (covered.length >= unitsFor(subject).length) return { ...P1, unitIds: null, forms: [] };
+  const pool = covered.reduce((a, u) => a + u.quiz.length, 0);
+  const count = Math.min(P1.count, pool);
+  const forms = [...new Set(covered.map((u) => u.form))];
+  return { count, minutes: Math.max(10, Math.round((P1.minutes * count) / P1.count / 5) * 5), unitIds: covered.map((u) => u.id), forms };
+}
 // Biology keeps its original key so an unfinished paper survives the update.
 const sessionKey = (subject) => (subject === 'biology' ? 'bs:p1:session' : `bs:p1:session:${subject}`);
 

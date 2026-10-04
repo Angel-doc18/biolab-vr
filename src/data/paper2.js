@@ -32,9 +32,7 @@ const shuffle = (a) => a.map((x) => [Math.random(), x]).sort((p, q) => p[0] - q[
 
 // Section A: one question per slot when the subject defines slots, otherwise a
 // spread across units. Section B: the questions offered for choice.
-export function buildPaper2(subject) {
-  const c = paper2Config(subject);
-  const bank = bankFor(subject);
+function draw(c, bank) {
   const poolA = shuffle(bank.filter((q) => q.section === 'A'));
   let a;
   if (c.aSlots) {
@@ -46,4 +44,24 @@ export function buildPaper2(subject) {
   }
   const b = shuffle(bank.filter((q) => q.section === 'B')).slice(0, c.b.offered);
   return { a: a.map((q) => q.id), b: b.map((q) => q.id) };
+}
+const complete = (c, p) => p.a.length === c.a && p.b.length === c.b.offered;
+
+// unitIds: the topics a student has covered so far. Their paper uses only those
+// topics when they can fill a paper laid out like the exam; otherwise it is the
+// full exam paper.
+export function paper2Covers(subject, unitIds) {
+  if (!unitIds) return true;
+  const c = paper2Config(subject);
+  const bank = bankFor(subject).filter((q) => unitIds.includes(q.unit));
+  const slotsOk = !c.aSlots || c.aSlots.every((slot) => bank.some((q) => q.section === 'A' && q.slot === slot));
+  return slotsOk && bank.filter((q) => q.section === 'A').length >= c.a && bank.filter((q) => q.section === 'B').length >= c.b.offered;
+}
+export function buildPaper2(subject, unitIds) {
+  const c = paper2Config(subject);
+  if (unitIds && paper2Covers(subject, unitIds)) {
+    const p = draw(c, bankFor(subject).filter((q) => unitIds.includes(q.unit)));
+    if (complete(c, p)) return p;
+  }
+  return draw(c, bankFor(subject));
 }

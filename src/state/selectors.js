@@ -20,10 +20,10 @@ export function nextLesson(progress, unitId, pro) {
 
 // The unit to revise today in a subject: lowest mastery among unlocked units,
 // preferring units already started.
-// `form`: for subjects organised by class, the class whose topics come first.
-export function focusUnit(progress, unitPct, pro, subject, form) {
-  const inClass = form ? unitsFor(subject).filter((u) => u.form === form) : [];
-  const units = inClass.length ? inClass : unitsFor(subject);
+// `shown`: the topics the student sees (their class's, for subjects organised by
+// class); all the subject's topics when not given.
+export function focusUnit(progress, unitPct, pro, subject, shown) {
+  const units = shown?.length ? shown : unitsFor(subject);
   const open = units.filter((u) => !unitLocked(u.id, pro));
   const started = open.filter((u) => (unitPct[u.id] || 0) > 0 && (unitPct[u.id] || 0) < 85);
   const pool = started.length ? started : open.filter((u) => (unitPct[u.id] || 0) < 85);

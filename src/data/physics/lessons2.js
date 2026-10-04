@@ -18,6 +18,15 @@ export const LESSONS_2 = [
       'The **wave equation**: **speed = frequency × wavelength**, v = fλ. For a given medium the speed is fixed, so a higher frequency means a shorter wavelength.',
     ],
     figure: 'transverse-wave',
+    examples: [
+      {
+        q: 'A wave of frequency 5 Hz has a wavelength of 0.4 m. Find its speed, and the wavelength of a 10 Hz wave with the same speed.',
+        steps: [
+          'v = fλ = 5 × 0.4 = 2 m/s.',
+          'At 10 Hz: λ = v ÷ f = 2 ÷ 10 = 0.2 m.',
+        ],
+      },
+    ],
     tip: 'Measure wavelength from **crest to crest**, and amplitude from the **middle** (rest line) to a crest, not from crest to trough.',
     check: {
       q: 'Radio waves travel at 3 × 10⁸ m/s. A station broadcasts at 100 MHz. Its wavelength is:',
@@ -59,7 +68,7 @@ export const LESSONS_2 = [
   },
   {
     id: 'ph-waves-3',
-    unit: 'ph-waves',
+    unit: 'ph-f4-sound',
     n: '7.3',
     title: 'Sound',
     minutes: 8,
@@ -72,6 +81,14 @@ export const LESSONS_2 = [
       '**Pitch** depends on frequency and **loudness** on amplitude. Humans hear from about 20 Hz to 20 000 Hz. **Ultrasound** (above 20 000 Hz) is used for scanning unborn babies, finding flaws in metals and measuring sea depth (sonar).',
     ],
     figure: null,
+    examples: [
+      {
+        q: 'Find the wavelength in air of a note of frequency 680 Hz. (speed of sound = 340 m/s)',
+        steps: [
+          'λ = v ÷ f = 340 ÷ 680 = 0.5 m.',
+        ],
+      },
+    ],
     tip: 'In echo calculations remember the sound goes **there and back**: distance = speed × time **÷ 2**.',
     check: {
       q: 'A ship’s sonar pulse returns from the sea bed after 0.4 s. Sound travels at 1500 m/s in water. The depth is:',
@@ -128,6 +145,15 @@ export const LESSONS_2 = [
       '**Optical fibres** carry light, and so information, by total internal reflection; doctors use them in endoscopes to see inside the body. Prisms in binoculars use it too, and it makes diamonds sparkle.',
     ],
     figure: ['refraction-block', 'total-internal-reflection'],
+    examples: [
+      {
+        q: 'A ray enters glass at an angle of incidence of 40° and is refracted at 25°. Find the refractive index and the critical angle of the glass.',
+        steps: [
+          'n = sin i ÷ sin r = sin 40° ÷ sin 25° = 0.643 ÷ 0.423 = 1.52.',
+          'sin c = 1 ÷ n = 1 ÷ 1.52 = 0.658, so c = 41°.',
+        ],
+      },
+    ],
     tip: 'Total internal reflection needs **two conditions**: light travelling from the denser medium towards the less dense one, and the angle of incidence **greater than the critical angle**.',
     check: {
       q: 'A material has a refractive index of 2.0. Its critical angle is:',
@@ -184,6 +210,15 @@ export const LESSONS_2 = [
       'Conventional current flows from the positive terminal round the circuit to the negative terminal, though electrons actually flow the other way.',
     ],
     figure: 'circuit-symbols',
+    examples: [
+      {
+        q: 'A current of 0.5 A flows for 2 minutes through a lamp with a p.d. of 6 V across it. Find the charge that passes and the energy changed.',
+        steps: [
+          'Q = It = 0.5 × 120 = 60 C.',
+          'E = QV = 60 × 6 = 360 J.',
+        ],
+      },
+    ],
     tip: 'Ammeters go in **series**, voltmeters in **parallel**. Remember Q = It: 1 coulomb is the charge carried by 1 A in 1 s.',
     check: {
       q: 'A charge of 30 C flows through a lamp in 1 minute. The current is:',
@@ -211,6 +246,14 @@ export const LESSONS_2 = [
       'In a **parallel** circuit each branch gets the full supply voltage, the currents in the branches add up to the total, and the combined resistance is less than the smallest one: 1/R = 1/R₁ + 1/R₂. House lighting is wired in parallel so each lamp can be switched separately.',
     ],
     figure: ['series-parallel', 'ohm-apparatus'],
+    examples: [
+      {
+        q: 'A torch lamp takes a current of 0.25 A from a 3 V battery. Find its resistance.',
+        steps: [
+          'R = V ÷ I = 3 ÷ 0.25 = 12 Ω.',
+        ],
+      },
+    ],
     tip: 'Use **R = V ÷ I** carefully with the right values: in a series circuit, use the voltage across that component, not the whole supply.',
     check: {
       q: 'Resistors of 3 Ω and 6 Ω are connected in parallel. Their combined resistance is:',
@@ -225,7 +268,7 @@ export const LESSONS_2 = [
   },
   {
     id: 'ph-electricity-3',
-    unit: 'ph-electricity',
+    unit: 'ph-f4-domestic',
     n: '9.3',
     title: 'Electrical power, cost and safety',
     minutes: 8,
@@ -238,6 +281,15 @@ export const LESSONS_2 = [
       'The **earth wire** connects a metal case to the ground: if a fault makes the case live, a large current flows to earth and blows the fuse, so the user is not electrocuted. Dangers include damaged insulation, overloaded sockets and water near electricity.',
     ],
     figure: null,
+    examples: [
+      {
+        q: 'A 1.5 kW cooker is used for 2 hours a day for 30 days. Find the energy used and its cost at 79 FCFA per kWh.',
+        steps: [
+          'E = P × t = 1.5 kW × (2 × 30) h = 90 kWh.',
+          'Cost = 90 × 79 = 7110 FCFA.',
+        ],
+      },
+    ],
     tip: 'To choose a fuse, work out the normal current with **I = P ÷ V**, then pick the **next fuse value above** it.',
     check: {
       q: 'A 2.3 kW kettle runs on 230 V. The best fuse to use is:',
@@ -254,7 +306,7 @@ export const LESSONS_2 = [
   // ---------------- Unit 10: Magnetism ----------------
   {
     id: 'ph-magnetism-1',
-    unit: 'ph-magnetism',
+    unit: 'ph-f5-magnets',
     n: '10.1',
     title: 'Magnets, fields and electromagnets',
     minutes: 8,
@@ -321,6 +373,15 @@ export const LESSONS_2 = [
       'A **transformer** has two coils on a soft iron core. An alternating current in the primary coil makes a changing field that induces an e.m.f. in the secondary coil: **Vs ÷ Vp = Ns ÷ Np**. Step-up transformers raise the voltage for transmission so the current is small and less energy is wasted as heat in the cables; step-down transformers lower it for homes.',
     ],
     figure: 'transformer',
+    examples: [
+      {
+        q: 'A transformer has 200 turns on its primary and 4000 on its secondary. Find the output voltage when 12 V a.c. is applied.',
+        steps: [
+          'Vs = Vp × Ns ÷ Np = 12 × 4000 ÷ 200.',
+          '= 240 V: a step-up transformer.',
+        ],
+      },
+    ],
     tip: 'Transformers work only with **a.c.**, because a changing field is needed. For an ideal transformer, power in = power out: **VpIp = VsIs**.',
     check: {
       q: 'A transformer steps 230 V down to 11.5 V. Its primary coil has 2000 turns. The secondary has:',
@@ -404,6 +465,15 @@ export const LESSONS_2 = [
       'Radiation can damage cells and cause cancer. Sources are handled with **tongs**, kept in **lead-lined boxes**, pointed away from people and used for the shortest possible time; workers wear film badges to measure their dose.',
     ],
     figure: ['decay-curve', 'halflife-apparatus'],
+    examples: [
+      {
+        q: 'Iodine-131 has a half-life of 8 days. What mass remains of a 64 g sample after 32 days?',
+        steps: [
+          '32 days = 32 ÷ 8 = 4 half-lives.',
+          '64 → 32 → 16 → 8 → 4 g remain.',
+        ],
+      },
+    ],
     tip: 'In half-life calculations, count how many half-lives have passed and halve that many times. Always **subtract background** first.',
     check: {
       q: 'A source has a count rate of 800 per minute and a half-life of 2 hours. After 6 hours the count rate is:',

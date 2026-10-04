@@ -9,7 +9,7 @@ import { useL, useLang } from '../../i18n';
 import { get } from '../../api/client';
 import { daysToExam } from '../../state/progress';
 import { firstName, focusUnit, greeting, nextLesson, recentUnits } from '../../state/selectors';
-import { formFor, topicLabel, unitsFor } from '../../data/units';
+import { topicLabel, unitsShown } from '../../data/units';
 import { lessonNumber, lessonsFor } from '../../data/lessons';
 import { LEVELS, examLabel, subjectById, subjectName } from '../../data/subjects';
 import { SubjectGrid, TileGrid } from '../../ui/hub';
@@ -60,10 +60,11 @@ function StudentHome({ navigation }) {
     }, [load])
   );
 
-  const focus = focusUnit(progress, stats.unitPct, pro, subject, formFor(subject, user?.className));
+  const shown = unitsShown(subject, user?.className);
+  const focus = focusUnit(progress, stats.unitPct, pro, subject, shown);
   const lesson = nextLesson(progress, focus.id, pro);
   const recent = recentUnits(progress, 2, subject);
-  const continueList = recent.length ? recent : unitsFor(subject).slice(0, 2);
+  const continueList = recent.length ? recent : shown.slice(0, 2);
   const taking = subjects.map((id) => subjectName(id, lang)).join(', ');
   const days = daysToExam(user?.examYear);
   const due = assignments[0];

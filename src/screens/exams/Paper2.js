@@ -13,6 +13,7 @@ import { Diagram } from '../../diagrams';
 import { post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
+import { paper1Plan } from '../../lib/exam';
 import { buildPaper2, p2ById, paper2Config, paper2Total, questionMarks } from '../../data/paper2';
 import { subjectName } from '../../data/subjects';
 import { pickAnswerPhoto } from '../../lib/photo';
@@ -63,7 +64,7 @@ const clock = (ms) => {
 
 export default function Paper2({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const { pro, recordExam, subject: current } = useApp();
+  const { pro, recordExam, subject: current, user } = useApp();
   const L = useL();
   const lang = useLang();
   const subject = route.params?.subject || current;
@@ -93,7 +94,7 @@ export default function Paper2({ navigation, route }) {
       } catch {
         // start fresh
       }
-      const paper = buildPaper2(subject);
+      const paper = buildPaper2(subject, paper1Plan(subject, user?.className).unitIds);
       setS({ startedAt: Date.now(), ...paper, chosen: choosing ? [] : paper.b, answers: {}, drawings: {}, photos: {}, index: 0 });
     })();
     const t = setInterval(() => setNow(Date.now()), 15000);

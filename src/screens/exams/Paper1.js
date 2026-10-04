@@ -5,7 +5,7 @@ import { Screen, Spinner, StackHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { subjectName } from '../../data/subjects';
-import { buildPaper, byKey, clearSession, loadSession, mockRef, p1For, saveSession, score, unitLabel } from '../../lib/exam';
+import { buildPaper, byKey, clearSession, loadSession, mockRef, paper1Plan, saveSession, score, unitLabel } from '../../lib/exam';
 import { topicLabel, unitById } from '../../data/units';
 import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
 import { completeMatchingAssignment } from '../../lib/assignments';
@@ -74,10 +74,10 @@ function Dialog({ visible, icon, iconBg, title, body, cancel, confirm, confirmC 
 }
 
 export default function Paper1({ navigation, route }) {
-  const { pro, progress, recordExam, subject: current } = useApp();
+  const { pro, progress, recordExam, subject: current, user } = useApp();
   const L = useL();
   const subject = route.params?.subject || current;
-  const P1 = p1For(subject);
+  const plan = paper1Plan(subject, user?.className);
   const title = `${subjectName(subject, useLang())} ${L('Paper 1', 'épreuve 1')}`;
   const [s, setS] = useState(null); // { startedAt, paper, answers, flags, struck, index }
   const [now, setNow] = useState(Date.now());
@@ -92,7 +92,7 @@ export default function Paper1({ navigation, route }) {
       const existing = await loadSession(subject);
       if (existing) return setS(existing);
       if (!pro && mocksThisWeek(progress.exams, subject) >= FREE_MOCKS_PER_WEEK) return navigation.replace('Paywall', { reason: 'mocks' });
-      const fresh = { startedAt: Date.now(), minutes: P1.minutes, paper: buildPaper(subject), answers: {}, flags: {}, struck: {}, index: 0 };
+      const fresh = { startedAt: Date.now(), minutes: plan.minutes, paper: buildPaper(subject, plan.count, plan.unitIds), answers: {}, flags: {}, struck: {}, index: 0 };
       setS(fresh);
       saveSession(subject, fresh);
     })();
@@ -113,13 +113,14 @@ export default function Paper1({ navigation, route }) {
     return () => sub.remove();
   }, []);
 
-  const left = s ? Math.max(0, Math.round((s.startedAt + P1.minutes * 60000 - now) / 1000)) : P1.minutes * 60;
+  const minutes = s?.minutes || plan.minutes;
+  const left = s ? Math.max(0, Math.round((s.startedAt + minutes * 60000 - now) / 1000)) : minutes * 60;
 
   const submit = () => {
     if (!s || done.current) return;
     done.current = true;
     const r = score(s.paper, s.answers, s.flags);
-    const secs = Math.min(P1.minutes * 60, Math.round((Date.now() - s.startedAt) / 1000));
+    const secs = Math.min(minutes * 60, Math.round((Date.now() - s.startedAt) / 1000));
     const exam = { kind: 'p1', subject, score: r.correct, total: r.total, pct: r.pct, byUnit: r.byUnit, items: r.items, secs };
     recordExam(exam);
     clearSession(subject);

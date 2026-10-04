@@ -9,7 +9,7 @@ import * as biology from './biology/units';
 import * as chemistry from './chemistry/units';
 import * as physics from './physics/units';
 import * as humanbio from './humanbio/units';
-import { CLASSES } from './subjects';
+import { CLASSES, classById, classLevel, subjectById } from './subjects';
 
 const MODULES = { biology, chemistry, physics, humanbio };
 
@@ -35,6 +35,42 @@ export function formFor(subject, className) {
   const i = ORDER.indexOf(className);
   if (i < 0) return forms[0];
   return [...forms].sort((a, b) => Math.abs(ORDER.indexOf(a) - i) - Math.abs(ORDER.indexOf(b) - i) || ORDER.indexOf(a) - ORDER.indexOf(b))[0];
+}
+
+// The classes whose topics a student sees in a subject. Their class is set when
+// they join, so they see that class only: their own class; the nearest class
+// while their own class's topics are being written; or, for a Sixth Form student
+// revising an Ordinary Level subject, every class of that course. Users with no
+// class (teachers, parents) choose a class on the topics screen.
+export function formsShown(subject, className) {
+  const forms = formsFor(subject);
+  if (!forms.length || !classById(className)) return [];
+  if (forms.includes(className)) return [className];
+  if (classLevel(className) !== subjectById(subject).level) return forms;
+  return [formFor(subject, className)];
+}
+export function unitsShown(subject, className) {
+  const forms = formsShown(subject, className);
+  return forms.length ? unitsFor(subject).filter((u) => forms.includes(u.form)) : unitsFor(subject);
+}
+
+// The topics a student has been taught so far: every class of the course up to
+// their own. Practice papers draw on these, so a Form 3 student is not set Form 5
+// questions. A Form 5 (or Sixth Form) student has covered the whole course.
+export function unitsCovered(subject, className) {
+  const forms = formsFor(subject);
+  const i = ORDER.indexOf(className);
+  if (!forms.length || i < 0) return unitsFor(subject);
+  const upTo = forms.filter((f) => ORDER.indexOf(f) <= i);
+  return unitsFor(subject).filter((u) => (upTo.length ? upTo : formsShown(subject, className)).includes(u.form));
+}
+
+// "Form 3" or "Forms 3 to 5": the classes a list of topics comes from.
+export function formsLabel(forms, L) {
+  if (!forms.length) return '';
+  if (forms.length === 1) return forms[0];
+  const num = (f) => f.replace('Form ', '');
+  return forms.every((f) => f.startsWith('Form ')) ? `Forms ${num(forms[0])} ${L('to', 'à')} ${num(forms[forms.length - 1])}` : forms.join(', ');
 }
 
 // The key of the 3D model a unit shows (its own, or one it borrows).

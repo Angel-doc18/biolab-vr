@@ -1,4 +1,4 @@
-// Physics units 1 to 6. See units.js.
+// Physics topic material, units 1 to 6, kept as a bank. See bank.js.
 const part = (key, en, fr) => ({ key, ...en, fr });
 
 export const UNITS_1 = [

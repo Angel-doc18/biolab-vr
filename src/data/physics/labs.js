@@ -90,7 +90,7 @@ export const LABS = [
   {
     id: 'ph-pendulum',
     unit: 'ph-measure',
-    units: ['ph-motion'],
+    units: ['ph-f5-kinematics'],
     kind: 'readings',
     short: 'Simple pendulum',
     title: 'The simple pendulum: finding g',
@@ -150,7 +150,7 @@ export const LABS = [
   },
   {
     id: 'ph-density',
-    unit: 'ph-measure',
+    unit: 'ph-f3-density',
     kind: 'readings',
     short: 'Density',
     title: 'Density of solids: identifying the material',
@@ -208,7 +208,7 @@ export const LABS = [
   // ---------------------------------------------------------------- forces
   {
     id: 'ph-hooke',
-    unit: 'ph-forces',
+    unit: 'ph-f3-elastic',
     kind: 'readings',
     short: 'Hooke’s law',
     title: 'Stretching a spring: Hooke’s law',
@@ -309,7 +309,7 @@ export const LABS = [
   // ---------------------------------------------------------------- motion
   {
     id: 'ph-ramp',
-    unit: 'ph-motion',
+    unit: 'ph-f5-kinematics',
     kind: 'readings',
     short: 'Acceleration down a ramp',
     title: 'Acceleration of a trolley down a ramp',
