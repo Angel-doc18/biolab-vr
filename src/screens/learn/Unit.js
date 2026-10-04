@@ -117,6 +117,13 @@ export default function Unit({ navigation, route }) {
                 sub={`${unit.quiz.length} ${L('questions with explanations', 'questions avec explications')}${quiz?.attempts ? `. ${quiz.attempts} ${quiz.attempts === 1 ? L('attempt', 'essai') : L('attempts', 'essais')}` : ''}`}
                 onPress={() => navigation.navigate('Quiz', { unitId: unit.id })}
               />
+              <Row
+                title={L('Workspace: solve on the board', 'Espace de travail : résoudre au tableau')}
+                sub={L('Questions from this topic worked step by step and explained aloud', 'Questions du thème résolues étape par étape et expliquées')}
+                icon="co_present"
+                iconC="primary-container"
+                onPress={() => navigation.navigate('Workspace', { unitId: unit.id, subject: unit.subject })}
+              />
               {labs.map((l) => (
                 <Row
                   key={l.id}

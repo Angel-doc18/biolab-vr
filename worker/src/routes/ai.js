@@ -2,7 +2,7 @@ import { HttpError, limit, now, ok, readJson } from '../lib/http.js';
 import { isPro, requireUser, requireConsent } from '../lib/auth.js';
 import { int, oneOf, str } from '../lib/validate.js';
 import { sha256, uuid } from '../lib/crypto.js';
-import { explainItems, markAnswer, tutorReply } from '../lib/ai.js';
+import { explainItems, markAnswer, solveQuestion, tutorReply } from '../lib/ai.js';
 import { today } from '../lib/notify.js';
 import { subjectOr } from '../lib/subjects.js';
 
@@ -56,11 +56,47 @@ export async function ask(request, env) {
     .slice(-10)
     .map((h) => ({ role: h.role, content: h.content }));
   while (history.length && history[0].role !== 'user') history.shift();
-  const context = str(b.context, 'Context', { max: 200, optional: true });
+  const context = str(b.context, 'Context', { max: 300, optional: true });
   const subject = subjectOr(b.subject);
-  const text = await tutorReply(env, history, question, { lang: user.lang, context, level: user.class_name, subject });
+  const text = await tutorReply(env, history, question, { lang: user.lang, context, lesson: lessonOf(b.lesson), level: user.class_name, subject });
   await consume(env, user.id, 'asks');
   return ok({ text, asksLeft: Math.max(0, AI_LIMITS[tier].asks - used.asks - 1) });
+}
+
+// The lesson or topic open on the student's screen, sent so the tutor can keep
+// to it: { title, text }. Long lessons are cut to a size the model reads well.
+function lessonOf(v) {
+  if (!v || typeof v !== 'object') return null;
+  const title = typeof v.title === 'string' ? v.title.trim().slice(0, 200) : '';
+  const text = typeof v.text === 'string' ? v.text.trim().slice(0, 5000) : '';
+  return title || text ? { title, text } : null;
+}
+
+// The workspace: a question solved step by step on the board. The same question
+// in the same class, language and lesson is solved once and shared, and a shared
+// solution does not use the student's daily questions.
+export async function solve(request, env) {
+  const user = await requireUser(request, env);
+  requireConsent(user);
+  const b = await readJson(request, 64 * 1024);
+  const subject = subjectOr(b.subject);
+  const lang = oneOf(b.lang ?? user.lang ?? 'en', 'Language', ['en', 'fr']);
+  const question = str(b.question, 'Question', { min: 3, max: 1500 });
+  const lesson = lessonOf(b.lesson);
+  const className = user.class_name || '';
+  const key = await sha256(JSON.stringify(['solve', subject, lang, className, question.replace(/\s+/g, ' ').trim().toLowerCase(), lesson?.title || '']));
+  const hit = await env.DB.prepare('SELECT body FROM ai_explanations WHERE key = ?').bind(key).first();
+  const tier = isPro(user) ? 'pro' : 'free';
+  const used = await usage(env, user.id);
+  if (hit) return ok({ solution: JSON.parse(hit.body), cached: true, asksLeft: Math.max(0, AI_LIMITS[tier].asks - used.asks) });
+  await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are sending questions too quickly. Wait a moment.');
+  if (used.asks >= AI_LIMITS[tier].asks) {
+    throw new HttpError(402, tier === 'pro' ? 'You have reached today\'s question limit.' : 'You have used today\'s free questions.', 'quota');
+  }
+  const solution = await solveQuestion(env, { subject, lang, className, question, lesson });
+  await env.DB.prepare('INSERT OR REPLACE INTO ai_explanations (key, kind, body, created_at) VALUES (?, ?, ?, ?)').bind(key, 'solve', JSON.stringify(solution), now()).run();
+  await consume(env, user.id, 'asks');
+  return ok({ solution, cached: false, asksLeft: Math.max(0, AI_LIMITS[tier].asks - used.asks - 1) });
 }
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];

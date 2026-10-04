@@ -37,21 +37,33 @@ export function formFor(subject, className) {
   return [...forms].sort((a, b) => Math.abs(ORDER.indexOf(a) - i) - Math.abs(ORDER.indexOf(b) - i) || ORDER.indexOf(a) - ORDER.indexOf(b))[0];
 }
 
-// The classes whose topics a student sees in a subject. Their class is set when
-// they join, so they see that class only: their own class; the nearest class
-// while their own class's topics are being written; or, for a Sixth Form student
-// revising an Ordinary Level subject, every class of that course. Users with no
-// class (teachers, parents) choose a class on the topics screen.
+// The examination classes: Form 5 sits the GCE Ordinary Level and Upper Sixth
+// the Advanced Level, so they revise the whole course.
+export const isExamClass = (className) => className === 'Form 5' || className === 'Upper Sixth';
+
+// The classes whose topics a student sees in a subject, in the order shown. Their
+// class is set when they join, so each class sees only its own topics; the nearest
+// class stands in while a class's topics are being written. An examination class
+// sees its own topics first, then those of the earlier classes for revision. A
+// Sixth Form student revising an Ordinary Level subject sees that whole course.
+// Users with no class (teachers, parents) choose a class on the topics screen.
 export function formsShown(subject, className) {
   const forms = formsFor(subject);
   if (!forms.length || !classById(className)) return [];
-  if (forms.includes(className)) return [className];
   if (classLevel(className) !== subjectById(subject).level) return forms;
+  if (isExamClass(className)) {
+    const i = ORDER.indexOf(className);
+    const earlier = forms.filter((f) => ORDER.indexOf(f) < i);
+    if (forms.includes(className)) return [className, ...earlier];
+    if (earlier.length) return earlier;
+  }
+  if (forms.includes(className)) return [className];
   return [formFor(subject, className)];
 }
 export function unitsShown(subject, className) {
   const forms = formsShown(subject, className);
-  return forms.length ? unitsFor(subject).filter((u) => forms.includes(u.form)) : unitsFor(subject);
+  if (!forms.length) return unitsFor(subject);
+  return forms.flatMap((f) => unitsFor(subject).filter((u) => u.form === f).sort((a, b) => a.n - b.n));
 }
 
 // The topics a student has been taught so far: every class of the course up to
@@ -66,11 +78,13 @@ export function unitsCovered(subject, className) {
 }
 
 // "Form 3" or "Forms 3 to 5": the classes a list of topics comes from.
-export function formsLabel(forms, L) {
-  if (!forms.length) return '';
-  if (forms.length === 1) return forms[0];
+export function formsLabel(list, L) {
+  if (!list.length) return '';
+  if (list.length === 1) return list[0];
+  const forms = [...list].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
   const num = (f) => f.replace('Form ', '');
-  return forms.every((f) => f.startsWith('Form ')) ? `Forms ${num(forms[0])} ${L('to', 'à')} ${num(forms[forms.length - 1])}` : forms.join(', ');
+  if (forms.every((f) => f.startsWith('Form '))) return `Forms ${num(forms[0])} ${L('to', 'à')} ${num(forms[forms.length - 1])}`;
+  return `${forms.slice(0, -1).join(', ')} ${L('and', 'et')} ${forms[forms.length - 1]}`;
 }
 
 // The key of the 3D model a unit shows (its own, or one it borrows).

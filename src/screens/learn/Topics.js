@@ -8,10 +8,10 @@ import { StaticTabBar } from '../../ui/TabBar';
 import { StepLine, SUBJECT_LOOK, SubjectIcon, TopicCard } from '../../ui/hub';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { formFor, formsFor, formsLabel, formsShown, groupsFor, unitsForForm } from '../../data/units';
+import { formFor, formsFor, formsLabel, formsShown, groupsFor, isExamClass, unitsForForm } from '../../data/units';
 import { lessonsFor } from '../../data/lessons';
 import { labsForUnit } from '../../data/labs';
-import { LEVELS, classById, subjectById, subjectName } from '../../data/subjects';
+import { LEVELS, classById, classLevel, subjectById, subjectName } from '../../data/subjects';
 import { labLocked, unitLocked } from '../../data/plan';
 import { gradeFor } from '../../state/selectors';
 
@@ -52,13 +52,17 @@ export default function Topics({ navigation, route }) {
   const sections = (shown.length ? shown : [null]).map((f) => ({ form: f, runs: runsOf(keep(unitsForForm(subject, f))) })).filter((s) => s.runs.some((r) => r.units.length));
 
   // What the student is looking at, in plain words.
+  const revisingOtherLevel = !!own && classLevel(own) !== subjectById(subject).level;
   const classNote = !own || !forms.length
     ? null
-    : forms.includes(own)
-      ? L(`Your class is ${own}, so these are the ${own} topics of the ${name} syllabus, in the order they are taught. You can change your class in Settings.`, `Votre classe est la ${own} : voici les thèmes de ${own} du programme de ${name}, dans l’ordre où ils sont enseignés. Vous pouvez changer de classe dans les Réglages.`)
-      : shown.length > 1
-        ? L(`You are in ${own}. The Advanced Level course is being written; until it is ready, revise the Ordinary Level ${name} course it builds on, ${formsLabel(shown, L)}.`, `Vous êtes en ${own}. Le cours de l’Advanced Level est en préparation ; en attendant, révisez le cours de ${name} de l’Ordinary Level sur lequel il repose, ${formsLabel(shown, L)}.`)
-        : L(`The ${own} topics of ${name} are being written. Until they are ready, here are the ${shown[0]} topics, the nearest class.`, `Les thèmes de ${own} en ${name} sont en préparation. En attendant, voici ceux de ${shown[0]}, la classe la plus proche.`);
+    : revisingOtherLevel
+      ? L(`You are in ${own}. The Advanced Level course is being written; until it is ready, revise the Ordinary Level ${name} course it builds on, ${formsLabel(shown, L)}.`, `Vous êtes en ${own}. Le cours de l’Advanced Level est en préparation ; en attendant, révisez le cours de ${name} de l’Ordinary Level sur lequel il repose, ${formsLabel(shown, L)}.`)
+      : isExamClass(own) && shown.length > 1
+        ? L(`${own} is your examination class, so your ${own} topics come first, followed by the topics of the earlier classes for revision. The examination covers all of them.`, `La ${own} est votre classe d’examen : vos thèmes de ${own} viennent d’abord, puis ceux des classes précédentes à réviser. L’examen porte sur l’ensemble.`)
+        : forms.includes(own)
+          ? L(`Your class is ${own}, so these are the ${own} topics of the ${name} syllabus, in the order they are taught. You can change your class in Settings.`, `Votre classe est la ${own} : voici les thèmes de ${own} du programme de ${name}, dans l’ordre où ils sont enseignés. Vous pouvez changer de classe dans les Réglages.`)
+          : L(`The ${own} topics of ${name} are being written. Until they are ready, here are the ${shown[0]} topics, the nearest class.`, `Les thèmes de ${own} en ${name} sont en préparation. En attendant, voici ceux de ${shown[0]}, la classe la plus proche.`);
+  const sectionTitle = (f) => (f === own ? `${f} (${L('your class', 'votre classe')})` : isExamClass(own) && !revisingOtherLevel ? `${f} (${L('revision', 'révision')})` : f);
 
   const heading = {
     learn: [L('Step 2 of 3', 'Étape 2 sur 3'), L('Choose a topic', 'Choisissez un thème'), L('Each topic opens its subtopics: the lessons, a labelled diagram and a quiz, and a 3D model where the topic has one.', 'Chaque thème ouvre ses sous-thèmes : leçons, schéma légendé et quiz, et un modèle 3D quand le thème en a un.')],
@@ -163,7 +167,7 @@ export default function Topics({ navigation, route }) {
             <V key={sec.form || 'all'} c="gap-space-md">
               {sections.length > 1 && (
                 <T c="font-headline-sm text-headline-sm text-on-surface">
-                  {sec.form}
+                  {sectionTitle(sec.form)}
                 </T>
               )}
               {sec.runs.map((run, i) => (

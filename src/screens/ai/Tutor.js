@@ -10,30 +10,23 @@ import { post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { focusUnit } from '../../state/selectors';
-import { unitById, unitsShown } from '../../data/units';
+import { unitById, unitsFor, unitsShown } from '../../data/units';
+import { contextFor } from '../../lib/tutorContext';
 import { subjectName } from '../../data/subjects';
 
-const KEYWORDS = {
-  cell: ['cell', 'mitochond', 'organelle', 'osmosis', 'plasmolys', 'nucleus', 'ribosome', 'membrane', 'turgid', 'cellule'],
-  nutrition: ['digest', 'enzyme', 'amylase', 'stomach', 'villi', 'food test', 'photosynth', 'diet', 'bile'],
-  transport: ['heart', 'blood', 'artery', 'vein', 'capillar', 'xylem', 'phloem', 'transpiration', 'circulation', 'cœur'],
-  gas: ['lung', 'alveol', 'breath', 'respiration', 'diaphragm', 'gas exchange', 'poumon'],
-  kidney: ['kidney', 'nephron', 'urine', 'excretion', 'glomerul', 'homeostasis', 'rein'],
-  nervous: ['nerve', 'neuron', 'reflex', 'brain', 'synapse', 'hormone', 'eye', 'nerveux'],
-  locomotion: ['bone', 'muscle', 'joint', 'skeleton', 'biceps', 'tendon', 'ligament'],
-  reproduction: ['flower', 'pollin', 'fertilis', 'reproduc', 'ovary', 'sperm', 'placenta', 'menstrua'],
-  genetics: ['gene', 'allele', 'dna', 'chromosome', 'inherit', 'mitosis', 'meiosis', 'genotype', 'punnett'],
-  ecology: ['ecosystem', 'food chain', 'food web', 'malaria', 'pollution', 'nitrogen cycle', 'carbon cycle', 'deforest'],
-};
-function matchUnit(text) {
+// The 3D model an answer is about: the topic of this subject whose key words the
+// question and answer mention most (only topics with a model).
+const WORDS = (u) => `${u.title} ${u.short} ${u.focus} ${(u.vr?.parts || []).map((p) => p.name).join(' ')}`.toLowerCase().match(/[a-z]{5,}/g) || [];
+function matchUnit(text, subject, preferred) {
   const s = text.toLowerCase();
   let best = null;
-  let hits = 0;
-  for (const [u, words] of Object.entries(KEYWORDS)) {
-    const n = words.filter((w) => s.includes(w)).length;
+  let hits = 1;
+  for (const u of unitsFor(subject)) {
+    if (!u.vr) continue;
+    const n = new Set(WORDS(u).filter((w) => s.includes(w))).size + (u.id === preferred ? 1 : 0);
     if (n > hits) {
       hits = n;
-      best = u;
+      best = u.id;
     }
   }
   return best;
@@ -106,7 +99,10 @@ export default function Tutor({ navigation, route }) {
   // One conversation per subject (Biology keeps its original key).
   const key = `bs:tutor:${user?.id || 'guest'}${subject === 'biology' ? '' : `:${subject}`}`;
   const focus = focusUnit(progress, stats.unitPct, pro, subject, unitsShown(subject, user?.className));
-  const context = route.params?.context || `${focus.short}`;
+  // The lesson or topic the student came from, or the topic they are working on.
+  const ctx = contextFor({ lessonId: route.params?.lessonId, unitId: route.params?.unitId || (route.params?.lessonId ? null : focus?.id) });
+  const context = ctx?.short || route.params?.context || focus?.short || '';
+  const ctxUnit = route.params?.unitId || focus?.id;
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState(route.params?.prefill || '');
   const [busy, setBusy] = useState(false);
@@ -142,8 +138,8 @@ export default function Tutor({ navigation, route }) {
     setDraft('');
     setBusy(true);
     try {
-      const r = await post('/v1/ai/ask', { question: q, history, context, subject }, { timeout: 90000 });
-      setMessages((m) => [...m, { id: `a${Date.now()}`, role: 'assistant', content: r.text, at: Date.now(), unit: matchUnit(`${q} ${r.text}`), q }]);
+      const r = await post('/v1/ai/ask', { question: q, history, context, subject, lesson: ctx ? { title: ctx.title, text: ctx.text } : undefined }, { timeout: 90000 });
+      setMessages((m) => [...m, { id: `a${Date.now()}`, role: 'assistant', content: r.text, at: Date.now(), unit: matchUnit(`${q} ${r.text}`, subject, ctxUnit), q }]);
       setQuota((x) => (x ? { ...x, asksLeft: r.asksLeft } : x));
     } catch (e) {
       setMessages((m) => [...m, { id: `e${Date.now()}`, role: 'assistant', error: true, content: e.message, code: e.code, at: Date.now() }]);
@@ -176,9 +172,10 @@ export default function Tutor({ navigation, route }) {
     }
   };
 
+  const about = route.params?.lessonId ? L('this lesson', 'cette leçon') : context || L('this topic', 'ce thème');
   const suggestions = [
-    L(`Explain the key ideas of ${focus.short} simply`, `Explique simplement ${focus.short}`),
-    L('Give me 3 exam-style questions on this', 'Donne-moi 3 questions type examen'),
+    L(`Explain ${about} in simple words`, `Explique ${about} simplement`),
+    L(`Ask me 3 exam-style questions on ${about}, one at a time, and correct my answers`, `Pose-moi 3 questions type examen sur ${about}, une à la fois, et corrige mes réponses`),
     L('What mistakes lose marks in this topic?', 'Quelles erreurs font perdre des points ?'),
   ];
 
@@ -262,6 +259,10 @@ export default function Tutor({ navigation, route }) {
 
           {!busy && messages.length < 2 && (
             <V c="gap-2">
+              <P c="self-start flex-row items-center gap-1.5 bg-surface-container-low px-space-sm py-2 rounded-lg" onPress={() => navigation.navigate('Workspace', { subject, lessonId: route.params?.lessonId, unitId: ctxUnit })}>
+                <Ic n="co_present" s={16} c="primary-container" />
+                <T c="font-body-sm text-body-sm text-on-surface">{L('Solve a question step by step on the board', 'Résoudre une question au tableau, étape par étape')}</T>
+              </P>
               {suggestions.map((sug) => (
                 <P key={sug} c="self-start bg-surface-container-lowest border border-outline-variant px-space-sm py-2 rounded-lg" onPress={() => send(sug)}>
                   <T c="font-body-sm text-body-sm text-on-surface">{sug}</T>

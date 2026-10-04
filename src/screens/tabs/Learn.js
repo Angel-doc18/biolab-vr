@@ -36,7 +36,7 @@ export default function Learn({ navigation }) {
               { icon: 'view_in_ar', title: L('3D models', 'Modèles 3D'), sub: L('Turn and open every model', 'Tournez et ouvrez chaque modèle'), onPress: () => navigation.navigate('Models', { subject }) },
               { icon: 'search', title: L('Search', 'Rechercher'), sub: L('Find any topic or term', 'Trouvez un thème ou un terme'), onPress: () => navigation.navigate('Search') },
               { icon: 'forum', title: L('Ask the tutor', 'Demander au tuteur'), sub: L('Questions answered and read aloud', 'Réponses lues à voix haute'), onPress: () => navigation.navigate('Tutor', { subject }) },
-              { icon: 'menu_book', title: L('Lab workbook', 'Cahier de TP'), sub: L('Your results and drawings', 'Vos résultats et dessins'), onPress: () => navigation.navigate('Workbook') },
+              { icon: 'co_present', title: L('Workspace', 'Espace de travail'), sub: L('Questions solved step by step on the board', 'Questions résolues au tableau, étape par étape'), onPress: () => navigation.navigate('Workspace', { subject }) },
             ]}
           />
         </Section>

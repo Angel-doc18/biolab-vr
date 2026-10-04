@@ -1,4 +1,5 @@
-// Biology by class, following the MINESEC Biology syllabus for Forms 3, 4 and 5:
+// Biology by class, following the MINESEC Biology syllabuses: Forms 1 and 2 are in
+// units12.js; this file holds Forms 3, 4 and 5, where
 // each class has the three modules The Living World, Health Education and
 // Environmental Education. Each topic lists its lessons by id; the ten original
 // topics keep their ids (and 3D models) and many quiz questions come from bank.js.
@@ -6,6 +7,7 @@
 // Quiz convention: the correct option is written first in `a`; options are
 // shuffled when shown.
 import { BANK } from './bank';
+import { UNITS_12 } from './units12';
 
 // MINESEC modules.
 export const GROUPS = [
@@ -18,7 +20,7 @@ const pick = (id, ...idx) => idx.map((i) => BANK[id].quiz[i]);
 const vrOf = (id) => BANK[id].vr;
 const Q = (q, a, why) => ({ q, a, why });
 
-export const units = [
+const UNITS_345 = [
   // ======================= Form 3 =======================
   {
     id: 'cell',
@@ -724,3 +726,6 @@ export const units = [
     ],
   },
 ];
+
+// Forms 1 and 2 first, then Forms 3 to 5.
+export const units = [...UNITS_12, ...UNITS_345];

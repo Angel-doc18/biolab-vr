@@ -66,6 +66,7 @@ const routes = [
   ['POST', '/v1/ai/ask', ai.ask],
   ['POST', '/v1/ai/mark', ai.mark],
   ['POST', '/v1/ai/explain', ai.explain],
+  ['POST', '/v1/ai/solve', ai.solve],
   ['POST', '/v1/admin/vouchers', admin.createVouchers],
   ['GET', '/v1/admin/licence-requests', admin.listLicenceRequests],
 ].map(([method, path, handler]) => [method, new RegExp(`^${path}$`), handler]);

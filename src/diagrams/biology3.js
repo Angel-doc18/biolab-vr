@@ -357,7 +357,101 @@ function PhototropismArt() {
   );
 }
 
+// ---------- the scientific method ----------
+function Stage({ x, y, title, sub, fill }) {
+  return (
+    <G>
+      <Rect x={x - 40} y={y} width={80} height={38} rx={6} fill={fill} stroke={O} strokeWidth={1.2} />
+      <Txt x={x} y={y + 16} size={9.5} weight="700">{title}</Txt>
+      <Txt x={x} y={y + 29} size={8.5}>{sub}</Txt>
+    </G>
+  );
+}
+function MethodArt() {
+  const top = 14;
+  const low = 112;
+  const xs = [48, 140, 232, 324];
+  const right = (x1, x2, y) => <Arrow d={`M${x1 + 40} ${y} L${x2 - 42} ${y}`} x={x2 - 41} y={y} dx={1} dy={0} />;
+  const left = (x1, x2, y) => <Arrow d={`M${x1 - 40} ${y} L${x2 + 42} ${y}`} x={x2 + 41} y={y} dx={-1} dy={0} />;
+  return (
+    <G>
+      <Stage x={xs[0]} y={top} title="Observe" sub="notice something" fill="#e8eef7" />
+      <Stage x={xs[1]} y={top} title="Question" sub="ask why or how" fill="#e8eef7" />
+      <Stage x={xs[2]} y={top} title="Hypothesis" sub="a testable idea" fill="#fbeedd" />
+      <Stage x={xs[3]} y={top} title="Experiment" sub="a fair test" fill="#fbeedd" />
+      <Stage x={xs[3]} y={low} title="Results" sub="tables and graphs" fill="#e8f1e4" />
+      <Stage x={xs[2]} y={low} title="Conclusion" sub="was it supported?" fill="#e8f1e4" />
+      <Stage x={xs[1]} y={low} title="Communicate" sub="report, chart" fill="#f3e9f5" />
+      {right(xs[0], xs[1], top + 19)}
+      {right(xs[1], xs[2], top + 19)}
+      {right(xs[2], xs[3], top + 19)}
+      <Arrow d={`M${xs[3]} ${top + 38} L${xs[3]} ${low - 3}`} x={xs[3]} y={low - 2} dx={0} dy={1} />
+      {left(xs[3], xs[2], low + 19)}
+      {left(xs[2], xs[1], low + 19)}
+      <Arrow d={`M${xs[2]} ${low} L${xs[2]} ${top + 41}`} x={xs[2]} y={top + 40} dx={0} dy={-1} dash="4 3" />
+      <Txt x={xs[2] - 6} y={84} size={8.5} anchor="end" italic>not supported:</Txt>
+      <Txt x={xs[2] - 6} y={95} size={8.5} anchor="end" italic>a new hypothesis</Txt>
+    </G>
+  );
+}
+
+// ---------- a soil profile ----------
+function SoilArt() {
+  const stones = [
+    [70, 150, 7],
+    [128, 138, 6],
+    [170, 160, 8],
+    [96, 172, 6],
+    [150, 182, 7],
+  ];
+  return (
+    <G>
+      {/* grass and leaf litter on the surface */}
+      {range(18, (i) => (
+        <Path key={i} d={`M${46 + i * 9} 40 q2 -10 ${i % 2 ? 4 : -3} -16`} fill="none" stroke={LEAF} strokeWidth={1.6} />
+      ))}
+      <Rect x={40} y={40} width={160} height={8} fill="#7a5a32" />
+      {/* topsoil: dark, with humus and roots */}
+      <Rect x={40} y={48} width={160} height={62} fill="#5b4330" stroke={O} strokeWidth={1} />
+      {range(14, (i) => (
+        <Circle key={i} cx={50 + ((i * 37) % 140)} cy={58 + ((i * 23) % 46)} r={1.6} fill="#2f2219" />
+      ))}
+      <Path d="M70 48 C68 66 76 80 70 100 M70 70 C80 76 84 86 86 96 M150 48 C152 64 146 78 150 96 M150 66 C140 74 136 84 134 92" fill="none" stroke="#c9a77c" strokeWidth={1.2} />
+      {/* subsoil: paler, few roots */}
+      <Rect x={40} y={110} width={160} height={52} fill="#a9814f" stroke={O} strokeWidth={1} />
+      {/* weathered rock: broken pieces */}
+      <Rect x={40} y={162} width={160} height={34} fill="#c2a27a" stroke={O} strokeWidth={1} />
+      {stones.map(([x, y, r], i) => (
+        <Ellipse key={i} cx={x} cy={y + 14} rx={r + 4} ry={r} fill="#9a9488" stroke={O} strokeWidth={0.7} />
+      ))}
+      {/* parent rock */}
+      <Path d="M40 196 L200 196 L200 226 L40 226 Z" fill="#8b8e93" stroke={O} strokeWidth={1} />
+      <Path d="M60 206 L90 214 M110 202 L150 210 M168 214 L192 206" stroke="#6b6e73" strokeWidth={1.2} fill="none" />
+    </G>
+  );
+}
+
 export const BIOLOGY_3 = {
+  'scientific-method': {
+    title: 'The steps of the scientific method',
+    w: 372,
+    h: 156,
+    art: MethodArt,
+    labels: [],
+  },
+  'soil-profile': {
+    title: 'A soil profile: the layers seen in a deep cut',
+    w: 300,
+    h: 230,
+    art: SoilArt,
+    labels: [
+      ['Grass and leaf litter', 222, 30, 196, 36],
+      ['Topsoil: dark, with\nhumus and roots', 222, 78, 196, 78],
+      ['Subsoil: paler,\nfew roots', 222, 136, 196, 136],
+      ['Weathered rock', 222, 179, 196, 179],
+      ['Parent rock', 222, 211, 196, 211],
+    ],
+  },
   'water-cycle': {
     title: 'The water cycle',
     w: 340,

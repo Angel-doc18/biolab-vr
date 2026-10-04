@@ -272,7 +272,19 @@ export default function Lesson({ navigation, route }) {
             ))}
           </V>
 
-          <P c="self-start py-1" onPress={() => navigation.navigate('Tutor', { context: `${unit.short}: ${lesson.title}`, subject: unit.subject })} hitSlop={8}>
+          <P c="rounded-xl bg-surface-container-low p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('Workspace', { lessonId: lesson.id, unitId: unit.id, subject: unit.subject })} scale={0.99}>
+            <V c="flex-1 gap-0.5">
+              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                {L('Solve questions on the board', 'Résoudre des questions au tableau')}
+              </T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant">
+                {L('The tutor works through a question from this lesson, or your own, step by step and explains each step aloud.', 'Le tuteur résout une question de cette leçon, ou la vôtre, étape par étape et explique chaque étape à voix haute.')}
+              </T>
+            </V>
+            <Ic n="co_present" s={24} c="primary-container" />
+          </P>
+
+          <P c="self-start py-1" onPress={() => navigation.navigate('Tutor', { lessonId: lesson.id, unitId: unit.id, subject: unit.subject })} hitSlop={8}>
             <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
               {L('Ask the tutor about this lesson', 'Poser une question au tuteur')}
             </T>

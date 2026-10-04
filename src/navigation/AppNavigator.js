@@ -41,6 +41,7 @@ import Paper2 from '../screens/exams/Paper2';
 import Results from '../screens/exams/Results';
 import Tutor from '../screens/ai/Tutor';
 import MarkAnswer from '../screens/ai/MarkAnswer';
+import Workspace from '../screens/ai/Workspace';
 import Paywall from '../screens/me/Paywall';
 import Offline from '../screens/me/Offline';
 import ParentReport from '../screens/me/ParentReport';
@@ -174,6 +175,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Paper2" component={Paper2} options={{ gestureEnabled: false }} />
         <Stack.Screen name="Results" component={Results} />
         <Stack.Screen name="Tutor" component={Tutor} />
+        <Stack.Screen name="Workspace" component={Workspace} />
         <Stack.Screen name="MarkAnswer" component={MarkAnswer} />
         <Stack.Screen name="ParentReport" component={ParentReport} />
         <Stack.Screen name="Notifications" component={Notifications} />
