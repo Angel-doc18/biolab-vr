@@ -122,7 +122,6 @@ export const LABS = [
   {
     id: 'osmosis',
     unit: 'cell',
-    unitN: 1,
     short: 'Osmosis & plasmolysis',
     title: 'Osmosis, turgidity & plasmolysis',
     desc: 'Mount red onion epidermis in distilled water and in sucrose solutions from 0.2 M to 1.0 M, and watch the protoplast pull away from the cell wall.',
@@ -173,7 +172,7 @@ export const LABS = [
   {
     id: 'food',
     unit: 'nutrition',
-    unitN: 2,
+    units: ['bi-f3-diet'],
     short: 'Food tests',
     title: 'Food tests: starch, reducing sugar, protein & fat',
     desc: 'Test a food suspension against a water control using iodine, Benedict’s, Biuret and the ethanol emulsion test.',
@@ -243,7 +242,6 @@ export const LABS = [
   {
     id: 'enzyme',
     unit: 'nutrition',
-    unitN: 2,
     short: 'Enzyme and temperature',
     title: 'Enzyme activity: amylase and temperature',
     desc: 'Mix starch with amylase at 10 °C, 37 °C and 70 °C and test a drop with iodine every minute until the starch has gone.',
@@ -315,8 +313,7 @@ export const LABS = [
   },
   {
     id: 'transpiration',
-    unit: 'transport',
-    unitN: 3,
+    unit: 'bi-f4-plants',
     short: 'Transpiration',
     title: 'Transpiration: bubble potometer',
     desc: 'Measure how far an air bubble moves along a potometer in still air, moving air, humid air and darkness.',
@@ -380,7 +377,7 @@ export const LABS = [
   },
   {
     id: 'photosynthesis',
-    unit: 'nutrition',
+    unit: 'bi-f4-plants',
     kind: 'readings',
     short: 'Light and photosynthesis',
     title: 'Photosynthesis rate: pondweed and light intensity',
@@ -641,6 +638,7 @@ export const LABS = [
   {
     id: 'respiration-indicator',
     unit: 'gas',
+    units: ['bi-f4-plants'],
     short: 'Respiration and carbon dioxide',
     title: 'Carbon dioxide from respiring organisms',
     desc: 'Use hydrogencarbonate indicator to show which organisms give out or take in carbon dioxide.',

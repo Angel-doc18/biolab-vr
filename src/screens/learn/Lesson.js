@@ -11,18 +11,28 @@ import { lessonById, lessonNumber, lessonsFor, plain } from '../../data/lessons'
 import { unitById } from '../../data/units';
 import { lessonLocked } from '../../data/plan';
 
-// Body text with **key terms** in bold.
+// Body text with **key terms** in bold and *scientific names* in italics.
 function Rich({ text, c = 'font-body-lg text-body-lg text-on-surface' }) {
+  const italics = (s, k) =>
+    s.split('*').map((b, j) =>
+      j % 2 ? (
+        <T key={`${k}-${j}`} c={c} style={{ fontStyle: 'italic' }}>
+          {b}
+        </T>
+      ) : (
+        b
+      )
+    );
   const parts = text.split('**');
   return (
     <T c={c} style={{ lineHeight: 27 }}>
       {parts.map((s, i) =>
         i % 2 ? (
           <T key={i} c={c} style={{ fontWeight: '700' }}>
-            {s}
+            {italics(s, i)}
           </T>
         ) : (
-          s
+          italics(s, i)
         )
       )}
     </T>

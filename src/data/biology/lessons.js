@@ -1,8 +1,15 @@
-// Lessons for the ten GCE Ordinary Level Biology units. Original text written for
-// this app. **double asterisks** mark key terms (rendered bold).
+// Biology lessons. The first thirty were written for the ten original GCE
+// Ordinary Level units; lessons3.js, lessons4.js and lessons5.js add the
+// lessons for the MINESEC Form 3, 4 and 5 topics they did not cover. Each lesson's
+// `unit` is the class topic it belongs to. Original text written for this app.
+// **double asterisks** mark key terms (rendered bold), *single asterisks*
+// scientific names (italics).
 // figure: a key in src/diagrams (a labelled diagram) or null.
+import { LESSONS_3 } from './lessons3';
+import { LESSONS_4 } from './lessons4';
+import { LESSONS_5 } from './lessons5';
 
-export const LESSONS = [
+const LESSONS_1 = [
   // ---------------- Unit 1: Cells ----------------
   {
     id: 'cell-1',
@@ -19,6 +26,22 @@ export const LESSONS = [
       'Magnification is calculated as **image size ÷ actual size**. With a light microscope, total magnification equals eyepiece magnification multiplied by objective magnification, for example ×10 × ×40 = ×400.',
     ],
     figure: 'plant-cell',
+    examples: [
+      {
+        q: 'A drawing of a cell is 40 mm long. The real cell is 0.1 mm long. Calculate the magnification of the drawing.',
+        steps: [
+          'Magnification = image size ÷ actual size, with both in the same unit.',
+          '= 40 mm ÷ 0.1 mm = ×400.',
+        ],
+      },
+      {
+        q: 'A photograph at ×2 000 shows a mitochondrion 6 mm long. Find its real length in micrometres (1 mm = 1 000 µm).',
+        steps: [
+          'Actual size = image size ÷ magnification = 6 mm ÷ 2 000 = 0.003 mm.',
+          '0.003 mm × 1 000 = 3 µm.',
+        ],
+      },
+    ],
     tip: 'When asked for differences between plant and animal cells, write them as **matched pairs** (plant cell has a cell wall; animal cell has no cell wall). Lists of unmatched features usually lose marks.',
     check: {
       q: 'Which three structures are found in plant cells but not in animal cells?',
@@ -90,7 +113,7 @@ export const LESSONS = [
   // ---------------- Unit 2: Nutrition ----------------
   {
     id: 'nutrition-1',
-    unit: 'nutrition',
+    unit: 'bi-f4-plants',
     n: '2.1',
     title: 'Photosynthesis',
     minutes: 9,
@@ -118,7 +141,7 @@ export const LESSONS = [
   },
   {
     id: 'nutrition-2',
-    unit: 'nutrition',
+    unit: 'bi-f3-diet',
     n: '2.2',
     title: 'Food and a balanced diet',
     minutes: 8,
@@ -228,7 +251,7 @@ export const LESSONS = [
   },
   {
     id: 'transport-3',
-    unit: 'transport',
+    unit: 'bi-f4-plants',
     n: '3.3',
     title: 'Transport in plants',
     minutes: 9,
@@ -241,6 +264,15 @@ export const LESSONS = [
       'The rate of transpiration increases with higher **temperature**, lower **humidity**, stronger **wind** and higher **light intensity** (which opens the stomata). It can be measured with a **potometer**, which records the rate of water uptake by a leafy shoot.',
     ],
     figure: 'stem-section',
+    examples: [
+      {
+        q: 'In a potometer, the air bubble moved 45 mm in 5 minutes. Calculate the rate of water uptake.',
+        steps: [
+          'Rate = distance moved ÷ time = 45 mm ÷ 5 min = 9 mm per minute.',
+          'If the capillary tube has a cross-section of 0.5 mm², the volume taken up = 9 × 0.5 = 4.5 mm³ per minute.',
+        ],
+      },
+    ],
     tip: 'A potometer measures **water uptake**, not transpiration directly. Examiners reward candidates who state this assumption.',
     check: {
       q: 'Which tissue carries sugars from the leaves to the rest of the plant?',
@@ -297,6 +329,15 @@ export const LESSONS = [
       'Smoking damages this system. Tar coats the alveoli and paralyses cilia, carbon monoxide reduces oxygen carried by haemoglobin, and nicotine is addictive. Smoking causes bronchitis, emphysema and lung cancer.',
     ],
     figure: ['breathing-system', 'alveolus'],
+    examples: [
+      {
+        q: 'At rest a student breathes 12 times a minute with a tidal volume of 500 cm³. Calculate the volume of air breathed in each minute.',
+        steps: [
+          'Volume per minute = tidal volume × breathing rate.',
+          '= 500 × 12 = 6 000 cm³, or 6 dm³ per minute.',
+        ],
+      },
+    ],
     tip: 'Explain breathing with the full chain: **muscles contract, volume increases, pressure decreases, air moves in**. Skipping the pressure step is the most common lost mark.',
     check: {
       q: 'What happens to the diaphragm during inhalation?',
@@ -311,7 +352,7 @@ export const LESSONS = [
   },
   {
     id: 'gas-3',
-    unit: 'gas',
+    unit: 'bi-f4-plants',
     n: '4.3',
     title: 'Gas exchange in plants and other organisms',
     minutes: 7,
@@ -394,7 +435,7 @@ export const LESSONS = [
   },
   {
     id: 'kidney-3',
-    unit: 'kidney',
+    unit: 'bi-f5-endocrine',
     n: '5.3',
     title: 'Blood sugar and diabetes',
     minutes: 7,
@@ -477,7 +518,7 @@ export const LESSONS = [
   },
   {
     id: 'nervous-3',
-    unit: 'nervous',
+    unit: 'bi-f5-endocrine',
     n: '6.3',
     title: 'Hormones and the endocrine system',
     minutes: 7,
@@ -559,7 +600,7 @@ export const LESSONS = [
   },
   {
     id: 'locomotion-3',
-    unit: 'locomotion',
+    unit: 'cell',
     n: '7.3',
     title: 'Support in plants',
     minutes: 6,
@@ -614,7 +655,7 @@ export const LESSONS = [
   },
   {
     id: 'reproduction-2',
-    unit: 'reproduction',
+    unit: 'bi-f5-humanrepro',
     n: '8.2',
     title: 'Human reproduction',
     minutes: 9,
@@ -641,7 +682,7 @@ export const LESSONS = [
   },
   {
     id: 'reproduction-3',
-    unit: 'reproduction',
+    unit: 'genetics',
     n: '8.3',
     title: 'Cell division: mitosis and meiosis',
     minutes: 8,
@@ -709,6 +750,16 @@ export const LESSONS = [
       '**Sickle cell anaemia** is a recessive condition common in parts of Africa. Carriers (HbA HbS) are healthy and have some protection against malaria.',
     ],
     figure: 'monohybrid-cross',
+    examples: [
+      {
+        q: 'A tall pea plant of unknown genotype is crossed with a short plant (tt). Half the offspring are tall and half short. What was the genotype of the tall parent?',
+        steps: [
+          'The short parent gives only t gametes.',
+          'Short offspring (tt) must also have received t from the tall parent, so it carried t.',
+          'The tall parent was Tt: Tt × tt gives 1 Tt (tall) : 1 tt (short).',
+        ],
+      },
+    ],
     tip: 'Most marks in genetic crosses come from **layout**. Label each line (parents, gametes, F1) even if the working seems obvious.',
     check: {
       q: 'What ratio of phenotypes results from crossing Tt × Tt (T = tall, dominant)?',
@@ -832,3 +883,5 @@ export const LESSONS = [
     ],
   },
 ];
+
+export const LESSONS = [...LESSONS_1, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5];

@@ -160,8 +160,8 @@ function WaterArt() {
       <Rect x={245} y={40} width={16} height={34} rx={5} fill="#7fb069" stroke={O} strokeWidth={1.1} />
       <Line x1={253} y1={74} x2={253} y2={96} stroke={O} strokeWidth={1.2} strokeDasharray="3 2" />
       <Rect x={280} y={76} width={56} height={54} fill="#cfe6f5" stroke={O} strokeWidth={1.3} />
-      <Arrow d="M336 100 L356 100" x={356} y={100} dx={1} dy={0} />
-      <Txt x={358} y={88} size={9} anchor="end">to homes</Txt>
+      <Arrow d="M336 100 L368 100" x={368} y={100} dx={1} dy={0} />
+      <Txt x={340} y={93} size={9} anchor="start">to homes</Txt>
     </G>
   );
 }
@@ -211,9 +211,9 @@ function AntibodyArt() {
   return (
     <G>
       <Line x1={50} y1={160} x2={302} y2={160} stroke={O} strokeWidth={1.3} />
-      <Line x1={50} y1={160} x2={50} y2={26} stroke={O} strokeWidth={1.3} />
+      <Line x1={50} y1={160} x2={50} y2={44} stroke={O} strokeWidth={1.3} />
       <Head x={306} y={160} dx={1} dy={0} size={6} />
-      <Head x={50} y={22} dx={0} dy={-1} size={6} />
+      <Head x={50} y={40} dx={0} dy={-1} size={6} />
       <Txt x={176} y={180} size={10} weight="700">Time</Txt>
       <Txt x={30} y={94} size={10} weight="700" rotate={-90}>Antibody concentration</Txt>
       <Path d="M74 157 C95 156 105 128 120 126 C135 124 150 152 182 156" fill="none" stroke="#3f7fb5" strokeWidth={2} />
@@ -266,7 +266,7 @@ export const HUMANBIO = {
   },
   'water-treatment': {
     title: 'The stages in treating water for a town',
-    w: 360,
+    w: 388,
     h: 170,
     art: WaterArt,
     labels: [
@@ -295,8 +295,8 @@ export const HUMANBIO = {
     h: 200,
     art: AntibodyArt,
     labels: [
-      ['First exposure\n(vaccination)', 74, 24, 74, 154],
-      ['Second exposure\nto the pathogen', 190, 24, 190, 154],
+      ['First exposure\n(vaccination)', 80, 18, 80, 157],
+      ['Second exposure\nto the pathogen', 190, 18, 190, 154],
       ['Primary response:\nslow and small', 112, 200, 120, 128],
       ['Secondary response:\nfast and large', 262, 200, 262, 56],
     ],
