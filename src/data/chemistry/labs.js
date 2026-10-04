@@ -190,6 +190,7 @@ export const LABS = [
   {
     id: 'ch-chromatography',
     unit: 'ch-analysis',
+    units: ['ch-f1-mixtures', 'ch-f2-purity'],
     short: 'Chromatography',
     title: 'Paper chromatography of inks and food colourings',
     desc: 'Run an ink beside known dyes, watch the colours separate as the solvent rises, and identify them from their Rf values.',
@@ -262,6 +263,7 @@ export const LABS = [
   {
     id: 'ch-solubility',
     unit: 'ch-f4-salts',
+    units: ['ch-f1-solutions'],
     kind: 'readings',
     short: 'Solubility curve',
     title: 'Solubility of potassium nitrate at different temperatures',
@@ -321,6 +323,7 @@ export const LABS = [
   {
     id: 'ch-conductivity',
     unit: 'ch-bonding',
+    units: ['ch-f1-elements', 'ch-f2-electricity'],
     short: 'Which substances conduct?',
     title: 'Electrical conductivity and structure',
     desc: 'Test solids, solutions and rods in a circuit with a lamp, and link what conducts to ions, molecules and delocalised electrons.',
@@ -591,6 +594,7 @@ export const LABS = [
   {
     id: 'ch-electrolysis-products',
     unit: 'ch-redox',
+    units: ['ch-f2-electricity'],
     short: 'Products of electrolysis',
     title: 'Electrolysis of aqueous solutions: what forms at each electrode',
     desc: 'Electrolyse four solutions with carbon electrodes, collect the products and identify them with their tests.',
@@ -646,6 +650,7 @@ export const LABS = [
   {
     id: 'ch-copper-plating',
     unit: 'ch-redox',
+    units: ['ch-f2-electricity'],
     kind: 'readings',
     short: 'Electrolysis of copper sulfate',
     title: 'Electrolysis of copper(II) sulfate with copper electrodes',
@@ -998,6 +1003,7 @@ export const LABS = [
   {
     id: 'ch-metal-acid',
     unit: 'ch-metals',
+    units: ['ch-f1-acids'],
     short: 'Metals with acid',
     title: 'Reactivity of metals with dilute hydrochloric acid',
     desc: 'Drop four metals into dilute acid and compare the bubbles and the temperature to put them in order of reactivity.',
@@ -1061,6 +1067,7 @@ export const LABS = [
   {
     id: 'ch-rusting',
     unit: 'ch-metals',
+    units: ['ch-f2-oxygen'],
     short: 'Conditions for rusting',
     title: 'What iron needs to rust',
     desc: 'Leave iron nails in tubes with and without air and water for a week, and see which ones rust.',

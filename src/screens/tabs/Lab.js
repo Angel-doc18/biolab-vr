@@ -5,19 +5,21 @@ import { Screen, TabHeader } from '../../ui/chrome';
 import { StepLine, SUBJECT_LOOK, SubjectGrid, TileGrid } from '../../ui/hub';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { labsFor, labUnitN } from '../../data/labs';
+import { labsForUnit, labUnit } from '../../data/labs';
+import { topicLabel, unitsShown } from '../../data/units';
 import { labLocked } from '../../data/plan';
 import { subjectName } from '../../data/subjects';
 import { useSubjectCards } from '../subjectCards';
 import { Section } from './Home';
 
 export default function Lab({ navigation }) {
-  const { pro, progress, subject } = useApp();
+  const { pro, progress, subject, user } = useApp();
   const L = useL();
   const lang = useLang();
   const cards = useSubjectCards('lab');
-  const labs = labsFor(subject);
-  // The first practical of the current subject not yet done.
+  // Practicals of the student's own topics, in the order the topics are taught.
+  const labs = [...new Set(unitsShown(subject, user?.className).flatMap((u) => labsForUnit(u.id)))];
+  // The first of them not yet done.
   const next = labs.find((l) => !progress.labs[l.id] && !labLocked(l.id, pro));
   const tint = (SUBJECT_LOOK[subject] || SUBJECT_LOOK.biology).tint;
 
@@ -46,7 +48,7 @@ export default function Lab({ navigation }) {
               </V>
               <V c="flex-1 gap-0.5">
                 <T c="font-label-md text-label-md text-on-surface-variant">
-                  {subjectName(subject, lang)}, {L('topic', 'thème')} {labUnitN(next)}, {next.minutes} min
+                  {subjectName(subject, lang)}, {topicLabel(labUnit(next, user?.className), L)}, {next.minutes} min
                 </T>
                 <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
                   {next.title}

@@ -3,7 +3,7 @@ import { LABS as BIOLOGY, STEPS as BIOLOGY_STEPS } from './biology/labs';
 import { LABS as CHEMISTRY } from './chemistry/labs';
 import { LABS as PHYSICS } from './physics/labs';
 import { LABS as HUMANBIO } from './humanbio/labs';
-import { unitById } from './units';
+import { formsShown, unitById } from './units';
 
 const tag = (list, subject) => list.map((l) => Object.assign(l, { subject }));
 
@@ -12,7 +12,16 @@ export const LABS = [...tag(BIOLOGY, 'biology'), ...tag(CHEMISTRY, 'chemistry'),
 export const labById = (id) => LABS.find((l) => l.id === id);
 export const labsForUnit = (unitId) => LABS.filter((l) => l.unit === unitId || l.units?.includes(unitId));
 export const labsFor = (subject) => LABS.filter((l) => l.subject === subject || l.subjects?.includes(subject));
-export const labUnitN = (lab) => unitById(lab.unit)?.n;
+// The topic a practical belongs to for this student. A practical can serve
+// topics in several classes; the one in the student's own class comes first.
+export function labUnit(lab, className) {
+  const units = [lab.unit, ...(lab.units || [])].map(unitById).filter(Boolean);
+  for (const f of formsShown(lab.subject, className)) {
+    const u = units.find((x) => x.form === f);
+    if (u) return u;
+  }
+  return unitById(lab.unit);
+}
 
 // Method steps shown while a practical runs; each lab may give its own.
 export const labSteps = (lang, lab) => {

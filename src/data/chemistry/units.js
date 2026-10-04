@@ -1,11 +1,13 @@
-// Chemistry by class, following the MINESEC Chemistry syllabus for Forms 3, 4 and
-// 5: eleven topics in Form 3, eight in Form 4 and five in Form 5 (the sixth Form 5
-// "topic", general revision, is the papers in Exams). Each topic lists its
+// Chemistry by class. Forms 1 and 2 are in units12.js (the Chemistry part of
+// Science and Technology). This file follows the MINESEC Chemistry syllabus for
+// Forms 3, 4 and 5: eleven topics in Form 3, eight in Form 4 and five in Form 5
+// (the sixth Form 5 "topic", general revision, is the papers in Exams). Each topic lists its
 // lessons by id; its 3D model and many quiz questions come from bank.js.
 //
 // Quiz convention: the correct option is written first in `a`; options are
 // shuffled when shown.
 import { BANK } from './bank';
+import { UNITS_12 } from './units12';
 
 // MINESEC modules (the Chemistry part of Science and Technology).
 export const GROUPS = [
@@ -18,7 +20,7 @@ const pick = (id, ...idx) => idx.map((i) => BANK[id].quiz[i]);
 const vrOf = (id) => BANK[id].vr;
 const Q = (q, a, why) => ({ q, a, why });
 
-export const units = [
+const UNITS_345 = [
   // ======================= Form 3 =======================
   {
     id: 'ch-atoms',
@@ -563,3 +565,5 @@ export const units = [
     ],
   },
 ];
+
+export const units = [...UNITS_12, ...UNITS_345];
