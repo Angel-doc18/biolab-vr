@@ -190,7 +190,8 @@ export const LABS = [
   {
     id: 'ch-chromatography',
     unit: 'ch-analysis',
-    units: ['ch-f1-mixtures', 'ch-f2-purity'],
+    units: ['ch-f1-mixtures', 'ch-f2-purity', 'ac-organic1'],
+    subjects: ['a-chemistry'],
     short: 'Chromatography',
     title: 'Paper chromatography of inks and food colourings',
     desc: 'Run an ink beside known dyes, watch the colours separate as the solvent rises, and identify them from their Rf values.',
@@ -387,7 +388,8 @@ export const LABS = [
   {
     id: 'ch-water-crystallisation',
     unit: 'ch-moles',
-    units: ['ch-f4-salts'],
+    units: ['ch-f4-salts', 'ac-mole'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Water of crystallisation',
     title: 'Water of crystallisation in copper(II) sulfate',
@@ -457,6 +459,8 @@ export const LABS = [
   {
     id: 'ch-titration',
     unit: 'ch-f4-titration',
+    units: ['ac-mole'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Acid-alkali titration',
     title: 'Titration: finding the concentration of sodium hydroxide',
@@ -536,7 +540,8 @@ export const LABS = [
   {
     id: 'ch-neutralisation',
     unit: 'ch-f4-titration',
-    units: ['ch-energy'],
+    units: ['ch-energy', 'ac-energetics'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Neutralisation temperature',
     title: 'Thermometric titration: the heat of neutralisation',
@@ -594,7 +599,8 @@ export const LABS = [
   {
     id: 'ch-electrolysis-products',
     unit: 'ch-redox',
-    units: ['ch-f2-electricity'],
+    units: ['ch-f2-electricity', 'ac-redox'],
+    subjects: ['a-chemistry'],
     short: 'Products of electrolysis',
     title: 'Electrolysis of aqueous solutions: what forms at each electrode',
     desc: 'Electrolyse four solutions with carbon electrodes, collect the products and identify them with their tests.',
@@ -650,7 +656,8 @@ export const LABS = [
   {
     id: 'ch-copper-plating',
     unit: 'ch-redox',
-    units: ['ch-f2-electricity'],
+    units: ['ch-f2-electricity', 'ac-redox'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Electrolysis of copper sulfate',
     title: 'Electrolysis of copper(II) sulfate with copper electrodes',
@@ -706,6 +713,8 @@ export const LABS = [
   {
     id: 'ch-rate-concentration',
     unit: 'ch-f5-rates',
+    units: ['ac-kinetics'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Concentration and rate',
     title: 'Rate of reaction: magnesium and hydrochloric acid',
@@ -762,6 +771,8 @@ export const LABS = [
   {
     id: 'ch-marble-surface',
     unit: 'ch-f5-rates',
+    units: ['ac-kinetics'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Surface area and rate',
     title: 'Rate of reaction: marble chips of different sizes',
@@ -821,6 +832,8 @@ export const LABS = [
   {
     id: 'ch-thiosulfate',
     unit: 'ch-f5-rates',
+    units: ['ac-kinetics'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Temperature and rate',
     title: 'The disappearing cross: temperature and rate',
@@ -878,7 +891,8 @@ export const LABS = [
   {
     id: 'ch-fuel-energy',
     unit: 'ch-organic',
-    units: ['ch-energy'],
+    units: ['ch-energy', 'ac-energetics'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Energy from alcohols',
     title: 'Energy released when alcohols burn',
@@ -945,7 +959,8 @@ export const LABS = [
   {
     id: 'ch-displacement',
     unit: 'ch-metals',
-    units: ['ch-redox'],
+    units: ['ch-redox', 'ac-energetics'],
+    subjects: ['a-chemistry'],
     kind: 'readings',
     short: 'Displacement and energy',
     title: 'Displacement of copper: temperature rise and reactivity',
@@ -1131,6 +1146,8 @@ export const LABS = [
   {
     id: 'ch-flame-tests',
     unit: 'ch-analysis',
+    units: ['ac-periodicity'],
+    subjects: ['a-chemistry'],
     short: 'Flame tests',
     title: 'Flame tests for metal ions',
     desc: 'Hold six unknown salts in a blue Bunsen flame and identify the metal ion in each from the flame colour.',
@@ -1191,6 +1208,8 @@ export const LABS = [
   {
     id: 'ch-cation-tests',
     unit: 'ch-analysis',
+    units: ['ac-inorganic'],
+    subjects: ['a-chemistry'],
     short: 'Tests for cations',
     title: 'Identifying metal ions with sodium hydroxide and ammonia',
     desc: 'Add sodium hydroxide and aqueous ammonia, a few drops and then in excess, to eight unknown solutions and identify the cation.',
@@ -1256,6 +1275,8 @@ export const LABS = [
   {
     id: 'ch-anion-tests',
     unit: 'ch-analysis',
+    units: ['ac-inorganic'],
+    subjects: ['a-chemistry'],
     short: 'Tests for anions',
     title: 'Identifying anions: halides, sulfate, carbonate and nitrate',
     desc: 'Acidify six unknown salt solutions and add silver nitrate or barium nitrate to identify the anion in each.',

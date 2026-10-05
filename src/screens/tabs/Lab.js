@@ -48,7 +48,7 @@ export default function Lab({ navigation }) {
               </V>
               <V c="flex-1 gap-0.5">
                 <T c="font-label-md text-label-md text-on-surface-variant">
-                  {subjectName(subject, lang)}, {topicLabel(labUnit(next, user?.className), L)}, {next.minutes} min
+                  {subjectName(subject, lang)}, {topicLabel(labUnit(next, user?.className, subject), L)}, {next.minutes} min
                 </T>
                 <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
                   {next.title}

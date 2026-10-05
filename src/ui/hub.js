@@ -9,6 +9,10 @@ export const SUBJECT_LOOK = {
   chemistry: { icon: 'science', tint: '#7a4bb3', bg: '#efe8f8' },
   physics: { icon: 'bolt', tint: '#1f6fb2', bg: '#e4eef8' },
   humanbio: { icon: 'cardiology', tint: '#b8433f', bg: '#f8e7e6' },
+  // Advanced Level: the same colour as the Ordinary Level subject, a deeper shade.
+  'a-biology': { icon: 'genetics', tint: '#24613d', bg: '#dcebe1' },
+  'a-chemistry': { icon: 'experiment', tint: '#5e3591', bg: '#e6dcf4' },
+  'a-physics': { icon: 'electric_bolt', tint: '#17548a', bg: '#d9e6f4' },
 };
 const look = (id) => SUBJECT_LOOK[id] || SUBJECT_LOOK.biology;
 

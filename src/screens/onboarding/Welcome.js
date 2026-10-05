@@ -7,6 +7,8 @@ import { useL } from '../../i18n';
 import { OPEN_SUBJECTS } from '../../data/subjects';
 
 // "Biology, Chemistry and Physics" from the subjects that are open.
+const O_LEVEL = OPEN_SUBJECTS.filter((s) => s.level === 'O');
+const A_LEVEL = OPEN_SUBJECTS.filter((s) => s.level === 'A');
 const listOf = (names, and) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} ${and} ${names[names.length - 1]}` : names[0]);
 
 function Point({ title, body }) {
@@ -45,7 +47,10 @@ export default function Welcome({ navigation }) {
         <V c="gap-space-xs">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('GCE sciences, from Form 1 to the exam hall', 'Les sciences du GCE, de la Form 1 à l’examen')}</T>
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-            {L(`${listOf(OPEN_SUBJECTS.map((s) => s.en), 'and')}, written for the Cameroon GCE syllabuses.`, `${listOf(OPEN_SUBJECTS.map((s, i) => (i ? s.fr.toLowerCase() : s.fr)), 'et')}, conçues pour les programmes du GCE du Cameroun.`)}
+            {L(
+              `${listOf(O_LEVEL.map((s) => s.en), 'and')} from Form 1 to Form 5${A_LEVEL.length ? `, and A Level ${listOf(A_LEVEL.map((s) => s.en), 'and')} for the Sixth Form` : ''}, written for the Cameroon GCE syllabuses.`,
+              `${listOf(O_LEVEL.map((s, i) => (i ? s.fr.toLowerCase() : s.fr)), 'et')} de la Form 1 à la Form 5${A_LEVEL.length ? `, et ${listOf(A_LEVEL.map((s) => s.fr.toLowerCase()), 'et')} de l’Advanced Level pour la Sixth Form` : ''}, conçues pour les programmes du GCE du Cameroun.`
+            )}
           </T>
         </V>
         <V c="gap-space-md">

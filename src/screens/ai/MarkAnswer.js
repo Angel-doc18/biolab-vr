@@ -9,6 +9,7 @@ import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { bankFor } from '../../data/paper2';
 import { topicLabel, unitById } from '../../data/units';
+import { subjectLabel } from '../../data/subjects';
 import { pickAnswerPhoto } from '../../lib/photo';
 
 const partsFor = (subject) => bankFor(subject).flatMap((q) => q.parts.filter((p) => p.kind === 'text').map((p) => ({ q, p, key: `${q.id}:${p.label}` })));
@@ -29,7 +30,7 @@ export default function MarkAnswer({ navigation, route }) {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const item = PARTS[sel];
-  const unit = unitById(item.q.unit);
+  const unit = item ? unitById(item.q.unit) : null;
 
   useEffect(() => {
     refreshQuota();
@@ -83,6 +84,26 @@ export default function MarkAnswer({ navigation, route }) {
   };
 
   const left = mode === 'photo' ? quota?.photosLeft : quota?.marksLeft;
+
+  // A subject whose structured questions are still being written.
+  if (!item) {
+    return (
+      <Screen bg="bg-surface" header={<StackHeader title={L('Mark an answer', 'Corriger une réponse')} />}>
+        <V c="pt-space-md pb-space-lg gap-space-md">
+          <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+            {L(
+              `Answers are marked against the mark schemes of the Paper 2 questions, and the ${subjectLabel(subject, lang)} Paper 2 questions are still being written.`,
+              `Les réponses sont corrigées selon les barèmes des questions de l’épreuve 2, et celles de ${subjectLabel(subject, lang)} sont encore en préparation.`
+            )}
+          </T>
+          <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
+            {L('Until then, the Workspace can solve a question for you step by step, and the tutor can check your working.', 'En attendant, l’espace de travail peut résoudre une question étape par étape, et le tuteur peut vérifier votre travail.')}
+          </T>
+          <Cta label={L('Open the Workspace', 'Ouvrir l’espace de travail')} onPress={() => navigation.replace('Workspace', { subject })} />
+        </V>
+      </Screen>
+    );
+  }
 
   return (
     <Screen bg="bg-surface" keyboard header={<StackHeader title={L('Mark an answer', 'Corriger une réponse')} />}>

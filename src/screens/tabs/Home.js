@@ -11,6 +11,7 @@ import { daysToExam } from '../../state/progress';
 import { firstName, focusUnit, greeting, nextLesson, recentUnits } from '../../state/selectors';
 import { topicLabel, unitsShown } from '../../data/units';
 import { lessonNumber, lessonsFor } from '../../data/lessons';
+import { paper2Config } from '../../data/paper2';
 import { LEVELS, examLabel, subjectById, subjectName } from '../../data/subjects';
 import { SubjectGrid, TileGrid } from '../../ui/hub';
 import { useSubjectCards } from '../subjectCards';
@@ -133,7 +134,7 @@ function StudentHome({ navigation }) {
             items={[
               { icon: 'experiment', title: L('Practicals', 'Travaux pratiques'), sub: L('Experiments with real readings', 'Expériences avec de vraies mesures'), onPress: () => navigation.navigate('Lab') },
               { icon: 'view_in_ar', title: L('3D models', 'Modèles 3D'), sub: L('Turn and open every model', 'Tournez et ouvrez chaque modèle'), onPress: () => navigation.navigate('Models', { subject }) },
-              { icon: 'timer', title: L('Practice papers', 'Épreuves'), sub: L('Paper 1, Paper 2, topic quizzes', 'Épreuves 1 et 2, quiz'), onPress: () => navigation.navigate('ExamMenu', { subject }) },
+              { icon: 'timer', title: L('Practice papers', 'Épreuves'), sub: paper2Config(subject) ? L('Paper 1, Paper 2, topic quizzes', 'Épreuves 1 et 2, quiz') : L('Paper 1 and topic quizzes', 'Épreuve 1 et quiz'), onPress: () => navigation.navigate('ExamMenu', { subject }) },
               { icon: 'forum', title: L('Ask the tutor', 'Demander au tuteur'), sub: quota ? `${quota.asksLeft} ${L('questions left today', 'questions restantes')}` : L('Answers read aloud', 'Réponses lues à voix haute'), onPress: () => navigation.navigate('Tutor', { unitId: focus.id, subject }) },
               { icon: 'co_present', title: L('Workspace', 'Espace de travail'), sub: L('Questions solved step by step on the board', 'Questions résolues au tableau, étape par étape'), onPress: () => navigation.navigate('Workspace', { unitId: focus.id, subject }) },
               { icon: 'grading', title: L('Mark my answer', 'Corriger ma réponse'), sub: L('Typed or photographed', 'Tapée ou photographiée'), onPress: () => navigation.navigate('MarkAnswer', { subject }) },

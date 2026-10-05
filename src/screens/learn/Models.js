@@ -7,7 +7,7 @@ import { SUBJECT_LOOK } from '../../ui/hub';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { modelOf, unitsFor } from '../../data/units';
-import { subjectName } from '../../data/subjects';
+import { subjectLabel } from '../../data/subjects';
 
 export default function Models({ navigation, route }) {
   const { subjects, subject: current } = useApp();
@@ -29,7 +29,7 @@ export default function Models({ navigation, route }) {
                   <P key={id} c="h-12 px-3 rounded-xl flex-row items-center gap-2 border-2" style={{ borderColor: on ? l.tint : '#e1e6eb', backgroundColor: on ? l.bg : '#ffffff' }} onPress={() => setPicked(id)} accessibilityRole="radio" accessibilityState={{ checked: on }}>
                     <Ic n={l.icon} s={20} c={l.tint} fill />
                     <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: on ? '700' : '500' }}>
-                      {subjectName(id, lang)}
+                      {subjectLabel(id, lang)}
                     </T>
                   </P>
                 );

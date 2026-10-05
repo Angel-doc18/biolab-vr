@@ -94,7 +94,7 @@ function Table({ columns, rows }) {
 }
 
 export default function LabRun({ navigation, route }) {
-  const { pro, recordLab, user } = useApp();
+  const { pro, recordLab, user, subject } = useApp();
   const L = useL();
   const lang = useLang();
   const lab = labById(route.params?.labId || 'osmosis');
@@ -206,7 +206,7 @@ export default function LabRun({ navigation, route }) {
 
   return (
     <V c="flex-1">
-      <Screen header={<StackHeader title={lab.title} subtitle={`${subjectName(lab.subject, lang)} ${L('practical', 'TP')}, ${topicLabel(labUnit(lab, user?.className), L)}`} subtitleColor="on-surface-variant" avatar={false} />}>
+      <Screen header={<StackHeader title={lab.title} subtitle={`${subjectName(lab.subject, lang)} ${L('practical', 'TP')}, ${topicLabel(labUnit(lab, user?.className, subject), L)}`} subtitleColor="on-surface-variant" avatar={false} />}>
         <V c="pt-space-md pb-space-xl gap-space-lg">
           <V c="gap-space-xs">
             <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>

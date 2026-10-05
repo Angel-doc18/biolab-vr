@@ -19,13 +19,13 @@ const BANKS = {
   humanbio: [...HUMANBIO, ...HUMANBIO_SHARED.map((id) => byId.get(id)).filter(Boolean)],
 };
 
-export const bankFor = (subject) => BANKS[subject] || BIOLOGY;
+export const bankFor = (subject) => BANKS[subject] || [];
 export const p2ById = (id) => byId.get(id);
 export const questionMarks = (q) => q.parts.reduce((a, p) => a + p.marks, 0);
 export const paper2Config = (subject) => subjectById(subject).p2;
 export const paper2Total = (subject) => {
   const c = paper2Config(subject);
-  return 20 * (c.a + c.b.answer);
+  return c ? 20 * (c.a + c.b.answer) : 0;
 };
 
 const shuffle = (a) => a.map((x) => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map((p) => p[1]);
@@ -51,8 +51,9 @@ const complete = (c, p) => p.a.length === c.a && p.b.length === c.b.offered;
 // topics when they can fill a paper laid out like the exam; otherwise it is the
 // full exam paper.
 export function paper2Covers(subject, unitIds) {
-  if (!unitIds) return true;
   const c = paper2Config(subject);
+  if (!c) return false;
+  if (!unitIds) return true;
   const bank = bankFor(subject).filter((q) => unitIds.includes(q.unit));
   const slotsOk = !c.aSlots || c.aSlots.every((slot) => bank.some((q) => q.section === 'A' && q.slot === slot));
   return slotsOk && bank.filter((q) => q.section === 'A').length >= c.a && bank.filter((q) => q.section === 'B').length >= c.b.offered;

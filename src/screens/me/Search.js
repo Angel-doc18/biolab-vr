@@ -8,7 +8,7 @@ import { modelOf, unitById, units } from '../../data/units';
 import { LESSONS, lessonNumber, lessonsFor, plain } from '../../data/lessons';
 import { LABS } from '../../data/labs';
 import { BANK } from '../../lib/exam';
-import { subjectName } from '../../data/subjects';
+import { subjectLabel } from '../../data/subjects';
 import { Section } from '../tabs/Home';
 
 const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -79,7 +79,7 @@ export default function Search({ navigation }) {
   const counts = { lessons: results.lessons.length, models: results.models.length, questions: results.questions.length, labs: results.labs.length };
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
   const show = (k) => scope === 'all' || scope === k;
-  const where = (u) => `${subjectName(u.subject, lang)}, ${L('unit', 'unité')} ${u.n}`;
+  const where = (u) => `${subjectLabel(u.subject, lang)}, ${L('unit', 'unité')} ${u.n}`;
 
   return (
     <Screen header={<StackHeader title={L('Search', 'Recherche')} />} keyboard>
@@ -167,7 +167,7 @@ export default function Search({ navigation }) {
               <Section title={L('Practicals', 'TP')}>
                 <V c="bg-surface-container-lowest rounded-xl shadow-sm">
                   {results.labs.map((l, i) => (
-                    <Row key={l.id} first={i === 0} title={l.title} sub={`${subjectName(l.subject, lang)}. ${l.desc}`} onPress={() => navigation.navigate('LabRun', { labId: l.id })} />
+                    <Row key={l.id} first={i === 0} title={l.title} sub={`${subjectLabel(l.subject, lang)}. ${l.desc}`} onPress={() => navigation.navigate('LabRun', { labId: l.id })} />
                   ))}
                 </V>
               </Section>

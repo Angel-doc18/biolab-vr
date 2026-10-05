@@ -49,6 +49,7 @@ export default function ExamMenu({ navigation, route }) {
   const covers = formsLabel(P1.forms, L);
   const shown = formsShown(subject, user?.className);
   const P2 = paper2Config(subject);
+  const examClass = subjectById(subject).level === 'A' ? 'Upper Sixth' : 'Form 5';
   // Practicals of the topics the student sees.
   const seen = new Set(unitsShown(subject, user?.className).map((u) => u.id));
   const labs = labsFor(subject).filter((l) => seen.has(l.unit) || l.units?.some((u) => seen.has(u)));
@@ -80,26 +81,28 @@ export default function ExamMenu({ navigation, route }) {
               title={L('Paper 1: multiple choice', 'Épreuve 1 : QCM')}
               sub={
                 scoped
-                  ? `${P1.count} ${L('questions in', 'questions en')} ${minutesLabel(P1.minutes, L)}, ${L(`on the ${covers} topics you have studied. The full exam paper opens in Form 5. A new paper each time.`, `sur les thèmes de ${covers} déjà étudiés. L’épreuve complète s’ouvre en Form 5. Une nouvelle épreuve à chaque fois.`)}`
+                  ? `${P1.count} ${L('questions in', 'questions en')} ${minutesLabel(P1.minutes, L)}, ${L(`on the ${covers} topics you have studied. The full exam paper opens in ${examClass}. A new paper each time.`, `sur les thèmes de ${covers} déjà étudiés. L’épreuve complète s’ouvre en ${examClass}. Une nouvelle épreuve à chaque fois.`)}`
                   : `${P1.count} ${L('questions in', 'questions en')} ${minutesLabel(P1.minutes, L)}, ${L('timed like the exam. A new paper each time.', 'chronométrée comme à l’examen. Une nouvelle épreuve à chaque fois.')}`
               }
               note={usedFree ? L('This week’s free paper is used.', 'L’épreuve gratuite de la semaine est utilisée.') : null}
               onPress={() => navigation.navigate(usedFree ? 'Paywall' : 'Paper1', usedFree ? { reason: 'mocks' } : { subject })}
             />
-            <Choice
-              icon="edit_note"
-              tint={tint}
-              title={L('Paper 2: structured questions', 'Épreuve 2 : questions structurées')}
-              sub={`${minutesLabel(P2.minutes, L)}. ${L('Section A', 'Section A')}: ${P2.a} ${L('questions', 'questions')}; ${L('Section B', 'Section B')}: ${P2.b.answer < P2.b.offered ? `${P2.b.answer} ${L('of', 'sur')} ${P2.b.offered}` : P2.b.answer}. ${L('20 marks each.', '20 points chacune.')}`}
-              note={
-                scoped && !p2Scoped
-                  ? L('This is the full Form 5 paper, so some questions are on topics you will meet later.', 'C’est l’épreuve complète de Form 5 : certaines questions portent sur des thèmes que vous verrez plus tard.')
-                  : pro
-                    ? L('Marked point by point against the mark scheme.', 'Corrigée point par point selon le barème.')
-                    : null
-              }
-              onPress={() => navigation.navigate('Paper2', { subject })}
-            />
+            {P2 && (
+              <Choice
+                icon="edit_note"
+                tint={tint}
+                title={L('Paper 2: structured questions', 'Épreuve 2 : questions structurées')}
+                sub={`${minutesLabel(P2.minutes, L)}. ${L('Section A', 'Section A')}: ${P2.a} ${L('questions', 'questions')}; ${L('Section B', 'Section B')}: ${P2.b.answer < P2.b.offered ? `${P2.b.answer} ${L('of', 'sur')} ${P2.b.offered}` : P2.b.answer}. ${L('20 marks each.', '20 points chacune.')}`}
+                note={
+                  scoped && !p2Scoped
+                    ? L(`This is the full ${examClass} paper, so some questions are on topics you will meet later.`, `C’est l’épreuve complète de ${examClass} : certaines questions portent sur des thèmes que vous verrez plus tard.`)
+                    : pro
+                      ? L('Marked point by point against the mark scheme.', 'Corrigée point par point selon le barème.')
+                      : null
+                }
+                onPress={() => navigation.navigate('Paper2', { subject })}
+              />
+            )}
             <Choice
               icon="quiz"
               tint={tint}
@@ -116,13 +119,19 @@ export default function ExamMenu({ navigation, route }) {
                 onPress={() => navigation.navigate('Topics', { subject, mode: 'lab' })}
               />
             )}
-            <Choice
-              icon="grading"
-              tint={tint}
-              title={L('Mark a written answer', 'Corriger une réponse écrite')}
-              sub={L('Type your answer or photograph your handwriting; see the marks you got and missed.', 'Tapez votre réponse ou photographiez-la ; voyez les points obtenus et manqués.')}
-              onPress={() => navigation.navigate('MarkAnswer', { subject })}
-            />
+            {P2 ? (
+              <Choice
+                icon="grading"
+                tint={tint}
+                title={L('Mark a written answer', 'Corriger une réponse écrite')}
+                sub={L('Type your answer or photograph your handwriting; see the marks you got and missed.', 'Tapez votre réponse ou photographiez-la ; voyez les points obtenus et manqués.')}
+                onPress={() => navigation.navigate('MarkAnswer', { subject })}
+              />
+            ) : (
+              <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
+                {L(`The ${name} Paper 2 structured questions are being written. Until then, practise with Paper 1, the topic quizzes and the Workspace.`, `Les questions structurées de l’épreuve 2 de ${name} sont en préparation. En attendant, entraînez-vous avec l’épreuve 1, les quiz et l’espace de travail.`)}
+              </T>
+            )}
           </V>
 
           {(weak || recent != null) && (

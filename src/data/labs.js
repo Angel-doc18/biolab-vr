@@ -12,15 +12,18 @@ export const LABS = [...tag(BIOLOGY, 'biology'), ...tag(CHEMISTRY, 'chemistry'),
 export const labById = (id) => LABS.find((l) => l.id === id);
 export const labsForUnit = (unitId) => LABS.filter((l) => l.unit === unitId || l.units?.includes(unitId));
 export const labsFor = (subject) => LABS.filter((l) => l.subject === subject || l.subjects?.includes(subject));
-// The topic a practical belongs to for this student. A practical can serve
-// topics in several classes; the one in the student's own class comes first.
-export function labUnit(lab, className) {
-  const units = [lab.unit, ...(lab.units || [])].map(unitById).filter(Boolean);
-  for (const f of formsShown(lab.subject, className)) {
+// The topic a practical belongs to for this student in the subject they are
+// studying. A practical can serve topics in several classes (and in both the
+// Ordinary and Advanced Level courses); the one in the student's own class
+// comes first.
+export function labUnit(lab, className, subject = lab.subject) {
+  const all = [lab.unit, ...(lab.units || [])].map(unitById).filter(Boolean);
+  const units = all.some((u) => u.subject === subject) ? all.filter((u) => u.subject === subject) : all;
+  for (const f of formsShown(units[0]?.subject || lab.subject, className)) {
     const u = units.find((x) => x.form === f);
     if (u) return u;
   }
-  return unitById(lab.unit);
+  return units[0] || unitById(lab.unit);
 }
 
 // Method steps shown while a practical runs; each lab may give its own.

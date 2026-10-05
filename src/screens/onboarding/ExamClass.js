@@ -4,7 +4,7 @@ import { Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { nextStep } from '../../navigation/routes';
-import { CLASSES, LEVELS, OPEN_SUBJECTS, chosenSubjects, classById, classLevel, examYearFor, subjectsForLevel } from '../../data/subjects';
+import { CLASSES, LEVELS, chosenSubjects, classById, classLevel, examYearFor, subjectsForClass, subjectsForLevel, subjectsInClass } from '../../data/subjects';
 import { OnbHeader, StepBar } from './Steps';
 
 // The exam year that follows from the class, and the two after it for students
@@ -39,16 +39,18 @@ export default function ExamClass({ navigation, route }) {
   const [year, setYear] = useState(years.includes(user?.examYear) ? user.examYear : years[0]);
   const level = classLevel(cls);
   const levelName = LEVELS[level][lang === 'fr' ? 'fr' : 'en'];
-  // Open subjects of the class's level; Sixth Form students revise the open
-  // Ordinary Level subjects until their Advanced Level subjects are written.
-  const levelOpen = OPEN_SUBJECTS.filter((s) => s.level === level);
-  const choices = levelOpen.length ? levelOpen : OPEN_SUBJECTS.filter((s) => s.level === 'O');
+  // The subjects this class can take. Sixth Form students keep an Ordinary Level
+  // subject while its Advanced Level course is being written.
+  const choices = subjectsForClass(cls);
+  const interim = choices.filter((s) => s.level !== level);
   const comingSoon = subjectsForLevel(level).filter((s) => !s.available);
+  const [subjects, setSubjects] = useState(user?.subjects?.length || user?.onboarded ? chosenSubjects(user) : []);
   const pickClass = (k) => {
     setCls(k);
     setYear(examYears(k)[0]);
+    // Chemistry becomes A Level Chemistry on moving into the Sixth Form, and back.
+    setSubjects((list) => subjectsInClass(list, k));
   };
-  const [subjects, setSubjects] = useState(user?.subjects?.length || user?.onboarded ? chosenSubjects(user) : []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const toggle = (id) => setSubjects((list) => (list.includes(id) ? list.filter((s) => s !== id) : [...list, id]));
@@ -111,13 +113,13 @@ export default function ExamClass({ navigation, route }) {
         </V>
         <V c="gap-space-sm">
           <T c="font-label-lg text-label-lg text-on-surface">
-            {levelOpen.length ? L('Subjects you are taking', 'Matières que vous présentez') : L('Ordinary Level subjects to study now', 'Matières Ordinary Level à étudier maintenant')}
+            {L('Subjects you are taking', 'Matières que vous présentez')}
           </T>
-          {!levelOpen.length && (
+          {!!interim.length && (
             <T c="font-body-md text-body-md text-on-surface-variant">
               {L(
-                'The Advanced Level courses are being written. Until they are ready, study the Ordinary Level subjects your A Level courses build on.',
-                'Les cours de l’Advanced Level sont en préparation. En attendant, étudiez les matières de l’Ordinary Level sur lesquelles reposent vos cours.'
+                'Where an Advanced Level course is still being written, study the Ordinary Level subject it builds on until it is ready.',
+                'Quand un cours de l’Advanced Level est encore en préparation, étudiez en attendant la matière de l’Ordinary Level sur laquelle il repose.'
               )}
             </T>
           )}
@@ -128,7 +130,7 @@ export default function ExamClass({ navigation, route }) {
                 <P key={s.id} c={`flex-row items-center gap-space-sm px-space-md py-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => toggle(s.id)} scale={1} accessibilityRole="checkbox" accessibilityState={{ checked: on }}>
                   <V c={`w-6 h-6 rounded items-center justify-center ${on ? 'bg-primary-container' : 'border-2 border-outline-variant'}`}>{on && <Ic n="check" s={16} c="on-primary" />}</V>
                   <T c="font-label-lg text-label-lg text-on-surface flex-1">{lang === 'fr' ? s.fr : s.en}</T>
-                  <T c="font-body-sm text-body-sm text-on-surface-variant">{s.code}</T>
+                  <T c="font-body-sm text-body-sm text-on-surface-variant">{s.level === level ? s.code : `${LEVELS[s.level].short} ${s.code}`}</T>
                 </P>
               );
             })}

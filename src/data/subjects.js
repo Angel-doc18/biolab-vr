@@ -4,7 +4,7 @@
 //
 // Paper 2 practice layout per subject: Section A questions are compulsory;
 // Section B offers `offered` questions of which `answer` are done. Every
-// question is worth 20 marks.
+// question is worth 20 marks. A subject without `p2` has no Paper 2 bank yet.
 //
 // A subject is switched on (`available`) once its lessons, practicals, 3D models
 // and papers are complete; until then it is listed as being written.
@@ -58,7 +58,15 @@ export const SUBJECTS = [
 
   // ---------- Advanced Level ----------
   { id: 'a-biology', code: '0710', level: 'A', en: 'Biology', fr: 'Biologie' },
-  { id: 'a-chemistry', code: '0715', level: 'A', en: 'Chemistry', fr: 'Chimie' },
+  {
+    id: 'a-chemistry',
+    code: '0715',
+    level: 'A',
+    available: true,
+    en: 'Chemistry',
+    fr: 'Chimie',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'a-physics', code: '0780', level: 'A', en: 'Physics', fr: 'Physique' },
   { id: 'a-maths-mech', code: '0765', level: 'A', en: 'Pure Mathematics with Mechanics', fr: 'Mathématiques pures et mécanique' },
   { id: 'a-maths-stat', code: '0770', level: 'A', en: 'Pure Mathematics with Statistics', fr: 'Mathématiques pures et statistiques' },
@@ -86,11 +94,43 @@ export const subjectName = (id, lang) => {
 };
 export const subjectsForLevel = (level) => SUBJECTS.filter((s) => s.level === level);
 
-// The subjects a student takes, in registry order, never empty.
-export function chosenSubjects(user) {
-  const list = Array.isArray(user?.subjects) ? user.subjects.filter((s) => OPEN_IDS.includes(s)) : [];
-  return list.length ? OPEN_IDS.filter((s) => list.includes(s)) : [DEFAULT_SUBJECT];
+// The Ordinary Level subject each Advanced Level course builds on.
+const BASE = { 'a-biology': 'biology', 'a-chemistry': 'chemistry', 'a-physics': 'physics' };
+const advancedOf = (id) => Object.keys(BASE).find((a) => BASE[a] === id);
+
+// The subjects a class can take. Sixth Form students take the open Advanced
+// Level courses, and keep the Ordinary Level subject while its Advanced Level
+// course is still being written.
+export function subjectsForClass(className) {
+  if (!classById(className)) return OPEN_SUBJECTS;
+  const level = classLevel(className);
+  const open = OPEN_SUBJECTS.filter((s) => s.level === level);
+  if (level === 'O') return open;
+  const waiting = OPEN_SUBJECTS.filter((s) => s.level === 'O' && advancedOf(s.id) && !OPEN_IDS.includes(advancedOf(s.id)));
+  return [...waiting, ...open].sort((a, b) => (BASE[a.id] || a.id).localeCompare(BASE[b.id] || b.id));
 }
+
+// A list of subjects carried over to another class: Chemistry becomes A Level
+// Chemistry on moving into the Sixth Form (and back again), and subjects the
+// class cannot take are dropped.
+export function subjectsInClass(list, className) {
+  const allowed = subjectsForClass(className).map((s) => s.id);
+  const moved = (list || []).map((id) => (allowed.includes(id) ? id : [advancedOf(id), BASE[id]].find((x) => x && allowed.includes(x)) || id));
+  return allowed.filter((id) => moved.includes(id));
+}
+
+// The subjects a student takes, in the order offered to their class, never empty.
+export function chosenSubjects(user) {
+  const list = subjectsInClass(Array.isArray(user?.subjects) ? user.subjects : [], user?.className);
+  return list.length ? list : [subjectsForClass(user?.className)[0]?.id || DEFAULT_SUBJECT];
+}
+
+// "Chemistry", or "A Level Chemistry" where both levels could be listed together.
+export const subjectLabel = (id, lang) => {
+  const s = subjectById(id);
+  const name = lang === 'fr' ? s.fr : s.en;
+  return s.level === 'A' ? `A Level ${name}` : name;
+};
 
 // Secondary school classes. Form 5 sits the Ordinary Level and Upper Sixth the
 // Advanced Level in June of the current school year.

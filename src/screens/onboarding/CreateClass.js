@@ -4,7 +4,7 @@ import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { post } from '../../api/client';
 import { useL, useLang } from '../../i18n';
-import { OPEN_SUBJECTS as SUBJECTS, subjectName } from '../../data/subjects';
+import { OPEN_SUBJECTS as SUBJECTS, subjectById, subjectLabel, subjectName } from '../../data/subjects';
 import { OnbHeader, StepBar } from './Steps';
 
 // Teachers create a class; students join it with the generated code.
@@ -50,7 +50,8 @@ export default function CreateClass({ navigation, route }) {
                 return (
                   <P key={s.id} c={`flex-row items-center gap-space-sm px-space-md py-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => setSubject(s.id)} scale={1} accessibilityRole="radio" accessibilityState={{ checked: on }}>
                     <V c={`w-5 h-5 rounded-full items-center justify-center ${on ? 'border-2 border-primary-container' : 'border-2 border-outline-variant'}`}>{on && <V c="w-2.5 h-2.5 rounded-full bg-primary-container" />}</V>
-                    <T c="font-label-lg text-label-lg text-on-surface flex-1">{lang === 'fr' ? s.fr : s.en}</T>
+                    <T c="font-label-lg text-label-lg text-on-surface flex-1">{subjectLabel(s.id, lang)}</T>
+                    <T c="font-body-sm text-body-sm text-on-surface-variant">{s.code}</T>
                   </P>
                 );
               })}
@@ -58,7 +59,7 @@ export default function CreateClass({ navigation, route }) {
           </V>
           <V c="gap-space-xs">
             <T c="font-label-lg text-label-lg text-on-surface">{L('Class name', 'Nom de la classe')}</T>
-            <Input c="h-[52px] px-4 rounded-xl bg-surface-container-lowest border border-outline-variant text-body-md" placeholder={`${L('For example', 'Par exemple')} Form 5 ${subjectName(subject, 'en')} A`} value={name} onChangeText={setName} maxLength={60} />
+            <Input c="h-[52px] px-4 rounded-xl bg-surface-container-lowest border border-outline-variant text-body-md" placeholder={`${L('For example', 'Par exemple')} ${subjectById(subject).level === 'A' ? 'Lower Sixth' : 'Form 5'} ${subjectName(subject, 'en')} A`} value={name} onChangeText={setName} maxLength={60} />
           </V>
           <ErrorNote error={error} />
           <Cta variant="dark" icon={null} label={L('Create class', 'Créer la classe')} loading={busy} onPress={submit} />
@@ -71,7 +72,7 @@ export default function CreateClass({ navigation, route }) {
       ) : (
         <V c="gap-space-md">
           <V c="p-space-md rounded-xl bg-primary-container gap-2">
-            <T c="font-label-md text-label-md text-on-primary" style={{ opacity: 0.85 }}>{made.name}, {subjectName(made.subject || subject, lang)}</T>
+            <T c="font-label-md text-label-md text-on-primary" style={{ opacity: 0.85 }}>{made.name}, {subjectLabel(made.subject || subject, lang)}</T>
             <V c="flex-row items-center justify-between">
               <T c="font-display-lg text-display-lg text-on-primary tracking-widest">{made.joinCode}</T>
               <P
