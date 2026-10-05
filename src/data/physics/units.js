@@ -1,14 +1,21 @@
-// Physics by class, following the MINESEC Physics syllabus for Forms 3, 4 and 5
-// (each class also has a Technology/Project module, done as practical projects).
+// Physics by class. Forms 1 and 2 are in units12.js (the Physics and Technology
+// part of Science and Technology). This file follows the MINESEC Physics syllabus
+// for Forms 3, 4 and 5 (each class also has a Technology/Project module, done as
+// practical projects).
 // Each topic lists its lessons by id; the original topics keep their ids (and 3D
 // models), and many quiz questions come from bank.js.
 //
 // Quiz convention: the correct option is written first in `a`; options are
 // shuffled when shown.
 import { BANK } from './bank';
+import { UNITS_12 } from './units12';
 
 // MINESEC modules, class by class.
 export const GROUPS = [
+  { id: 'science', en: 'The world of science', fr: 'Le monde de la science' },
+  { id: 'health', en: 'Health education', fr: 'Éducation à la santé' },
+  { id: 'environment', en: 'Environmental education', fr: 'Éducation environnementale' },
+  { id: 'tech', en: 'Technology', fr: 'Technologie' },
   { id: 'intro', en: 'Introduction to mechanics', fr: 'Introduction à la mécanique' },
   { id: 'matter', en: 'Matter: properties and transformation', fr: 'Matière : propriétés et transformations' },
   { id: 'energy', en: 'Energy: applications and uses', fr: 'Énergie : applications et usages' },
@@ -24,7 +31,7 @@ const pick = (id, ...idx) => idx.map((i) => BANK[id].quiz[i]);
 const vrOf = (id) => BANK[id].vr;
 const Q = (q, a, why) => ({ q, a, why });
 
-export const units = [
+const UNITS_345 = [
   // ======================= Form 3 =======================
   {
     id: 'ph-measure',
@@ -500,3 +507,5 @@ export const units = [
     ],
   },
 ];
+
+export const units = [...UNITS_12, ...UNITS_345];

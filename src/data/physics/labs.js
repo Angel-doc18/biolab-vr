@@ -151,6 +151,7 @@ export const LABS = [
   {
     id: 'ph-density',
     unit: 'ph-f3-density',
+    units: ['ph-f1-measure', 'ph-f2-method'],
     kind: 'readings',
     short: 'Density',
     title: 'Density of solids: identifying the material',
@@ -262,6 +263,7 @@ export const LABS = [
   {
     id: 'ph-moments',
     unit: 'ph-forces',
+    units: ['ph-f1-tech'],
     kind: 'readings',
     short: 'Principle of moments',
     title: 'The principle of moments: weighing an unknown object',
@@ -524,6 +526,7 @@ export const LABS = [
   {
     id: 'ph-cooling',
     unit: 'ph-thermal',
+    units: ['ph-f2-heatstate'],
     kind: 'readings',
     short: 'Cooling curve',
     title: 'Cooling curve: finding a melting point',
@@ -577,6 +580,7 @@ export const LABS = [
   {
     id: 'ph-conduction',
     unit: 'ph-thermal',
+    units: ['ph-f1-insulation', 'ph-f1-heatflow', 'ph-f2-materials'],
     short: 'Conduction in rods',
     title: 'Which materials conduct heat best?',
     desc: 'Heat one end of rods of different materials with wax pins along them and compare how fast the pins fall off.',
@@ -729,6 +733,7 @@ export const LABS = [
   {
     id: 'ph-lens',
     unit: 'ph-light',
+    units: ['ph-f2-health'],
     kind: 'readings',
     short: 'Focal length of a lens',
     title: 'Focal length of a converging lens',
@@ -896,6 +901,7 @@ export const LABS = [
   {
     id: 'ph-circuits',
     unit: 'ph-electricity',
+    units: ['ph-f2-electricity'],
     short: 'Series and parallel',
     title: 'Lamps in series and in parallel',
     desc: 'Add identical lamps in series and in parallel and compare their brightness and the current from the cell.',
