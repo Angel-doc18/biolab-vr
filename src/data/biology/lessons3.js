@@ -375,9 +375,10 @@ export const LESSONS_3 = [
     tags: ['HIV/AIDS', 'Transmission'],
     body: [
       '**HIV** (human immunodeficiency virus) attacks white blood cells called lymphocytes, which defend the body. Over several years, without treatment, the immune system becomes so weak that other infections such as TB and pneumonia take hold. This late stage is **AIDS** (acquired immune deficiency syndrome).',
-      'HIV is found in **blood, semen, vaginal fluids and breast milk**. It spreads by **unprotected sexual intercourse** with an infected person, by **infected blood** (shared needles, razor blades, unsterilised instruments), and **from mother to child** during pregnancy, birth or breastfeeding. It is **not** spread by shaking hands, hugging, sharing food or plates, mosquito bites or sitting in the same class.',
+      'HIV is found in **blood, semen, vaginal fluids and breast milk**. It spreads in three ways:\n- **unprotected sexual intercourse** with an infected person\n- **infected blood**: shared needles, razor blades, unsterilised instruments\n- **from mother to child** during pregnancy, birth or breastfeeding',
+      'HIV is **not** spread by shaking hands, hugging, sharing food or plates, mosquito bites or sitting in the same class.',
       '**Sexually transmitted infections** (STIs) such as gonorrhoea, syphilis and chlamydia spread through unprotected sex. They can cause pain, discharge and sores, but many have no signs at first. Untreated STIs can cause **infertility**, and the sores make HIV infection easier.',
-      '**Ebola virus disease** causes high fever, weakness, vomiting, diarrhoea and sometimes bleeding, and kills many of those infected. It spreads through direct contact with the **blood and body fluids** of a sick person or of someone who has died of it, including during the washing of bodies, and through contact with infected bushmeat such as bats and monkeys.',
+      '**Ebola virus disease** causes high fever, weakness, vomiting, diarrhoea and sometimes bleeding. It kills many of those infected. It spreads through direct contact with:\n- the **blood and body fluids** of a sick person\n- the body of someone who has died of it, for example when washing the body\n- infected bushmeat, such as bats and monkeys',
       'Because people with HIV can look healthy for years, the only way to know one’s status is an **HIV test**, which is confidential at health centres.',
     ],
     figure: null,

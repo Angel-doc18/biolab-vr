@@ -212,7 +212,7 @@ const UNITS_345 = [
     n: 9,
     group: 'matter',
     icon: 'local_fire_department',
-    diagram: null,
+    diagram: 'phosphorus-allotropes',
     ask: 'Why is white phosphorus kept under water?',
     title: 'Chemistry of the Elements: Phosphorus',
     short: 'Phosphorus',

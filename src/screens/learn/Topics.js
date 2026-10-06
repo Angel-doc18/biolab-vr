@@ -65,7 +65,7 @@ export default function Topics({ navigation, route }) {
   const sectionTitle = (f) => (f === own ? `${f} (${L('your class', 'votre classe')})` : isExamClass(own) && !revisingOtherLevel ? `${f} (${L('revision', 'révision')})` : f);
 
   const heading = {
-    learn: [L('Step 2 of 3', 'Étape 2 sur 3'), L('Choose a topic', 'Choisissez un thème'), L('Each topic opens its subtopics: the lessons, a labelled diagram and a quiz, and a 3D model where the topic has one.', 'Chaque thème ouvre ses sous-thèmes : leçons, schéma légendé et quiz, et un modèle 3D quand le thème en a un.')],
+    learn: [L('Step 2 of 3', 'Étape 2 sur 3'), L('Choose a topic', 'Choisissez un thème'), L('Each topic opens its subtopics: the lessons with their labelled diagrams and questions, and a topic quiz.', 'Chaque thème ouvre ses sous-thèmes : les leçons avec leurs schémas légendés et leurs questions, et un quiz du thème.')],
     lab: [L('Step 2 of 3', 'Étape 2 sur 3'), L('Choose a topic', 'Choisissez un thème'), L('Each topic opens the practicals you can do for it.', 'Chaque thème ouvre ses travaux pratiques.')],
     quiz: [L('Step 3 of 3', 'Étape 3 sur 3'), L('Choose a topic quiz', 'Choisissez un quiz'), L('Questions on one topic, each with an explanation.', 'Des questions sur un thème, chacune expliquée.')],
   }[mode];

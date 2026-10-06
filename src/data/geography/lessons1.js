@@ -203,10 +203,11 @@ export const LESSONS_1 = [
   ]),
 
   L('ge-protect-1', 'ge-f1-sanitation', '11.2', 'Protecting our environment: bush fires, trees and rivers', 8, ['Environment'], [
-    '**Bush fires** are uncontrolled fires that burn grassland and forest, mostly in the **dry season**. They are started to clear farms, to hunt animals or to get fresh grass for cattle, and by careless smokers. Bush fires **destroy** crops, trees, animals and houses, leave the soil **bare** so it is easily eroded, kill the useful organisms in the soil and fill the air with **smoke**.',
-    'Bush fires can be prevented by making **fire breaks** (strips of land cleared of grass, so the fire cannot cross), by **controlled early burning** where farmers agree, by teaching people about the dangers, and by laws against setting fires.',
-    '**Planting trees** (afforestation and reforestation) gives shade, fruit, firewood and timber, holds the soil against erosion, protects water sources and takes in carbon dioxide. Schools can grow tree nurseries and plant trees around their compounds.',
-    '**Rivers and streams** are protected by not throwing refuse or dead animals into them, not washing with chemicals or fishing with poisons, building latrines far from water sources, and keeping trees and grass along their banks.',
+    '**Bush fires** are uncontrolled fires that burn grassland and forest, mostly in the **dry season**. People start them to clear farms, to hunt animals or to get fresh grass for cattle. Careless smokers also start them.',
+    'Bush fires:\n- **destroy** crops, trees, animals and houses\n- leave the soil **bare**, so it is easily eroded\n- kill the useful organisms in the soil\n- fill the air with **smoke**',
+    'Bush fires can be prevented by:\n- **fire breaks**: strips of land cleared of grass, so the fire cannot cross\n- **controlled early burning**, where farmers agree\n- teaching people about the dangers\n- laws against setting fires',
+    '**Planting trees** (afforestation and reforestation) gives shade, fruit, firewood and timber. Trees hold the soil against erosion, protect water sources and take in carbon dioxide. Schools can grow tree nurseries and plant trees around their compounds.',
+    'To protect **rivers and streams**:\n- do not throw refuse or dead animals into them\n- do not wash with chemicals or fish with poisons\n- build latrines far from water sources\n- keep trees and grass along their banks',
   ], null, 'For each problem give the **cause**, the **effect** and a **solution**: bush fires, from clearing farms, destroy soil life, prevented by fire breaks.',
   ['A strip of land cleared of grass to stop a bush fire spreading is a:', ['Fire break', 'Terrace', 'Compost heap', 'Contour'], 'With no fuel to burn, the fire stops at the cleared strip.'],
   [['Bush fire', 'An uncontrolled fire that burns grassland or forest.'], ['Fire break', 'A cleared strip of land that stops a fire from spreading.'], ['Afforestation', 'Planting trees where there were none before.']],

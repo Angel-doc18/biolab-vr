@@ -9,6 +9,7 @@ import * as admin from './routes/admin.js';
 import { paymentsConfigured } from './lib/providers.js';
 import { channels, sendNotice } from './lib/messaging.js';
 import * as consent from './routes/consent.js';
+import * as avatar from './routes/avatar.js';
 import * as models from './routes/models.js';
 import * as voice from './routes/voice.js';
 import { notify } from './lib/notify.js';
@@ -36,6 +37,9 @@ const routes = [
   ['GET', '/v1/me', me.getMe],
   ['PATCH', '/v1/me', me.patchMe],
   ['DELETE', '/v1/me', me.deleteMe],
+  ['GET', '/v1/me/avatar', avatar.getAvatar],
+  ['PUT', '/v1/me/avatar', avatar.putAvatar],
+  ['DELETE', '/v1/me/avatar', avatar.deleteAvatar],
   ['GET', '/v1/me/progress', me.getProgress],
   ['PUT', '/v1/me/progress', me.putProgress],
   ['GET', '/v1/me/report', me.myReport],

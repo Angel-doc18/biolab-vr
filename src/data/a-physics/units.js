@@ -271,7 +271,7 @@ export const units = [
     n: 1,
     group: 'fields',
     icon: 'public',
-    diagram: null,
+    diagram: 'gravity-field',
     ask: 'How high above the Earth is a geostationary satellite?',
     title: 'Gravitational Fields',
     short: 'Gravitational Fields',

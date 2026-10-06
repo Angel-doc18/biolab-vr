@@ -141,7 +141,7 @@ function StudentHome({ navigation }) {
           <TileGrid
             items={[
               { icon: 'experiment', title: L('Practicals', 'Travaux pratiques'), sub: L('Experiments with real readings', 'Expériences avec de vraies mesures'), onPress: () => navigation.navigate('Lab') },
-              { icon: 'view_in_ar', title: L('3D models', 'Modèles 3D'), sub: L('Turn and open every model', 'Tournez et ouvrez chaque modèle'), onPress: () => navigation.navigate('Models', { subject }) },
+              { icon: 'search', title: L('Search', 'Rechercher'), sub: L('Find any topic or term', 'Trouvez un thème ou un terme'), onPress: () => navigation.navigate('Search') },
               { icon: 'timer', title: L('Practice papers', 'Épreuves'), sub: paper2Config(subject) ? L('Paper 1, Paper 2, topic quizzes', 'Épreuves 1 et 2, quiz') : L('Paper 1 and topic quizzes', 'Épreuve 1 et quiz'), onPress: () => navigation.navigate('ExamMenu', { subject }) },
               { icon: 'forum', title: L('Ask the tutor', 'Demander au tuteur'), sub: quota ? `${quota.asksLeft} ${L('questions left today', 'questions restantes')}` : L('Answers read aloud', 'Réponses lues à voix haute'), onPress: () => navigation.navigate('Tutor', { unitId: focus.id, subject }) },
               { icon: 'co_present', title: L('Workspace', 'Espace de travail'), sub: L('Questions solved step by step on the board', 'Questions résolues au tableau, étape par étape'), onPress: () => navigation.navigate('Workspace', { unitId: focus.id, subject }) },
@@ -213,10 +213,10 @@ function StudentHome({ navigation }) {
                     {reviewed ? L('Review lesson', 'Revoir la leçon') : L('Start lesson', 'Commencer la leçon')}
                   </T>
                 </P>
-                <P c="h-12 px-space-md bg-surface-container-low rounded-xl flex-row items-center justify-center gap-1.5" onPress={() => navigation.navigate('Specimen', { unitId: focus.id })}>
-                  <Ic n="view_in_ar" s={18} c="primary-container" />
+                <P c="h-12 px-space-md bg-surface-container-low rounded-xl flex-row items-center justify-center gap-1.5" onPress={() => navigation.navigate('Quiz', { unitId: focus.id })}>
+                  <Ic n="quiz" s={18} c="primary-container" />
                   <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
-                    3D
+                    {L('Quiz', 'Quiz')}
                   </T>
                 </P>
               </V>

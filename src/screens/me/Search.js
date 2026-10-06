@@ -4,7 +4,7 @@ import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { modelOf, unitById, units } from '../../data/units';
+import { unitById, units } from '../../data/units';
 import { LESSONS, lessonNumber, lessonsFor, plain } from '../../data/lessons';
 import { LABS } from '../../data/labs';
 import { BANK } from '../../lib/exam';
@@ -36,7 +36,7 @@ function Row({ title, sub, onPress, first }) {
   );
 }
 
-// Searches the lessons, 3D models, questions and practicals of the subjects the
+// Searches the lessons, topics, questions and practicals of the subjects the
 // student takes.
 export default function Search({ navigation }) {
   const { subjects } = useApp();
@@ -47,7 +47,7 @@ export default function Search({ navigation }) {
   const terms = norm(q).split(/\s+/).filter((w) => w.length > 1);
 
   const results = useMemo(() => {
-    if (!terms.length) return { lessons: [], models: [], questions: [], labs: [] };
+    if (!terms.length) return { lessons: [], topics: [], questions: [], labs: [] };
     const mine = units.filter((u) => subjects.includes(u.subject));
     const lessonUnit = new Map();
     for (const u of mine) for (const l of lessonsFor(u.id)) if (!lessonUnit.has(l.id)) lessonUnit.set(l.id, u);
@@ -64,7 +64,7 @@ export default function Search({ navigation }) {
       )
         .slice(0, 12)
         .map((l) => ({ l, u: lessonUnit.get(l.id) })),
-      models: rank(mine.filter((u, i, all) => u.vr && all.findIndex((x) => x.vr && modelOf(x.id) === modelOf(u.id)) === i), (u) => score(`${u.vr.title} ${u.vr.subtitle} ${u.vr.parts.map((p) => `${p.name} ${p.title} ${p.fr?.name || ''}`).join(' ')}`, terms)),
+      topics: rank(mine, (u) => score(`${u.short} ${u.title} ${u.focus || ''}`, terms)).slice(0, 12),
       questions: rank(
         BANK.filter((b) => subjects.includes(b.subject)),
         (b) => score(`${b.q} ${b.a[0]} ${b.why}`, terms)
@@ -76,7 +76,7 @@ export default function Search({ navigation }) {
     };
   }, [q, subjects]);
 
-  const counts = { lessons: results.lessons.length, models: results.models.length, questions: results.questions.length, labs: results.labs.length };
+  const counts = { lessons: results.lessons.length, topics: results.topics.length, questions: results.questions.length, labs: results.labs.length };
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
   const show = (k) => scope === 'all' || scope === k;
   const where = (u) => `${subjectLabel(u.subject, lang)}, ${L('unit', 'unité')} ${u.n}`;
@@ -99,7 +99,7 @@ export default function Search({ navigation }) {
             {[
               ['all', L('All', 'Tout'), total],
               ['lessons', L('Lessons', 'Leçons'), counts.lessons],
-              ['models', L('3D models', 'Modèles 3D'), counts.models],
+              ['topics', L('Topics', 'Thèmes'), counts.topics],
               ['questions', L('Questions', 'Questions'), counts.questions],
               ['labs', L('Practicals', 'TP'), counts.labs],
             ].map(([id, label, n]) => {
@@ -117,7 +117,7 @@ export default function Search({ navigation }) {
 
         {!terms.length ? (
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-            {L('Search the lessons, 3D models, practice questions and practicals of your subjects. Try a structure, a process or a key term.', 'Cherchez dans les leçons, modèles 3D, questions et TP de vos matières. Essayez une structure, un processus ou un mot clé.')}
+            {L('Search the lessons, topics, practice questions and practicals of your subjects. Try a structure, a process or a key term.', 'Cherchez dans les leçons, thèmes, questions et TP de vos matières. Essayez une structure, un processus ou un mot clé.')}
           </T>
         ) : !total ? (
           <V c="gap-space-xs">
@@ -139,16 +139,16 @@ export default function Search({ navigation }) {
                 </V>
               </Section>
             )}
-            {show('models') && results.models.length > 0 && (
-              <Section title={L('3D models', 'Modèles 3D')}>
+            {show('topics') && results.topics.length > 0 && (
+              <Section title={L('Topics', 'Thèmes')}>
                 <V c="bg-surface-container-lowest rounded-xl shadow-sm">
-                  {results.models.map((u, i) => (
+                  {results.topics.map((u, i) => (
                     <Row
                       key={u.id}
                       first={i === 0}
-                      title={(lang === 'fr' && u.vr.fr?.title) || u.vr.title}
-                      sub={`${where(u)}. ${u.vr.parts.map((p) => (lang === 'fr' && p.fr?.name) || p.name).join(', ')}`}
-                      onPress={() => navigation.navigate('Specimen', { unitId: u.id })}
+                      title={u.short}
+                      sub={`${where(u)}: ${u.title}`}
+                      onPress={() => navigation.navigate('Unit', { unitId: u.id })}
                     />
                   ))}
                 </V>

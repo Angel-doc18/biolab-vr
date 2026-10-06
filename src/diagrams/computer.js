@@ -394,9 +394,9 @@ function FlowArt() {
       <Arrow x1={294} y1={100} x2={294} y2={140} />
       <Txt x={276} y={94} size={8.5} weight="700">No</Txt>
       <Path d="M116 140 L176 140 L168 162 L108 162 Z" fill={AMBER} stroke={O} strokeWidth={1.2} />
-      <Txt x={142} y={155} size={9}>Output "Pass"</Txt>
+      <Txt x={142} y={155} size={9}>{'Output "Pass"'}</Txt>
       <Path d="M268 140 L328 140 L320 162 L260 162 Z" fill={AMBER} stroke={O} strokeWidth={1.2} />
-      <Txt x={294} y={155} size={9}>Output "Fail"</Txt>
+      <Txt x={294} y={155} size={9}>{'Output "Fail"'}</Txt>
       <Path d="M142 162 L142 182 L210 182" fill="none" stroke={O} strokeWidth={1.3} />
       <Path d="M294 162 L294 182 L226 182" fill="none" stroke={O} strokeWidth={1.3} />
       <Arrow x1={218} y1={182} x2={218} y2={192} />

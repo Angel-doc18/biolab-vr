@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { get, loadSession, onSessionLost, patch as apiPatch, post, put, setSession } from '../api/client';
+import { del, get, loadSession, onSessionLost, patch as apiPatch, post, put, setSession } from '../api/client';
 import { EMPTY, examSubject, merge, minutesThisWeek, streak, syllabusMastery, touchDay, unitMastery, bestExam } from './progress';
 import { units, unitsShown } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
@@ -10,6 +10,7 @@ import { setVoice } from '../lib/voice';
 
 const PREFS = 'bs:prefs';
 const USER = 'bs:user';
+const AVATAR = 'bs:avatar';
 const progressKey = (id) => `bs:progress:${id || 'guest'}`;
 
 const Ctx = createContext(null);
@@ -31,6 +32,7 @@ export function AppProvider({ children }) {
   const [progress, setProgress] = useState(EMPTY);
   const [quota, setQuota] = useState(null);
   const [unread, setUnread] = useState(0);
+  const [avatar, setAvatarUri] = useState(null);
   const loadedFor = useRef(null);
   const syncTimer = useRef(null);
 
@@ -129,8 +131,9 @@ export function AppProvider({ children }) {
       // the local session is cleared regardless
     }
     await setSession(null);
-    await AsyncStorage.removeItem(USER).catch(() => {});
+    await AsyncStorage.multiRemove([USER, AVATAR]).catch(() => {});
     setAuth({ status: 'guest', user: null, pro: false });
+    setAvatarUri(null);
     setQuota(null);
     setUnread(0);
   }, []);
@@ -146,6 +149,54 @@ export function AppProvider({ children }) {
   // Students under 18 need a parent's approval before anything is stored on the
   // server; until then progress stays on this phone only.
   const consentOk = !user || user.role !== 'student' || user.consentStatus === 'granted' || user.consentStatus === 'not_needed';
+
+  // ---------- profile picture ----------
+  // Kept on this phone as a data URI and fetched again only when it changes
+  // (the server's avatarAt).
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      if (!user) return setAvatarUri(null);
+      const cached = await readJson(AVATAR, null);
+      if (!user.avatarAt) {
+        if (cached) AsyncStorage.removeItem(AVATAR).catch(() => {});
+        if (live) setAvatarUri(null);
+        return;
+      }
+      if (cached?.userId === user.id && cached.at === user.avatarAt) {
+        if (live) setAvatarUri(cached.uri);
+        return;
+      }
+      try {
+        const r = await get('/v1/me/avatar');
+        const uri = `data:${r.mediaType};base64,${r.base64}`;
+        writeJson(AVATAR, { userId: user.id, at: r.at, uri });
+        if (live) setAvatarUri(uri);
+      } catch {
+        if (live) setAvatarUri(cached?.userId === user.id ? cached.uri : null);
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [user]);
+
+  const saveAvatar = useCallback(
+    async (photo) => {
+      const r = await put('/v1/me/avatar', { base64: photo.base64, mediaType: photo.mediaType });
+      const uri = `data:${photo.mediaType};base64,${photo.base64}`;
+      await writeJson(AVATAR, { userId: r.user.id, at: r.user.avatarAt, uri });
+      setAvatarUri(uri);
+      await applyUser(r.user, auth.pro);
+    },
+    [applyUser, auth.pro]
+  );
+  const removeAvatar = useCallback(async () => {
+    const r = await del('/v1/me/avatar');
+    await AsyncStorage.removeItem(AVATAR).catch(() => {});
+    setAvatarUri(null);
+    await applyUser(r.user, auth.pro);
+  }, [applyUser, auth.pro]);
 
   // The sciences this student takes, and the one the tabs are showing now.
   const subjects = useMemo(() => chosenSubjects(user), [user]);
@@ -315,6 +366,9 @@ export function AppProvider({ children }) {
       subject,
       setSubject,
       applyUser,
+      avatar,
+      saveAvatar,
+      removeAvatar,
       register,
       login,
       logout,
@@ -331,7 +385,7 @@ export function AppProvider({ children }) {
       refreshUnread,
       ...actions,
     }),
-    [ready, prefs, savePrefs, auth, user, consentOk, subjects, subject, setSubject, applyUser, register, login, logout, updateMe, refreshMe, startSession, progress, stats, quota, refreshQuota, unread, refreshUnread, actions]
+    [ready, prefs, savePrefs, auth, user, consentOk, subjects, subject, setSubject, applyUser, avatar, saveAvatar, removeAvatar, register, login, logout, updateMe, refreshMe, startSession, progress, stats, quota, refreshQuota, unread, refreshUnread, actions]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

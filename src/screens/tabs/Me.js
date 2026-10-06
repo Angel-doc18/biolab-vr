@@ -9,6 +9,7 @@ import { subjectName } from '../../data/subjects';
 import { Section } from './Home';
 import { VOICES, setVoice, speak } from '../../lib/voice';
 import { get } from '../../api/client';
+import { pickProfilePhoto } from '../../lib/photo';
 
 function MenuRow({ title, sub, onPress, first }) {
   return (
@@ -32,8 +33,38 @@ const DAYS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const DAYS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
 export default function Me({ navigation }) {
-  const { user, pro, progress, stats, logout, prefs, savePrefs, subjects, setSubject } = useApp();
+  const { user, pro, progress, stats, logout, prefs, savePrefs, subjects, setSubject, avatar, saveAvatar, removeAvatar, consentOk } = useApp();
   const L = useL();
+  // Profile picture: tap the picture to take a photo, choose one or remove it.
+  const [photoMenu, setPhotoMenu] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState(null);
+  const changePhoto = async (source) => {
+    setPhotoError(null);
+    try {
+      const photo = await pickProfilePhoto(source);
+      if (!photo) return;
+      setPhotoBusy(true);
+      await saveAvatar(photo);
+      setPhotoMenu(false);
+    } catch (e) {
+      setPhotoError(e?.message || L('The picture could not be saved. Try again.', 'La photo n’a pas pu être enregistrée. Réessayez.'));
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+  const dropPhoto = async () => {
+    setPhotoError(null);
+    setPhotoBusy(true);
+    try {
+      await removeAvatar();
+      setPhotoMenu(false);
+    } catch (e) {
+      setPhotoError(e?.message || L('The picture could not be removed. Try again.', 'La photo n’a pas pu être supprimée. Réessayez.'));
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
   // The paid voice engine has a man's and a woman's English voice; the server
   // says which voices it offers, and the choice is shown only when there is one.
   const [voiceChoice, setVoiceChoice] = useState(false);
@@ -72,7 +103,12 @@ export default function Me({ navigation }) {
     <Screen bg="bg-surface" header={<TabHeader title={L('Me', 'Moi')} subtitle={user?.name || ''} />}>
       <V c="pb-space-lg gap-space-lg pt-space-md">
         <V c="flex-row items-center gap-space-md">
-          <Avatar name={user?.name} size={64} />
+          <P onPress={() => setPhotoMenu((x) => !x)} accessibilityRole="button" accessibilityLabel={L('Change profile picture', 'Changer la photo de profil')} hitSlop={6}>
+            <Avatar name={user?.name} size={64} uri={avatar} />
+            <V c="absolute w-6 h-6 rounded-full bg-primary-container items-center justify-center" style={{ right: -4, bottom: -4, borderWidth: 2, borderColor: '#ffffff' }}>
+              <Ic n="photo_camera" s={13} c="on-primary" fill />
+            </V>
+          </P>
           <V c="flex-1 gap-0.5">
             <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }} numberOfLines={1}>
               {user?.name}
@@ -87,6 +123,25 @@ export default function Me({ navigation }) {
             </P>
           </V>
         </V>
+
+        {photoMenu && (
+          <V c="bg-surface-container-lowest rounded-xl shadow-sm">
+            {!consentOk ? (
+              <T c="font-body-md text-body-md text-on-surface-variant p-space-md" style={{ lineHeight: 22 }}>
+                {L('A parent or guardian needs to approve your account before you can add a profile picture.', 'Un parent ou tuteur doit approuver votre compte avant que vous puissiez ajouter une photo de profil.')}
+              </T>
+            ) : (
+              <>
+                <MenuRow first title={L('Take a photo', 'Prendre une photo')} sub={photoBusy ? L('Saving...', 'Enregistrement...') : null} onPress={() => !photoBusy && changePhoto('camera')} />
+                <MenuRow title={L('Choose from your pictures', 'Choisir dans vos photos')} onPress={() => !photoBusy && changePhoto('library')} />
+                {!!avatar && <MenuRow title={L('Remove the picture', 'Supprimer la photo')} onPress={() => !photoBusy && dropPhoto()} />}
+              </>
+            )}
+            {!!photoError && (
+              <T c="font-body-sm text-body-sm text-error px-space-md pb-space-md">{photoError}</T>
+            )}
+          </V>
+        )}
 
         {student && (
           <Section title={L('This week', 'Cette semaine')}>
@@ -156,7 +211,7 @@ export default function Me({ navigation }) {
           {user?.role === 'parent' && <MenuRow first title={L('Link a child', 'Lier un enfant')} sub={L('With the code shown in your child’s app', 'Avec le code affiché dans l’application de l’enfant')} onPress={() => navigation.navigate('LinkChild', { fromHome: true })} />}
           {user?.role === 'teacher' && <MenuRow first title={L('My classes', 'Mes classes')} sub={L('Codes, students and work set', 'Codes, élèves et travaux')} onPress={() => navigation.navigate('Main', { screen: 'Home' })} />}
           <MenuRow title={pro ? L('Subscription and payments', 'Abonnement et paiements') : L('Full course and prices', 'Cours complet et prix')} sub={pro && until ? `${L('Active until', 'Actif jusqu’au')} ${until}` : null} onPress={() => navigation.navigate('Paywall')} />
-          {student && <MenuRow title={L('Downloads and storage', 'Téléchargements et stockage')} sub={L('3D models and data kept on this phone', '3D et données gardées sur ce téléphone')} onPress={() => navigation.navigate('Offline')} />}
+          {student && <MenuRow title={L('Downloads and storage', 'Téléchargements et stockage')} sub={L('Data kept on this phone', 'Données gardées sur ce téléphone')} onPress={() => navigation.navigate('Offline')} />}
           <MenuRow title={L('Language', 'Langue')} sub={prefs.lang === 'fr' ? 'Français' : 'English'} onPress={() => navigation.navigate('Language', { fromSettings: true })} />
           {voiceChoice && prefs.lang !== 'fr' && <MenuRow title={L('Tutor voice', 'Voix du tuteur')} sub={`${(VOICES.en.find((v) => v.id === prefs.voice) || VOICES.en[0])[prefs.lang === 'fr' ? 'fr' : 'en']}. ${L('Tap to hear the other voice', 'Touchez pour entendre l’autre voix')}`} onPress={changeVoice} />}
           <MenuRow title={L('Account and settings', 'Compte et réglages')} sub={L('Profile, reminders, password, deleting your account', 'Profil, rappels, mot de passe, suppression du compte')} onPress={() => navigation.navigate('Settings')} />

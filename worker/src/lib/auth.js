@@ -101,6 +101,7 @@ export function publicUser(u) {
     birthYear: u.birth_year || null,
     birthMonth: u.birth_month || null,
     consentStatus: u.consent_status || null,
+    avatarAt: u.avatar_at || null,
     guardianName: u.guardian_name || null,
     subjects: userSubjects(u),
     proUntil: u.pro_until || null,

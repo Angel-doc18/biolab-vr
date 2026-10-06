@@ -70,6 +70,8 @@ export async function deleteMe(request, env) {
     env.DB.prepare("UPDATE users SET deleted_at = ?, name = 'Deleted user', phone = 'deleted:' || id, email = NULL, parent_phone = NULL WHERE id = ?").bind(now(), id),
     env.DB.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?').bind(id),
     env.DB.prepare('DELETE FROM progress WHERE user_id = ?').bind(id),
+    env.DB.prepare('DELETE FROM avatars WHERE user_id = ?').bind(id),
+    env.DB.prepare('UPDATE users SET avatar_at = NULL WHERE id = ?').bind(id),
     env.DB.prepare('DELETE FROM notifications WHERE user_id = ?').bind(id),
     env.DB.prepare('DELETE FROM class_members WHERE student_id = ?').bind(id),
     env.DB.prepare('DELETE FROM parent_links WHERE student_id = ? OR parent_id = ?').bind(id, id),

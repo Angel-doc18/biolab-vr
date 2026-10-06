@@ -27,9 +27,13 @@ import { MATHS } from './maths';
 import { COMPUTER } from './computer';
 import { GEOGRAPHY } from './geography';
 import { HOMEEC } from './homeec';
+import { FLOWS } from './flows';
+import { SCIENCE_2 } from './science2';
+import { COMPUTER_2 } from './computer2';
+import { GEOGRAPHY_2 } from './geography2';
 import { PHYSICS_A } from './physicsA';
 
-export const DIAGRAMS = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC };
+export const DIAGRAMS = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2 };
 
 // A labelled diagram. With `explain`, the tutor can explain it out loud: each
 // label lights up while it is being explained, and tapping a label explains just

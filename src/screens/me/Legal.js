@@ -4,13 +4,12 @@ import { P, T, V } from '../../ui/kit';
 import { Screen, StackHeader } from '../../ui/chrome';
 import { useL } from '../../i18n';
 import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from '../../data/plan';
-import { ANATOMY_CREDIT } from '../../three/anatomy';
 
 const UPDATED = '2 October 2026';
 
 const TERMS = [
   ['Using ScienceAid', 'ScienceAid is a revision app for the Cameroon GCE Ordinary Level sciences: Biology, Chemistry, Physics and Human Biology. You may use it for your own study. Give accurate details when you register and keep your password private. If you are under 18, a parent or guardian must approve your account before your progress is stored on our servers or you use the tutor.'],
-  ['Content', 'Lessons, diagrams, questions, mark schemes and practicals were written for this app to follow the GCE syllabuses. They are not official GCE Board papers, and grades shown in the app are practice estimates, not exam results. The 3D anatomy models are based on BodyParts3D (credit below); the molecule, apparatus and other models are drawn for this app.'],
+  ['Content', 'Lessons, diagrams, questions, mark schemes and practicals were written for this app to follow the GCE syllabuses. They are not official GCE Board papers, and grades shown in the app are practice estimates, not exam results. Every diagram is drawn for this app.'],
   ['AI tutor and marking', 'The tutor and answer marking are produced by an AI system. They can contain mistakes. Check important facts against your lessons and your teacher, and use "Report" on any answer that is wrong or inappropriate. Do not include other people’s personal information in questions or photos.'],
   ['Full course and payments', 'The full course is a one-off pass for a fixed number of days, paid by MTN Mobile Money or Orange Money through our payment provider, Fapshi. Passes do not renew automatically. If a payment fails, no days are added. Contact support within 14 days if you were charged but the course did not open.'],
   ['School codes and vouchers', 'Class codes and licence vouchers are issued by schools and teachers. A voucher can be used once per account and cannot be exchanged for money.'],
@@ -36,10 +35,10 @@ export default function Legal({ route }) {
 
   const HELP = [
     [L('Lessons', 'Leçons'), L('Read lessons unit by unit, or press Listen to hear them. Mastery grows as you read lessons and improve your quiz scores.', 'Lisez les leçons unité par unité, ou appuyez sur Écouter. La maîtrise progresse avec les leçons lues et les scores aux quiz.')],
-    [L('3D models', 'Modèles 3D'), L('Drag to turn a model, pinch to zoom and tap the numbers. "See inside" makes the other parts see-through. On Android, "View in your room" opens the model in augmented reality. Each model downloads once, then opens without data.', 'Glissez pour tourner, pincez pour zoomer et touchez les numéros. « Voir dedans » rend les autres parties transparentes. Sur Android, « Voir dans votre pièce » ouvre le modèle en réalité augmentée. Chaque modèle se télécharge une fois.')],
+    [L('Diagrams', 'Schémas'), L('Every diagram is labelled the way examiners expect. Tap a label to hear what it shows; the tutor can explain the whole diagram.', 'Chaque schéma est légendé comme l’attendent les examinateurs. Touchez une légende pour l’écouter ; le tuteur peut expliquer tout le schéma.')],
     [L('Practicals', 'Travaux pratiques'), L('Change the condition, move the time slider and compare the results, then record your observation in the lab workbook.', 'Changez la condition, déplacez le curseur de temps, comparez, puis notez votre observation dans le cahier.')],
     [L('Papers', 'Épreuves'), L('Paper 1 is 50 questions in 1 hour 30 minutes, marked at once. Paper 2 is 2 hours in two sections, marked against a mark scheme.', 'L’épreuve 1 compte 50 questions en 1 h 30, corrigées tout de suite. L’épreuve 2 dure 2 heures en deux sections, corrigée selon un barème.')],
-    [L('Without data', 'Sans données'), L('Lessons, quizzes, papers, practicals and downloaded 3D models work without a connection. The tutor, marking and saving to your account need one.', 'Leçons, quiz, épreuves, TP et modèles 3D téléchargés marchent sans connexion. Le tuteur, la correction et l’enregistrement sur le compte en ont besoin.')],
+    [L('Without data', 'Sans données'), L('Lessons, diagrams, quizzes, papers and practicals work without a connection. The tutor, marking and saving to your account need one.', 'Leçons, schémas, quiz, épreuves et TP marchent sans connexion. Le tuteur, la correction et l’enregistrement sur le compte en ont besoin.')],
   ];
 
   return (
@@ -88,14 +87,6 @@ export default function Legal({ route }) {
                 )}
               </V>
             )}
-            <V c="gap-1 pt-space-sm">
-              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-                {L('Credits', 'Crédits')}
-              </T>
-              <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
-                {ANATOMY_CREDIT} (https://creativecommons.org/licenses/by-sa/2.1/jp/)
-              </T>
-            </V>
           </V>
         ) : (
           <V c="gap-space-md">

@@ -69,7 +69,7 @@ export default function Lab({ navigation }) {
           <TileGrid
             items={[
               { icon: 'menu_book', title: L('Lab workbook', 'Cahier de TP'), sub: L('Every result you saved', 'Tous vos résultats enregistrés'), onPress: () => navigation.navigate('Workbook') },
-              { icon: 'view_in_ar', title: L('3D models', 'Modèles 3D'), sub: L('Apparatus and structures', 'Matériel et structures'), onPress: () => navigation.navigate('Models', { subject }) },
+              { icon: 'forum', title: L('Ask about a practical', 'Questions sur un TP'), sub: L('Method, readings and results explained', 'Méthode, mesures et résultats expliqués'), onPress: () => navigation.navigate('Tutor', { subject }) },
             ]}
           />
         </Section>

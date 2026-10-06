@@ -1,25 +1,14 @@
 // Downloads and storage: what the app keeps on this phone, and controls to free it.
 import { useCallback, useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { P, T, V } from '../../ui/kit';
 import { Screen, StackHeader, useToast } from '../../ui/chrome';
 import { Toggle } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-import { ANATOMY, deleteDownloads, downloadedModels } from '../../three/anatomy';
 import { Section } from '../tabs/Home';
 
 const fmt = (b) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : b >= 1e6 ? `${(b / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1e3))} KB`);
-
-const MODEL_NAMES = {
-  heart: ['Heart', 'Cœur'],
-  lungs: ['Lungs', 'Poumons'],
-  digestive: ['Digestive system', 'Appareil digestif'],
-  urinary: ['Kidneys and urinary system', 'Reins et appareil urinaire'],
-  brain: ['Brain and spinal cord', 'Encéphale et moelle'],
-  arm: ['Arm, elbow and muscles', 'Bras, coude et muscles'],
-};
 
 function Row({ title, sub, action, onAction, first }) {
   return (
@@ -40,12 +29,10 @@ function Row({ title, sub, action, onAction, first }) {
 export default function Offline({ navigation }) {
   const { prefs, savePrefs } = useApp();
   const L = useL();
-  const [models, setModels] = useState([]);
   const [sizes, setSizes] = useState({ progress: 0, chat: 0, drafts: 0 });
   const [toast, showToast] = useToast();
 
   const measure = useCallback(async () => {
-    setModels(downloadedModels());
     try {
       const keys = await AsyncStorage.getAllKeys();
       const pairs = await AsyncStorage.multiGet(keys);
@@ -72,45 +59,9 @@ export default function Offline({ navigation }) {
     showToast(label);
   };
 
-  const modelBytes = models.reduce((a, m) => a + m.size, 0);
-  const label = (fileName) => {
-    const key = fileName.split('-')[0];
-    const n = MODEL_NAMES[key];
-    return n ? L(n[0], n[1]) : fileName;
-  };
-
   return (
     <Screen bg="bg-surface" header={<StackHeader close title={L('Downloads and storage', 'Téléchargements et stockage')} avatar={false} />}>
       <V c="pt-space-md pb-space-xl gap-space-lg">
-        <Section title={L('3D models', 'Modèles 3D')}>
-          <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
-            {L('Each model downloads the first time you open it and is kept here, so it opens without data afterwards.', 'Chaque modèle se télécharge à la première ouverture et reste ici : il s’ouvre ensuite sans données.')}
-          </T>
-          {Platform.OS === 'web' ? (
-            <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Not stored in the web preview.', 'Non stockés dans l’aperçu web.')}</T>
-          ) : models.length ? (
-            <V c="bg-surface-container-lowest rounded-xl shadow-sm">
-              {models.map((m, i) => (
-                <Row key={m.name} first={i === 0} title={label(m.name)} sub={fmt(m.size)} />
-              ))}
-              <Row
-                title={L('Total', 'Total')}
-                sub={fmt(modelBytes)}
-                action={L('Delete all', 'Tout supprimer')}
-                onAction={() => {
-                  deleteDownloads();
-                  measure();
-                  showToast(L('3D models deleted. They download again when you open them.', 'Modèles 3D supprimés. Ils se retéléchargent à l’ouverture.'));
-                }}
-              />
-            </V>
-          ) : (
-            <T c="font-body-md text-body-md text-on-surface-variant">
-              {L('No models downloaded yet. All six together take about', 'Aucun modèle téléchargé. Les six ensemble font environ')} {fmt(Object.values(ANATOMY).reduce((a, m) => a + m.bytes, 0))}.
-            </T>
-          )}
-        </Section>
-
         <Section title={L('Your data on this phone', 'Vos données sur ce téléphone')}>
           <V c="bg-surface-container-lowest rounded-xl shadow-sm">
             <Row first title={L('Study record', 'Progression')} sub={`${fmt(sizes.progress)}. ${L('Also saved to your account once approved.', 'Aussi enregistrée sur votre compte après approbation.')}`} />

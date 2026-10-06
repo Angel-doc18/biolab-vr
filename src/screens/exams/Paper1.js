@@ -81,7 +81,8 @@ export default function Paper1({ navigation, route }) {
   const term = route.params?.term || null;
   const slot = term ? `t${term}` : undefined;
   const plan = term ? termPlan(subject, user?.className, term) : paper1Plan(subject, user?.className);
-  const title = term ? `${subjectName(subject, useLang())}: ${L(`term ${term} test`, `contrôle du trimestre ${term}`)}` : `${subjectName(subject, useLang())} ${L('Paper 1', 'épreuve 1')}`;
+  const lang = useLang();
+  const title = term ? `${subjectName(subject, lang)}: ${L(`term ${term} test`, `contrôle du trimestre ${term}`)}` : `${subjectName(subject, lang)} ${L('Paper 1', 'épreuve 1')}`;
   const [s, setS] = useState(null); // { startedAt, paper, answers, flags, struck, index }
   const [now, setNow] = useState(Date.now());
   const [big, setBig] = useState(false);

@@ -10,6 +10,7 @@ import { useL, useLang } from '../../i18n';
 import { lessonById, lessonNumber, lessonsFor, plain } from '../../data/lessons';
 import { unitById } from '../../data/units';
 import { lessonLocked } from '../../data/plan';
+import { lessonQuiz } from '../../lib/lessonQuiz';
 
 // Body text with **key terms** in bold and *scientific names* in italics.
 function Rich({ text, c = 'font-body-lg text-body-lg text-on-surface' }) {
@@ -39,9 +40,132 @@ function Rich({ text, c = 'font-body-lg text-body-lg text-on-surface' }) {
   );
 }
 
+// A paragraph may hold a short list: an opening line, then one "- item" per line.
+function Paragraph({ text }) {
+  const lines = String(text).split('\n');
+  if (lines.length === 1) return <Rich text={text} />;
+  return (
+    <V c="gap-1">
+      {lines.map((line, i) =>
+        line.startsWith('- ') ? (
+          <V key={i} c="flex-row gap-space-xs pl-1">
+            <T c="font-body-lg text-body-lg text-secondary" style={{ lineHeight: 27 }}>
+              •
+            </T>
+            <V c="flex-1">
+              <Rich text={line.slice(2)} />
+            </V>
+          </V>
+        ) : (
+          <Rich key={i} text={line} />
+        )
+      )}
+    </V>
+  );
+}
+
+// The questions at the end of the lesson: each is answered in place, with the
+// right answer and its explanation shown at once, then the score.
+function LessonQuiz({ lesson, L }) {
+  const { answer, finishQuiz } = useApp();
+  const key = `lesson-${lesson.id}`;
+  const [round, setRound] = useState(0);
+  // `round` reshuffles the options when the questions are tried again.
+  const items = useMemo(
+    () => lessonQuiz(lesson).map((q) => ({ ...q, options: q.a.map((t, i) => ({ t, ok: i === 0 })).sort(() => Math.random() - 0.5) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lesson, round]
+  );
+  const [picks, setPicks] = useState({});
+  const answered = Object.keys(picks).length;
+  const correct = Object.entries(picks).filter(([i, p]) => items[i].options[p].ok).length;
+  const finished = answered === items.length;
+  useEffect(() => {
+    if (finished) finishQuiz(key, items.length);
+  }, [finished, finishQuiz, key, items.length]);
+
+  return (
+    <V c="gap-space-md">
+      <V c="gap-0.5">
+        <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+          {L('Questions on this lesson', 'Questions sur cette leçon')}
+        </T>
+        <T c="font-body-sm text-body-sm text-on-surface-variant">
+          {items.length} {L('multiple-choice questions. Choose an answer to see if it is right and why.', 'questions à choix multiples. Choisissez une réponse pour voir si elle est juste et pourquoi.')}
+        </T>
+      </V>
+      {items.map((q, qi) => {
+        const pick = picks[qi];
+        const reveal = pick != null;
+        return (
+          <V key={`${round}-${qi}`} c="gap-2">
+            <T c="font-body-md text-body-md text-on-surface" style={{ fontWeight: '600', lineHeight: 22 }}>
+              {qi + 1}. {q.q}
+            </T>
+            {q.options.map((o, i) => {
+              const chosen = pick === i;
+              const style = !reveal
+                ? 'bg-surface-container-lowest border border-outline-variant'
+                : o.ok
+                ? 'bg-secondary-container/60 border border-secondary'
+                : chosen
+                ? 'bg-error-container border border-error'
+                : 'bg-surface-container-lowest border border-outline-variant opacity-60';
+              return (
+                <P
+                  key={i}
+                  c={`w-full p-3 rounded-lg flex-row items-center justify-between gap-2 ${style}`}
+                  disabled={reveal}
+                  scale={0.99}
+                  onPress={() => {
+                    setPicks((x) => ({ ...x, [qi]: i }));
+                    answer(key, qi, o.ok, i);
+                  }}
+                >
+                  <T c="font-body-md text-body-md text-on-surface flex-1">
+                    {String.fromCharCode(65 + i)}. {o.t}
+                  </T>
+                  {reveal && (chosen || o.ok) && <Ic n={o.ok ? 'check' : 'close'} s={20} c={o.ok ? 'secondary' : 'error'} />}
+                </P>
+              );
+            })}
+            {reveal && (
+              <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
+                <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '700' }}>
+                  {q.options[pick].ok ? L('Correct. ', 'Correct. ') : `${L('Not quite. The answer is', 'Pas tout à fait. La réponse est')} ${q.a[0]}. `}
+                </T>
+                {q.why}
+              </T>
+            )}
+          </V>
+        );
+      })}
+      {finished && (
+        <V c="p-space-md rounded-xl bg-surface-container-low gap-space-xs">
+          <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+            {L(`You got ${correct} of ${items.length} right.`, `Vous avez ${correct} bonnes réponses sur ${items.length}.`)}
+          </T>
+          <T c="font-body-sm text-body-sm text-on-surface-variant">
+            {correct === items.length
+              ? L('Well done. You are ready for the next lesson.', 'Bravo. Vous êtes prêt pour la leçon suivante.')
+              : L('Read the parts of the lesson you missed again, then try the questions once more.', 'Relisez les parties manquées, puis refaites les questions.')}
+          </T>
+          {correct < items.length && (
+            <P c="self-start py-1" onPress={() => { setPicks({}); setRound((r) => r + 1); }} hitSlop={8}>
+              <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                {L('Try the questions again', 'Refaire les questions')}
+              </T>
+            </P>
+          )}
+        </V>
+      )}
+    </V>
+  );
+}
+
 export default function Lesson({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const { pro, progress, completeLesson, answer, toggleBookmark } = useApp();
+  const { pro, progress, completeLesson, toggleBookmark } = useApp();
   const L = useL();
   const lang = useLang();
   const lesson = lessonById(route.params?.lessonId) || lessonsFor('cell')[0];
@@ -52,6 +176,8 @@ export default function Lesson({ navigation, route }) {
   const nextLesson = siblings[idx + 1];
   const done = !!progress.lessons[lesson.id];
   const saved = !!progress.bookmarks?.[lesson.id];
+  // A lesson without its own figure shows its topic's diagram.
+  const figures = [].concat(lesson.figure || unit.diagram || []);
   const [toast, showToast] = useToast();
 
   // Read aloud paragraph by paragraph, so it can pause and resume on every platform.
@@ -105,10 +231,6 @@ export default function Lesson({ navigation, route }) {
     if (lessonLocked(unit.id, idx, pro)) navigation.replace('Paywall');
   }, [unit.id, idx, pro, navigation]);
 
-  // Check question (options shuffled once per visit).
-  const options = useMemo(() => lesson.check.a.map((t, i) => ({ t, ok: i === 0 })).sort(() => Math.random() - 0.5), [lesson]);
-  const [pick, setPick] = useState(null);
-
   const complete = () => {
     const minutes = Math.max(1, Math.min(lesson.minutes * 2, Math.round((Date.now() - started.current) / 60000)));
     completeLesson(lesson.id, minutes);
@@ -161,25 +283,18 @@ export default function Lesson({ navigation, route }) {
           <V c="gap-4">
             {lesson.body.map((p, i) => (
               <V key={i} c={playing && para === i + 1 ? 'p-space-sm rounded-lg bg-surface-container-low border-l-4 border-secondary' : ''}>
-                <Rich text={p} />
+                <Paragraph text={p} />
               </V>
             ))}
           </V>
 
-          {lesson.figure && (
+          {!!figures.length && (
             <V c="gap-space-xs">
-              {[].concat(lesson.figure).map((id) => (
+              {figures.map((id) => (
                 <V key={id} c="rounded-xl overflow-hidden bg-surface-container-lowest border border-surface-container p-space-sm">
                   <Diagram id={id} maxHeight={360} explain subject={unit.subject} />
                 </V>
               ))}
-              {!!unit.vr && (
-                <P c="self-start py-1" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} hitSlop={8}>
-                  <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
-                    {L('Open the 3D model', 'Ouvrir le modèle 3D')}: {(lang === 'fr' && unit.vr.fr?.title) || unit.vr.title}
-                  </T>
-                </P>
-              )}
             </V>
           )}
 
@@ -213,51 +328,6 @@ export default function Lesson({ navigation, route }) {
             <Rich text={lesson.tip} c="font-body-md text-body-md text-on-surface" />
           </V>
 
-          <V c="gap-space-sm">
-            <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
-              {L('Check yourself', 'Vérifiez-vous')}
-            </T>
-            <T c="font-body-md text-body-md text-on-surface">{lesson.check.q}</T>
-            <V c="gap-2">
-              {options.map((o, i) => {
-                const chosen = pick === i;
-                const reveal = pick != null;
-                const style = !reveal
-                  ? 'bg-surface-container-lowest border border-outline-variant'
-                  : o.ok
-                  ? 'bg-secondary-container/60 border border-secondary'
-                  : chosen
-                  ? 'bg-error-container border border-error'
-                  : 'bg-surface-container-lowest border border-outline-variant opacity-60';
-                return (
-                  <P
-                    key={i}
-                    c={`w-full p-3 rounded-lg flex-row items-center justify-between gap-2 ${style}`}
-                    disabled={reveal}
-                    scale={0.99}
-                    onPress={() => {
-                      setPick(i);
-                      answer(`lesson-${lesson.id}`, 0, o.ok, i);
-                    }}
-                  >
-                    <T c="font-body-md text-body-md text-on-surface flex-1">
-                      {String.fromCharCode(65 + i)}. {o.t}
-                    </T>
-                    {reveal && (chosen || o.ok) && <Ic n={o.ok ? 'check' : 'close'} s={20} c={o.ok ? 'secondary' : 'error'} />}
-                  </P>
-                );
-              })}
-            </V>
-            {pick != null && (
-              <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
-                <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '700' }}>
-                  {options[pick].ok ? L('Correct. ', 'Correct. ') : L('Not quite. ', 'Pas tout à fait. ')}
-                </T>
-                {lesson.check.why}
-              </T>
-            )}
-          </V>
-
           <V c="gap-space-xs">
             <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
               {L('Key terms', 'Mots clés')}
@@ -271,6 +341,8 @@ export default function Lesson({ navigation, route }) {
               </T>
             ))}
           </V>
+
+          <LessonQuiz key={lesson.id} lesson={lesson} L={L} />
 
           <P c="rounded-xl bg-surface-container-low p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('Workspace', { lessonId: lesson.id, unitId: unit.id, subject: unit.subject })} scale={0.99}>
             <V c="flex-1 gap-0.5">

@@ -32,7 +32,6 @@ export default function Unit({ navigation, route }) {
   const L = useL();
   const lang = useLang();
   const unit = unitById(route.params?.unitId || 'cell');
-  const vr = unit.vr && lang === 'fr' && unit.vr.fr ? { ...unit.vr, ...unit.vr.fr } : unit.vr;
   const lessons = lessonsFor(unit.id);
   const labs = labsForUnit(unit.id);
   const pct = stats.unitPct[unit.id] || 0;
@@ -87,20 +86,6 @@ export default function Unit({ navigation, route }) {
           </Section>
 
           <UnitPicture unit={unit} explain maxHeight={320} />
-
-          {!!vr && (
-          <P c="rounded-xl bg-surface-container-low p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} scale={0.99}>
-            <V c="flex-1 gap-0.5">
-              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-                {L('3D model', 'Modèle 3D')}: {vr.title}
-              </T>
-              <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={2}>
-                {unit.vr.parts.map((p) => (lang === 'fr' && p.fr?.name) || p.name).join(', ')}
-              </T>
-            </V>
-            <Ic n="view_in_ar" s={22} c="primary-container" />
-          </P>
-          )}
 
           <P c="w-full h-12 bg-primary-container rounded-xl items-center justify-center" onPress={() => openLesson(next, lessons.indexOf(next))}>
             <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>

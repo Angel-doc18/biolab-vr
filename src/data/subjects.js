@@ -9,7 +9,7 @@
 // Section B offers `offered` questions of which `answer` are done. Every
 // question is worth 20 marks. A subject without `p2` has no Paper 2 bank yet.
 //
-// A subject is switched on (`available`) once its lessons, practicals, 3D models
+// A subject is switched on (`available`) once its lessons, practicals, diagrams
 // and papers are complete; until then it is listed as being written.
 
 export const SUBJECTS = [

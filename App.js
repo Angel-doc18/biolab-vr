@@ -10,6 +10,7 @@ import { Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800Ext
 import { AppProvider, useApp } from './src/state/store';
 import { LangContext } from './src/i18n';
 import AppNavigator from './src/navigation/AppNavigator';
+import { removeOldModels } from './src/lib/cleanup';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -42,9 +43,10 @@ export default function App() {
     Manrope_800ExtraBold,
   });
 
-  // Portrait everywhere; the VR view switches to landscape itself.
+  // Portrait everywhere.
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
+    removeOldModels();
   }, []);
   useEffect(() => {
     if (loaded || fontError) SplashScreen.hideAsync().catch(() => {});

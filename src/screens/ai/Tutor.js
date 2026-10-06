@@ -14,15 +14,14 @@ import { unitById, unitsFor, unitsShown } from '../../data/units';
 import { contextFor } from '../../lib/tutorContext';
 import { subjectName } from '../../data/subjects';
 
-// The 3D model an answer is about: the topic of this subject whose key words the
-// question and answer mention most (only topics with a model).
+// The topic an answer is about: the topic of this subject whose key words the
+// question and answer mention most.
 const WORDS = (u) => `${u.title} ${u.short} ${u.focus} ${(u.vr?.parts || []).map((p) => p.name).join(' ')}`.toLowerCase().match(/[a-z]{5,}/g) || [];
 function matchUnit(text, subject, preferred) {
   const s = text.toLowerCase();
   let best = null;
   let hits = 1;
   for (const u of unitsFor(subject)) {
-    if (!u.vr) continue;
     const n = new Set(WORDS(u).filter((w) => s.includes(w))).size + (u.id === preferred ? 1 : 0);
     if (n > hits) {
       hits = n;
@@ -236,9 +235,9 @@ export default function Tutor({ navigation, route }) {
                 <V c="flex-row items-center gap-space-md flex-wrap">
                   <ListenButton size="sm" label={L('Listen', 'Écouter')} stopLabel={L('Stop', 'Arrêter')} playing={speaking === m.id} onPress={() => speak(m)} />
                   {m.unit && (
-                    <P c="flex-row items-center gap-1" onPress={() => navigation.navigate('Specimen', { unitId: m.unit })} hitSlop={8}>
-                      <Ic n="view_in_ar" s={16} c="on-surface-variant" />
-                      <T c="font-label-md text-label-md text-on-surface-variant">{unitById(m.unit)?.short ? L('3D model', 'Modèle 3D') : ''}</T>
+                    <P c="flex-row items-center gap-1" onPress={() => navigation.navigate('Unit', { unitId: m.unit })} hitSlop={8}>
+                      <Ic n="menu_book" s={16} c="on-surface-variant" />
+                      <T c="font-label-md text-label-md text-on-surface-variant">{unitById(m.unit)?.short ? `${L('Topic', 'Thème')}: ${unitById(m.unit).short}` : ''}</T>
                     </P>
                   )}
                   <P c="flex-row items-center gap-1" onPress={() => !m.reported && setReporting(m)} hitSlop={8} accessibilityLabel="Report this answer">

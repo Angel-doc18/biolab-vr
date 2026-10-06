@@ -1,7 +1,7 @@
 // Primitives that let each screen keep the Stitch utility classes:
 //   <V c="flex-row items-center gap-2">  <T c="font-headline-sm text-headline-sm">  <Ic n="home" s={22} />
 import { useRef } from 'react';
-import { Animated, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { createIconSet } from '@expo/vector-icons';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { LOGO_S } from './logoPath';
@@ -135,15 +135,25 @@ export function Bar({ pct = 0, c = 'h-1.5 bg-surface-container-low', fill = 'bg-
   );
 }
 
-// Initials in a squircle. The design system's rounded-full is 12px, so avatars
-// are soft squares, never stock portraits.
-export function Avatar({ name = '', size = 32, c = '', ring }) {
+// The user's own profile picture, or their initials, in a squircle. The design
+// system's rounded-full is 12px, so avatars are soft squares.
+export function Avatar({ name = '', size = 32, c = '', ring, uri }) {
+  const radius = Math.min(12, size / 2.6);
+  if (uri) {
+    return (
+      <Image
+        source={{ uri }}
+        accessibilityIgnoresInvertColors
+        style={[{ width: size, height: size, borderRadius: radius }, ring && { borderWidth: 2, borderColor: color(ring) }]}
+      />
+    );
+  }
   const parts = String(name).trim().split(/\s+/).filter(Boolean);
   const ini = ((parts[0]?.[0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase() || 'B';
   return (
     <V
       c={`items-center justify-center bg-primary-fixed ${c}`}
-      style={[{ width: size, height: size, borderRadius: Math.min(12, size / 2.6) }, ring && { borderWidth: 2, borderColor: color(ring) }]}
+      style={[{ width: size, height: size, borderRadius: radius }, ring && { borderWidth: 2, borderColor: color(ring) }]}
     >
       <T c="font-headline-sm text-on-primary-fixed-variant" style={{ fontSize: size * 0.38, lineHeight: size * 0.5, fontWeight: '700' }}>
         {ini}

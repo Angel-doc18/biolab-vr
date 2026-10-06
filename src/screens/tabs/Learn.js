@@ -14,7 +14,7 @@ export default function Learn({ navigation }) {
   const cards = useSubjectCards('learn');
 
   return (
-    <Screen header={<TabHeader title={L('Learn', 'Apprendre')} subtitle={L('Lessons, labelled diagrams and 3D models', 'Leçons, schémas légendés et modèles 3D')} />}>
+    <Screen header={<TabHeader title={L('Learn', 'Apprendre')} subtitle={L('Lessons, labelled diagrams and questions', 'Leçons, schémas légendés et questions')} />}>
       <V c="pt-space-md pb-space-xl gap-space-lg">
         <V c="gap-space-xs">
           <StepLine step={L('Step 1 of 3', 'Étape 1 sur 3')} text={L('Choose a subject', 'Choisissez une matière')} />
@@ -33,7 +33,7 @@ export default function Learn({ navigation }) {
         <Section title={L('Also in Learn', 'Aussi dans Apprendre')}>
           <TileGrid
             items={[
-              { icon: 'view_in_ar', title: L('3D models', 'Modèles 3D'), sub: L('Turn and open every model', 'Tournez et ouvrez chaque modèle'), onPress: () => navigation.navigate('Models', { subject }) },
+              { icon: 'timer', title: L('Practice papers', 'Épreuves'), sub: L('Paper 1, class tests and topic quizzes', 'Épreuve 1, contrôles et quiz'), onPress: () => navigation.navigate('ExamMenu', { subject }) },
               { icon: 'search', title: L('Search', 'Rechercher'), sub: L('Find any topic or term', 'Trouvez un thème ou un terme'), onPress: () => navigation.navigate('Search') },
               { icon: 'forum', title: L('Ask the tutor', 'Demander au tuteur'), sub: L('Questions answered and read aloud', 'Réponses lues à voix haute'), onPress: () => navigation.navigate('Tutor', { subject }) },
               { icon: 'co_present', title: L('Workspace', 'Espace de travail'), sub: L('Questions solved step by step on the board', 'Questions résolues au tableau, étape par étape'), onPress: () => navigation.navigate('Workspace', { subject }) },

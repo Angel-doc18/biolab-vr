@@ -3,8 +3,9 @@
 // progress, quiz scores and teacher assignments stay keyed by unit id alone.
 //
 // A unit that follows the MINESEC class syllabuses carries `form` (the class it
-// is taught in, e.g. "Form 3") and `group` (its module). A unit may borrow the
-// 3D model of another unit with `model`, or have none (`vr: null`).
+// is taught in, e.g. "Form 3") and `group` (its module). (`vr` and `model` are
+// left from the removed 3D models: the part names still help the tutor match
+// an answer to its topic.)
 import * as biology from './biology/units';
 import * as chemistry from './chemistry/units';
 import * as physics from './physics/units';
@@ -91,10 +92,6 @@ export function formsLabel(list, L) {
   if (forms.every((f) => f.startsWith('Form '))) return `Forms ${num(forms[0])} ${L('to', 'à')} ${num(forms[forms.length - 1])}`;
   return `${forms.slice(0, -1).join(', ')} ${L('and', 'et')} ${forms[forms.length - 1]}`;
 }
-
-// The key of the 3D model a unit shows (its own, or one it borrows).
-export const modelOf = (unitId) => unitById(unitId)?.model || unitId;
-export const hasModel = (unit) => !!unit?.vr;
 
 // "Form 4, Topic 3" (or "Topic 3" for a subject not yet organised by class).
 export const topicLabel = (unit, L) => `${unit?.form ? `${unit.form}, ` : ''}${L('Topic', 'Thème')} ${unit?.n ?? ''}`;

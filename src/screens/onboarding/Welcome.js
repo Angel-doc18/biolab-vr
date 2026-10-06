@@ -62,7 +62,7 @@ export default function Welcome({ navigation }) {
           </T>
         </V>
         <V c="gap-space-md">
-          <Point title={L('Labelled diagrams and 3D models', 'Schémas annotés et modèles 3D')} body={L('Every structure labelled the way the exam expects: organs, cells, molecules and apparatus you can turn and open.', 'Chaque structure annotée comme l’attend l’examen : organes, cellules, molécules et appareils à tourner et ouvrir.')} />
+          <Point title={L('Labelled diagrams', 'Schémas annotés')} body={L('Every diagram labelled the way the exam expects, with each label read and explained by the tutor.', 'Chaque schéma annoté comme l’attend l’examen, chaque légende lue et expliquée par le tuteur.')} />
           <Point title={L('Practicals', 'Travaux pratiques')} body={L('Run the standard practicals of each science step by step and record your results.', 'Réalisez les TP de chaque matière pas à pas et notez vos résultats.')} />
           <Point title={L('Papers 1 and 2', 'Épreuves 1 et 2')} body={L('Timed papers in the exam format, with answers marked against a mark scheme.', 'Épreuves chronométrées au format de l’examen, corrigées selon un barème.')} />
         </V>

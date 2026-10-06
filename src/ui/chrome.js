@@ -24,10 +24,10 @@ function Bell() {
 
 function Me({ ring = 'secondary' }) {
   const nav = useNavigation();
-  const { user } = useApp();
+  const { user, avatar } = useApp();
   return (
     <P c="pl-1" onPress={() => nav.navigate('Main', { screen: 'Me' })} accessibilityLabel="Profile">
-      <Avatar name={user?.name} size={32} ring={ring} />
+      <Avatar name={user?.name} size={32} ring={ring} uri={avatar} />
     </P>
   );
 }

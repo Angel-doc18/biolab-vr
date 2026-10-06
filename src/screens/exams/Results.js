@@ -194,8 +194,8 @@ export default function Results({ navigation, route }) {
                         </T>
                         <V c="flex-row gap-space-md pt-space-xs flex-wrap">
                           <ListenButton size="sm" label={L('Listen', 'Écouter')} stopLabel={L('Stop', 'Arrêter')} playing={speaking === it.n} onPress={() => speak(it)} />
-                          <P onPress={() => navigation.navigate('Specimen', { unitId: unit.id })} hitSlop={8}>
-                            <T c="font-label-md text-label-md text-primary-container">{L('3D model', 'Modèle 3D')}</T>
+                          <P onPress={() => navigation.navigate('Unit', { unitId: unit.id })} hitSlop={8}>
+                            <T c="font-label-md text-label-md text-primary-container">{L('Read the lessons', 'Relire les leçons')}</T>
                           </P>
                           <P onPress={() => navigation.navigate('Quiz', { unitId: unit.id })} hitSlop={8}>
                             <T c="font-label-md text-label-md text-primary-container">{L('Practise this unit', 'S’entraîner')}</T>
