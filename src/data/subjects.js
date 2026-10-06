@@ -45,6 +45,7 @@ export const SUBJECTS = [
     id: 'humanbio',
     code: '0565',
     level: 'O',
+    available: true,
     en: 'Human Biology',
     fr: 'Biologie humaine',
     p1: { count: 50, minutes: 90 },

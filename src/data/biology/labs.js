@@ -122,6 +122,8 @@ export const LABS = [
   {
     id: 'osmosis',
     unit: 'cell',
+    units: ['hb-cells'],
+    subjects: ['humanbio'],
     short: 'Osmosis & plasmolysis',
     title: 'Osmosis, turgidity & plasmolysis',
     desc: 'Mount red onion epidermis in distilled water and in sucrose solutions from 0.2 M to 1.0 M, and watch the protoplast pull away from the cell wall.',
@@ -172,7 +174,8 @@ export const LABS = [
   {
     id: 'food',
     unit: 'nutrition',
-    units: ['bi-f3-diet'],
+    units: ['bi-f3-diet', 'hb-nutrition'],
+    subjects: ['humanbio'],
     short: 'Food tests',
     title: 'Food tests: starch, reducing sugar, protein & fat',
     desc: 'Test a food suspension against a water control using iodine, Benedict’s, Biuret and the ethanol emulsion test.',
@@ -242,6 +245,8 @@ export const LABS = [
   {
     id: 'enzyme',
     unit: 'nutrition',
+    units: ['hb-nutrition'],
+    subjects: ['humanbio'],
     short: 'Enzyme and temperature',
     title: 'Enzyme activity: amylase and temperature',
     desc: 'Mix starch with amylase at 10 °C, 37 °C and 70 °C and test a drop with iodine every minute until the starch has gone.',
@@ -430,6 +435,8 @@ export const LABS = [
   {
     id: 'catalase',
     unit: 'nutrition',
+    units: ['hb-cells'],
+    subjects: ['humanbio'],
     kind: 'readings',
     short: 'Catalase and temperature',
     title: 'Catalase activity at different temperatures',
@@ -489,6 +496,8 @@ export const LABS = [
   {
     id: 'agar-cubes',
     unit: 'cell',
+    units: ['hb-cells'],
+    subjects: ['humanbio'],
     kind: 'readings',
     short: 'Surface area and diffusion',
     title: 'Surface area to volume ratio and diffusion in agar cubes',
@@ -638,7 +647,8 @@ export const LABS = [
   {
     id: 'respiration-indicator',
     unit: 'gas',
-    units: ['bi-f4-plants'],
+    units: ['bi-f4-plants', 'hb-breathing'],
+    subjects: ['humanbio'],
     short: 'Respiration and carbon dioxide',
     title: 'Carbon dioxide from respiring organisms',
     desc: 'Use hydrogencarbonate indicator to show which organisms give out or take in carbon dioxide.',
@@ -680,6 +690,8 @@ export const LABS = [
   {
     id: 'pulse',
     unit: 'transport',
+    units: ['hb-blood'],
+    subjects: ['humanbio'],
     kind: 'readings',
     short: 'Pulse rate and exercise',
     title: 'The effect of exercise on pulse rate',
@@ -724,6 +736,8 @@ export const LABS = [
   {
     id: 'reaction-time',
     unit: 'nervous',
+    units: ['hb-senses'],
+    subjects: ['humanbio'],
     kind: 'readings',
     short: 'Reaction time',
     title: 'Measuring reaction time with a falling ruler',
