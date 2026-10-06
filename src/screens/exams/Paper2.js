@@ -24,6 +24,7 @@ const SYMBOLS = {
   biology: ['→', '×', '÷', '°C', 'CO₂', 'O₂', 'H₂O', 'C₆H₁₂O₆', 'µm', 'm²'],
   humanbio: ['→', '×', '÷', '°C', 'CO₂', 'O₂', 'H₂O', 'C₆H₁₂O₆', 'µm', 'mmHg'],
   chemistry: ['→', '⇌', '₂', '₃', '₄', '⁺', '²⁺', '⁻', '²⁻', '°C', 'dm³', 'mol'],
+  'a-chemistry': ['→', '⇌', '₂', '₃', '₄', '⁺', '²⁺', '⁻', '²⁻', 'Δ', '°C', 'mol', 'kJ'],
   physics: ['×', '÷', '²', '³', '⁻¹', '⁻²', '√', 'Δ', 'λ', 'Ω', '°', 'm/s²'],
 };
 
@@ -225,6 +226,14 @@ export default function Paper2({ navigation, route }) {
     setTimeout(() => navigation.navigate('Main', { screen: 'Exams' }), 700);
   };
 
+  // The section a page belongs to: named sections (A Level Chemistry) or A and B.
+  const sectionOf = (pg) => {
+    if (!pg) return '';
+    const named = P2.sections && !pg.choose && P2.sections[p2ById(pg.id)?.slot];
+    if (named) return L(named.en, named.fr);
+    return pg.choose || !s.a.includes(pg.id) ? L('Section B', 'Section B') : L('Section A', 'Section A');
+  };
+
   const qLabel = (id) => {
     const ai = s.a.indexOf(id);
     if (ai >= 0) return `${L('Question', 'Question')} ${ai + 1}`;
@@ -332,7 +341,15 @@ export default function Paper2({ navigation, route }) {
       ) : (
         <P c="flex-1 h-12 bg-primary-container rounded-xl items-center justify-center" onPress={() => go(s.index + 1)}>
           <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
-            {page.choose ? L('Start Section B', 'Commencer la section B') : s.index === P2.a - 1 ? L('Go to Section B', 'Aller à la section B') : L('Next question', 'Question suivante')}
+            {page.choose
+              ? L('Start Section B', 'Commencer la section B')
+              : P2.sections
+                ? sectionOf(pages[s.index + 1]) !== sectionOf(page)
+                  ? L('Go to the next section', 'Section suivante')
+                  : L('Next question', 'Question suivante')
+                : s.index === P2.a - 1
+                  ? L('Go to Section B', 'Aller à la section B')
+                  : L('Next question', 'Question suivante')}
           </T>
         </P>
       )}
@@ -342,7 +359,7 @@ export default function Paper2({ navigation, route }) {
   const header = (
     <StackHeader
       title={title}
-      subtitle={`${page.choose || !s.a.includes(page.id) ? L('Section B', 'Section B') : L('Section A', 'Section A')}, ${left > 0 ? `${clock(left)} ${L('left', 'restant')}` : L('time is up', 'temps écoulé')}`}
+      subtitle={`${sectionOf(page)}, ${left > 0 ? `${clock(left)} ${L('left', 'restant')}` : L('time is up', 'temps écoulé')}`}
       subtitleColor={left < 10 * 60000 ? 'error' : 'on-surface-variant'}
       onBack={() => (save(), navigation.goBack())}
     />
@@ -415,7 +432,7 @@ export default function Paper2({ navigation, route }) {
               <T c="font-headline-md text-headline-md text-on-surface flex-1" style={{ fontWeight: '700' }}>
                 {qLabel(q.id)}
               </T>
-              <T c="font-label-lg text-label-lg text-on-surface-variant">20 {L('marks', 'points')}</T>
+              <T c="font-label-lg text-label-lg text-on-surface-variant">{questionMarks(q)} {L('marks', 'points')}</T>
             </V>
             <T c="font-body-lg text-body-lg text-on-surface" style={{ lineHeight: 24 }}>
               {q.stem}

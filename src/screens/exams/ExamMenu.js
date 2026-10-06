@@ -92,7 +92,11 @@ export default function ExamMenu({ navigation, route }) {
                 icon="edit_note"
                 tint={tint}
                 title={L('Paper 2: structured questions', 'Épreuve 2 : questions structurées')}
-                sub={`${minutesLabel(P2.minutes, L)}. ${L('Section A', 'Section A')}: ${P2.a} ${L('questions', 'questions')}; ${L('Section B', 'Section B')}: ${P2.b.answer < P2.b.offered ? `${P2.b.answer} ${L('of', 'sur')} ${P2.b.offered}` : P2.b.answer}. ${L('20 marks each.', '20 points chacune.')}`}
+                sub={
+                  P2.layout
+                    ? `${minutesLabel(P2.minutes, L)}. ${L(P2.layout.en, P2.layout.fr)} ${L('20 marks each.', '20 points chacune.')}`
+                    : `${minutesLabel(P2.minutes, L)}. ${L('Section A', 'Section A')}: ${P2.a} ${L('questions', 'questions')}; ${L('Section B', 'Section B')}: ${P2.b.answer < P2.b.offered ? `${P2.b.answer} ${L('of', 'sur')} ${P2.b.offered}` : P2.b.answer}. ${L('20 marks each.', '20 points chacune.')}`
+                }
                 note={
                   scoped && !p2Scoped
                     ? L(`This is the full ${examClass} paper, so some questions are on topics you will meet later.`, `C’est l’épreuve complète de ${examClass} : certaines questions portent sur des thèmes que vous verrez plus tard.`)

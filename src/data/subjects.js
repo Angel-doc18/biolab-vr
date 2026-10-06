@@ -66,6 +66,22 @@ export const SUBJECTS = [
     en: 'Chemistry',
     fr: 'Chimie',
     p1: { count: 50, minutes: 90 },
+    // Three sections of two compulsory questions: 120 marks in 3 hours.
+    p2: {
+      minutes: 180,
+      a: 6,
+      aSlots: ['physical', 'physical', 'inorganic', 'inorganic', 'organic', 'organic'],
+      b: { offered: 0, answer: 0 },
+      sections: {
+        physical: { en: 'Section A: physical and general chemistry', fr: 'Section A : chimie physique et générale' },
+        inorganic: { en: 'Section B: inorganic chemistry', fr: 'Section B : chimie inorganique' },
+        organic: { en: 'Section C: organic chemistry', fr: 'Section C : chimie organique' },
+      },
+      layout: {
+        en: 'Six compulsory questions: two each on physical, inorganic and organic chemistry.',
+        fr: 'Six questions obligatoires : deux en chimie physique, deux en inorganique et deux en organique.',
+      },
+    },
   },
   {
     id: 'a-physics',

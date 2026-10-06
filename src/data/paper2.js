@@ -6,9 +6,10 @@ import { PAPER2 as BIOLOGY } from './biology/paper2';
 import { PAPER2 as CHEMISTRY } from './chemistry/paper2';
 import { PAPER2 as PHYSICS } from './physics/paper2';
 import { PAPER2 as HUMANBIO, SHARED as HUMANBIO_SHARED } from './humanbio/paper2';
+import { PAPER2 as A_CHEMISTRY } from './a-chemistry/paper2';
 import { subjectById } from './subjects';
 
-const ALL = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO];
+const ALL = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY];
 const byId = new Map(ALL.map((q) => [q.id, q]));
 
 const BANKS = {
@@ -17,6 +18,7 @@ const BANKS = {
   physics: PHYSICS,
   // Human Biology adds its own Section A questions to the human Biology questions.
   humanbio: [...HUMANBIO, ...HUMANBIO_SHARED.map((id) => byId.get(id)).filter(Boolean)],
+  'a-chemistry': A_CHEMISTRY,
 };
 
 export const bankFor = (subject) => BANKS[subject] || [];
@@ -30,13 +32,18 @@ export const paper2Total = (subject) => {
 
 const shuffle = (a) => a.map((x) => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map((p) => p[1]);
 
-// Section A: one question per slot when the subject defines slots, otherwise a
+// Section A: one question per slot when the subject defines slots (a slot may
+// repeat, as in A Level Chemistry's two questions per section), otherwise a
 // spread across units. Section B: the questions offered for choice.
 function draw(c, bank) {
   const poolA = shuffle(bank.filter((q) => q.section === 'A'));
   let a;
   if (c.aSlots) {
-    a = c.aSlots.map((slot) => poolA.find((q) => q.slot === slot)).filter(Boolean);
+    a = [];
+    for (const slot of c.aSlots) {
+      const q = poolA.find((x) => x.slot === slot && !a.includes(x));
+      if (q) a.push(q);
+    }
   } else {
     a = [];
     for (const q of poolA) if (a.length < c.a && !a.some((x) => x.unit === q.unit)) a.push(q);
@@ -55,7 +62,8 @@ export function paper2Covers(subject, unitIds) {
   if (!c) return false;
   if (!unitIds) return true;
   const bank = bankFor(subject).filter((q) => unitIds.includes(q.unit));
-  const slotsOk = !c.aSlots || c.aSlots.every((slot) => bank.some((q) => q.section === 'A' && q.slot === slot));
+  const need = (slot) => c.aSlots.filter((s) => s === slot).length;
+  const slotsOk = !c.aSlots || c.aSlots.every((slot) => bank.filter((q) => q.section === 'A' && q.slot === slot).length >= need(slot));
   return slotsOk && bank.filter((q) => q.section === 'A').length >= c.a && bank.filter((q) => q.section === 'B').length >= c.b.offered;
 }
 export function buildPaper2(subject, unitIds) {
