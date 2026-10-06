@@ -51,7 +51,7 @@ export default function CreateClass({ navigation, route }) {
                   <P key={s.id} c={`flex-row items-center gap-space-sm px-space-md py-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => setSubject(s.id)} scale={1} accessibilityRole="radio" accessibilityState={{ checked: on }}>
                     <V c={`w-5 h-5 rounded-full items-center justify-center ${on ? 'border-2 border-primary-container' : 'border-2 border-outline-variant'}`}>{on && <V c="w-2.5 h-2.5 rounded-full bg-primary-container" />}</V>
                     <T c="font-label-lg text-label-lg text-on-surface flex-1">{subjectLabel(s.id, lang)}</T>
-                    <T c="font-body-sm text-body-sm text-on-surface-variant">{s.code}</T>
+                    <T c="font-body-sm text-body-sm text-on-surface-variant">{s.code || L('School subject', 'Matière scolaire')}</T>
                   </P>
                 );
               })}

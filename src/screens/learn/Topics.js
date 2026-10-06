@@ -11,7 +11,7 @@ import { useL, useLang } from '../../i18n';
 import { formFor, formsFor, formsLabel, formsShown, groupsFor, isExamClass, unitsForForm } from '../../data/units';
 import { lessonsFor } from '../../data/lessons';
 import { labsForUnit } from '../../data/labs';
-import { LEVELS, classById, classLevel, subjectById, subjectName } from '../../data/subjects';
+import { classById, classLevel, examLine, subjectById, subjectName } from '../../data/subjects';
 import { labLocked, unitLocked } from '../../data/plan';
 import { gradeFor } from '../../state/selectors';
 
@@ -129,7 +129,7 @@ export default function Topics({ navigation, route }) {
 
   return (
     <V c="flex-1">
-      <Screen header={<StackHeader title={name} subtitle={`GCE ${LEVELS[subjectById(subject).level].en} (${subjectById(subject).code})`} subtitleColor="on-surface-variant" avatar={false} />}>
+      <Screen header={<StackHeader title={name} subtitle={examLine(subject, lang)} subtitleColor="on-surface-variant" avatar={false} />}>
         <V c="pt-space-md pb-space-xl gap-space-lg">
           <V c="flex-row items-center gap-space-sm">
             <SubjectIcon id={subject} size={52} />

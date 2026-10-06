@@ -17,7 +17,7 @@ export default function Role({ navigation }) {
     {
       id: 'student',
       name: L('Student', 'Élève'),
-      body: L('Sciences and the GCE, from Form 1 to Upper Sixth.', 'Les sciences et le GCE, de la Form 1 à l’Upper Sixth.'),
+      body: L('Your school subjects and the GCE, from Form 1 to Upper Sixth.', 'Vos matières et le GCE, de la Form 1 à l’Upper Sixth.'),
     },
     {
       id: 'parent',

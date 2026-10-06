@@ -5,7 +5,7 @@ import { Screen, TabHeader } from '../../ui/chrome';
 import { StepLine, SUBJECT_LOOK, SubjectGrid, TileGrid } from '../../ui/hub';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { labsForUnit, labUnit } from '../../data/labs';
+import { labsFor, labsForUnit, labUnit } from '../../data/labs';
 import { topicLabel, unitsShown } from '../../data/units';
 import { labLocked } from '../../data/plan';
 import { subjectName } from '../../data/subjects';
@@ -16,7 +16,8 @@ export default function Lab({ navigation }) {
   const { pro, progress, subject, user } = useApp();
   const L = useL();
   const lang = useLang();
-  const cards = useSubjectCards('lab');
+  // Only subjects that have practicals (the sciences) are shown here.
+  const cards = useSubjectCards('lab').filter((c) => labsFor(c.id).length > 0);
   // Practicals of the student's own topics, in the order the topics are taught.
   const labs = [...new Set(unitsShown(subject, user?.className).flatMap((u) => labsForUnit(u.id)))];
   // The first of them not yet done.
@@ -33,6 +34,11 @@ export default function Lab({ navigation }) {
           </T>
         </V>
 
+        {!cards.length && (
+          <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
+            {L('Practicals belong to the science subjects. Add Biology, Chemistry or Physics to use the Lab.', 'Les TP concernent les matières scientifiques. Ajoutez la biologie, la chimie ou la physique pour utiliser le labo.')}
+          </T>
+        )}
         <SubjectGrid
           items={cards}
           onPick={(id) => navigation.navigate('Topics', { subject: id, mode: 'lab' })}

@@ -37,7 +37,7 @@ export default function Splash({ navigation }) {
         <Logo size={88} />
         <V c="mt-space-md items-center gap-1">
           <T c="font-display-lg text-display-lg text-on-surface tracking-tight">ScienceAid</T>
-          <T c="font-body-md text-body-md text-on-surface-variant">{L('GCE Ordinary Level sciences, Cameroon', 'Sciences du GCE Ordinary Level, Cameroun')}</T>
+          <T c="font-body-md text-body-md text-on-surface-variant">{L('School subjects and the GCE, Cameroon', 'Matières scolaires et GCE, Cameroun')}</T>
         </V>
       </Animated.View>
     </V>

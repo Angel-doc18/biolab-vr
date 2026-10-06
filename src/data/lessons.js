@@ -1,4 +1,4 @@
-// Every lesson across the sciences. A unit lists its lessons either by the
+// Every lesson across the subjects. A unit lists its lessons either by the
 // lessons' own `unit` field or, when it shares lessons with another subject
 // (Human Biology reuses the human Biology lessons), by `unit.lessonIds`.
 import { LESSONS as BIOLOGY } from './biology/lessons';
@@ -7,9 +7,12 @@ import { LESSONS as PHYSICS } from './physics/lessons';
 import { LESSONS as HUMANBIO } from './humanbio/lessons';
 import { LESSONS as A_CHEMISTRY } from './a-chemistry/lessons';
 import { LESSONS as A_PHYSICS } from './a-physics/lessons';
+import { LESSONS as COMPUTER } from './computer/lessons';
+import { LESSONS as GEOGRAPHY } from './geography/lessons';
+import { LESSONS as HOMEEC } from './homeec/lessons';
 import { unitById } from './units';
 
-export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY, ...A_PHYSICS];
+export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC];
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));
 const byUnit = new Map();

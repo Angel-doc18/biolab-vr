@@ -17,7 +17,7 @@ export function useSubjectCards(mode = 'learn') {
     const forms = formsShown(id, user?.className);
     const units = unitsShown(id, user?.className);
     const forClass = forms.length ? `${formsLabel(forms, L)}: ` : '';
-    const base = { id, name: subjectName(id, lang), code: `GCE ${subjectById(id).code}`, current: id === subject };
+    const base = { id, name: subjectName(id, lang), code: subjectById(id).code ? `GCE ${subjectById(id).code}` : L('School subject', 'Matière scolaire'), current: id === subject };
     if (mode === 'lab') {
       const seen = new Set(units.map((u) => u.id));
       const labs = labsFor(id).filter((l) => seen.has(l.unit) || l.units?.some((u) => seen.has(u)));
@@ -28,7 +28,7 @@ export function useSubjectCards(mode = 'learn') {
       const papers = progress.exams.filter((e) => examSubject(e) === id).length;
       return {
         ...base,
-        line: `${L('Papers 1 and 2', 'Épreuves 1 et 2')}, ${forClass}${units.length} ${L('topic quizzes', 'quiz par thème')}. ${papers ? `${papers} ${papers === 1 ? L('paper done', 'épreuve faite') : L('papers done', 'épreuves faites')}` : L('No papers done yet', 'Aucune épreuve faite')}`,
+        line: `${subjectById(id).p2 ? L('Papers 1 and 2', 'Épreuves 1 et 2') : L('Paper 1', 'Épreuve 1')}, ${forClass}${units.length} ${L('topic quizzes', 'quiz par thème')}. ${papers ? `${papers} ${papers === 1 ? L('paper done', 'épreuve faite') : L('papers done', 'épreuves faites')}` : L('No papers done yet', 'Aucune épreuve faite')}`,
         pct: null,
       };
     }

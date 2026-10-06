@@ -1,6 +1,9 @@
-// The GCE sciences and mathematics, Ordinary and Advanced Level. Codes are the
-// GCE Board subject codes; durations follow the Board's June 2026 examination
-// timetable.
+// The subjects the app teaches, Ordinary and Advanced Level: the sciences and
+// mathematics, and other school subjects. Codes are the GCE Board subject codes;
+// durations follow the Board's examination timetable. A subject with `classes`
+// is offered only to those classes while its later classes are being written;
+// one with `gce: false` (Home Economics) is a school subject that leads to a GCE
+// paper of another name (`leadsTo`).
 //
 // Paper 2 practice layout per subject: Section A questions are compulsory;
 // Section B offers `offered` questions of which `answer` are done. Every
@@ -53,7 +56,37 @@ export const SUBJECTS = [
   },
   { id: 'maths', code: '0570', level: 'O', en: 'Mathematics', fr: 'Mathématiques' },
   { id: 'addmaths', code: '0575', level: 'O', en: 'Additional Mathematics', fr: 'Mathématiques additionnelles' },
-  { id: 'computer', code: '0595', level: 'O', en: 'Computer Science', fr: 'Informatique' },
+  {
+    id: 'computer',
+    code: '0595',
+    level: 'O',
+    available: true,
+    classes: ['Form 1', 'Form 2', 'Form 3'],
+    en: 'Computer Science',
+    fr: 'Informatique',
+    p1: { count: 50, minutes: 90 },
+  },
+  {
+    id: 'geography',
+    code: '0550',
+    level: 'O',
+    available: true,
+    classes: ['Form 1', 'Form 2'],
+    en: 'Geography',
+    fr: 'Géographie',
+    p1: { count: 50, minutes: 90 },
+  },
+  {
+    id: 'homeec',
+    level: 'O',
+    gce: false,
+    leadsTo: 'food',
+    available: true,
+    classes: ['Form 2'],
+    en: 'Home Economics',
+    fr: 'Économie sociale et familiale',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'geology', code: '0555', level: 'O', en: 'Geology', fr: 'Géologie' },
   { id: 'food', code: '0540', level: 'O', en: 'Food and Nutrition', fr: 'Alimentation et nutrition' },
 
@@ -150,7 +183,7 @@ const advancedOf = (id) => Object.keys(BASE).find((a) => BASE[a] === id);
 export function subjectsForClass(className) {
   if (!classById(className)) return OPEN_SUBJECTS;
   const level = classLevel(className);
-  const open = OPEN_SUBJECTS.filter((s) => s.level === level);
+  const open = OPEN_SUBJECTS.filter((s) => s.level === level && (!s.classes || s.classes.includes(className)));
   if (level === 'O') return open;
   const waiting = OPEN_SUBJECTS.filter((s) => s.level === 'O' && advancedOf(s.id) && !OPEN_IDS.includes(advancedOf(s.id)));
   return [...waiting, ...open].sort((a, b) => (BASE[a.id] || a.id).localeCompare(BASE[b.id] || b.id));
@@ -211,3 +244,13 @@ export const minutesLabel = (m, L) => {
   if (!h) return `${r} min`;
   return r ? `${h} h ${r}` : `${h} ${h === 1 ? L('hour', 'heure') : L('hours', 'heures')}`;
 };
+
+// The examination a subject is sat as, for headers: "GCE Ordinary Level (0595)",
+// or, for a school subject that is not itself a GCE paper, the paper it leads to.
+export function examLine(id, lang) {
+  const s = subjectById(id);
+  if (s.code) return `GCE ${LEVELS[s.level].en} (${s.code})`;
+  const to = SUBJECTS.find((x) => x.id === s.leadsTo);
+  if (!to) return lang === 'fr' ? 'Matière scolaire' : 'School subject';
+  return lang === 'fr' ? `Mène au GCE ${LEVELS[to.level].short} ${to.fr} (${to.code})` : `Leads to GCE ${LEVELS[to.level].short} ${to.en} (${to.code})`;
+}

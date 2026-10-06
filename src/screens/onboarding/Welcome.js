@@ -6,10 +6,18 @@ import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { OPEN_SUBJECTS } from '../../data/subjects';
 
-// "Biology, Chemistry and Physics" from the subjects that are open.
-const O_LEVEL = OPEN_SUBJECTS.filter((s) => s.level === 'O');
+// "Biology, Chemistry and Physics" from the subjects that are open; subjects
+// still being written for the higher classes are named with their classes.
+const O_LEVEL = OPEN_SUBJECTS.filter((s) => s.level === 'O' && !s.classes);
+const PARTIAL = OPEN_SUBJECTS.filter((s) => s.level === 'O' && s.classes);
 const A_LEVEL = OPEN_SUBJECTS.filter((s) => s.level === 'A');
 const listOf = (names, and) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} ${and} ${names[names.length - 1]}` : names[0]);
+// "Forms 1 to 3", "Forms 1 and 2", "Form 2".
+const classesOf = (list, and, to) => {
+  const n = list.map((c) => c.replace('Form ', ''));
+  if (n.length === 1) return list[0];
+  return n.length === 2 ? `Forms ${n[0]} ${and} ${n[1]}` : `Forms ${n[0]} ${to} ${n[n.length - 1]}`;
+};
 
 function Point({ title, body }) {
   return (
@@ -45,11 +53,11 @@ export default function Welcome({ navigation }) {
       </V>
       <V c="flex-1 px-margin pt-space-lg gap-space-lg">
         <V c="gap-space-xs">
-          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('GCE sciences, from Form 1 to the exam hall', 'Les sciences du GCE, de la Form 1 à l’examen')}</T>
+          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Your school subjects, from Form 1 to the exam hall', 'Vos matières, de la Form 1 à l’examen')}</T>
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
             {L(
-              `${listOf(O_LEVEL.map((s) => s.en), 'and')} from Form 1 to Form 5${A_LEVEL.length ? `, and A Level ${listOf(A_LEVEL.map((s) => s.en), 'and')} for the Sixth Form` : ''}, written for the Cameroon GCE syllabuses.`,
-              `${listOf(O_LEVEL.map((s, i) => (i ? s.fr.toLowerCase() : s.fr)), 'et')} de la Form 1 à la Form 5${A_LEVEL.length ? `, et ${listOf(A_LEVEL.map((s) => s.fr.toLowerCase()), 'et')} de l’Advanced Level pour la Sixth Form` : ''}, conçues pour les programmes du GCE du Cameroun.`
+              `${listOf(O_LEVEL.map((s) => s.en), 'and')} from Form 1 to Form 5${PARTIAL.length ? `; ${listOf(PARTIAL.map((s) => `${s.en} for ${classesOf(s.classes, 'and', 'to')}`), 'and')}` : ''}${A_LEVEL.length ? `; and A Level ${listOf(A_LEVEL.map((s) => s.en), 'and')} for the Sixth Form` : ''}. Written for the Cameroon syllabuses and the GCE.`,
+              `${listOf(O_LEVEL.map((s, i) => (i ? s.fr.toLowerCase() : s.fr)), 'et')} de la Form 1 à la Form 5${PARTIAL.length ? ` ; ${listOf(PARTIAL.map((s) => `${s.fr.toLowerCase()} en ${classesOf(s.classes, 'et', 'à')}`), 'et')}` : ''}${A_LEVEL.length ? ` ; et ${listOf(A_LEVEL.map((s) => s.fr.toLowerCase()), 'et')} de l’Advanced Level pour la Sixth Form` : ''}. Conçu pour les programmes du Cameroun et le GCE.`
             )}
           </T>
         </V>

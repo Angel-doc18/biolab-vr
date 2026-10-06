@@ -1,4 +1,4 @@
-// Every syllabus topic ("unit") across the sciences. Unit ids are unique across
+// Every syllabus topic ("unit") across the subjects. Unit ids are unique across
 // subjects (Biology keeps its original ids; the other subjects use a prefix), so
 // progress, quiz scores and teacher assignments stay keyed by unit id alone.
 //
@@ -11,9 +11,12 @@ import * as physics from './physics/units';
 import * as humanbio from './humanbio/units';
 import * as aChemistry from './a-chemistry/units';
 import * as aPhysics from './a-physics/units';
+import * as computer from './computer/units';
+import * as geography from './geography/units';
+import * as homeec from './homeec/units';
 import { CLASSES, classById, classLevel, subjectById } from './subjects';
 
-const MODULES = { biology, chemistry, physics, humanbio, 'a-chemistry': aChemistry, 'a-physics': aPhysics };
+const MODULES = { biology, chemistry, physics, humanbio, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec };
 
 export const units = Object.entries(MODULES).flatMap(([subject, m]) => m.units.map((u) => ({ ...u, subject })));
 

@@ -9,6 +9,9 @@ export const SUBJECT_LOOK = {
   chemistry: { icon: 'science', tint: '#7a4bb3', bg: '#efe8f8' },
   physics: { icon: 'bolt', tint: '#1f6fb2', bg: '#e4eef8' },
   humanbio: { icon: 'cardiology', tint: '#b8433f', bg: '#f8e7e6' },
+  computer: { icon: 'computer', tint: '#37474f', bg: '#e6eaed' },
+  geography: { icon: 'public', tint: '#9a6a12', bg: '#f6eddb' },
+  homeec: { icon: 'restaurant', tint: '#b0466f', bg: '#f7e4ec' },
   // Advanced Level: the same colour as the Ordinary Level subject, a deeper shade.
   'a-biology': { icon: 'genetics', tint: '#24613d', bg: '#dcebe1' },
   'a-chemistry': { icon: 'experiment', tint: '#5e3591', bg: '#e6dcf4' },

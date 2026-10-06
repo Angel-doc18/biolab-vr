@@ -130,7 +130,7 @@ export default function ExamClass({ navigation, route }) {
                 <P key={s.id} c={`flex-row items-center gap-space-sm px-space-md py-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => toggle(s.id)} scale={1} accessibilityRole="checkbox" accessibilityState={{ checked: on }}>
                   <V c={`w-6 h-6 rounded items-center justify-center ${on ? 'bg-primary-container' : 'border-2 border-outline-variant'}`}>{on && <Ic n="check" s={16} c="on-primary" />}</V>
                   <T c="font-label-lg text-label-lg text-on-surface flex-1">{lang === 'fr' ? s.fr : s.en}</T>
-                  <T c="font-body-sm text-body-sm text-on-surface-variant">{s.level === level ? s.code : `${LEVELS[s.level].short} ${s.code}`}</T>
+                  <T c="font-body-sm text-body-sm text-on-surface-variant">{!s.code ? L('School subject', 'Matière scolaire') : s.level === level ? s.code : `${LEVELS[s.level].short} ${s.code}`}</T>
                 </P>
               );
             })}

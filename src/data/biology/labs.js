@@ -550,6 +550,7 @@ export const LABS = [
   {
     id: 'quadrat',
     unit: 'ecology',
+    units: ['bi-f1-ecology'],
     kind: 'readings',
     short: 'Sampling with quadrats',
     title: 'Estimating a plant population with quadrats',

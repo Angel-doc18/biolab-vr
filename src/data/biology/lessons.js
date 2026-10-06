@@ -9,6 +9,7 @@ import { LESSONS_3 } from './lessons3';
 import { LESSONS_4 } from './lessons4';
 import { LESSONS_5 } from './lessons5';
 import { LESSONS_12 } from './lessons12';
+import { LESSONS_F1 } from './lessonsF1';
 
 const LESSONS_1 = [
   // ---------------- Unit 1: Cells ----------------
@@ -885,4 +886,4 @@ const LESSONS_1 = [
   },
 ];
 
-export const LESSONS = [...LESSONS_12, ...LESSONS_1, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5];
+export const LESSONS = [...LESSONS_12, ...LESSONS_F1, ...LESSONS_1, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5];

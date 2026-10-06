@@ -37,7 +37,7 @@ export const UNITS_12 = [
   {
     id: 'bi-f1-farming',
     form: 'Form 1',
-    n: 2,
+    n: 6,
     group: 'living',
     icon: 'grass',
     diagram: null,
@@ -61,7 +61,7 @@ export const UNITS_12 = [
   {
     id: 'bi-f1-soil',
     form: 'Form 1',
-    n: 3,
+    n: 7,
     group: 'living',
     icon: 'landscape',
     diagram: 'soil-profile',
@@ -85,7 +85,7 @@ export const UNITS_12 = [
   {
     id: 'bi-f1-wild',
     form: 'Form 1',
-    n: 4,
+    n: 8,
     group: 'living',
     icon: 'forest',
     diagram: null,
@@ -109,7 +109,7 @@ export const UNITS_12 = [
   {
     id: 'bi-f1-puberty',
     form: 'Form 1',
-    n: 5,
+    n: 9,
     group: 'health',
     icon: 'self_improvement',
     diagram: null,
@@ -133,7 +133,7 @@ export const UNITS_12 = [
   {
     id: 'bi-f1-sti',
     form: 'Form 1',
-    n: 6,
+    n: 10,
     group: 'health',
     icon: 'shield',
     diagram: null,
@@ -157,7 +157,7 @@ export const UNITS_12 = [
   {
     id: 'bi-f1-food',
     form: 'Form 1',
-    n: 7,
+    n: 11,
     group: 'health',
     icon: 'lunch_dining',
     diagram: null,
@@ -181,7 +181,7 @@ export const UNITS_12 = [
   {
     id: 'bi-f1-foodsafety',
     form: 'Form 1',
-    n: 8,
+    n: 12,
     group: 'health',
     icon: 'no_food',
     diagram: null,
@@ -205,7 +205,7 @@ export const UNITS_12 = [
   {
     id: 'bi-f1-pollution',
     form: 'Form 1',
-    n: 9,
+    n: 14,
     group: 'env',
     icon: 'water_drop',
     diagram: 'water-treatment',

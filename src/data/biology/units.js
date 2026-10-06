@@ -8,6 +8,7 @@
 // shuffled when shown.
 import { BANK } from './bank';
 import { UNITS_12 } from './units12';
+import { UNITS_F1 } from './unitsF1';
 
 // MINESEC modules.
 export const GROUPS = [
@@ -728,4 +729,4 @@ const UNITS_345 = [
 ];
 
 // Forms 1 and 2 first, then Forms 3 to 5.
-export const units = [...UNITS_12, ...UNITS_345];
+export const units = [...UNITS_12, ...UNITS_F1, ...UNITS_345];
