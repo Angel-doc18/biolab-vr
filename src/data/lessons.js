@@ -6,9 +6,10 @@ import { LESSONS as CHEMISTRY } from './chemistry/lessons';
 import { LESSONS as PHYSICS } from './physics/lessons';
 import { LESSONS as HUMANBIO } from './humanbio/lessons';
 import { LESSONS as A_CHEMISTRY } from './a-chemistry/lessons';
+import { LESSONS as A_PHYSICS } from './a-physics/lessons';
 import { unitById } from './units';
 
-export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY];
+export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY, ...A_PHYSICS];
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));
 const byUnit = new Map();

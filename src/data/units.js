@@ -10,9 +10,10 @@ import * as chemistry from './chemistry/units';
 import * as physics from './physics/units';
 import * as humanbio from './humanbio/units';
 import * as aChemistry from './a-chemistry/units';
+import * as aPhysics from './a-physics/units';
 import { CLASSES, classById, classLevel, subjectById } from './subjects';
 
-const MODULES = { biology, chemistry, physics, humanbio, 'a-chemistry': aChemistry };
+const MODULES = { biology, chemistry, physics, humanbio, 'a-chemistry': aChemistry, 'a-physics': aPhysics };
 
 export const units = Object.entries(MODULES).flatMap(([subject, m]) => m.units.map((u) => ({ ...u, subject })));
 

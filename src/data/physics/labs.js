@@ -90,7 +90,8 @@ export const LABS = [
   {
     id: 'ph-pendulum',
     unit: 'ph-measure',
-    units: ['ph-f5-kinematics'],
+    units: ['ph-f5-kinematics', 'ap-circular-shm'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Simple pendulum',
     title: 'The simple pendulum: finding g',
@@ -151,7 +152,8 @@ export const LABS = [
   {
     id: 'ph-density',
     unit: 'ph-f3-density',
-    units: ['ph-f1-measure', 'ph-f2-method'],
+    units: ['ph-f1-measure', 'ph-f2-method', 'ap-matter'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Density',
     title: 'Density of solids: identifying the material',
@@ -210,6 +212,8 @@ export const LABS = [
   {
     id: 'ph-hooke',
     unit: 'ph-f3-elastic',
+    units: ['ap-matter'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Hooke’s law',
     title: 'Stretching a spring: Hooke’s law',
@@ -263,7 +267,8 @@ export const LABS = [
   {
     id: 'ph-moments',
     unit: 'ph-forces',
-    units: ['ph-f1-tech'],
+    units: ['ph-f1-tech', 'ap-statics-energy'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Principle of moments',
     title: 'The principle of moments: weighing an unknown object',
@@ -312,6 +317,8 @@ export const LABS = [
   {
     id: 'ph-ramp',
     unit: 'ph-f5-kinematics',
+    units: ['ap-kinematics'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Acceleration down a ramp',
     title: 'Acceleration of a trolley down a ramp',
@@ -367,6 +374,8 @@ export const LABS = [
   {
     id: 'ph-pulley',
     unit: 'ph-energy',
+    units: ['ap-statics-energy'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Efficiency of a pulley',
     title: 'Mechanical advantage and efficiency of a pulley system',
@@ -424,6 +433,8 @@ export const LABS = [
   {
     id: 'ph-boyle',
     unit: 'ph-pressure',
+    units: ['ap-gases'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Boyle’s law',
     title: 'Boyle’s law: pressure and volume of a gas',
@@ -477,6 +488,8 @@ export const LABS = [
   {
     id: 'ph-shc',
     unit: 'ph-thermal',
+    units: ['ap-thermal'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Specific heat capacity',
     title: 'Specific heat capacity of a metal block',
@@ -526,7 +539,8 @@ export const LABS = [
   {
     id: 'ph-cooling',
     unit: 'ph-thermal',
-    units: ['ph-f2-heatstate'],
+    units: ['ph-f2-heatstate', 'ap-thermal'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Cooling curve',
     title: 'Cooling curve: finding a melting point',
@@ -580,7 +594,8 @@ export const LABS = [
   {
     id: 'ph-conduction',
     unit: 'ph-thermal',
-    units: ['ph-f1-insulation', 'ph-f1-heatflow', 'ph-f2-materials'],
+    units: ['ph-f1-insulation', 'ph-f1-heatflow', 'ph-f2-materials', 'ap-thermal'],
+    subjects: ['a-physics'],
     short: 'Conduction in rods',
     title: 'Which materials conduct heat best?',
     desc: 'Heat one end of rods of different materials with wax pins along them and compare how fast the pins fall off.',
@@ -634,6 +649,8 @@ export const LABS = [
   {
     id: 'ph-ripple',
     unit: 'ph-waves',
+    units: ['ap-waves'],
+    subjects: ['a-physics'],
     short: 'Ripple tank',
     title: 'Water waves in a ripple tank',
     desc: 'Watch plane waves refract into shallow water, diffract through gaps and reflect from a barrier.',
@@ -683,6 +700,8 @@ export const LABS = [
   {
     id: 'ph-refraction',
     unit: 'ph-light',
+    units: ['ap-light'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Refraction of light',
     title: 'Refraction through a glass block: refractive index',
@@ -733,7 +752,8 @@ export const LABS = [
   {
     id: 'ph-lens',
     unit: 'ph-light',
-    units: ['ph-f2-health'],
+    units: ['ph-f2-health', 'ap-light'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Focal length of a lens',
     title: 'Focal length of a converging lens',
@@ -788,6 +808,8 @@ export const LABS = [
   {
     id: 'ph-ohm',
     unit: 'ph-electricity',
+    units: ['ap-current'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Current and voltage',
     title: 'Current-voltage graphs: resistor and filament lamp',
@@ -848,6 +870,8 @@ export const LABS = [
   {
     id: 'ph-wire',
     unit: 'ph-electricity',
+    units: ['ap-current'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Resistance and length',
     title: 'Resistance of a wire against its length',
@@ -901,7 +925,8 @@ export const LABS = [
   {
     id: 'ph-circuits',
     unit: 'ph-electricity',
-    units: ['ph-f2-electricity'],
+    units: ['ph-f2-electricity', 'ap-current'],
+    subjects: ['a-physics'],
     short: 'Series and parallel',
     title: 'Lamps in series and in parallel',
     desc: 'Add identical lamps in series and in parallel and compare their brightness and the current from the cell.',
@@ -956,6 +981,8 @@ export const LABS = [
   {
     id: 'ph-induction',
     unit: 'ph-magnetism',
+    units: ['ap-magnetic'],
+    subjects: ['a-physics'],
     short: 'Electromagnetic induction',
     title: 'Electromagnetic induction with a magnet and a coil',
     desc: 'Move a magnet in and out of a coil connected to a galvanometer and find what makes the induced current bigger.',
@@ -1005,6 +1032,8 @@ export const LABS = [
   {
     id: 'ph-halflife',
     unit: 'ph-atomic',
+    units: ['ap-nuclear'],
+    subjects: ['a-physics'],
     kind: 'readings',
     short: 'Half-life',
     title: 'Half-life of protactinium-234',
