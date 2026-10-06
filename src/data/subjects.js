@@ -77,9 +77,9 @@ export const SUBJECTS = [
         inorganic: { en: 'Section B: inorganic chemistry', fr: 'Section B : chimie inorganique' },
         organic: { en: 'Section C: organic chemistry', fr: 'Section C : chimie organique' },
       },
-      layout: {
-        en: 'Six compulsory questions: two each on physical, inorganic and organic chemistry.',
-        fr: 'Six questions obligatoires : deux en chimie physique, deux en inorganique et deux en organique.',
+      summary: {
+        en: 'Six compulsory questions: two each on physical, inorganic and organic chemistry. 20 marks each.',
+        fr: 'Six questions obligatoires : deux en chimie physique, deux en inorganique et deux en organique. 20 points chacune.',
       },
     },
   },
@@ -91,6 +91,27 @@ export const SUBJECTS = [
     en: 'Physics',
     fr: 'Physique',
     p1: { count: 50, minutes: 90 },
+    // Section I: five short questions and one of two long ones; Section II: data
+    // analysis; Section III: two of the four options. 100 marks in 3 hours.
+    p2: {
+      minutes: 180,
+      groups: [
+        { slot: 'short', count: 5, marks: 6 },
+        { slot: 'long', offered: 2, answer: 1, marks: 20 },
+        { slot: 'data', count: 1, marks: 20 },
+        { slot: 'option', offered: 4, answer: 2, marks: 15 },
+      ],
+      sections: {
+        short: { en: 'Section I: short questions', fr: 'Section I : questions courtes' },
+        long: { en: 'Section I: long question', fr: 'Section I : question longue' },
+        data: { en: 'Section II: data analysis', fr: 'Section II : analyse de données' },
+        option: { en: 'Section III: options', fr: 'Section III : options' },
+      },
+      summary: {
+        en: 'Section I: five short questions (30 marks) and one of two long questions (20); Section II: data analysis (20); Section III: two of the four options (15 each).',
+        fr: 'Section I : cinq questions courtes (30 points) et une question longue sur deux (20) ; section II : analyse de données (20) ; section III : deux options sur quatre (15 chacune).',
+      },
+    },
   },
   { id: 'a-maths-mech', code: '0765', level: 'A', en: 'Pure Mathematics with Mechanics', fr: 'Mathématiques pures et mécanique' },
   { id: 'a-maths-stat', code: '0770', level: 'A', en: 'Pure Mathematics with Statistics', fr: 'Mathématiques pures et statistiques' },

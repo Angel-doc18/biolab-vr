@@ -12,7 +12,7 @@ import { firstName, focusUnit, greeting, nextLesson, recentUnits } from '../../s
 import { topicLabel, unitsShown } from '../../data/units';
 import { lessonNumber, lessonsFor } from '../../data/lessons';
 import { paper2Config } from '../../data/paper2';
-import { LEVELS, examLabel, subjectById, subjectName } from '../../data/subjects';
+import { LEVELS, examLabel, subjectById, subjectName, userLevel } from '../../data/subjects';
 import { SubjectGrid, TileGrid } from '../../ui/hub';
 import { useSubjectCards } from '../subjectCards';
 import ParentHome from './ParentHome';
@@ -66,7 +66,15 @@ function StudentHome({ navigation }) {
   const lesson = nextLesson(progress, focus.id, pro);
   const recent = recentUnits(progress, 2, subject);
   const continueList = recent.length ? recent : shown.slice(0, 2);
-  const taking = subjects.map((id) => subjectName(id, lang)).join(', ');
+  // "A Level: Chemistry, Physics; O Level: Biology": a Sixth Former may still be
+  // studying an Ordinary Level subject whose A Level course is being written.
+  const own = userLevel(user);
+  const taking = [own, own === 'A' ? 'O' : 'A']
+    .map((lv) => [lv, subjects.filter((id) => subjectById(id).level === lv)])
+    .filter(([, ids]) => ids.length)
+    .map(([lv, ids]) => `${LEVELS[lv].short}: ${ids.map((id) => subjectName(id, lang)).join(', ')}`)
+    .join('; ');
+  const subjectLine = subjectById(subject).level === own ? subjectName(subject, lang) : `${subjectName(subject, lang)} (${LEVELS[subjectById(subject).level].short})`;
   const days = daysToExam(user?.examYear);
   const due = assignments[0];
   const reviewed = !!progress.lessons[lesson?.id];
@@ -83,7 +91,7 @@ function StudentHome({ navigation }) {
             {greeting(L)}, {firstName(user?.name)}
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant" numberOfLines={1}>
-            GCE {LEVELS[subjectById(subjects[0]).level].short}: {taking}
+            GCE {taking}
           </T>
         </V>
 
@@ -163,7 +171,7 @@ function StudentHome({ navigation }) {
           <V c="flex-row items-end justify-between gap-space-sm">
             <V c="flex-1">
               <T c="font-body-sm text-body-sm text-on-primary" style={{ opacity: 0.85 }}>
-                {`${subjectName(subject, lang)}, ${examLabel(user, L)}`}
+                {`${subjectLine}, ${examLabel(user, L)}`}
               </T>
               <T c="font-headline-lg text-on-primary" style={{ fontSize: 34, lineHeight: 40 }}>
                 {days} {days === 1 ? L('day', 'jour') : L('days', 'jours')}

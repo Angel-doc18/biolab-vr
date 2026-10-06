@@ -26,6 +26,7 @@ const SYMBOLS = {
   chemistry: ['→', '⇌', '₂', '₃', '₄', '⁺', '²⁺', '⁻', '²⁻', '°C', 'dm³', 'mol'],
   'a-chemistry': ['→', '⇌', '₂', '₃', '₄', '⁺', '²⁺', '⁻', '²⁻', 'Δ', '°C', 'mol', 'kJ'],
   physics: ['×', '÷', '²', '³', '⁻¹', '⁻²', '√', 'Δ', 'λ', 'Ω', '°', 'm/s²'],
+  'a-physics': ['×', '÷', '²', '³', '⁻¹', '⁻²', '√', 'Δ', 'λ', 'Ω', 'π', 'ω', 'μ'],
 };
 
 function Rich({ text, c }) {
@@ -72,8 +73,10 @@ export default function Paper2({ navigation, route }) {
   const P2 = paper2Config(subject);
   const TOTAL = paper2Total(subject);
   const KEY = keyFor(subject);
-  // Section B with no choice (all of it compulsory) skips the choice page.
-  const choosing = P2.b.answer < P2.b.offered;
+  // Section B with no choice (all of it compulsory) skips the choice page. A
+  // paper laid out in groups (A Level Physics) has a choice page per choice group.
+  const groupOf = (id) => P2.groups?.find((g) => g.slot === p2ById(id)?.slot);
+  const choosing = P2.groups ? P2.groups.some((g) => g.offered > g.answer) : P2.b.answer < P2.b.offered;
   const title = `${subjectName(subject, lang)} ${L('Paper 2', 'épreuve 2')}`;
   const [s, setS] = useState(null); // { startedAt, a, b, chosen, answers, drawings, photos, index }
   const [now, setNow] = useState(Date.now());
@@ -96,7 +99,8 @@ export default function Paper2({ navigation, route }) {
         // start fresh
       }
       const paper = buildPaper2(subject, paper1Plan(subject, user?.className).unitIds);
-      setS({ startedAt: Date.now(), ...paper, chosen: choosing ? [] : paper.b, answers: {}, drawings: {}, photos: {}, index: 0 });
+      const chosen = P2.groups ? paper.b.filter((id) => groupOf(id)?.offered === groupOf(id)?.answer) : choosing ? [] : paper.b;
+      setS({ startedAt: Date.now(), ...paper, chosen, answers: {}, drawings: {}, photos: {}, index: 0 });
     })();
     const t = setInterval(() => setNow(Date.now()), 15000);
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -124,7 +128,14 @@ export default function Paper2({ navigation, route }) {
   // Pages: Section A questions, then the Section B choice (when there is one),
   // then the Section B questions being answered.
   const answered = [...s.a, ...s.chosen];
-  const pages = [...s.a.map((id) => ({ id })), ...(choosing ? [{ choose: true }] : []), ...s.chosen.map((id) => ({ id }))];
+  const pages = P2.groups
+    ? P2.groups.flatMap((g, gi) => {
+        if (g.count) return s.a.filter((id) => groupOf(id) === g).map((id) => ({ id }));
+        const offered = s.b.filter((id) => groupOf(id) === g);
+        const picked = s.chosen.filter((id) => offered.includes(id)).map((id) => ({ id }));
+        return g.offered > g.answer ? [{ choose: true, group: gi }, ...picked] : picked;
+      })
+    : [...s.a.map((id) => ({ id })), ...(choosing ? [{ choose: true }] : []), ...s.chosen.map((id) => ({ id }))];
   const page = pages[Math.min(s.index, pages.length - 1)];
   const go = (i) => {
     setS((x) => ({ ...x, index: i }));
@@ -143,7 +154,8 @@ export default function Paper2({ navigation, route }) {
   const toggleChoice = (id) =>
     setS((x) => {
       if (x.chosen.includes(id)) return { ...x, chosen: x.chosen.filter((c) => c !== id) };
-      if (x.chosen.length >= P2.b.answer) return x;
+      const g = groupOf(id);
+      if (g ? x.chosen.filter((c) => groupOf(c) === g).length >= g.answer : x.chosen.length >= P2.b.answer) return x;
       return { ...x, chosen: [...x.chosen, id] };
     });
 
@@ -229,12 +241,17 @@ export default function Paper2({ navigation, route }) {
   // The section a page belongs to: named sections (A Level Chemistry) or A and B.
   const sectionOf = (pg) => {
     if (!pg) return '';
-    const named = P2.sections && !pg.choose && P2.sections[p2ById(pg.id)?.slot];
+    const slot = pg.choose ? P2.groups?.[pg.group]?.slot : p2ById(pg.id)?.slot;
+    const named = P2.sections && slot && P2.sections[slot];
     if (named) return L(named.en, named.fr);
     return pg.choose || !s.a.includes(pg.id) ? L('Section B', 'Section B') : L('Section A', 'Section A');
   };
 
   const qLabel = (id) => {
+    if (P2.groups) {
+      const order = P2.groups.flatMap((g) => (g.count ? s.a : s.b).filter((x) => groupOf(x) === g));
+      return `${L('Question', 'Question')} ${order.indexOf(id) + 1}`;
+    }
     const ai = s.a.indexOf(id);
     if (ai >= 0) return `${L('Question', 'Question')} ${ai + 1}`;
     return `${L('Question', 'Question')} ${P2.a + 1 + s.b.indexOf(id)}`;
@@ -342,7 +359,9 @@ export default function Paper2({ navigation, route }) {
         <P c="flex-1 h-12 bg-primary-container rounded-xl items-center justify-center" onPress={() => go(s.index + 1)}>
           <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
             {page.choose
-              ? L('Start Section B', 'Commencer la section B')
+              ? P2.groups
+                ? L('Start these questions', 'Commencer ces questions')
+                : L('Start Section B', 'Commencer la section B')
               : P2.sections
                 ? sectionOf(pages[s.index + 1]) !== sectionOf(page)
                   ? L('Go to the next section', 'Section suivante')
@@ -366,24 +385,28 @@ export default function Paper2({ navigation, route }) {
   );
 
   if (page.choose) {
+    const g = P2.groups ? P2.groups[page.group] : { answer: P2.b.answer, offered: P2.b.offered };
+    const offered = P2.groups ? s.b.filter((id) => groupOf(id) === g) : s.b;
+    const named = P2.groups && P2.sections?.[g.slot];
+    const heading = named ? L(named.en, named.fr) : L('Section B', 'Section B');
     return (
       <V c="flex-1">
         <Screen bg="bg-surface" header={header} footer={footer} scrollRef={scroller}>
           <V c="pt-space-md pb-space-md gap-space-md">
             <V c="gap-space-xs">
               <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
-                {L(`Section B: answer ${P2.b.answer} of the ${P2.b.offered} questions`, `Section B : répondez à ${P2.b.answer} des ${P2.b.offered} questions`)}
+                {L(`${heading}: answer ${g.answer} of the ${g.offered} questions`, `${heading} : répondez à ${g.answer} des ${g.offered} questions`)}
               </T>
               <T c="font-body-md text-body-md text-on-surface-variant">{L('Read them all, then choose the ones you can answer best. You can change your choice until you submit.', 'Lisez-les toutes, puis choisissez celles auxquelles vous répondez le mieux. Vous pouvez changer jusqu’à la remise.')}</T>
             </V>
-            {s.b.map((id) => {
+            {offered.map((id) => {
               const qq = p2ById(id);
               const on = s.chosen.includes(id);
               return (
                 <P key={id} c={`p-space-md rounded-xl gap-space-xs ${on ? 'bg-surface-container-low border-2 border-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={() => toggleChoice(id)} scale={0.99} accessibilityRole="checkbox" accessibilityState={{ checked: on }}>
                   <V c="flex-row items-center justify-between gap-space-sm">
                     <T c="font-label-md text-label-md text-on-surface-variant">
-                      {qLabel(id)}, 20 {L('marks', 'points')}
+                      {qLabel(id)}, {questionMarks(qq)} {L('marks', 'points')}
                     </T>
                     <V c={`w-6 h-6 rounded items-center justify-center ${on ? 'bg-primary-container' : 'border-2 border-outline-variant'}`}>{on && <Ic n="check" s={16} c="on-primary" />}</V>
                   </V>
@@ -400,7 +423,7 @@ export default function Paper2({ navigation, route }) {
               );
             })}
             <T c="font-body-sm text-body-sm text-on-surface-variant">
-              {s.chosen.length} {L('of', 'sur')} {P2.b.answer} {L('chosen', 'choisies')}
+              {s.chosen.filter((id) => offered.includes(id)).length} {L('of', 'sur')} {g.answer} {L('chosen', 'choisies')}
             </T>
           </V>
         </Screen>
@@ -420,8 +443,8 @@ export default function Paper2({ navigation, route }) {
               const on = i === s.index;
               const complete = pg.id && p2ById(pg.id).parts.every((pp) => partDone(pg.id, pp));
               return (
-                <P key={pg.id || 'choose'} c={`h-8 px-2.5 rounded-lg items-center justify-center ${on ? 'bg-primary-container' : complete ? 'bg-secondary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={() => go(i)} accessibilityLabel={pg.choose ? 'Section B choice' : qLabel(pg.id)}>
-                  <T c={`font-label-md text-label-md ${on ? 'text-on-primary' : 'text-on-surface'}`}>{pg.choose ? 'B' : qLabel(pg.id).split(' ')[1]}</T>
+                <P key={pg.id || 'choose'} c={`h-8 px-2.5 rounded-lg items-center justify-center ${on ? 'bg-primary-container' : complete ? 'bg-secondary-container' : 'bg-surface-container-lowest border border-outline-variant'}`} onPress={() => go(i)} accessibilityLabel={pg.choose ? (P2.groups ? sectionOf(pg) : 'Section B choice') : qLabel(pg.id)}>
+                  <T c={`font-label-md text-label-md ${on ? 'text-on-primary' : 'text-on-surface'}`}>{pg.choose ? (P2.groups ? L('Choose', 'Choisir') : 'B') : qLabel(pg.id).split(' ')[1]}</T>
                 </P>
               );
             })}

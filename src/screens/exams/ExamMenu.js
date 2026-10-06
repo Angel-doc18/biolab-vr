@@ -93,8 +93,8 @@ export default function ExamMenu({ navigation, route }) {
                 tint={tint}
                 title={L('Paper 2: structured questions', 'Épreuve 2 : questions structurées')}
                 sub={
-                  P2.layout
-                    ? `${minutesLabel(P2.minutes, L)}. ${L(P2.layout.en, P2.layout.fr)} ${L('20 marks each.', '20 points chacune.')}`
+                  P2.summary
+                    ? `${minutesLabel(P2.minutes, L)}. ${L(P2.summary.en, P2.summary.fr)}`
                     : `${minutesLabel(P2.minutes, L)}. ${L('Section A', 'Section A')}: ${P2.a} ${L('questions', 'questions')}; ${L('Section B', 'Section B')}: ${P2.b.answer < P2.b.offered ? `${P2.b.answer} ${L('of', 'sur')} ${P2.b.offered}` : P2.b.answer}. ${L('20 marks each.', '20 points chacune.')}`
                 }
                 note={
