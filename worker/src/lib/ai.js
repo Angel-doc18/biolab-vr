@@ -223,14 +223,20 @@ export async function markAnswer(env, input) {
   return finalize(result, input);
 }
 
-// ---------- spoken explanations of diagrams and practicals ----------
+// ---------- spoken teaching of diagrams, practicals and lessons ----------
 
-const EXPLAIN_SYSTEM = `You are the ScienceAid tutor explaining something out loud to a Cameroon GCE Ordinary Level student while they look at it on their phone.
+const EXPLAIN_SYSTEM = `You are the ScienceAid tutor: an experienced, warm Cameroonian secondary school teacher. The student is looking at something on their phone and you are teaching it out loud, exactly as a good teacher does in class. You are a teacher, not a reader.
 
-How to speak:
-- Short, simple sentences that anyone can follow, as in a friendly lesson. Explain any technical word the first time you use it.
-- Be accurate to the GCE syllabus. Never invent facts, numbers or quotations.
-- Everything is read aloud by a speech engine, so write words, not symbols: "degrees Celsius", "centimetres cubed", "carbon dioxide", "H two O". No lists, no markdown, no brackets, no emojis.
+How to teach:
+- Never read the text back word for word. Say each idea in your own simple words, then explain it: what it is, how it works, why it happens and why it matters.
+- Give a short everyday example the student knows from life in Cameroon (the farm, the market, the kitchen, the weather, a phone, a taxi, a football match) whenever it makes the idea clearer.
+- Explain every technical word the first time you use it, in plain words.
+- Link the ideas: say how each part connects to the next one and to the whole.
+- Mention the common mistake or what examiners give marks for when it helps.
+- Speak directly to the student, using "you" and "we", in short, clear sentences.
+- Pitch everything at the student's class, which is given below.
+- Be accurate to the syllabus. Never invent facts, numbers, names, dates or quotations. Where the material gives a figure or an example, use it exactly as given.
+- Everything is read aloud by a speech engine, so write words, not symbols: "degrees Celsius", "centimetres cubed", "carbon dioxide", "H two O", "x squared". No lists, no markdown, no brackets, no emojis.
 - Never use em dashes. Use commas or full stops.`;
 
 const Explained = z.object({
@@ -239,31 +245,60 @@ const Explained = z.object({
   summary: z.coerce.string(),
 });
 
-// kind: 'diagram' (items are the labels) or 'practical' (items are the method steps).
-export async function explainItems(env, { kind, subject, lang, title, items, context }) {
-  const what = kind === 'diagram' ? 'a labelled diagram' : 'a practical experiment';
-  const each =
-    kind === 'diagram'
-      ? 'For each label say what the structure is, what it does, and how it helps the whole work.'
-      : 'For each method step say what to do and why it is done, and what to watch for so the result is accurate and safe.';
-  const prompt = `${subjectLine(subject)}
-You are explaining ${what}: "${title}".${context ? `\nAbout it: ${context}` : ''}
-${kind === 'diagram' ? 'Labels' : 'Method steps'}, in order:
-${items.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+// How each kind of material is taught, part by part.
+const TEACH = {
+  diagram: {
+    what: 'a diagram',
+    parts: 'The parts of the diagram, in order (a named label, or a sentence saying what the drawing shows)',
+    intro: 'two or three sentences, like a teacher at the board: say what the diagram shows, where to start looking and why it matters',
+    each:
+      'Each part is a separate explanation of three to five sentences. Point to it ("Look at the ...", "Now find the ..."). For a structure or component, say what it is, what it does, and its role in the whole system: what the system needs it for and what would go wrong without it. For a stage, step, group or row, say what it means, why it happens and how it leads to or connects with the parts around it. Never just repeat the label.',
+    summary: 'three or four sentences: pull the parts together to show how the whole works, ask the student one short question to check understanding, say "Think about it", then give the answer, and end with one thing examiners look for',
+  },
+  practical: {
+    what: 'a practical experiment',
+    parts: 'Method steps, in order',
+    intro: 'two or three sentences saying what the experiment finds out and why it matters',
+    each: 'Each step is two to four sentences: what to do, why it is done, and what to watch for so the result is accurate and safe.',
+    summary: 'two or three sentences pulling it together, including what the results show, and one thing examiners look for',
+  },
+  lesson: {
+    what: 'a lesson from the student’s notes',
+    parts: 'The paragraphs of the lesson and its worked examples, in order',
+    intro: 'two or three sentences: greet the student briefly, say what we are going to learn today and why it matters in everyday life or in the examination',
+    each:
+      'Each part is a separate explanation of four to seven sentences that teaches that paragraph or worked example. Start with its main idea in simpler words, then explain how and why, then give an everyday example. When a paragraph is a list, group the items and explain the reason behind them, naming each key term, instead of reading them one by one. For a worked example, talk the student through each step and why it is done, then say how to check the answer.',
+    summary:
+      'four or five sentences: recap the two or three most important points, ask the student one short question to check understanding, say "Think about it", then give the answer, and end with one encouraging sentence',
+  },
+};
 
-Write in ${lang === 'fr' ? 'French' : 'English'}.
-"intro": two or three sentences saying what this ${kind === 'diagram' ? 'diagram shows' : 'experiment finds out'} and why it matters.
-"items": exactly ${items.length} entries, one per ${kind === 'diagram' ? 'label' : 'step'} in the same order, each two or three sentences. ${each}
-"summary": two or three sentences pulling it together${kind === 'practical' ? ', including what the results show' : ''}, and one thing examiners look for.
-Reply with JSON only: {"intro": string, "items": [string], "summary": string}`;
+// kind: 'diagram' (labels and facts), 'practical' (method steps) or 'lesson'
+// (paragraphs and worked examples).
+export async function explainItems(env, { kind, subject, lang, title, items, context, className }) {
+  const t = TEACH[kind];
+  const prompt = [
+    subjectLine(subject),
+    classGuide(className),
+    `You are teaching ${t.what}: "${title}".${context ? `\nAbout it: ${context}` : ''}`,
+    `${t.parts}:\n${items.map((x, i) => `${i + 1}. ${x}`).join('\n')}`,
+    `Write in ${lang === 'fr' ? 'French' : 'English'}.
+"intro": ${t.intro}.
+"items": exactly ${items.length} entries, one per part in the same order. ${t.each}
+"summary": ${t.summary}.
+Reply with JSON only: {"intro": string, "items": [string], "summary": string}`,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
   const provider = aiProvider(env);
   if (!provider) throw new HttpError(503, 'The tutor is not available yet.', 'ai_unavailable');
+  const maxTokens = kind === 'lesson' ? 6000 : 4000;
   for (const temperature of [0.3, 0]) {
     let text;
     if (provider === 'groq') {
-      ({ text } = await groqChat(env, { json: true, maxTokens: 3500, temperature, messages: [{ role: 'system', content: EXPLAIN_SYSTEM }, { role: 'user', content: prompt }] }));
+      ({ text } = await groqChat(env, { json: true, maxTokens, temperature, messages: [{ role: 'system', content: EXPLAIN_SYSTEM }, { role: 'user', content: prompt }] }));
     } else {
-      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 6000, system: EXPLAIN_SYSTEM, output_config: { effort: 'low' }, ...FALLBACK, messages: [{ role: 'user', content: prompt }] });
+      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 8000, system: EXPLAIN_SYSTEM, output_config: { effort: 'low' }, ...FALLBACK, messages: [{ role: 'user', content: prompt }] });
       text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
     }
     try {

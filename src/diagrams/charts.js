@@ -1,11 +1,14 @@
 // Builders for the simple teaching charts used across subjects: a sequence of
 // steps (flow), a cycle, a classification tree and side-by-side columns. Each
-// returns a diagram spec { title, w, h, art, labels }. Text in a box is given
-// with "\n" for line breaks, so nothing depends on measuring text.
+// returns a diagram spec { title, w, h, art, labels, facts }. Text in a box is
+// given with "\n" for line breaks, so nothing depends on measuring text. `facts`
+// says in words what the chart shows, so the tutor can teach a chart that has
+// no ruled labels.
 import { G, Line, Path, Rect } from 'react-native-svg';
 import { Head, Txt } from './Diagram';
 
 const O = '#33414d';
+const flat = (t) => String(t).replace(/\n/g, ' ');
 export const FILLS = ['#e6eef8', '#e3f0da', '#fbefd0', '#efe6f7', '#f8e3df', '#e0f2f1'];
 
 function Box({ x, y, w, h, text, fill, size = 9.5, bold }) {
@@ -68,7 +71,7 @@ export function flowSpec(title, steps, { perRow = 3, boxW = 104, boxH = 52, gap 
       )}
     </G>
   );
-  return { title, w, h, art, labels: [] };
+  return { title, w, h, art, labels: [], facts: [...steps.map((s, i) => `Step ${i + 1}: ${flat(s)}`), ...(note ? [note] : [])] };
 }
 
 // Stages that repeat, arranged round a circle with arrows between them.
@@ -114,7 +117,7 @@ export function cycleSpec(title, stages, { r = 78, boxW = 104, boxH = 44, centre
       )}
     </G>
   );
-  return { title, w, h, art, labels: [] };
+  return { title, w, h, art, labels: [], facts: [...stages.map((s, i) => `Stage ${i + 1}: ${flat(s)}`), `After stage ${n}, the cycle starts again at stage 1.`] };
 }
 
 // A root that divides into groups, each with a list of examples underneath.
@@ -146,7 +149,7 @@ export function treeSpec(title, root, groups, { colW = 104, gap = 10, itemH = 15
       ))}
     </G>
   );
-  return { title, w, h, art, labels: [] };
+  return { title, w, h, art, labels: [], facts: groups.map((g) => `${flat(g.name)}: for example ${g.items.join(', ')}`) };
 }
 
 // Side-by-side columns, each with a heading and a list (for comparisons).
@@ -185,5 +188,5 @@ export function columnsSpec(title, columns, { colW = 110, gap = 10, itemH = 15, 
         ))}
     </G>
   );
-  return { title, w, h, art, labels: [] };
+  return { title, w, h, art, labels: [], facts: columns.map((c) => `${flat(c.head)}: ${c.items.join('; ')}`) };
 }

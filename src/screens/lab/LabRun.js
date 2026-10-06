@@ -135,7 +135,7 @@ export default function LabRun({ navigation, route }) {
     if (!e) {
       setBusy(true);
       try {
-        e = await fetchExplanation({ kind: 'practical', subject: lab.subject, title: lab.title, items: method, context: lab.objective, lang });
+        e = await fetchExplanation({ kind: 'practical', subject: lab.subject, title: lab.title, items: method, context: lab.objective, lang, className: user?.className });
         setExplained(e);
       } catch (err) {
         setNote(

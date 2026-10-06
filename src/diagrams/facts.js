@@ -1,0 +1,446 @@
+// What each diagram shows, in words, for diagrams whose parts are written inside
+// the drawing rather than named by ruled labels (or that have only one or two
+// labels). The tutor explains these parts one by one, saying what each does and
+// its role in the whole. Each list follows the drawing, from where the eye starts.
+export const FACTS = {
+  // ---------- Biology ----------
+  'osmosis-cd': [
+    'Cell C: the vacuole and cytoplasm have shrunk and the cell membrane has pulled away from the cell wall. Water left the cell by osmosis because the solution outside was more concentrated. The cell is plasmolysed.',
+    'Cell D: the vacuole is large and the cytoplasm presses against the cell wall. Water entered by osmosis from a more dilute solution, so the cell is turgid. The strong cell wall stops it bursting.',
+  ],
+  'carbon-cycle': [
+    'Carbon dioxide in the air is the store of carbon that every living thing depends on.',
+    'Green plants take in carbon dioxide by photosynthesis and build it into sugars and other food.',
+    'Animals get carbon by feeding on plants, and on other animals.',
+    'Plants and animals return carbon dioxide to the air by respiration.',
+    'When they die, and in their wastes (egestion), their carbon goes to dead remains.',
+    'Bacteria and fungi decay the dead remains and release carbon dioxide by their own respiration.',
+    'Some remains are buried and, over millions of years, fossilisation turns them into fossil fuels: coal, oil and gas.',
+    'Combustion (burning) of fossil fuels and wood releases their carbon as carbon dioxide, which is raising its level in the air.',
+  ],
+  'scientific-method': [
+    'Observe: notice something in the world around you.',
+    'Question: ask why or how it happens.',
+    'Hypothesis: suggest a testable idea that could explain it.',
+    'Experiment: carry out a fair test, changing one variable and keeping the others the same.',
+    'Results: record what you measure in tables and graphs.',
+    'Conclusion: decide whether the results support the hypothesis.',
+    'If the hypothesis is not supported, form a new hypothesis and test again.',
+    'Communicate: report the findings so others can check and use them.',
+  ],
+  'classification-key': [
+    'The key starts with any arthropod and asks a question with two answers at each step.',
+    'Three pairs of legs: it is an insect, such as the housefly or the bee.',
+    'Four pairs of legs: it is an arachnid, such as the spider or the tick.',
+    'More than four pairs of legs and two pairs of antennae: it is a crustacean, such as the crab or the shrimp.',
+    'Many body segments, each with legs: it is a myriapod, such as the millipede.',
+  ],
+  'insect-life-cycles': [
+    'Complete metamorphosis, shown by the mosquito, has four stages: egg, larva, pupa and adult.',
+    'The larva feeds and grows; it looks nothing like the adult.',
+    'In the pupa the body is rebuilt into the adult form.',
+    'Incomplete metamorphosis, shown by the grasshopper, has three stages: egg, nymph and adult.',
+    'The nymph looks like a small adult without wings, and moults several times as it grows.',
+  ],
+  'food-web': [
+    'Grass and maize are the producers: they make food by photosynthesis and start every chain.',
+    'The grasshopper and the rat are primary consumers that eat the plants.',
+    'The lizard eats grasshoppers, and the snake eats rats and lizards.',
+    'The hawk is the top carnivore, feeding on snakes, lizards and rats.',
+    'The arrows show the direction energy flows, from the food to the feeder.',
+  ],
+  'monohybrid-cross': [
+    'The parents are both tall, but each is heterozygous, Tt: one allele for tall, T, and one for short, t.',
+    'Each parent makes two kinds of gamete in equal numbers: T and t.',
+    'The square shows every way the gametes can join at fertilisation.',
+    'The offspring genotypes are TT, Tt, Tt and tt.',
+    'T is dominant, so TT and Tt are tall; only tt is short. The phenotype ratio is 3 tall to 1 short.',
+  ],
+  'sickle-cross': [
+    'Both parents are carriers: genotype HbA HbS. They are healthy, because the normal allele HbA is dominant.',
+    'Each parent passes on either HbA or HbS in its gametes.',
+    'The offspring genotypes are HbA HbA (normal), HbA HbS twice (carriers) and HbS HbS (sickle-cell anaemia).',
+    'So each child has a 1 in 4 chance of sickle-cell anaemia, a 1 in 2 chance of being a carrier and a 1 in 4 chance of being normal.',
+  ],
+  'water-culture': [
+    'Three seedlings grow in jars of water with mineral salts dissolved in it, instead of soil.',
+    'With a complete solution, holding all the minerals, the plant is healthy and green.',
+    'Without nitrates the plant is small with yellow leaves, because nitrogen is needed to make proteins for growth.',
+    'Without magnesium the leaves turn yellow, because magnesium is needed to make chlorophyll.',
+    'Each jar lacks just one mineral, so any difference is caused by that mineral alone: a fair test.',
+  ],
+  'bee-castes': [
+    'The worker is a female that cannot breed. Workers collect nectar and pollen, make honey and wax, guard the hive and feed the young.',
+    'The queen is the only fertile female in each hive. Her job is to lay all the eggs.',
+    'The drone is a male. His only job is to mate with a young queen.',
+    'Each caste has its own job, so the colony works together like one organism: this is division of labour.',
+  ],
+
+  // ---------- Chemistry ----------
+  'mole-map': [
+    'Moles sit in the centre: every conversion goes through the number of moles.',
+    'Mass in grams: divide by the molar mass to get moles, multiply moles by the molar mass to get mass.',
+    'Number of particles: multiply moles by 6 × 10²³ (the Avogadro constant), or divide particles by it.',
+    'Gas volume: one mole of any gas fills 24 dm³ at room temperature and pressure, so multiply or divide by 24.',
+    'Solutions: moles = concentration × volume in dm³, and concentration = moles ÷ volume.',
+  ],
+  'contact-process': [
+    'The burner: sulphur burns in air to make sulphur dioxide, S + O₂ → SO₂.',
+    'The converter: sulphur dioxide and oxygen react on a vanadium(V) oxide catalyst at about 450 °C to form sulphur trioxide. The reaction is reversible.',
+    'The absorber: sulphur trioxide is dissolved in concentrated sulphuric acid to make oleum, H₂S₂O₇, because dissolving it in water directly gives a dangerous acid mist.',
+    'The diluting tank: oleum is mixed with water to give sulphuric acid.',
+  ],
+  'haber-process': [
+    'The raw gases: nitrogen from the air and hydrogen from natural gas, mixed in the ratio 1 to 3.',
+    'The compressor raises the pressure to about 200 atmospheres, which pushes the equilibrium towards ammonia.',
+    'The converter: nitrogen and hydrogen react on an iron catalyst at about 450 °C. The reaction is reversible.',
+    'The cooler: ammonia liquefies and is removed; the unreacted nitrogen and hydrogen are recycled to the converter.',
+  ],
+  'vsepr-shapes': [
+    'Electron pairs around the central atom repel and get as far apart as possible; this sets the shape.',
+    'Linear, 180 degrees: two bonding pairs, as in carbon dioxide and beryllium chloride.',
+    'Trigonal planar, 120 degrees: three bonding pairs, as in boron trifluoride.',
+    'Tetrahedral, 109.5 degrees: four bonding pairs, as in methane.',
+    'Trigonal pyramidal, 107 degrees: three bonding pairs and one lone pair, as in ammonia. The lone pair repels more, so the angle is smaller.',
+    'Bent, 104.5 degrees: two bonding pairs and two lone pairs, as in water.',
+    'Octahedral, 90 degrees: six bonding pairs, as in sulphur hexafluoride.',
+  ],
+  'rusting-tubes': [
+    'Tube A: iron nail with air and water. It rusts.',
+    'Tube B: water with no air, because the water was boiled and covered with oil. No rust.',
+    'Tube C: air with no water, because a drying agent removes the moisture. No rust.',
+    'Tube D: air and salt water. It rusts fastest, because salt speeds up rusting.',
+    'Conclusion: iron needs both oxygen (air) and water to rust.',
+  ],
+  'metal-acid-tubes': [
+    'Magnesium fizzes fast: it is the most reactive of the four.',
+    'Zinc gives steady bubbles of hydrogen.',
+    'Iron gives slow bubbles.',
+    'Copper does not react: it is below hydrogen in the reactivity series.',
+    'The rate of bubbling shows the order of reactivity: magnesium, zinc, iron, copper.',
+  ],
+  'balancing-equation': [
+    'On the left, two hydrogen molecules, 2H₂, each made of two hydrogen atoms.',
+    'One oxygen molecule, O₂, made of two oxygen atoms.',
+    'On the right, two water molecules, 2H₂O, each with one oxygen atom and two hydrogen atoms.',
+    'Counting atoms: 4 hydrogen and 2 oxygen on each side. Atoms are not created or destroyed, so the equation is balanced.',
+    'We balance by changing the big numbers in front of formulae, never the small numbers inside them.',
+  ],
+  'phosphorus-allotropes': [
+    'Allotropes are different forms of the same element in the same state.',
+    'White phosphorus is made of P₄ molecules shaped like a pyramid. It is waxy, glows in air, catches fire easily and is very poisonous, so it is kept under water.',
+    'Red phosphorus is made of P₄ units joined in chains. It is a powder, far less reactive and far less poisonous, and is used on the side of match boxes.',
+  ],
+  'flame-test': [
+    'A clean nichrome wire is dipped in acid, then in the solid, and held in a hot, blue Bunsen flame.',
+    'Sodium ions give a yellow-orange flame.',
+    'Potassium ions give a lilac flame.',
+    'Calcium ions give a brick-red flame.',
+    'Copper ions give a blue-green flame.',
+  ],
+  'titration-curves': [
+    'Each curve shows how the pH changes as sodium hydroxide is added to an acid.',
+    'Strong acid with strong base: the pH rises very steeply around the end point, from about 3 to 11, so both indicators work.',
+    'Weak acid with strong base: the steep part is only from about 7 to 11, so phenolphthalein must be used.',
+  ],
+  'born-haber': [
+    'The cycle builds solid sodium chloride from its elements by two routes; by Hess’s law both routes give the same total enthalpy change.',
+    'Direct route: the enthalpy of formation of sodium chloride, minus 411 kilojoules per mole.',
+    'Atomising sodium, plus 107, and ionising it, plus 496, make gaseous sodium ions.',
+    'Atomising chlorine, plus 122, and the electron affinity of chlorine, minus 349, make gaseous chloride ions.',
+    'Lattice enthalpy, minus 787, is the energy released when the gaseous ions come together to form the solid.',
+  ],
+
+  // ---------- Physics ----------
+  'em-spectrum': [
+    'The electromagnetic spectrum runs from radio waves, through microwaves, infrared, visible light and ultraviolet, to X-rays and gamma rays.',
+    'Radio waves have the longest wavelength; gamma rays the shortest.',
+    'Frequency and energy increase from radio to gamma, so ultraviolet, X-rays and gamma rays are the most harmful to living cells.',
+    'All of them travel at the same speed in a vacuum, three hundred million metres per second.',
+  ],
+  'circuit-symbols': [
+    'Cell: the source of electrical energy; the longer line is the positive terminal.',
+    'Lamp: changes electrical energy into light.',
+    'Resistor: limits the current; a variable resistor lets you change it.',
+    'Switch: opens or closes the circuit.',
+    'Ammeter: measures current, connected in series.',
+    'Voltmeter: measures potential difference, connected in parallel.',
+    'Fuse: melts and breaks the circuit if the current is too large, to protect the wiring.',
+  ],
+  'series-parallel': [
+    'In series there is one path, so the same current flows through each lamp and the supply voltage is shared between them.',
+    'If one lamp in series breaks, the circuit is broken and all the lamps go out.',
+    'In parallel each lamp has its own branch and gets the full supply voltage, so each lamp is brighter.',
+    'If one lamp in parallel breaks, the others stay on. Houses are wired in parallel for this reason.',
+  ],
+  'lever-classes': [
+    'P is the pivot, or fulcrum; L is the load; E is the effort.',
+    'First class: the pivot is between the effort and the load, as in a crowbar, scissors and a see-saw.',
+    'Second class: the load is between the pivot and the effort, as in a wheelbarrow and a nutcracker.',
+    'Third class: the effort is between the pivot and the load, as in the forearm and tweezers.',
+  ],
+  'vector-parallelogram': [
+    'Two forces, 4 newtons and 3 newtons, act at the same point with 60 degrees between them.',
+    'They are drawn to scale, 1 centimetre for 1 newton, as two sides of a parallelogram.',
+    'The diagonal from the point where they act is the resultant: 6.1 newtons.',
+    'The angle between the resultant and the 4 newton force is measured as 25 degrees.',
+  ],
+  'energy-chain': [
+    'Chemical energy is stored in the cells of the torch.',
+    'It becomes electrical energy, carried by the current in the circuit.',
+    'The lamp changes electrical energy into light energy, the useful output.',
+    'Some energy becomes heat in the lamp; this is wasted energy. Energy is never lost, only changed from one form to another.',
+  ],
+  'hooke-graph': [
+    'The load in newtons is on one axis and the extension in centimetres on the other.',
+    'At first the graph is a straight line through the origin: extension is proportional to load. This is Hooke’s law.',
+    'Beyond the limit of proportionality the line curves: the spring stretches more for each extra newton and may not return to its length.',
+  ],
+  'wheatstone-bridge': [
+    'Four resistors, P, Q, R and S, form a diamond, with a cell across one diagonal and a galvanometer, G, across the other.',
+    'The resistors are adjusted until the galvanometer reads zero: the bridge is balanced.',
+    'At balance P divided by Q equals R divided by S, so an unknown resistance can be found from the other three.',
+  ],
+  'gravity-field': [
+    'The field lines all point towards the centre of the Earth: the force of gravity on any mass is towards the centre.',
+    'This is a radial field.',
+    'The lines get further apart away from the Earth, showing that the field gets weaker. The field strength g equals G M over r squared.',
+  ],
+
+  // ---------- Mathematics ----------
+  'place-value': [
+    'Each place is worth ten times the place on its right.',
+    'In 52 708.36, the 5 is worth 50 000 and the 2 is worth 2000.',
+    'The 7 is worth 700, the 0 holds the tens place, and the 8 is worth 8.',
+    'After the decimal point, the 3 is worth 3 tenths and the 6 is worth 6 hundredths.',
+  ],
+  'number-line': [
+    'Zero is in the middle; positive integers are to the right and negative integers to the left.',
+    'To add, move to the right: start at minus 2 and move 5 steps right.',
+    'You land on 3, so minus 2 plus 5 equals 3.',
+  ],
+  'fraction-bars': [
+    'The top bar is one whole.',
+    'One half, two quarters and four eighths cover the same length, so they are equivalent fractions.',
+    'Multiplying the top and bottom of a fraction by the same number gives an equivalent fraction.',
+    'The last bar shows three quarters for comparison.',
+  ],
+  'angle-types': [
+    'An acute angle is less than 90 degrees, for example 45 degrees.',
+    'A right angle is exactly 90 degrees.',
+    'An obtuse angle is between 90 and 180 degrees, for example 130 degrees.',
+    'A straight angle is exactly 180 degrees.',
+    'A reflex angle is between 180 and 360 degrees, for example 250 degrees.',
+  ],
+  'triangle-types': [
+    'An equilateral triangle has three equal sides and three equal angles of 60 degrees.',
+    'An isosceles triangle has two equal sides, and the two angles opposite them are equal.',
+    'A scalene triangle has no equal sides.',
+    'A right-angled triangle has one angle of 90 degrees.',
+    'In every triangle the angles add up to 180 degrees.',
+  ],
+  'cartesian-plane': [
+    'The x-axis is horizontal and the y-axis vertical; they cross at the origin, O.',
+    'A point is written as (x, y): first how far across, then how far up or down.',
+    'A is at (3, 2), B at (minus 4, 1), C at (minus 2, minus 3) and D at (4, minus 2).',
+  ],
+  'cuboid-net': [
+    'A cuboid has a length, a width and a height, and six rectangular faces.',
+    'The net is the cuboid opened out flat: six rectangles that fold up to make it.',
+    'The total surface area is the sum of the areas of the six rectangles.',
+  ],
+  'bar-pie-chart': [
+    'The bar chart shows how many of the 60 pupils use each way to school: 30 walk, 15 take a taxi, 10 ride a bike and 5 come by car.',
+    'In the pie chart each pupil is worth 360 ÷ 60 = 6 degrees.',
+    'So walk is 180 degrees, taxi 90 degrees, bike 60 degrees and car 30 degrees.',
+  ],
+  'parallel-transversal': [
+    'A transversal is a line that crosses two parallel lines.',
+    'Corresponding angles, such as a and b, are equal: they are in matching positions.',
+    'Alternate angles, such as a and c, are equal: they lie on opposite sides of the transversal, between the parallel lines.',
+  ],
+  'probability-scale': [
+    'Probability runs from 0, impossible, to 1, certain.',
+    'Snow falling in Douala is near 0: almost impossible.',
+    'A coin landing heads is one half: an even chance.',
+    'The sun rising tomorrow is 1: certain.',
+  ],
+  'factor-tree': [
+    '60 is split into a pair of factors, 2 and 30; 30 is split into 2 and 15; 15 into 3 and 5.',
+    'A branch stops at a prime number, which is circled.',
+    'So 60 = 2 × 2 × 3 × 5, written in index form as 2² × 3 × 5.',
+  ],
+  'lines-notation': [
+    'A line, written (AB), goes on for ever in both directions.',
+    'A line segment, written [AB], has two end points, A and B.',
+    'A half-line, written [AB), starts at A and goes on for ever through B.',
+  ],
+  'pythagoras': [
+    'The triangle has sides 3, 4 and 5; the right angle is between the sides 3 and 4.',
+    'The square on side 3 has area 9 and the square on side 4 has area 16.',
+    'The square on the hypotenuse has area 25, and 9 + 16 = 25.',
+    'In any right-angled triangle, the square on the hypotenuse equals the sum of the squares on the other two sides.',
+  ],
+  'prism-pyramid': [
+    'A triangular prism has the same triangular cross-section all along its length. Its volume is the area of the cross-section times the length.',
+    'A square-based pyramid has a square base and four triangular faces that meet at the apex.',
+    'Its volume is one third of the base area times the height, h.',
+  ],
+
+  // ---------- Computer Science ----------
+  'ipo-cycle': [
+    'Input: data is entered, for example with a keyboard or a scanner.',
+    'Processing: the CPU works on the data to turn it into information.',
+    'Output: the results are shown or printed, on a screen or a printer.',
+    'Storage: data and results are kept for later, on a disk or a flash drive.',
+  ],
+  'computer-system': [
+    'Input devices send data into the computer.',
+    'The CPU processes it: the control unit directs every operation, and the arithmetic and logic unit does the calculations and comparisons, using registers to hold data.',
+    'Main memory holds the programs and data in use: RAM is temporary, ROM keeps the start-up instructions.',
+    'Secondary storage keeps files when the power is off.',
+    'Output devices show or print the results; the buses carry data and signals between all the parts.',
+  ],
+  'folder-tree': [
+    'Drive C: is the top of the tree, the root.',
+    'Inside it, the Users folder holds a folder for each user, here Ama.',
+    'Ama’s Documents folder holds the subfolder Form 2, which holds the files Geography.docx and Marks.xlsx.',
+    'The Pictures folder holds the file Map.jpg. Folders keep files organised so they are easy to find.',
+  ],
+  'url-parts': [
+    'https:// is the protocol: the rules the browser uses to fetch the page securely.',
+    'www.example.com is the domain name of the website.',
+    '/news/ is the folder, or path, on the web server.',
+    'index.html is the page, the file that is opened.',
+  ],
+  'binary-places': [
+    'In binary each place is worth twice the place on its right: 128, 64, 32, 16, 8, 4, 2 and 1.',
+    'The number 00101101 has 1s in the places worth 32, 8, 4 and 1.',
+    'Adding them: 32 + 8 + 4 + 1 = 45 in denary.',
+  ],
+  'flowchart-symbols': [
+    'An oval shows start or stop.',
+    'A parallelogram shows input or output.',
+    'A rectangle shows a process, a calculation or action.',
+    'A diamond shows a decision with two exits, yes and no.',
+    'The example inputs a mark; if the mark is 10 or more it outputs Pass, otherwise Fail, then stops.',
+  ],
+  'lan-wan': [
+    'A local area network, LAN, joins computers in one building, such as a school or an office.',
+    'A switch connects the computers inside each LAN and sends data to the right one.',
+    'A router connects the LAN to other networks.',
+    'A wide area network, WAN, joins LANs in different towns over long distances.',
+  ],
+  'network-topologies': [
+    'Star: every computer has its own cable to a central switch. One broken cable cuts off only one computer.',
+    'Bus: all computers share one main cable, with a terminator at each end to stop signals bouncing back.',
+    'Ring: each computer connects to the next in a closed loop, and data passes round in one direction.',
+  ],
+  'spreadsheet-grid': [
+    'Columns are lettered A to E and rows numbered; each box is a cell, named by its column and row.',
+    'The active cell, D5, holds the formula equals B5 plus C5, shown in the formula bar.',
+    'The formula adds Dikongue’s Maths and English marks, 10 and 13, to give 23.',
+    'Row 6 holds the averages of each column.',
+  ],
+  'text-alignment': [
+    'Left alignment lines text up on the left margin: Ctrl and L.',
+    'Centre alignment puts each line in the middle, used for titles: Ctrl and E.',
+    'Right alignment lines text up on the right margin: Ctrl and R.',
+    'Justify lines text up on both margins by spreading the words: Ctrl and J.',
+  ],
+
+  // ---------- Geography ----------
+  'compass-rose': [
+    'The four cardinal points are north, east, south and west.',
+    'Between them are the four intermediate points: north-east, south-east, south-west and north-west.',
+    'Directions are given from where you stand, with north at the top of most maps.',
+  ],
+  'solar-system': [
+    'The Sun is at the centre; the planets travel round it in orbits.',
+    'The four inner, rocky planets are Mercury, Venus, Earth and Mars.',
+    'The asteroid belt lies between Mars and Jupiter.',
+    'The four outer, giant planets are Jupiter, Saturn, Uranus and Neptune.',
+    'Sizes and distances in the drawing are not to scale.',
+  ],
+  'longitude-time': [
+    'The Earth turns 360 degrees in 24 hours, so 15 degrees of longitude make one hour of time.',
+    'It is 12 noon at Greenwich, on 0 degrees.',
+    'Going east, the time gains one hour for every 15 degrees: 3 p.m. at 45 degrees east.',
+    'Going west, it loses one hour for every 15 degrees: 8 a.m. at 60 degrees west.',
+  ],
+  'settlement-patterns': [
+    'Nucleated: houses are grouped closely together, often around a market or a water point.',
+    'Dispersed: houses are scattered across the land, each near its own farm.',
+    'Linear: houses are built in a line along a road, a river or a railway.',
+  ],
+  'earth-orbit-seasons': [
+    'The Earth goes round the Sun once a year with its axis tilted.',
+    'On 21 June the Sun is overhead at the Tropic of Cancer: summer in the northern hemisphere.',
+    'On 22 December the Sun is overhead at the Tropic of Capricorn: winter in the northern hemisphere.',
+    'On 21 March and 23 September, the equinoxes, the Sun is overhead at the Equator and day and night are equal everywhere.',
+  ],
+  'africa-map': [
+    'Africa lies across the Equator, between the Tropic of Cancer and the Tropic of Capricorn, so most of it is hot.',
+    'It is bordered by the Mediterranean Sea in the north, the Red Sea and the Indian Ocean in the east and the Atlantic Ocean in the west.',
+    'The 0 degree line of longitude, the Greenwich meridian, passes through West Africa.',
+    'Cameroon lies just north of the Equator, at the bend of the Gulf of Guinea, often called Africa in miniature.',
+  ],
+  'population-pyramid': [
+    'Males are on the left and females on the right, in age groups from 0 to 9 at the bottom to 70 and over at the top.',
+    'The wide base shows many children: a high birth rate.',
+    'The narrow top shows few old people: a lower life expectancy.',
+    'This shape is typical of a young, fast-growing population, as in Cameroon.',
+  ],
+  'transit-corridor': [
+    'Douala and Kribi are the ports on the coast.',
+    'The railway runs from Douala to Yaoundé and on to Ngaoundéré.',
+    'From Ngaoundéré a road continues north to N’Djamena in Chad.',
+    'Another road runs from Yaoundé through Bertoua and Garoua-Boulaï to Bangui in the Central African Republic.',
+    'These transit corridors carry the goods of landlocked Chad and the Central African Republic to and from the sea.',
+  ],
+  'page-layout': [
+    'The header at the top and the footer at the bottom repeat on every page; the footer often holds the page number.',
+    'Portrait pages are taller than they are wide; landscape pages are wider than they are tall.',
+  ],
+
+  // ---------- Home Economics and Food ----------
+  'food-groups': [
+    'Energy foods, such as cassava, yam, rice, plantain and palm oil, give the body energy to work and play.',
+    'Body-building foods, such as beans, fish, eggs, meat and groundnuts, are rich in protein for growth and repair.',
+    'Protective foods, fruit and vegetables, give vitamins and minerals that keep the body healthy.',
+    'Water is needed every day; a balanced meal has something from each group.',
+  ],
+  'care-symbols': [
+    'The washtub: wash at no more than 40 degrees Celsius.',
+    'The triangle: bleach allowed; with a cross, do not bleach.',
+    'The square: how to dry the garment.',
+    'The iron: two dots mean iron warm.',
+    'The circle: dry clean. A cross through any symbol means do not.',
+  ],
+  'hand-stitches': [
+    'Tacking: long, loose temporary stitches that hold fabric in place before the final sewing.',
+    'Running stitch: small, even stitches for seams and gathering.',
+    'Backstitch: a strong stitch that looks like machine stitching.',
+    'Hemming: small slanting stitches that hold a folded edge in place.',
+    'Overcasting: stitches over a raw edge to stop it fraying.',
+    'Blanket stitch: a decorative stitch that also neatens edges.',
+  ],
+  'danger-zone': [
+    'Boiling, at 100 degrees Celsius, kills most germs.',
+    'Hot food should be kept above 63 degrees Celsius.',
+    'Between 5 and 63 degrees Celsius is the danger zone, where bacteria multiply fast, fastest near body temperature, 37 degrees.',
+    'In a fridge, 0 to 5 degrees Celsius, bacteria grow slowly.',
+    'In a freezer, at minus 18 degrees Celsius, growth stops, but the germs are not killed.',
+  ],
+  'fire-triangle': [
+    'A fire needs three things: heat, oxygen and fuel.',
+    'Take away any one side and the fire goes out.',
+    'Water removes heat; a fire blanket or sand cuts off oxygen; turning off the gas removes the fuel.',
+  ],
+  'cooking-methods': [
+    'Boiling: food cooks in water at 100 degrees Celsius.',
+    'Steaming: food cooks in the steam above boiling water, so fewer vitamins are lost into the water.',
+    'Frying: food cooks in hot oil, which is quick but adds fat.',
+    'Baking: food cooks in the hot, dry air of an oven.',
+  ],
+};

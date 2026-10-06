@@ -158,24 +158,28 @@ export async function report(request, env) {
   return ok({ reported: true });
 }
 
-// Spoken explanation of a diagram or a practical. Shared and cached, so it does
-// not use the student's daily questions; the rate limiter still applies.
+// Spoken teaching of a diagram, a practical or a lesson, pitched at the student's
+// class. Shared and cached per class, so it does not use the student's daily
+// questions; the rate limiter still applies.
+const TEACHING_VERSION = 2; // bump when the teaching prompts change
 export async function explain(request, env) {
   const user = await requireUser(request, env);
   requireConsent(user);
-  const b = await readJson(request, 32 * 1024);
-  const kind = oneOf(b.kind, 'Kind', ['diagram', 'practical']);
+  const b = await readJson(request, 48 * 1024);
+  const kind = oneOf(b.kind, 'Kind', ['diagram', 'practical', 'lesson']);
+  const long = kind === 'lesson';
   const subject = subjectOr(b.subject);
   const lang = oneOf(b.lang ?? user.lang ?? 'en', 'Language', ['en', 'fr']);
   const title = str(b.title, 'Title', { min: 3, max: 200 });
-  const context = str(b.context, 'Context', { max: 600, optional: true });
+  const context = str(b.context, 'Context', { max: long ? 2000 : 600, optional: true });
   if (!Array.isArray(b.items) || b.items.length < 1 || b.items.length > 16) throw new HttpError(400, 'Between 1 and 16 items are needed.', 'invalid_input');
-  const items = b.items.map((t, i) => str(t, `Item ${i + 1}`, { min: 1, max: 300 }));
-  const key = await sha256(JSON.stringify([kind, subject, lang, title, items, context || '']));
+  const items = b.items.map((t, i) => str(t, `Item ${i + 1}`, { min: 1, max: long ? 2000 : 400 }));
+  const className = user.class_name || '';
+  const key = await sha256(JSON.stringify([TEACHING_VERSION, kind, subject, lang, className, title, items, context || '']));
   const hit = await env.DB.prepare('SELECT body FROM ai_explanations WHERE key = ?').bind(key).first();
   if (hit) return ok({ explanation: JSON.parse(hit.body), cached: true });
   await limit(env.AI_LIMITER, `ai:${user.id}`, 'Please wait a moment before asking for another explanation.');
-  const explanation = await explainItems(env, { kind, subject, lang, title, items, context });
+  const explanation = await explainItems(env, { kind, subject, lang, title, items, context, className });
   await env.DB.prepare('INSERT OR REPLACE INTO ai_explanations (key, kind, body, created_at) VALUES (?, ?, ?, ?)').bind(key, kind, JSON.stringify(explanation), now()).run();
   return ok({ explanation, cached: false });
 }

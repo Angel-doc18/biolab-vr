@@ -11,6 +11,8 @@ import { lessonById, lessonNumber, lessonsFor, plain } from '../../data/lessons'
 import { unitById } from '../../data/units';
 import { lessonLocked } from '../../data/plan';
 import { lessonQuiz } from '../../lib/lessonQuiz';
+import { useNarrator } from '../../lib/narrator';
+import { fetchExplanation, segmentsOf } from '../../lib/explain';
 
 // Body text with **key terms** in bold and *scientific names* in italics.
 function Rich({ text, c = 'font-body-lg text-body-lg text-on-surface' }) {
@@ -165,7 +167,7 @@ function LessonQuiz({ lesson, L }) {
 
 export default function Lesson({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const { pro, progress, completeLesson, toggleBookmark } = useApp();
+  const { pro, progress, completeLesson, toggleBookmark, user } = useApp();
   const L = useL();
   const lang = useLang();
   const lesson = lessonById(route.params?.lessonId) || lessonsFor('cell')[0];
@@ -180,7 +182,84 @@ export default function Lesson({ navigation, route }) {
   const figures = [].concat(lesson.figure || unit.diagram || []);
   const [toast, showToast] = useToast();
 
-  // Read aloud paragraph by paragraph, so it can pause and resume on every platform.
+  // The teacher: the tutor teaches the lesson out loud, paragraph by paragraph and
+  // example by example, in simpler words with examples, at the student's class.
+  // The part being taught is highlighted and the teacher's words appear under it.
+  const voice = useNarrator(lang);
+  const [taught, setTaught] = useState(null); // { intro, items, summary }
+  const [teachBusy, setTeachBusy] = useState(false);
+  const [teachNote, setTeachNote] = useState(null);
+  const [segs, setSegs] = useState([]);
+  const resumeAt = useRef(0);
+  const nBody = lesson.body.length;
+  const parts = useMemo(
+    () =>
+      [
+        ...lesson.body.map(plain),
+        ...(lesson.examples || []).map((e) => `Worked example. ${plain(e.q)} Steps: ${e.steps.map((s, j) => `(${j + 1}) ${plain(s)}`).join(' ')}`),
+      ].slice(0, 16),
+    [lesson]
+  );
+  const teachContext = useMemo(
+    () => `Exam tip: ${plain(lesson.tip)} Key terms: ${(lesson.terms || []).map(([t, d]) => `${t}: ${d}`).join('; ')}`.slice(0, 2000),
+    [lesson]
+  );
+  const seg = voice.index >= 0 ? segs[voice.index] : null;
+  const teacherSays = (at) =>
+    seg && seg.at === at ? (
+      <V c="mt-space-xs p-space-sm rounded-lg bg-surface-container-low border-l-4 border-primary-container gap-0.5">
+        <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+          {L('Your teacher', 'Votre professeur')}
+        </T>
+        <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+          {seg.text}
+        </T>
+      </V>
+    ) : null;
+
+  const teach = async () => {
+    if (voice.playing) {
+      resumeAt.current = voice.index;
+      voice.stop();
+      return;
+    }
+    if (playRef.current) {
+      playRef.current = false;
+      setPlaying(false);
+    }
+    let e = taught;
+    if (!e) {
+      setTeachBusy(true);
+      setTeachNote(null);
+      try {
+        e = await fetchExplanation({ kind: 'lesson', subject: unit.subject, title: lesson.title, items: parts, context: teachContext, lang, className: user?.className });
+        setTaught(e);
+      } catch (err) {
+        setTeachNote(
+          err?.code === 'consent_required'
+            ? L('The teacher explains lessons once a parent approves your account. Reading the notes for now.', 'Le professeur explique les leçons après l’accord d’un parent. Lecture des notes pour l’instant.')
+            : L('The teacher needs a connection the first time. Reading the notes for now.', 'Le professeur a besoin d’une connexion la première fois. Lecture des notes pour l’instant.')
+        );
+      } finally {
+        setTeachBusy(false);
+      }
+    }
+    if (!e) {
+      toggle();
+      return;
+    }
+    const list = segmentsOf(e);
+    setSegs(list);
+    voice.play(list, {
+      from: resumeAt.current < list.length ? resumeAt.current : 0,
+      onEnd: () => {
+        resumeAt.current = 0;
+      },
+    });
+  };
+
+  // Reading the notes word for word, paragraph by paragraph, for students who
+  // want that (and when the teacher is not available).
   const script = useMemo(
     () => [lesson.title, ...lesson.body.map(plain), ...(lesson.examples || []).map((e) => `Worked example. ${plain(e.q)} ${e.steps.map(plain).join('. ')}.`), `Exam tip. ${plain(lesson.tip)}`],
     [lesson]
@@ -215,6 +294,7 @@ export default function Lesson({ navigation, route }) {
       setPlaying(false);
       Speech.stop();
     } else {
+      if (voice.playing) voice.stop();
       playRef.current = true;
       setPlaying(true);
       speakFrom(para);
@@ -268,13 +348,24 @@ export default function Lesson({ navigation, route }) {
             </T>
           </V>
 
-          <ListenButton
-            label={L('Listen to this lesson', 'Écouter cette leçon')}
-            sub={L('The tutor reads it to you; follow the highlighted paragraph', 'Le tuteur la lit ; suivez le paragraphe surligné')}
-            stopLabel={L('Pause listening', 'Mettre en pause')}
-            playing={playing}
-            onPress={toggle}
-          />
+          <V c="gap-space-xs">
+            <ListenButton
+              label={L('Listen: your teacher explains this lesson', 'Écouter : votre professeur explique cette leçon')}
+              sub={L('Each paragraph explained in simple words, with examples', 'Chaque paragraphe expliqué simplement, avec des exemples')}
+              stopLabel={L('Pause the teacher', 'Mettre le professeur en pause')}
+              busyLabel={L('Your teacher is preparing the lesson', 'Votre professeur prépare la leçon')}
+              playing={voice.playing}
+              busy={teachBusy}
+              onPress={teach}
+            />
+            {!!teachNote && <T c="font-body-sm text-body-sm text-on-surface-variant">{teachNote}</T>}
+            <P c="self-start py-1" onPress={toggle} hitSlop={8}>
+              <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                {playing ? L('Stop reading the notes', 'Arrêter la lecture des notes') : L('Or read the notes aloud, word for word', 'Ou lire les notes à voix haute, mot à mot')}
+              </T>
+            </P>
+            {teacherSays(null)}
+          </V>
 
           {lang === 'fr' && (
             <T c="font-body-sm text-body-sm text-on-surface-variant">Les leçons sont en anglais, comme l’examen du GCE. Vous pouvez poser vos questions au tuteur en français.</T>
@@ -282,8 +373,9 @@ export default function Lesson({ navigation, route }) {
 
           <V c="gap-4">
             {lesson.body.map((p, i) => (
-              <V key={i} c={playing && para === i + 1 ? 'p-space-sm rounded-lg bg-surface-container-low border-l-4 border-secondary' : ''}>
+              <V key={i} c={(playing && para === i + 1) || seg?.at === i ? 'p-space-sm rounded-lg bg-surface-container-low border-l-4 border-secondary' : ''}>
                 <Paragraph text={p} />
+                {teacherSays(i)}
               </V>
             ))}
           </V>
@@ -304,7 +396,7 @@ export default function Lesson({ navigation, route }) {
                 {lesson.examples.length === 1 ? L('Worked example', 'Exemple corrigé') : L('Worked examples', 'Exemples corrigés')}
               </T>
               {lesson.examples.map((e, i) => (
-                <V key={i} c="p-space-md rounded-xl bg-surface-container-lowest border border-surface-container gap-space-xs">
+                <V key={i} c={`p-space-md rounded-xl bg-surface-container-lowest border gap-space-xs ${seg?.at === nBody + i ? 'border-secondary' : 'border-surface-container'}`}>
                   <Rich text={e.q} c="font-body-md text-body-md text-on-surface" />
                   {e.steps.map((st, j) => (
                     <V key={j} c="flex-row gap-space-xs">
@@ -316,6 +408,7 @@ export default function Lesson({ navigation, route }) {
                       </V>
                     </V>
                   ))}
+                  {teacherSays(nBody + i)}
                 </V>
               ))}
             </V>
@@ -366,12 +459,17 @@ export default function Lesson({ navigation, route }) {
 
       <V c="absolute left-0 right-0 bottom-0 bg-surface-container-lowest border-t border-surface-container" style={{ paddingBottom: insets.bottom }}>
         <V c="h-16 px-margin flex-row items-center gap-space-sm">
-          <P c="h-11 pl-1.5 pr-3 rounded-lg bg-secondary flex-row items-center gap-2" onPress={toggle} accessibilityLabel={playing ? L('Pause listening', 'Mettre en pause') : L('Listen to this lesson', 'Écouter cette leçon')}>
+          <P
+            c="h-11 pl-1.5 pr-3 rounded-lg bg-secondary flex-row items-center gap-2"
+            onPress={playing ? toggle : teach}
+            disabled={teachBusy}
+            accessibilityLabel={voice.playing || playing ? L('Pause', 'Mettre en pause') : L('Listen: your teacher explains this lesson', 'Écouter : votre professeur explique cette leçon')}
+          >
             <V c="w-8 h-8 rounded-full bg-surface-container-lowest items-center justify-center">
-              <Ic n={playing ? 'pause' : 'volume_up'} s={20} c="secondary" fill />
+              <Ic n={voice.playing || playing ? 'pause' : 'volume_up'} s={20} c="secondary" fill />
             </V>
             <T c="font-label-md text-label-md text-on-primary" style={{ fontWeight: '700' }}>
-              {playing ? L('Pause', 'Pause') : L('Listen', 'Écouter')}
+              {teachBusy ? L('Preparing', 'Préparation') : voice.playing || playing ? L('Pause', 'Pause') : L('Listen', 'Écouter')}
             </T>
           </P>
           {done ? (
