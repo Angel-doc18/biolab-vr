@@ -256,11 +256,22 @@ const TEACH = {
     summary: 'three or four sentences: pull the parts together to show how the whole works, ask the student one short question to check understanding, say "Think about it", then give the answer, and end with one thing examiners look for',
   },
   practical: {
-    what: 'a practical experiment',
-    parts: 'Method steps, in order',
-    intro: 'two or three sentences saying what the experiment finds out and why it matters',
-    each: 'Each step is two to four sentences: what to do, why it is done, and what to watch for so the result is accurate and safe.',
-    summary: 'two or three sentences pulling it together, including what the results show, and one thing examiners look for',
+    what: 'a practical experiment, as a teacher in the laboratory',
+    parts: 'The method steps, in order',
+    intro: 'three or four sentences: say what the experiment finds out, the scientific idea behind it in simple words, and what we expect to see and why',
+    each:
+      'Each step is a separate explanation of three to five sentences. Say what to do and which apparatus is used, then explain why it is done and the science behind it: what this step controls, measures or makes happen. Say what would go wrong if it were done badly, and give the safety point or the way to make the reading accurate when there is one. Never just repeat the step.',
+    summary:
+      'four or five sentences: say what the results should show and why, how to write the conclusion in the examination, one likely source of error and how to reduce it, and one thing examiners look for',
+  },
+  result: {
+    what: 'the result of a practical the student has just done',
+    parts: 'What the student observed or worked out, in order, ending with the conclusion',
+    intro: 'two sentences: say what the experiment was testing and what the student has found',
+    each:
+      'Each part is a separate explanation of two to four sentences. Explain what this observation, reading or line of working means and why it came out like this, using the science behind it. For a calculation line, say what it calculates and why that step is needed. Never just repeat the line.',
+    summary:
+      'three or four sentences: how to write this conclusion in the examination, one likely source of error and how to reduce it, and one thing examiners look for',
   },
   lesson: {
     what: 'a lesson from the student’s notes',
@@ -273,8 +284,31 @@ const TEACH = {
   },
 };
 
-// kind: 'diagram' (labels and facts), 'practical' (method steps) or 'lesson'
-// (paragraphs and worked examples).
+// The teacher must teach, not read back. A part is "read back" when its
+// explanation is hardly longer than the text it explains, or is mostly made of
+// that text's words; a part that is too short cannot be a real explanation.
+const words = (s) => String(s).toLowerCase().normalize('NFKD').replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+// Small words every sentence shares, left out when comparing wording.
+const COMMON = new Set(
+  'a an the and or but of to in on at by for from with as is are was were be been it its this that these those there their they them we you your our he she his her which who what when where why how not no so than then into out up down over also can will would should could may might must do does did has have had if each all any some more most very just only same such one two three le la les un une des du de et ou en au aux est sont il elle ils elles on nous vous ce cet cette ces qui que quoi dans pour par sur avec pas plus ne se sa son ses leur leurs'.split(' ')
+);
+const content = (s) => words(s).filter((w) => !COMMON.has(w));
+const MIN_WORDS = { diagram: 28, practical: 30, result: 18, lesson: 45 };
+export function readsBack(kind, source, explanation) {
+  const all = words(explanation);
+  if (all.length < MIN_WORDS[kind]) return true;
+  const out = content(explanation);
+  const src = content(source);
+  if (!src.length || !out.length) return false;
+  const known = new Set(src);
+  const copied = out.filter((w) => known.has(w)).length / out.length;
+  return all.length < words(source).length * 1.3 && copied > 0.8;
+}
+const poorParts = (kind, items, reply) => items.map((src, i) => (readsBack(kind, src, reply.items[i]) ? i : -1)).filter((i) => i >= 0);
+
+// kind: 'diagram' (labels and facts), 'practical' (method steps), 'result' (a
+// practical's observations and conclusion) or 'lesson' (paragraphs and worked
+// examples).
 export async function explainItems(env, { kind, subject, lang, title, items, context, className }) {
   const t = TEACH[kind];
   const prompt = [
@@ -293,24 +327,42 @@ Reply with JSON only: {"intro": string, "items": [string], "summary": string}`,
   const provider = aiProvider(env);
   if (!provider) throw new HttpError(503, 'The tutor is not available yet.', 'ai_unavailable');
   const maxTokens = kind === 'lesson' ? 6000 : 4000;
-  for (const temperature of [0.3, 0]) {
+  const tidy = (t) => clean(t).replace(/\*\*/g, '');
+  let feedback = null; // what was wrong with the last reply
+  let best = null; // the best usable reply so far, and how many parts were read back
+  for (const temperature of [0.3, 0.2, 0]) {
+    const messages = [{ role: 'user', content: prompt }];
+    if (feedback) messages.push({ role: 'assistant', content: feedback.reply }, { role: 'user', content: feedback.note });
     let text;
     if (provider === 'groq') {
-      ({ text } = await groqChat(env, { json: true, maxTokens, temperature, messages: [{ role: 'system', content: EXPLAIN_SYSTEM }, { role: 'user', content: prompt }] }));
+      ({ text } = await groqChat(env, { json: true, maxTokens, temperature, messages: [{ role: 'system', content: EXPLAIN_SYSTEM }, ...messages] }));
     } else {
-      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 8000, system: EXPLAIN_SYSTEM, output_config: { effort: 'low' }, ...FALLBACK, messages: [{ role: 'user', content: prompt }] });
+      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 8000, system: EXPLAIN_SYSTEM, output_config: { effort: 'low' }, ...FALLBACK, messages });
       text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
     }
+    let parsed;
     try {
       const raw = clean(text).replace(/^```(?:json)?\s*|\s*```$/g, '');
-      const parsed = Explained.parse(JSON.parse(raw));
-      if (parsed.items.length !== items.length) continue;
-      const tidy = (t) => clean(t).replace(/\*\*/g, '');
-      return { intro: tidy(parsed.intro), items: parsed.items.map(tidy), summary: tidy(parsed.summary) };
+      parsed = Explained.parse(JSON.parse(raw));
     } catch {
-      // malformed reply: try once more at temperature 0
+      feedback = null; // malformed reply: ask again
+      continue;
     }
+    if (parsed.items.length !== items.length) {
+      feedback = { reply: text, note: `Your reply has ${parsed.items.length} items but there are ${items.length} parts. Reply again with exactly ${items.length} items, one per part, in the same order. JSON only.` };
+      continue;
+    }
+    const reply = { intro: tidy(parsed.intro), items: parsed.items.map(tidy), summary: tidy(parsed.summary) };
+    const poor = poorParts(kind, items, reply);
+    if (!poor.length) return reply;
+    if (!best || poor.length < best.poor) best = { reply, poor: poor.length };
+    feedback = {
+      reply: text,
+      note: `Parts ${poor.map((i) => i + 1).join(', ')} only repeat the text or are too short. Do not read the text back: teach each of those parts properly, in your own words, as the instructions say (what it is, what it does or means, why, and how it connects to the rest). Reply again with the whole JSON, all ${items.length} items.`,
+    };
   }
+  // Every attempt read some parts back: keep the best reply if most of it teaches.
+  if (best && best.poor <= Math.floor(items.length / 4)) return best.reply;
   throw new HttpError(502, 'The tutor could not prepare this explanation. Try again.', 'explain_failed');
 }
 

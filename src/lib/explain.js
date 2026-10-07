@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { post } from '../api/client';
 
 // Bump when the way the tutor teaches changes, so old explanations are not reused.
-const VERSION = 2;
+const VERSION = 3;
 
 function hash(s) {
   let h = 5381;

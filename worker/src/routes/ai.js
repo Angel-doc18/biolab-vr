@@ -158,15 +158,15 @@ export async function report(request, env) {
   return ok({ reported: true });
 }
 
-// Spoken teaching of a diagram, a practical or a lesson, pitched at the student's
-// class. Shared and cached per class, so it does not use the student's daily
-// questions; the rate limiter still applies.
-const TEACHING_VERSION = 2; // bump when the teaching prompts change
+// Spoken teaching of a diagram, a practical, a practical's result or a lesson,
+// at the student's class. Shared and cached per class, so it does not use the
+// student's daily questions; the rate limiter still applies.
+const TEACHING_VERSION = 3; // bump when the teaching prompts change
 export async function explain(request, env) {
   const user = await requireUser(request, env);
   requireConsent(user);
   const b = await readJson(request, 48 * 1024);
-  const kind = oneOf(b.kind, 'Kind', ['diagram', 'practical', 'lesson']);
+  const kind = oneOf(b.kind, 'Kind', ['diagram', 'practical', 'result', 'lesson']);
   const long = kind === 'lesson';
   const subject = subjectOr(b.subject);
   const lang = oneOf(b.lang ?? user.lang ?? 'en', 'Language', ['en', 'fr']);

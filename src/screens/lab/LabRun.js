@@ -154,6 +154,46 @@ export default function LabRun({ navigation, route }) {
     voice.play(list);
   };
 
+  // ---------- the teacher explains a result ----------
+  // Why the observations or working came out like this and what they show, how
+  // to write the conclusion, and the likely errors. Without a connection the
+  // result itself is read out.
+  const resultVoice = useNarrator(lang);
+  const [resultKey, setResultKey] = useState(null); // 'result' or 'meaning'
+  const [resultBusy, setResultBusy] = useState(null);
+  const [resultSegs, setResultSegs] = useState([]);
+  const resultSeg = resultVoice.index >= 0 ? resultSegs[resultVoice.index] : null;
+  const teachResult = async (key, parts, fallback) => {
+    if (resultVoice.playing && resultKey === key) return resultVoice.stop();
+    if (resultBusy) return;
+    voice.stop();
+    setResultKey(key);
+    setResultBusy(key);
+    let e = null;
+    try {
+      const items = parts.map((x) => String(x || '').trim()).filter(Boolean).slice(0, 16).map((x) => x.slice(0, 400));
+      e = await fetchExplanation({ kind: 'result', subject: lab.subject, title: lab.title, items, context: lab.objective, lang, className: user?.className });
+    } catch {
+      // read the result itself instead
+    } finally {
+      setResultBusy(null);
+    }
+    const list = e ? segmentsOf(e) : [{ text: fallback, at: null }];
+    setResultSegs(list);
+    resultVoice.play(list);
+  };
+  const teacherOnResult = (key) =>
+    resultKey === key && resultSeg ? (
+      <V c="p-space-sm rounded-lg bg-surface-container-low border-l-4 border-primary-container gap-0.5">
+        <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+          {L('Your teacher', 'Votre professeur')}
+        </T>
+        <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+          {resultSeg.text}
+        </T>
+      </V>
+    ) : null;
+
   // ---------- readings practicals ----------
   const mine = rows[r] || [];
   const take = () => {
@@ -227,20 +267,20 @@ export default function LabRun({ navigation, route }) {
             <V c="gap-space-sm">
               <V c="gap-space-sm">
                 <ListenButton
-                  label={L('Listen to the method', 'Écouter la méthode')}
-                  sub={L('Every step read aloud, one by one', 'Chaque étape lue à voix haute')}
+                  label={L('Listen: your teacher explains this experiment', 'Écouter : votre professeur explique cette expérience')}
+                  sub={L('The science behind each step, what to watch for, and what the results show', 'La science derrière chaque étape, les précautions et ce que montrent les résultats')}
                   stopLabel={L('Stop listening', 'Arrêter l’écoute')}
-                  playing={voice.playing && mode === 'method'}
-                  onPress={listenMethod}
-                />
-                <ListenButton
-                  label={L('Listen: the tutor explains each step', 'Écouter : le tuteur explique chaque étape')}
-                  sub={L('Why each step is done and what to watch for', 'Pourquoi chaque étape et ce qu’il faut observer')}
-                  stopLabel={L('Stop listening', 'Arrêter l’écoute')}
-                  busyLabel={L('The tutor is preparing', 'Le tuteur prépare')}
+                  busyLabel={L('Your teacher is preparing', 'Votre professeur prépare')}
                   playing={voice.playing && mode === 'explain'}
                   busy={busy}
                   onPress={explain}
+                />
+                <ListenButton
+                  size="sm"
+                  label={L('Or read the method aloud, step by step', 'Ou lire la méthode à voix haute, étape par étape')}
+                  stopLabel={L('Stop reading', 'Arrêter la lecture')}
+                  playing={voice.playing && mode === 'method'}
+                  onPress={listenMethod}
                 />
               </V>
               {!!note && <T c="font-body-sm text-body-sm text-on-surface-variant">{note}</T>}
@@ -338,12 +378,15 @@ export default function LabRun({ navigation, route }) {
                       {analysis.conclusion}
                     </T>
                     <ListenButton
-                      label={L('Listen to the result', 'Écouter le résultat')}
-                      sub={L('The working and what it shows', 'Le calcul et ce qu’il montre')}
+                      label={L('Listen: your teacher explains the result', 'Écouter : votre professeur explique le résultat')}
+                      sub={L('Why it came out like this and what it shows', 'Pourquoi ce résultat et ce qu’il montre')}
                       stopLabel={L('Stop listening', 'Arrêter l’écoute')}
-                      playing={voice.saying === 'result'}
-                      onPress={() => (voice.saying === 'result' ? voice.stop() : voice.say(`${analysis.lines.join(' ')} ${analysis.conclusion}`, { keep: false, key: 'result' }))}
+                      busyLabel={L('Your teacher is preparing', 'Votre professeur prépare')}
+                      playing={resultVoice.playing && resultKey === 'result'}
+                      busy={resultBusy === 'result'}
+                      onPress={() => teachResult('result', [...analysis.lines, analysis.conclusion], `${analysis.lines.join(' ')} ${analysis.conclusion}`)}
                     />
+                    {teacherOnResult('result')}
                   </V>
                 ) : (
                   mine.length > 0 && (
@@ -382,16 +425,18 @@ export default function LabRun({ navigation, route }) {
                   <Panel panel={m.B} magnify={lab.magnify} />
                 </V>
                 <ListenButton
-                  label={L('Listen: what this result means', 'Écouter : ce que montre ce résultat')}
-                  sub={L('What you see and what it tells you', 'Ce que vous voyez et ce que cela montre')}
+                  label={L('Listen: your teacher explains what this result means', 'Écouter : votre professeur explique ce résultat')}
+                  sub={L('Why it happens and what it tells you', 'Pourquoi cela se produit et ce que cela montre')}
                   stopLabel={L('Stop listening', 'Arrêter l’écoute')}
-                  playing={voice.saying === 'meaning'}
+                  busyLabel={L('Your teacher is preparing', 'Votre professeur prépare')}
+                  playing={resultVoice.playing && resultKey === 'meaning'}
+                  busy={resultBusy === 'meaning'}
                   onPress={() => {
-                    if (voice.saying === 'meaning') return voice.stop();
                     const e = lab.record(r, t);
-                    voice.say(`${e.observation} ${e.conclusion}`, { key: 'meaning' });
+                    teachResult('meaning', [e.observation, e.conclusion], `${e.observation} ${e.conclusion}`);
                   }}
                 />
+                {teacherOnResult('meaning')}
               </V>
             </Section>
           )}
