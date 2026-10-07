@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Speech from '../../lib/voice';
 import { Ic, P, T, V } from '../../ui/kit';
@@ -63,6 +64,28 @@ function Paragraph({ text }) {
         )
       )}
     </V>
+  );
+}
+
+// The teacher's pointer beside the paragraph or worked example being taught: an
+// arrow in the margin that nudges towards the text.
+function PointerMark() {
+  const [nudge] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(nudge, { toValue: 1, duration: 450, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(nudge, { toValue: 0, duration: 450, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [nudge]);
+  const translateX = nudge.interpolate({ inputRange: [0, 1], outputRange: [-3, 3] });
+  return (
+    <Animated.View pointerEvents="none" style={{ position: 'absolute', left: -24, top: 6, transform: [{ translateX }] }}>
+      <Ic n="arrow_right_alt" s={24} c="secondary" />
+    </Animated.View>
   );
 }
 
@@ -205,6 +228,10 @@ export default function Lesson({ navigation, route }) {
     [lesson]
   );
   const seg = voice.index >= 0 ? segs[voice.index] : null;
+  // Follow the part being taught (or read) so it stays on screen.
+  const scrollRef = useRef(null);
+  const layoutY = useRef({ body: 0, examples: 0, para: [], example: [] });
+  const followAt = seg?.at ?? null;
   const teacherSays = (at) =>
     seg && seg.at === at ? (
       <V c="mt-space-xs p-space-sm rounded-lg bg-surface-container-low border-l-4 border-primary-container gap-0.5">
@@ -267,6 +294,16 @@ export default function Lesson({ navigation, route }) {
   const [playing, setPlaying] = useState(false);
   const [para, setPara] = useState(0);
   const playRef = useRef(false);
+  // The paragraph (or worked example) to keep on screen: the one the teacher is
+  // on, or the one being read word for word.
+  const readingAt = playing && para >= 1 && para <= nBody ? para - 1 : null;
+  const showAt = followAt ?? readingAt;
+  useEffect(() => {
+    if (showAt == null) return;
+    const y = layoutY.current;
+    const top = showAt < nBody ? y.body + (y.para[showAt] || 0) : y.examples + (y.example[showAt - nBody] || 0);
+    scrollRef.current?.scrollTo({ y: Math.max(0, top - 80), animated: true });
+  }, [showAt, nBody]);
   const started = useRef(Date.now());
 
   const speakFrom = (i) => {
@@ -337,6 +374,7 @@ export default function Lesson({ navigation, route }) {
           />
         }
         contentStyle={{ paddingBottom: insets.bottom + 90 }}
+        scrollRef={scrollRef}
       >
         <V c="pb-6 gap-space-lg pt-space-md">
           <V c="gap-space-xs">
@@ -371,9 +409,14 @@ export default function Lesson({ navigation, route }) {
             <T c="font-body-sm text-body-sm text-on-surface-variant">Les leçons sont en anglais, comme l’examen du GCE. Vous pouvez poser vos questions au tuteur en français.</T>
           )}
 
-          <V c="gap-4">
+          <V c="gap-4" onLayout={(e) => (layoutY.current.body = e.nativeEvent.layout.y)}>
             {lesson.body.map((p, i) => (
-              <V key={i} c={(playing && para === i + 1) || seg?.at === i ? 'p-space-sm rounded-lg bg-surface-container-low border-l-4 border-secondary' : ''}>
+              <V
+                key={i}
+                c={(playing && para === i + 1) || seg?.at === i ? 'p-space-sm rounded-lg bg-surface-container-low border-l-4 border-secondary' : ''}
+                onLayout={(e) => (layoutY.current.para[i] = e.nativeEvent.layout.y)}
+              >
+                {((playing && para === i + 1) || seg?.at === i) && <PointerMark />}
                 <Paragraph text={p} />
                 {teacherSays(i)}
               </V>
@@ -391,12 +434,17 @@ export default function Lesson({ navigation, route }) {
           )}
 
           {!!lesson.examples?.length && (
-            <V c="gap-space-sm">
+            <V c="gap-space-sm" onLayout={(e) => (layoutY.current.examples = e.nativeEvent.layout.y)}>
               <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
                 {lesson.examples.length === 1 ? L('Worked example', 'Exemple corrigé') : L('Worked examples', 'Exemples corrigés')}
               </T>
               {lesson.examples.map((e, i) => (
-                <V key={i} c={`p-space-md rounded-xl bg-surface-container-lowest border gap-space-xs ${seg?.at === nBody + i ? 'border-secondary' : 'border-surface-container'}`}>
+                <V
+                  key={i}
+                  c={`p-space-md rounded-xl bg-surface-container-lowest border gap-space-xs ${seg?.at === nBody + i ? 'border-secondary' : 'border-surface-container'}`}
+                  onLayout={(ev) => (layoutY.current.example[i] = ev.nativeEvent.layout.y)}
+                >
+                  {seg?.at === nBody + i && <PointerMark />}
                   <Rich text={e.q} c="font-body-md text-body-md text-on-surface" />
                   {e.steps.map((st, j) => (
                     <V key={j} c="flex-row gap-space-xs">

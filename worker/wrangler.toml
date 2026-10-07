@@ -21,7 +21,11 @@ ALLOWED_ORIGINS = "http://localhost:8081"
 # Characters of new natural-voice speech allowed per day across all users.
 VOICE_DAILY_CHARS = "400000"
 # "melo" fits the Workers free allowance; "aura" (British voices) needs Workers Paid.
+# A cloned teacher's voice: "fish" (Fish Audio) or "elevenlabs", with OWN_VOICE_ID
+# below and the service's key set as a secret (npx wrangler secret put FISH_API_KEY
+# or ELEVENLABS_API_KEY). Until the key is set, "melo" is used.
 VOICE_ENGINE = "melo"
+# OWN_VOICE_ID = ""
 
 [[d1_databases]]
 binding = "DB"

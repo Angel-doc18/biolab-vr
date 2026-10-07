@@ -7,13 +7,90 @@
 // left of its point is right-aligned, one right of it left-aligned, and one
 // directly above or below it (tx === px) is centred with the line running
 // vertically. Omit (px, py) for a caption with no line. "\n" starts a new line.
+import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Line, Path, Polygon, Text as SvgText } from 'react-native-svg';
 
 export const INK = '#1f2933';
 const RULE = '#3d4852';
 const LIT = '#0369a1';
 const SIZE = 10.5;
+
+// ---------- the teacher's pointer ----------
+// A wooden pointer whose tip rests on the part being explained. It slides from
+// one part to the next, and a ring pulses once where it lands.
+const MOVE_MS = 450;
+const PING_MS = 650;
+const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+
+function Stick({ x, y, a, len }) {
+  const dx = Math.cos(a);
+  const dy = Math.sin(a);
+  const nx = -dy;
+  const ny = dx;
+  const at = (d, half) => [
+    [x + dx * d + nx * half, y + dy * d + ny * half],
+    [x + dx * d - nx * half, y + dy * d - ny * half],
+  ];
+  const band = (d0, h0, d1, h1) => {
+    const [p1, p2] = at(d0, h0);
+    const [p3, p4] = at(d1, h1);
+    return `${p1} ${p3} ${p4} ${p2}`;
+  };
+  const w = Math.max(2, len * 0.06);
+  return (
+    <G>
+      <G opacity={0.18} transform="translate(1.6 1.8)">
+        <Polygon points={band(0, w * 0.3, len, w)} fill="#000000" />
+      </G>
+      <Polygon points={band(len * 0.12, w * 0.4, len * 0.72, w * 0.82)} fill="#c08a4a" />
+      <Polygon points={band(len * 0.72, w * 0.82, len, w)} fill="#6b4423" />
+      <Polygon points={band(0, w * 0.28, len * 0.12, w * 0.4)} fill="#1f2933" />
+    </G>
+  );
+}
+
+function Pointer({ x, y, a, len, ring }) {
+  const [pos, setPos] = useState({ x, y, a, ping: 1 });
+  const now = useRef(pos);
+  useEffect(() => {
+    const from = now.current;
+    const start = Date.now();
+    let frame;
+    const tick = () => {
+      const t = Math.min(1, (Date.now() - start) / MOVE_MS);
+      const k = ease(t);
+      const p = { x: from.x + (x - from.x) * k, y: from.y + (y - from.y) * k, a: from.a + (a - from.a) * k, ping: t < 1 ? 0 : Math.min(1, (Date.now() - start - MOVE_MS) / PING_MS) };
+      now.current = p;
+      setPos(p);
+      if (p.ping < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [x, y, a]);
+  const arrived = pos.ping > 0 || (Math.abs(pos.x - x) < 0.5 && Math.abs(pos.y - y) < 0.5);
+  return (
+    <G pointerEvents="none">
+      {arrived && <Circle cx={x} cy={y} r={ring} fill="none" stroke={LIT} strokeWidth={1.4} />}
+      {arrived && pos.ping < 1 && <Circle cx={x} cy={y} r={ring * (1 + pos.ping * 1.4)} fill="none" stroke={LIT} strokeWidth={1.2} opacity={1 - pos.ping} />}
+      <Stick x={pos.x} y={pos.y} a={pos.a} len={len} />
+    </G>
+  );
+}
+
+// Where the pointer's handle goes: away from the label (so the label stays
+// readable) and inside the frame where possible.
+function pointerAngle([, tx, ty, px, py], f, len) {
+  const deg = (d) => (d * Math.PI) / 180;
+  const vertical = Math.abs(tx - px) < 1;
+  const prefer = vertical ? (ty < py ? [40, 140, -40, -140] : [-40, -140, 40, 140]) : tx < px ? [-40, 40, -140, 140] : [-140, 140, -40, 40];
+  const inside = (d) => {
+    const ex = px + Math.cos(deg(d)) * len;
+    const ey = py + Math.sin(deg(d)) * len;
+    return ex >= f.x && ex <= f.x + f.w && ey >= f.y && ey <= f.y + f.h;
+  };
+  return deg(prefer.find(inside) ?? prefer[0]);
+}
 
 // state: 'lit' (being explained), 'dim' (another label is) or undefined.
 function Label({ text, tx, ty, px, py, size = SIZE, state, onPress }) {
@@ -75,6 +152,9 @@ export function DiagramView({ spec, maxHeight, labels = true, active = null, onL
   if (!spec) return null;
   const { w, h, art, labels: list = [] } = spec;
   const f = labels ? frame(w, h, list) : { x: 0, y: 0, w, h };
+  // The teacher's pointer rests on the part being explained.
+  const target = labels && active != null && list[active] && list[active][3] != null ? list[active] : null;
+  const len = Math.max(40, Math.min(84, Math.min(f.w, f.h) * 0.26));
   return (
     <View style={{ width: '100%', aspectRatio: f.w / f.h, maxHeight, alignSelf: 'center' }}>
       <Svg width="100%" height="100%" viewBox={`${f.x} ${f.y} ${f.w} ${f.h}`}>
@@ -93,6 +173,7 @@ export function DiagramView({ spec, maxHeight, labels = true, active = null, onL
               onPress={onLabel && px != null ? () => onLabel(i) : undefined}
             />
           ))}
+        {!!target && <Pointer x={target[3]} y={target[4]} a={pointerAngle(target, f, len)} len={len} ring={Math.max(5, len * 0.14)} />}
       </Svg>
     </View>
   );

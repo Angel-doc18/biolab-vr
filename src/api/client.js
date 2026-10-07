@@ -90,7 +90,7 @@ async function raw(path, { method = 'GET', body, token, timeout = 20000, binary 
   }
   if (binary && res.ok) {
     try {
-      return { bytes: await res.arrayBuffer(), type: res.headers.get('content-type') || '' };
+      return { bytes: await res.arrayBuffer(), type: res.headers.get('content-type') || '', cache: res.headers.get('x-voice-cache') || '' };
     } catch {
       throw new ApiError('The connection was interrupted. Try again.', { code: 'offline' });
     }

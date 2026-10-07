@@ -5,7 +5,8 @@
 // speak(text, options) and stop() take the same options as expo-speech.
 import { Platform } from 'react-native';
 import * as Speech from 'expo-speech';
-import { postBytes } from '../api/client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { get, postBytes } from '../api/client';
 import { forSpeech, speechChunks } from './pronounce';
 
 export const VOICES = {
@@ -58,12 +59,50 @@ function storedClip(key) {
   return null;
 }
 
+// The voice the server speaks in (for example "melo", or a cloned teacher's
+// voice). Clips are kept under it, and the old ones are cleared when it changes,
+// so a phone never replays sentences in a voice the school no longer uses.
+const TAG_KEY = 'bs:voiceTag';
+let tagPromise = null;
+function clearClips() {
+  if (Platform.OS === 'web') return;
+  try {
+    voiceDir().delete();
+  } catch {
+    // nothing kept yet
+  }
+}
+function serverVoice() {
+  if (!tagPromise) {
+    tagPromise = (async () => {
+      let saved = '';
+      try {
+        saved = (await AsyncStorage.getItem(TAG_KEY)) || '';
+      } catch {
+        // no storage
+      }
+      try {
+        const tag = (await get('/v1/health', { timeout: 8000 }))?.voice || '';
+        if (tag && tag !== saved) {
+          clearClips();
+          AsyncStorage.setItem(TAG_KEY, tag).catch(() => {});
+        }
+        return tag || saved;
+      } catch {
+        return saved; // offline: keep using the clips already on the phone
+      }
+    })();
+  }
+  return tagPromise;
+}
+
 // A playable address for one piece of speech (already rewritten).
 function clip(text, lang, keep) {
   const voice = voiceFor(lang);
-  const key = hash(`${voice}|${lang}|${text}`);
-  if (clips.has(key)) return clips.get(key);
+  const id = `${voice}|${lang}|${text}`;
+  if (clips.has(id)) return clips.get(id);
   const p = (async () => {
+    const key = hash(`${await serverVoice()}|${id}`);
     const stored = storedClip(key);
     if (stored) return stored;
     if (Date.now() < pauseUntil) throw new Error('natural voice paused');
@@ -79,14 +118,17 @@ function clip(text, lang, keep) {
     const bytes = new Uint8Array(got.bytes);
     if (Platform.OS === 'web') return URL.createObjectURL(new Blob([bytes], { type: wav ? 'audio/wav' : 'audio/mpeg' }));
     const { File } = require('expo-file-system');
-    const f = new File(voiceDir(), `${key}.${wav ? 'wav' : 'mp3'}`);
+    // A clip the server did not keep (a one-off, or said in the stand-in voice
+    // because the cloned voice was unavailable) is played but not reused later.
+    const once = got.cache === 'once' ? `-once-${Date.now()}` : '';
+    const f = new File(voiceDir(), `${key}${once}.${wav ? 'wav' : 'mp3'}`);
     if (f.exists) f.delete();
     f.create();
     f.write(bytes);
     return f.uri;
   })();
-  clips.set(key, p);
-  p.catch(() => clips.delete(key));
+  clips.set(id, p);
+  p.catch(() => clips.delete(id));
   return p;
 }
 

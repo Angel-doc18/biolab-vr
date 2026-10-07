@@ -17,7 +17,7 @@ import { aiProvider } from './lib/ai.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
 const routes = [
-  ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), messaging: channels(env), payments: paymentsConfigured(env), voices: voice.voiceChoices(env) })],
+  ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), messaging: channels(env), payments: paymentsConfigured(env), voices: voice.voiceChoices(env), voice: voice.voiceTag(env) })],
   ['POST', '/v1/voice', voice.speak],
   ['POST', '/v1/me/consent', consent.requestConsent],
   ['GET', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentPage],
