@@ -486,8 +486,10 @@ export const LESSONS_1 = [
       'Electrolysis of **concentrated sodium chloride solution (brine)** gives chlorine at the anode, hydrogen at the cathode, and leaves sodium hydroxide in solution. All three products are useful: chlorine for bleach and water treatment, hydrogen as a fuel, sodium hydroxide for soap and paper.',
       'With **copper electrodes** in copper(II) sulfate solution, copper atoms at the anode lose electrons and go into solution, while copper ions gain electrons and are deposited on the cathode. The anode gets thinner and the cathode thicker by the same mass. This is how impure copper is **purified**: the impure copper is the anode and pure copper builds up on the cathode.',
       'In **electroplating**, the object to be plated is the cathode, the plating metal is the anode, and the electrolyte contains ions of the plating metal. Objects are plated with silver or chromium for appearance and to prevent corrosion. **Aluminium** is extracted by electrolysis of aluminium oxide dissolved in molten cryolite.',
+      '**Practical: electrolysis of water.** Fill a **Hofmann voltameter** with water containing a little dilute sulphuric acid (pure water barely conducts) and pass a current. Bubbles form at both electrodes: **hydrogen** at the cathode (−) and **oxygen** at the anode (+), in the ratio **2 : 1 by volume**, because water is H₂O: 2H₂O → 2H₂ + O₂. Test them: hydrogen burns with a squeaky pop; oxygen relights a glowing splint.',
+      '**Practical: copper plating.** Clean an iron nail or key with sandpaper and connect it to the **negative** terminal (it is the cathode). Connect a strip of copper to the positive terminal (the anode). Dip both into copper(II) sulphate solution and pass a small current for a few minutes. The nail is coated with pink copper, while the copper anode slowly dissolves. In industry, nickel, chromium and silver are plated in the same way.',
     ],
-    figure: ['copper-electrolysis', 'electrolysis'],
+    figure: ['copper-electrolysis', 'electrolysis', 'hofmann-voltameter'],
     tip: 'For a solution, decide each electrode separately using the **reactivity series** (cathode) and **concentration of halide** (anode). Then write the half equation for each.',
     check: {
       q: 'What is produced at the anode when dilute sulfuric acid is electrolysed with inert electrodes?',

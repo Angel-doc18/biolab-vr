@@ -8,6 +8,7 @@
 // shuffled when shown.
 import { BANK } from './bank';
 import { UNITS_12 } from './units12';
+import { UNITS_F5 } from './unitsF5';
 
 // MINESEC modules (the Chemistry part of Science and Technology).
 export const GROUPS = [
@@ -311,6 +312,7 @@ const UNITS_345 = [
     n: 2,
     term: 2,
     seq: 4,
+    alsoIn: { 'Form 5': { n: 3.5, term: 1, seq: 2 } },
     group: 'energy',
     icon: 'bolt',
     diagram: 'electrolysis',
@@ -473,6 +475,8 @@ const UNITS_345 = [
     id: 'ch-f5-gases',
     form: 'Form 5',
     n: 1,
+    term: 1,
+    seq: 1,
     alsoIn: { 'Form 4': { n: 1.5, term: 2, seq: 4 } },
     group: 'matter',
     icon: 'air',
@@ -497,6 +501,8 @@ const UNITS_345 = [
     id: 'ch-energy',
     form: 'Form 5',
     n: 2,
+    term: 1,
+    seq: 1,
     group: 'energy',
     icon: 'local_fire_department',
     diagram: 'energy-profile',
@@ -521,6 +527,8 @@ const UNITS_345 = [
     id: 'ch-f5-rates',
     form: 'Form 5',
     n: 3,
+    term: 1,
+    seq: 1,
     group: 'matter',
     icon: 'speed',
     diagram: 'rate-graph',
@@ -543,6 +551,8 @@ const UNITS_345 = [
     id: 'ch-metals',
     form: 'Form 5',
     n: 4,
+    term: 2,
+    seq: 3,
     group: 'environment',
     icon: 'factory',
     diagram: 'blast-furnace',
@@ -561,6 +571,8 @@ const UNITS_345 = [
     id: 'ch-nonmetals',
     form: 'Form 5',
     n: 5,
+    term: 2,
+    seq: 4,
     group: 'environment',
     icon: 'oil_barrel',
     diagram: 'fractionating-column',
@@ -568,7 +580,7 @@ const UNITS_345 = [
     title: 'Chemistry in Society: Heavy Chemical Industries',
     short: 'Chemical Industries',
     focus: 'Ammonia, sulphuric acid, aluminium, cement, soap and oil refining; pollution',
-    lessonIds: ['ch-nonmetals-3', 'ch-industry-1'],
+    lessonIds: ['ch-nonmetals-3', 'ch-industry-1', 'ch-pollution-f5'],
     vr: vrOf('ch-nonmetals'),
     quiz: [
       Q('Aluminium is produced at Edéa mainly because of the cheap:', ['Hydroelectric power', 'Coal', 'Bauxite mined in the town', 'Sea water'], 'The electrolysis of alumina uses a very large amount of electricity.'),
@@ -585,4 +597,4 @@ const UNITS_345 = [
   },
 ];
 
-export const units = [...UNITS_12, ...UNITS_345];
+export const units = [...UNITS_12, ...UNITS_345, ...UNITS_F5];
