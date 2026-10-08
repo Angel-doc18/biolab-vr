@@ -9,6 +9,7 @@
 // shuffled when shown.
 import { BANK } from './bank';
 import { UNITS_12 } from './units12';
+import { UNITS_OL } from './unitsOL';
 
 // MINESEC modules, class by class.
 export const GROUPS = [
@@ -44,7 +45,7 @@ const UNITS_345 = [
     title: 'Physical Quantities and Measurement',
     short: 'Measurement',
     focus: 'SI units, measuring length, time, mass, volume and temperature, mass and weight, laboratory safety',
-    lessonIds: ['ph-measure-1', 'ph-measure-2', 'ph-lab-1'],
+    lessonIds: ['ph-measure-1', 'ph-measure-2', 'ph-vernier-1', 'ph-lab-1', 'ph-project-f3'],
     vr: vrOf('ph-measure'),
     quiz: [
       ...pick('ph-measure', 0, 1, 2, 3, 5, 8, 9),
@@ -178,7 +179,7 @@ const UNITS_345 = [
     title: 'Light and the Electromagnetic Spectrum',
     short: 'Light',
     focus: 'Rays, reflection, refraction and refractive index, total internal reflection, lenses and images, dispersion, the electromagnetic spectrum and its hazards',
-    lessonIds: ['ph-light-1', 'ph-light-2', 'ph-light-3', 'ph-lens-2', 'ph-spectrum-2'],
+    lessonIds: ['ph-shadows-1', 'ph-light-1', 'ph-light-2', 'ph-light-3', 'ph-lens-2', 'ph-spectrum-2'],
     vr: vrOf('ph-light'),
     quiz: [
       ...pick('ph-light', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
@@ -443,6 +444,7 @@ const UNITS_345 = [
     id: 'ph-f5-kinematics',
     form: 'Form 5',
     n: 5,
+    alsoIn: { 'Form 3': { n: 4.5 } },
     group: 'mech',
     icon: 'trending_up',
     diagram: 'speed-time',
@@ -450,7 +452,7 @@ const UNITS_345 = [
     title: 'Describing Motion',
     short: 'Motion',
     focus: 'Distance, displacement, speed, velocity and acceleration, motion graphs, the equations of uniformly accelerated motion, free fall',
-    lessonIds: ['ph-motion-1', 'ph-equations-1'],
+    lessonIds: ['ph-motiontypes-1', 'ph-motion-1', 'ph-equations-1'],
     vr: null,
     quiz: [
       ...pick('ph-motion', 0, 1, 2, 3, 9),
@@ -465,6 +467,7 @@ const UNITS_345 = [
     id: 'ph-motion',
     form: 'Form 5',
     n: 6,
+    alsoIn: { 'Form 3': { n: 4.6 } },
     group: 'mech',
     icon: 'speed',
     diagram: 'forces-car',
@@ -508,4 +511,4 @@ const UNITS_345 = [
   },
 ];
 
-export const units = [...UNITS_12, ...UNITS_345];
+export const units = [...UNITS_12, ...UNITS_345, ...UNITS_OL];

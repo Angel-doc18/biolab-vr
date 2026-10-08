@@ -10,5 +10,6 @@ import { LESSONS_2 } from './lessons2';
 import { LESSONS_3 } from './lessons3';
 import { LESSONS_4 } from './lessons4';
 import { LESSONS_5 } from './lessons5';
+import { LESSONS_OL } from './lessonsOL';
 
-export const LESSONS = [...LESSONS_12, ...LESSONS_1, ...LESSONS_2, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5];
+export const LESSONS = [...LESSONS_12, ...LESSONS_1, ...LESSONS_2, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5, ...LESSONS_OL];
