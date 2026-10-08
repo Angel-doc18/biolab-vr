@@ -9,6 +9,7 @@
 import { BANK } from './bank';
 import { UNITS_12 } from './units12';
 import { UNITS_F1 } from './unitsF1';
+import { UNITS_F4 } from './unitsF4';
 
 // MINESEC modules.
 export const GROUPS = [
@@ -256,6 +257,8 @@ const UNITS_345 = [
     id: 'bi-f4-plants',
     form: 'Form 4',
     n: 1,
+    term: 1,
+    seq: 1,
     group: 'living',
     icon: 'potted_plant',
     diagram: 'leaf-section',
@@ -263,7 +266,7 @@ const UNITS_345 = [
     title: 'Nutrition in Plants',
     short: 'Plant Nutrition',
     focus: 'Uptake of water and minerals, transpiration, photosynthesis, translocation and food storage',
-    lessonIds: ['bi-plantneeds-1', 'transport-3', 'nutrition-1', 'gas-3', 'bi-translocation-1'],
+    lessonIds: ['bi-plantneeds-1', 'transport-3', 'nutrition-1', 'bi-photo-2', 'gas-3', 'bi-translocation-1'],
     vr: null,
     quiz: [
       ...pick('transport', 4, 5, 8),
@@ -280,6 +283,8 @@ const UNITS_345 = [
     id: 'nutrition',
     form: 'Form 4',
     n: 2,
+    term: 1,
+    seq: 2,
     group: 'living',
     icon: 'gastroenterology',
     diagram: 'digestive-system',
@@ -287,7 +292,7 @@ const UNITS_345 = [
     title: 'Nutrition in Animals: Food, Enzymes and Digestion',
     short: 'Animal Nutrition',
     focus: 'Classes of food, enzymes, the gut of humans, herbivores, carnivores and birds, and the fate of digested food',
-    lessonIds: ['nutrition-2', 'bi-foodchem-1', 'bi-enzyme-1', 'nutrition-3', 'bi-teeth-1', 'bi-absorb-1'],
+    lessonIds: ['nutrition-2', 'bi-foodchem-1', 'bi-enzyme-1', 'bi-enzyme-2', 'nutrition-3', 'bi-teeth-1', 'bi-absorb-1'],
     vr: vrOf('nutrition'),
     quiz: [
       ...pick('nutrition', 0, 1, 2, 4, 5, 7, 9),
@@ -303,6 +308,8 @@ const UNITS_345 = [
     id: 'bi-f4-immunity',
     form: 'Form 4',
     n: 3,
+    term: 2,
+    seq: 3,
     group: 'health',
     icon: 'vaccines',
     diagram: 'antibody-response',
@@ -329,6 +336,8 @@ const UNITS_345 = [
     id: 'transport',
     form: 'Form 4',
     n: 4,
+    term: 2,
+    seq: 3,
     group: 'health',
     icon: 'cardiology',
     diagram: 'heart-section',
@@ -351,6 +360,8 @@ const UNITS_345 = [
     id: 'gas',
     form: 'Form 4',
     n: 5,
+    term: 2,
+    seq: 4,
     group: 'health',
     icon: 'pulmonology',
     diagram: 'breathing-system',
@@ -371,6 +382,8 @@ const UNITS_345 = [
     id: 'kidney',
     form: 'Form 4',
     n: 6,
+    term: 2,
+    seq: 4,
     group: 'health',
     icon: 'nephrology',
     diagram: 'nephron',
@@ -391,6 +404,8 @@ const UNITS_345 = [
     id: 'locomotion',
     form: 'Form 4',
     n: 7,
+    term: 3,
+    seq: 5,
     group: 'health',
     icon: 'orthopedics',
     diagram: 'arm-elbow',
@@ -411,6 +426,8 @@ const UNITS_345 = [
     id: 'bi-f4-sapro',
     form: 'Form 4',
     n: 8,
+    term: 3,
+    seq: 5,
     group: 'env',
     icon: 'recycling',
     diagram: 'rhizopus',
@@ -437,6 +454,8 @@ const UNITS_345 = [
     id: 'bi-f4-parasites',
     form: 'Form 4',
     n: 9,
+    term: 3,
+    seq: 5,
     group: 'env',
     icon: 'pest_control',
     diagram: 'malaria-cycle',
@@ -729,4 +748,4 @@ const UNITS_345 = [
 ];
 
 // Forms 1 and 2 first, then Forms 3 to 5.
-export const units = [...UNITS_12, ...UNITS_F1, ...UNITS_345];
+export const units = [...UNITS_12, ...UNITS_F1, ...UNITS_345, ...UNITS_F4];

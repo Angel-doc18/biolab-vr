@@ -10,6 +10,7 @@ import { LESSONS_4 } from './lessons4';
 import { LESSONS_5 } from './lessons5';
 import { LESSONS_12 } from './lessons12';
 import { LESSONS_F1 } from './lessonsF1';
+import { LESSONS_F4 } from './lessonsF4';
 
 const LESSONS_1 = [
   // ---------------- Unit 1: Cells ----------------
@@ -210,6 +211,7 @@ const LESSONS_1 = [
       'The heart has four chambers. The **right atrium** receives deoxygenated blood from the body through the vena cava. The right ventricle pumps it to the lungs in the **pulmonary artery**. Oxygenated blood returns in the pulmonary vein to the **left atrium** and is pumped to the body by the **left ventricle** through the **aorta**.',
       'The wall of the left ventricle is thicker than the right because it must pump blood all round the body. **Valves** (bicuspid, tricuspid and semilunar) stop blood flowing backwards.',
       '**Arteries** carry blood away from the heart and have thick, muscular, elastic walls to withstand high pressure. **Veins** carry blood back at low pressure and have valves. **Capillaries** have walls one cell thick so that substances can be exchanged with tissues.',
+      '**Practical: looking inside a heart.** A goat or sheep heart from the market can be cut open with care. You can find the four chambers, see that the left ventricle wall is much thicker than the right, find the thin strings (tendons) that hold the valves, and push a pencil into the aorta and the pulmonary artery to see where they leave. Wear gloves and wash your hands afterwards.',
     ],
     figure: ['heart-section', 'blood-vessels'],
     tip: 'The pulmonary artery is the only artery carrying **deoxygenated** blood, and the pulmonary vein the only vein carrying oxygenated blood. This is a favourite Paper 1 trap.',
@@ -236,6 +238,7 @@ const LESSONS_1 = [
       'Blood is made of **plasma** with red cells, white cells and platelets. Plasma carries dissolved glucose, amino acids, carbon dioxide, urea, hormones and heat.',
       '**Red blood cells** carry oxygen as oxyhaemoglobin. They are biconcave discs with no nucleus, giving a large surface area and room for more **haemoglobin**.',
       '**White blood cells** defend the body. **Phagocytes** engulf and digest bacteria. **Lymphocytes** produce **antibodies** that recognise and destroy particular pathogens. **Platelets** help blood to clot at a wound, which stops bleeding and keeps pathogens out.',
+      '**Practical: a blood smear under the microscope.** On a prepared, stained slide of human blood, most cells are pale pink **red cells** with no nucleus. Here and there you see larger **white cells** with a stained nucleus, and tiny **platelets**. Count the cells in one field of view: red cells far outnumber white cells, by about 600 to 1.',
       '**Vaccination** introduces a harmless form of a pathogen. Lymphocytes make antibodies and memory cells, so a later infection is destroyed quickly. This is **active immunity**. Cameroon’s immunisation programme protects children against measles, polio and other diseases this way.',
     ],
     figure: 'blood-cells',
@@ -262,6 +265,7 @@ const LESSONS_1 = [
     body: [
       'Plants have two transport tissues. **Xylem** carries water and mineral salts from the roots to the leaves; its vessels are dead, hollow tubes strengthened with **lignin**. **Phloem** carries sugars and amino acids from the leaves to other parts of the plant; this is **translocation**.',
       'Water enters **root hair cells** by osmosis, crosses the root cortex and enters the xylem. It moves up the stem as a continuous column.',
+      '**Practical: the path of water in a stem.** Stand a stalk of celery, or a young balsam plant, in water coloured with red ink or eosin dye for a few hours. Cut across the stem: only small dots in a ring are coloured. These are the **xylem** vessels, which carry the water up. In a cut lengthways, coloured lines run up into the veins of the leaves.',
       '**Transpiration** is the loss of water vapour from the leaves, mainly through the stomata. It pulls water up the xylem (transpiration pull), cools the leaf and carries minerals upward.',
       'The rate of transpiration increases with higher **temperature**, lower **humidity**, stronger **wind** and higher **light intensity** (which opens the stomata). It can be measured with a **potometer**, which records the rate of water uptake by a leafy shoot.',
     ],
@@ -300,6 +304,7 @@ const LESSONS_1 = [
     body: [
       '**Respiration** is the release of energy from food in every living cell. It is not the same as breathing.',
       '**Aerobic respiration** uses oxygen: glucose + oxygen → carbon dioxide + water + energy. Balanced: **C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O**. It releases a large amount of energy and takes place mainly in mitochondria.',
+      'The energy released is not used straight away. It is stored for a short time in a molecule called **ATP** (adenosine triphosphate), which every cell uses as its energy currency: for muscle contraction, building proteins, active transport, cell division and keeping the body warm. Aerobic respiration releases far more energy from each glucose molecule, roughly fifteen times as much as anaerobic respiration, because the glucose is broken down completely to carbon dioxide and water.',
       '**Anaerobic respiration** happens without oxygen and releases much less energy. In yeast it produces **ethanol** and carbon dioxide; this is used in brewing and in making bread rise. In human muscles during hard exercise, glucose becomes **lactic acid**, which causes fatigue and cramp.',
       'After exercise, extra oxygen is needed to break down the lactic acid. This is the **oxygen debt**, which is why you keep breathing hard after a race.',
     ],
@@ -328,6 +333,7 @@ const LESSONS_1 = [
       'Air passes through the nose, **trachea**, **bronchi** and **bronchioles** to millions of **alveoli** in the lungs. The trachea is held open by C-shaped rings of cartilage, and its lining has cilia and mucus that trap dust and microbes.',
       'Gas exchange happens by **diffusion** across the alveolus wall. Alveoli are adapted with a very large surface area, walls only one cell thick, a moist lining, and a dense network of capillaries that keeps a steep concentration gradient.',
       'During **inhalation** the external intercostal muscles contract and lift the ribs up and out, and the **diaphragm** contracts and flattens. The chest volume increases, pressure falls and air rushes in. During **exhalation** the reverse happens.',
+      '**Practical: the bell-jar model of breathing.** A bell jar stands for the chest, two balloons for the lungs, the tube for the trachea and a rubber sheet at the bottom for the diaphragm. Pulling the sheet down makes the space inside bigger, so the pressure falls and air rushes into the balloons: they inflate, as in inhalation. Pushing it up does the opposite. The model has limits: the bell jar cannot move like the ribs, and the balloons have no alveoli.',
       'Smoking damages this system. Tar coats the alveoli and paralyses cilia, carbon monoxide reduces oxygen carried by haemoglobin, and nicotine is addictive. Smoking causes bronchitis, emphysema and lung cancer.',
     ],
     figure: ['breathing-system', 'alveolus'],
@@ -886,4 +892,4 @@ const LESSONS_1 = [
   },
 ];
 
-export const LESSONS = [...LESSONS_12, ...LESSONS_F1, ...LESSONS_1, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5];
+export const LESSONS = [...LESSONS_12, ...LESSONS_F1, ...LESSONS_1, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5, ...LESSONS_F4];

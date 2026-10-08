@@ -98,7 +98,7 @@ export const LESSONS_F1 = [
   ]),
 
   // ---------- Classification ----------
-  L('bi-classify-1', 'bi-f1-classify', '4.1', 'Why living things are classified, and how they are named', 9, ['Classification'], [
+  L('bi-classify-f1', 'bi-f1-classify', '4.1', 'Why living things are classified, and how they are named', 9, ['Classification'], [
     'There are millions of kinds of living things. To study them, biologists put them into groups according to the features they share. This is **classification**, and the science of naming and classifying living things is **taxonomy**. Classification makes it easier to identify a living thing, to learn about many organisms at once and to see how they are related.',
     'Local names cause confusion: one plant may have several names in different languages, and one name may be used for different plants. In the 18th century the Swedish scientist **Carolus Linnaeus** introduced a system in which every kind of organism has a **scientific name** of two parts, used all over the world. This is **binomial nomenclature** ("two names").',
     'The first part of the name is the **genus** and the second is the **species**. Maize is *Zea mays*; cocoa is *Theobroma cacao*; cassava is *Manihot esculenta*; the mosquito that carries malaria is *Anopheles gambiae*; and humans are *Homo sapiens*.',

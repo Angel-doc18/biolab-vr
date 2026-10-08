@@ -74,7 +74,7 @@ export const UNITS_F1 = [
     title: 'Classification and the Naming of Living Things',
     short: 'Classification',
     focus: 'Why living things are classified, binomial nomenclature and its rules, the seven ranks from kingdom to species, and using a dichotomous key',
-    lessonIds: ['bi-classify-1', 'bi-ranks-1'],
+    lessonIds: ['bi-classify-f1', 'bi-ranks-1'],
     vr: null,
     quiz: [
       Q('The two-name system of naming living things was introduced by:', ['Carolus Linnaeus', 'Robert Hooke', 'Louis Pasteur', 'Charles Darwin'], 'Linnaeus, a Swedish scientist of the 18th century, gave every species a genus and a species name.'),
