@@ -29,8 +29,15 @@ export const groupsFor = (subject) => MODULES[subject]?.GROUPS || [];
 // The classes a subject has topics for, in school order. Empty while a subject
 // is still organised as one Ordinary Level course.
 const ORDER = CLASSES.map((c) => c.id);
-export const formsFor = (subject) => ORDER.filter((f) => unitsFor(subject).some((u) => u.form === f));
-export const unitsForForm = (subject, form) => (form ? unitsFor(subject).filter((u) => u.form === form) : unitsFor(subject));
+// A topic belongs to the class of the MINESEC syllabus (`form`). Where many
+// schools' schemes of work teach it in another class too, `alsoIn` names that
+// class with the topic's place there: { 'Form 4': { n, term, seq } }.
+export const inClass = (u, form) => u.form === form || !!u.alsoIn?.[form];
+export const placeIn = (u, form) => (u.form === form ? { n: u.n, term: u.term, seq: u.seq } : u.alsoIn?.[form] || {});
+// Topics of a class in teaching order: by term where the scheme gives one, then by place.
+export const byPlace = (form) => (a, b) => (placeIn(a, form).term ?? 9) - (placeIn(b, form).term ?? 9) || placeIn(a, form).n - placeIn(b, form).n;
+export const formsFor = (subject) => ORDER.filter((f) => unitsFor(subject).some((u) => inClass(u, f)));
+export const unitsForForm = (subject, form) => (form ? unitsFor(subject).filter((u) => inClass(u, form)) : unitsFor(subject));
 
 // The class whose topics a student sees first: their own class when the subject
 // has topics for it, otherwise the nearest class that has.
@@ -69,7 +76,13 @@ export function formsShown(subject, className) {
 export function unitsShown(subject, className) {
   const forms = formsShown(subject, className);
   if (!forms.length) return unitsFor(subject);
-  return forms.flatMap((f) => unitsFor(subject).filter((u) => u.form === f).sort((a, b) => a.n - b.n));
+  const seen = new Set();
+  return forms.flatMap((f) =>
+    unitsFor(subject)
+      .filter((u) => inClass(u, f) && !seen.has(u.id))
+      .sort(byPlace(f))
+      .map((u) => (seen.add(u.id), u))
+  );
 }
 
 // The topics a student has been taught so far: every class of the course up to
@@ -80,7 +93,8 @@ export function unitsCovered(subject, className) {
   const i = ORDER.indexOf(className);
   if (!forms.length || i < 0) return unitsFor(subject);
   const upTo = forms.filter((f) => ORDER.indexOf(f) <= i);
-  return unitsFor(subject).filter((u) => (upTo.length ? upTo : formsShown(subject, className)).includes(u.form));
+  const forms2 = upTo.length ? upTo : formsShown(subject, className);
+  return unitsFor(subject).filter((u) => forms2.some((f) => inClass(u, f)));
 }
 
 // "Form 3" or "Forms 3 to 5": the classes a list of topics comes from.

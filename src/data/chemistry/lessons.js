@@ -7,5 +7,6 @@ import { LESSONS_1 } from './lessons1';
 import { LESSONS_2 } from './lessons2';
 import { LESSONS_3 } from './lessons3';
 import { LESSONS_45 } from './lessons45';
+import { LESSONS_F4 } from './lessonsF4';
 
-export const LESSONS = [...LESSONS_12, ...LESSONS_1, ...LESSONS_2, ...LESSONS_3, ...LESSONS_45];
+export const LESSONS = [...LESSONS_12, ...LESSONS_1, ...LESSONS_2, ...LESSONS_3, ...LESSONS_45, ...LESSONS_F4];

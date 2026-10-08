@@ -114,4 +114,21 @@ export const LESSON_QUESTIONS = {
     Q('Heating limestone in a lime kiln gives:', ['Quicklime (calcium oxide) and carbon dioxide', 'Slaked lime and oxygen', 'Cement and water', 'Calcium and carbon'], 'CaCO₃ → CaO + CO₂.'),
     Q('Slaked lime (calcium hydroxide) is used by farmers to:', ['Neutralise acidic soils', 'Make soil more acidic', 'Kill weeds', 'Store water'], 'It is a base.'),
   ],
+  'ch-naming-1': [
+    Q('The alkane with five carbon atoms is called:', ['Pentane', 'Butane', 'Hexane', 'Propane'], 'The prefixes are meth-, eth-, prop-, but-, pent-, hex-.'),
+    Q('In but-2-ene, the double bond is between:', ['Carbons 2 and 3', 'Carbons 1 and 2', 'Carbons 3 and 4', 'Every carbon'], 'The number shows the first carbon of the double bond.'),
+    Q('How many structural isomers does pentane, C₅H₁₂, have?', ['Three', 'Two', 'One', 'Five'], 'Pentane, 2-methylbutane and 2,2-dimethylpropane.'),
+    Q('Methane reacts with chlorine only in ultraviolet light, in a reaction called:', ['Substitution', 'Addition', 'Polymerisation', 'Neutralisation'], 'A hydrogen atom is replaced by a chlorine atom.'),
+    Q('Acidified potassium manganate(VII) is decolourised by:', ['An alkene', 'An alkane', 'Water', 'Carbon dioxide'], 'It turns from purple to colourless with a C=C double bond.'),
+    Q('Incomplete combustion of a fuel produces:', ['Carbon monoxide and soot', 'Only carbon dioxide and water', 'Oxygen', 'Hydrogen'], 'Never use a charcoal stove or generator in a closed room.'),
+  ],
+  'ch-nitrogen-2': [
+    Q('In the brown ring test, the brown ring forms where:', ['Concentrated sulphuric acid meets the nitrate and iron(II) sulphate solution', 'The solution boils', 'Silver nitrate is added', 'Limewater turns milky'], 'The ring at the junction of the two layers shows a nitrate.'),
+    Q('Nitric acid is made industrially by the:', ['Ostwald process', 'Haber process', 'Contact process', 'Frasch process'], 'Ammonia is oxidised over a platinum catalyst.'),
+  ],
+  'ch-organic-1': [
+    Q('The members of a homologous series differ from one another by:', ['CH₂', 'CH₄', 'C₂H₂', 'H₂'], 'They also share a general formula and similar chemical properties.'),
+    Q('The fraction of crude oil used to surface roads is:', ['Bitumen', 'Petrol', 'Kerosene', 'Refinery gas'], 'It has the largest molecules and the highest boiling point.'),
+    Q('The general formula of the alkanes is:', ['CnH2n+2', 'CnH2n', 'CnH2n-2', 'CnHn'], 'Methane CH₄, ethane C₂H₆, propane C₃H₈.'),
+  ],
 };

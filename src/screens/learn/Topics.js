@@ -8,7 +8,7 @@ import { StaticTabBar } from '../../ui/TabBar';
 import { StepLine, SUBJECT_LOOK, SubjectIcon, TopicCard } from '../../ui/hub';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
-import { formFor, formsFor, formsLabel, formsShown, groupsFor, isExamClass, unitsForForm } from '../../data/units';
+import { formFor, formsFor, formsLabel, formsShown, groupsFor, isExamClass, byPlace, unitsForForm } from '../../data/units';
 import { lessonsFor } from '../../data/lessons';
 import { labsForUnit } from '../../data/labs';
 import { classById, classLevel, examLine, subjectById, subjectName } from '../../data/subjects';
@@ -36,11 +36,11 @@ export default function Topics({ navigation, route }) {
   const name = subjectName(subject, lang);
   // Each class keeps its syllabus order, with the module named each time it
   // changes; a course not yet organised by class is grouped by module.
-  const runsOf = (list) => {
+  const runsOf = (list, f) => {
     const groups = groupsFor(subject).filter((g) => list.some((u) => u.group === g.id));
     if (forms.length)
       return [...list]
-        .sort((a, b) => a.n - b.n)
+        .sort(f ? byPlace(f) : (a, b) => a.n - b.n)
         .reduce((acc, u) => {
           const last = acc[acc.length - 1];
           if (last && last.group?.id === u.group) last.units.push(u);
@@ -49,7 +49,11 @@ export default function Topics({ navigation, route }) {
         }, []);
     return groups.length ? groups.map((g) => ({ group: g, units: list.filter((u) => u.group === g.id) })) : [{ group: null, units: list }];
   };
-  const sections = (shown.length ? shown : [null]).map((f) => ({ form: f, runs: runsOf(keep(unitsForForm(subject, f))) })).filter((s) => s.runs.some((r) => r.units.length));
+  // A topic taught in two classes is listed once, under the first class shown.
+  const seen = new Set();
+  const sections = (shown.length ? shown : [null])
+    .map((f) => ({ form: f, runs: runsOf(keep(unitsForForm(subject, f)).filter((u) => !seen.has(u.id) && seen.add(u.id)), f) }))
+    .filter((s) => s.runs.some((r) => r.units.length));
 
   // What the student is looking at, in plain words.
   const revisingOtherLevel = !!own && classLevel(own) !== subjectById(subject).level;

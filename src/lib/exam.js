@@ -1,6 +1,6 @@
 // Paper 1 engine: builds papers from a subject's question bank and scores attempts.
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { formsFor, units, unitById, unitsCovered, unitsFor } from '../data/units';
+import { formsFor, inClass, placeIn, units, unitById, unitsCovered, unitsFor } from '../data/units';
 import { subjectById } from '../data/subjects';
 
 export const BANK = units.flatMap((u) => u.quiz.map((q, qi) => ({ ...q, unit: u.id, subject: u.subject, qi, key: `${u.id}:${qi}` })));
@@ -36,13 +36,13 @@ export function paper1Plan(subject, className) {
 // no topic taught that term is left out.
 const TERM_QUESTIONS = 30;
 export function termsFor(subject, className) {
-  const mine = unitsFor(subject).filter((u) => u.form === className);
-  if (!mine.length || mine.some((u) => !u.term)) return [];
-  return [...new Set(mine.map((u) => u.term))].sort((a, b) => a - b);
+  const mine = unitsFor(subject).filter((u) => inClass(u, className));
+  if (!mine.length || mine.some((u) => !placeIn(u, className).term)) return [];
+  return [...new Set(mine.map((u) => placeIn(u, className).term))].sort((a, b) => a - b);
 }
 export function termPlan(subject, className, term) {
   const P1 = p1For(subject);
-  const list = unitsFor(subject).filter((u) => u.form === className && u.term === term);
+  const list = unitsFor(subject).filter((u) => inClass(u, className) && placeIn(u, className).term === term);
   const pool = list.reduce((a, u) => a + u.quiz.length, 0);
   const count = Math.min(TERM_QUESTIONS, pool);
   return { count, minutes: Math.max(10, Math.round((P1.minutes * count) / P1.count / 5) * 5), unitIds: list.map((u) => u.id), forms: [className], term };

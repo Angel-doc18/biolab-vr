@@ -3,7 +3,7 @@ import { LABS as BIOLOGY, STEPS as BIOLOGY_STEPS } from './biology/labs';
 import { LABS as CHEMISTRY } from './chemistry/labs';
 import { LABS as PHYSICS } from './physics/labs';
 import { LABS as HUMANBIO } from './humanbio/labs';
-import { formsShown, unitById } from './units';
+import { formsShown, inClass, unitById } from './units';
 
 const tag = (list, subject) => list.map((l) => Object.assign(l, { subject }));
 
@@ -20,7 +20,7 @@ export function labUnit(lab, className, subject = lab.subject) {
   const all = [lab.unit, ...(lab.units || [])].map(unitById).filter(Boolean);
   const units = all.some((u) => u.subject === subject) ? all.filter((u) => u.subject === subject) : all;
   for (const f of formsShown(units[0]?.subject || lab.subject, className)) {
-    const u = units.find((x) => x.form === f);
+    const u = units.find((x) => inClass(x, f));
     if (u) return u;
   }
   return units[0] || unitById(lab.unit);
