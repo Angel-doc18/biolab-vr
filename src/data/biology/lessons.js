@@ -11,6 +11,7 @@ import { LESSONS_5 } from './lessons5';
 import { LESSONS_12 } from './lessons12';
 import { LESSONS_F1 } from './lessonsF1';
 import { LESSONS_F4 } from './lessonsF4';
+import { LESSONS_F5 } from './lessonsF5';
 
 const LESSONS_1 = [
   // ---------------- Unit 1: Cells ----------------
@@ -481,8 +482,11 @@ const LESSONS_1 = [
     body: [
       'The **central nervous system** is the brain and spinal cord. Nerves carry electrical **impulses** between the CNS and the rest of the body.',
       '**Sensory neurones** carry impulses from receptors to the CNS. **Relay neurones** in the CNS pass them on. **Motor neurones** carry impulses to **effectors**, which are muscles or glands.',
+      'A **neurone** (nerve cell) is built to carry impulses over long distances:\n- a **cell body** with the nucleus\n- **dendrites**, short branches that receive impulses from other cells\n- an **axon**, a long fibre that carries the impulse away from the cell body\n- a fatty **myelin sheath** around the axon, which insulates it and makes the impulse travel faster\nIn a **motor neurone** the cell body is at one end, inside the spinal cord. In a **sensory neurone** the cell body is part way along, just outside the spinal cord.',
       'Neurones meet at **synapses**. When an impulse arrives, a chemical transmitter diffuses across the tiny gap and starts an impulse in the next neurone. Synapses make sure impulses travel in one direction only.',
       'A **reflex action** is a fast, automatic response to a stimulus, such as pulling your hand from a hot pot. The pathway is the **reflex arc**: receptor → sensory neurone → relay neurone → motor neurone → effector. Reflexes protect the body because they do not wait for conscious thought.',
+      '**Spinal reflexes** pass through the spinal cord, such as pulling the hand away from a hot pot or the knee-jerk. **Cranial reflexes** pass through the brain, such as blinking, sneezing and the narrowing of the pupil in bright light.',
+      '**Practical: testing two reflexes in pairs.**\n- **Knee-jerk**: your partner sits with one leg crossed loosely over the other. Tap just below the kneecap with the side of the hand. The lower leg kicks forward at once, without the person deciding to move it.\n- **Pupil reflex**: your partner closes the eyes for a minute, then opens them while you watch one pupil in good light. The pupil gets smaller within a second.\nBoth responses are fast and automatic, which shows they are reflexes.',
     ],
     figure: 'reflex-arc',
     tip: 'Name all five parts of the reflex arc **in order**. Examiners award a mark per correct link.',
@@ -510,6 +514,7 @@ const LESSONS_1 = [
       'The **iris** controls the size of the pupil. In bright light the circular muscles contract and the pupil gets smaller, protecting the retina. In dim light the radial muscles contract and the pupil widens.',
       '**Accommodation** is changing the shape of the lens. For a near object, the ciliary muscles contract, the suspensory ligaments slacken and the lens becomes fatter. For a distant object the ciliary muscles relax, the ligaments tighten and the lens becomes thinner.',
       'Cones detect colour and work in bright light. Rods work in dim light. The **blind spot** has no receptors because it is where the optic nerve leaves the eye.',
+      '**Practical: dissecting an eye.** A bull or sheep eye from the abattoir can be cut open with care, with gloves on. Find the tough white **sclera** and the clear **cornea** at the front, then cut around the middle. Inside you see the jelly-like vitreous humour, the black **choroid**, the thin **retina** that peels away easily, and the hard, clear **lens**, which magnifies print when placed on a page. The optic nerve leaves at the back.',
     ],
     figure: 'eye',
     tip: 'In accommodation, it is the **ciliary muscles** that contract or relax, and the ligaments that tighten or slacken. Keep the sequence in order.',
@@ -537,8 +542,9 @@ const LESSONS_1 = [
       'Important glands include the **pituitary** (the master gland), the **thyroid** (thyroxine controls metabolic rate), the **adrenal glands** (adrenaline), the **pancreas** (insulin and glucagon), and the ovaries and testes (sex hormones).',
       '**Adrenaline** prepares the body for “fight or flight”: heart rate and breathing rate rise, the pupils widen, and glucose is released into the blood for extra respiration.',
       'Compared with nerves, hormones act more **slowly**, their effects **last longer**, and they can affect several organs at once.',
+      'The **pituitary** is called the master gland because many of its hormones control other glands: for example, it releases a hormone that makes the thyroid produce thyroxine, and hormones that control the ovaries and testes. It also makes **growth hormone** and **ADH**, which controls how much water the kidneys reabsorb. Too little thyroxine in a child slows growth and mental development; the thyroid needs **iodine**, which is why iodised salt is used.',
     ],
-    figure: 'endocrine-glands',
+    figure: ['endocrine-glands', 'nervous-hormonal'],
     tip: 'When comparing nervous and hormonal control, give **both sides** of each point, for example nerve impulses are fast; hormones are slower.',
     check: {
       q: 'Which gland secretes adrenaline?',
@@ -647,6 +653,8 @@ const LESSONS_1 = [
       'The flower is the organ of sexual reproduction. The **stamen** (anther and filament) makes pollen. The **carpel** (stigma, style and ovary) contains the ovules.',
       '**Pollination** is the transfer of pollen from an anther to a stigma. Insect-pollinated flowers have large, brightly coloured petals, scent and nectar. Wind-pollinated flowers, like maize, have small dull petals, long feathery stigmas and large amounts of light pollen.',
       'After pollination a **pollen tube** grows down the style to the ovule, and the male nucleus fuses with the egg nucleus. This is **fertilisation**. The ovule becomes the **seed** and the ovary becomes the **fruit**.',
+      'Flowering plants have **double fertilisation**. Two male nuclei travel down the pollen tube:\n- one fuses with the **egg cell** to form the **zygote**, which grows into the embryo\n- the other fuses with the two **polar nuclei** in the centre of the embryo sac to form the **endosperm nucleus**, which grows into the food store of the seed\nAfter fertilisation, the ovule becomes the seed, the ovule wall becomes the seed coat (testa), and the ovary wall becomes the fruit wall.',
+      '**Practical: dissecting a flower.** Cut a hibiscus or a pride of Barbados flower in half lengthways with a sharp blade. Find the sepals, petals, stamens (anthers and filaments) and the carpel (stigma, style and ovary with ovules). Use a hand lens on the anthers to see the pollen, and draw the half flower with labels.',
     ],
     figure: 'flower-half',
     tip: 'Pollination and fertilisation are **different events**. Pollination is transfer of pollen; fertilisation is fusion of nuclei.',
@@ -782,7 +790,7 @@ const LESSONS_1 = [
   },
   {
     id: 'genetics-3',
-    unit: 'genetics',
+    unit: 'bi-f5-evolution',
     n: '9.3',
     title: 'Variation and evolution',
     minutes: 8,
@@ -892,4 +900,4 @@ const LESSONS_1 = [
   },
 ];
 
-export const LESSONS = [...LESSONS_12, ...LESSONS_F1, ...LESSONS_1, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5, ...LESSONS_F4];
+export const LESSONS = [...LESSONS_12, ...LESSONS_F1, ...LESSONS_1, ...LESSONS_3, ...LESSONS_4, ...LESSONS_5, ...LESSONS_F4, ...LESSONS_F5];

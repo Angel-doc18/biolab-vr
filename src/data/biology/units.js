@@ -10,6 +10,7 @@ import { BANK } from './bank';
 import { UNITS_12 } from './units12';
 import { UNITS_F1 } from './unitsF1';
 import { UNITS_F4 } from './unitsF4';
+import { UNITS_F5 } from './unitsF5';
 
 // MINESEC modules.
 export const GROUPS = [
@@ -484,6 +485,8 @@ const UNITS_345 = [
     id: 'reproduction',
     form: 'Form 5',
     n: 1,
+    term: 1,
+    seq: 2,
     group: 'living',
     icon: 'local_florist',
     diagram: 'flower-half',
@@ -491,7 +494,7 @@ const UNITS_345 = [
     title: 'Reproduction in Plants',
     short: 'Plant Reproduction',
     focus: 'Asexual and sexual reproduction, the flower, pollination and fertilisation, seeds, fruits, dispersal and germination',
-    lessonIds: ['reproduction-1', 'bi-seed-1'],
+    lessonIds: ['reproduction-1', 'bi-asexual-f5', 'bi-seed-1'],
     vr: vrOf('reproduction'),
     quiz: [
       ...pick('reproduction', 0, 1, 2, 3, 4, 9),
@@ -505,6 +508,8 @@ const UNITS_345 = [
     id: 'bi-f5-rearing',
     form: 'Form 5',
     n: 2,
+    term: 2,
+    seq: 4,
     group: 'living',
     icon: 'egg',
     diagram: 'ruminant-stomach',
@@ -531,6 +536,8 @@ const UNITS_345 = [
     id: 'bi-f5-biotech',
     form: 'Form 5',
     n: 3,
+    term: 2,
+    seq: 4,
     group: 'living',
     icon: 'liquor',
     diagram: 'yoghurt-steps',
@@ -557,6 +564,8 @@ const UNITS_345 = [
     id: 'bi-f5-coord',
     form: 'Form 5',
     n: 4,
+    term: 1,
+    seq: 1,
     group: 'living',
     icon: 'wb_sunny',
     diagram: 'phototropism',
@@ -583,6 +592,8 @@ const UNITS_345 = [
     id: 'genetics',
     form: 'Form 5',
     n: 5,
+    term: 2,
+    seq: 3,
     group: 'living',
     icon: 'genetics',
     diagram: 'monohybrid-cross',
@@ -590,7 +601,7 @@ const UNITS_345 = [
     title: 'Genetics: Chromosomes, Genes and Inheritance',
     short: 'Genetics',
     focus: 'DNA and chromosomes, the karyotype, mitosis and meiosis, sex determination, monohybrid crosses, sickle cell, ABO groups and albinism',
-    lessonIds: ['genetics-1', 'bi-chrom-1', 'reproduction-3', 'genetics-2', 'bi-allele-1', 'genetics-3'],
+    lessonIds: ['genetics-1', 'bi-chrom-1', 'reproduction-3', 'bi-division-f5', 'genetics-2', 'bi-dominance-f5', 'bi-allele-1', 'bi-sexlink-f5'],
     vr: vrOf('genetics'),
     quiz: [
       ...pick('genetics', 0, 1, 2, 3, 4, 5, 6, 7, 8),
@@ -604,6 +615,8 @@ const UNITS_345 = [
     id: 'bi-f5-humanrepro',
     form: 'Form 5',
     n: 6,
+    term: 1,
+    seq: 2,
     group: 'health',
     icon: 'family_restroom',
     diagram: 'female-reproductive',
@@ -628,6 +641,8 @@ const UNITS_345 = [
     id: 'bi-f5-sti',
     form: 'Form 5',
     n: 7,
+    term: 1,
+    seq: 2,
     group: 'health',
     icon: 'medical_information',
     diagram: 'hiv-structure',
@@ -654,6 +669,8 @@ const UNITS_345 = [
     id: 'bi-f5-endocrine',
     form: 'Form 5',
     n: 8,
+    term: 1,
+    seq: 1,
     group: 'health',
     icon: 'body_system',
     diagram: 'endocrine-glands',
@@ -661,7 +678,7 @@ const UNITS_345 = [
     title: 'The Endocrine System',
     short: 'Hormones',
     focus: 'Endocrine glands and hormones, control of blood sugar, hormones of the menstrual cycle, hormonal disorders',
-    lessonIds: ['nervous-3', 'kidney-3', 'bi-hormone-1'],
+    lessonIds: ['nervous-3', 'kidney-3', 'bi-homeo-f5', 'bi-hormone-1'],
     vr: null,
     quiz: [
       ...pick('nervous', 8),
@@ -680,6 +697,8 @@ const UNITS_345 = [
     id: 'bi-f5-modbio',
     form: 'Form 5',
     n: 9,
+    term: 2,
+    seq: 3,
     group: 'health',
     icon: 'biotech',
     diagram: 'chromosome-dna',
@@ -706,6 +725,8 @@ const UNITS_345 = [
     id: 'nervous',
     form: 'Form 5',
     n: 10,
+    term: 1,
+    seq: 1,
     group: 'health',
     icon: 'neurology',
     diagram: 'reflex-arc',
@@ -727,6 +748,8 @@ const UNITS_345 = [
     id: 'ecology',
     form: 'Form 5',
     n: 11,
+    term: 2,
+    seq: 4,
     group: 'env',
     icon: 'nature',
     diagram: 'energy-pyramid',
@@ -748,4 +771,4 @@ const UNITS_345 = [
 ];
 
 // Forms 1 and 2 first, then Forms 3 to 5.
-export const units = [...UNITS_12, ...UNITS_F1, ...UNITS_345, ...UNITS_F4];
+export const units = [...UNITS_12, ...UNITS_F1, ...UNITS_345, ...UNITS_F4, ...UNITS_F5];
