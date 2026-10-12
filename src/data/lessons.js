@@ -32,11 +32,13 @@ export function lessonsFor(unitId) {
 export const lessonIdsFor = (unitId) => lessonsFor(unitId).map((l) => l.id);
 export const lessonCount = () => LESSONS.length;
 
-// Plain text for narration (strips the ** markers and runs list lines together).
+// Plain text for narration (strips the ** and *italic* markers, reads a lone *
+// as "times" and runs list lines together).
 export const plain = (s) =>
   s
     .replace(/\*\*/g, '')
-    .replace(/\*/g, '')
+    .replace(/\*([^\s*](?:[^*]*[^\s*])?)\*/g, '$1')
+    .replace(/ \* /g, ' times ')
     .replace(/:\n- /g, ': ')
     .replace(/\.\n- /g, '. ')
     .replace(/\n- /g, '; ')

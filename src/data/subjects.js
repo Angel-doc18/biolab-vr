@@ -61,7 +61,7 @@ export const SUBJECTS = [
     code: '0595',
     level: 'O',
     available: true,
-    classes: ['Form 1', 'Form 2', 'Form 3'],
+    classes: ['Form 1', 'Form 2', 'Form 3', 'Form 4'],
     en: 'Computer Science',
     fr: 'Informatique',
     p1: { count: 50, minutes: 90 },

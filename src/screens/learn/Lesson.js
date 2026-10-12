@@ -15,10 +15,12 @@ import { lessonQuiz } from '../../lib/lessonQuiz';
 import { useNarrator } from '../../lib/narrator';
 import { fetchExplanation, segmentsOf } from '../../lib/explain';
 
-// Body text with **key terms** in bold and *scientific names* in italics.
+// Body text with **key terms** in bold and *scientific names* in italics. A lone
+// * with spaces round it (C * 9) stays a multiplication sign.
+const ITALIC = /\*([^\s*](?:[^*]*[^\s*])?)\*/;
 function Rich({ text, c = 'font-body-lg text-body-lg text-on-surface' }) {
   const italics = (s, k) =>
-    s.split('*').map((b, j) =>
+    s.split(ITALIC).map((b, j) =>
       j % 2 ? (
         <T key={`${k}-${j}`} c={c} style={{ fontStyle: 'italic' }}>
           {b}
