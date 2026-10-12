@@ -10,18 +10,28 @@ import { Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800Ext
 import { AppProvider, useApp } from './src/state/store';
 import { LangContext } from './src/i18n';
 import AppNavigator from './src/navigation/AppNavigator';
-import { removeOldModels } from './src/lib/cleanup';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// Development only: ?gallery in the web preview shows every labelled diagram.
-const GALLERY = __DEV__ && Platform.OS === 'web' && typeof window !== 'undefined' && window.location.search.includes('gallery');
+// Development only: ?gallery in the web preview shows every labelled diagram,
+// and ?model3d=<topic id> opens a topic's 3D model screen.
+const DEV_WEB = __DEV__ && Platform.OS === 'web' && typeof window !== 'undefined';
+const GALLERY = DEV_WEB && window.location.search.includes('gallery');
+const MODEL_PREVIEW = DEV_WEB && window.location.search.includes('model3d');
 
 function Root() {
   const { prefs } = useApp();
   if (GALLERY) {
     const DiagramGallery = require('./src/dev/DiagramGallery').default;
     return <DiagramGallery />;
+  }
+  if (MODEL_PREVIEW) {
+    const ModelPreview = require('./src/dev/ModelPreview').default;
+    return (
+      <LangContext.Provider value={prefs.lang}>
+        <ModelPreview />
+      </LangContext.Provider>
+    );
   }
   return (
     <LangContext.Provider value={prefs.lang}>
@@ -43,10 +53,9 @@ export default function App() {
     Manrope_800ExtraBold,
   });
 
-  // Portrait everywhere.
+  // Portrait everywhere; the VR view switches to landscape itself.
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
-    removeOldModels();
   }, []);
   useEffect(() => {
     if (loaded || fontError) SplashScreen.hideAsync().catch(() => {});
