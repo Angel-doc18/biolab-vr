@@ -71,7 +71,7 @@ export const SUBJECTS = [
     code: '0550',
     level: 'O',
     available: true,
-    classes: ['Form 1', 'Form 2'],
+    classes: ['Form 1', 'Form 2', 'Form 4'],
     en: 'Geography',
     fr: 'Géographie',
     p1: { count: 50, minutes: 90 },

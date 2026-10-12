@@ -3,6 +3,7 @@
 // which it is taught, so class tests can follow the school year.
 import { UNITS_1 } from './units1';
 import { UNITS_2 } from './units2';
+import { UNITS_4 } from './units4';
 
 export const GROUPS = [
   { id: 'earth', en: 'The Earth in space and map skills', fr: 'La Terre dans l’espace et la lecture de cartes' },
@@ -12,4 +13,4 @@ export const GROUPS = [
   { id: 'environment', en: 'Environment and sustainable development', fr: 'Environnement et développement durable' },
 ];
 
-export const units = [...UNITS_1, ...UNITS_2];
+export const units = [...UNITS_1, ...UNITS_2, ...UNITS_4];
