@@ -228,4 +228,132 @@ export const LESSON_QUESTIONS = {
     Q('What is 352 MOD 10?', ['2', '35', '3', '0'], 'MOD 10 gives the last digit.'),
     Q('What is 352 DIV 10?', ['35', '2', '3', '3.52'], 'DIV 10 removes the last digit.'),
   ],
+  // ---------- Form 5 ----------
+  'cs-is-f5': [
+    Q('Printing report cards for parents is which function of an information system?', ['Distribute', 'Collect', 'Store', 'Process'], 'Distribute means giving the information to the people who need it.'),
+    Q('Calculating each student’s average is which function?', ['Process', 'Collect', 'Distribute', 'Store'], 'Processing turns data into information.'),
+    Q('A report that arrives after the decision has been made fails which quality of good information?', ['Being on time', 'Being relevant', 'Being complete', 'Being short'], 'Information must be timely to be useful.'),
+    Q('A system that records every mobile money transfer as it happens is a:', ['Transaction processing system', 'Word processor', 'Utility program', 'Linked list'], 'It records day-to-day events.'),
+  ],
+  'cs-sdlc-f5': [
+    Q('In TELOS, the E stands for:', ['Economic', 'Electronic', 'Encrypted', 'External'], 'Do the benefits outweigh the costs?'),
+    Q('Which changeover method is quickest but riskiest?', ['Direct', 'Parallel', 'Phased', 'Pilot'], 'If the new system fails, there is nothing to fall back on.'),
+    Q('Trying a new system first in one branch of a bank is:', ['Pilot changeover', 'Direct changeover', 'Parallel changeover', 'Corrective maintenance'], 'The other branches change later.'),
+    Q('Fixing an error found after the system is in use is:', ['Corrective maintenance', 'Adaptive maintenance', 'Perfective maintenance', 'A feasibility study'], 'It corrects faults.'),
+  ],
+  'cs-syssoft-f5': [
+    Q('A spreadsheet program is:', ['General-purpose application software', 'System software', 'A device driver', 'Firmware'], 'It can be used for many different jobs.'),
+    Q('The start-up program stored in ROM is called:', ['Firmware', 'Shareware', 'A spreadsheet', 'A database'], 'It is software built into the hardware.'),
+    Q('One disadvantage of bespoke software is that it:', ['Costs more and takes longer to produce', 'Never fits the user’s needs', 'Cannot be changed', 'Is always free'], 'It is written from scratch for one customer.'),
+  ],
+  'cs-oscore-f5': [
+    Q('Holding print jobs in a queue on disk until the printer is ready is:', ['Spooling', 'Paging', 'Compiling', 'Sorting'], 'The user can keep working meanwhile.'),
+    Q('An operating system that must respond at once, as in traffic lights, is:', ['Real-time', 'Single-user', 'Batch', 'Shareware'], 'Delays could be dangerous.'),
+    Q('In round robin scheduling, each process gets:', ['A short time slice in turn', 'The CPU until it finishes', 'No CPU time', 'Two CPUs'], 'The turns go round and round.'),
+    Q('Memory divided into equal blocks for virtual memory are called:', ['Pages', 'Records', 'Packets', 'Nodes'], 'Pages are moved between RAM and disk.'),
+  ],
+  'cs-db-f5': [
+    Q('Storing the same data in several files is called:', ['Redundancy', 'Validation', 'Encryption', 'Normal data'], 'It wastes space and leads to inconsistencies.'),
+    Q('A primary key made of two fields together is a:', ['Composite key', 'Foreign key', 'Data type', 'Query'], 'For example StudentID and SubjectID together.'),
+    Q('The rule that every foreign key must match an existing primary key is:', ['Referential integrity', 'Redundancy', 'Spooling', 'Verification'], 'It stops links to records that do not exist.'),
+  ],
+  'cs-erd-f5': [
+    Q('In an ERD, a crow’s foot marks the:', ['Many end of a relationship', 'One end of a relationship', 'Primary key', 'Data type'], 'A single bar marks the one end.'),
+    Q('One student has one school identity card. This is:', ['One-to-one', 'One-to-many', 'Many-to-many', 'No relationship'], 'Each card belongs to one student only.'),
+    Q('In a one-to-many relationship, the foreign key goes in the table at the:', ['Many end', 'One end', 'Both ends', 'Neither end'], 'Each student row holds its ClassID.'),
+    Q('Properties of an entity, such as Name, are its:', ['Attributes', 'Relationships', 'Queries', 'Pages'], 'Each attribute becomes a field.'),
+  ],
+  'cs-sql-f5': [
+    Q('Which SQL command changes the data in existing records?', ['UPDATE', 'INSERT INTO', 'CREATE TABLE', 'SELECT'], 'UPDATE ... SET ... WHERE ...'),
+    Q('What happens if DELETE FROM Students; is run without WHERE?', ['Every record in the table is deleted', 'Nothing happens', 'Only the first record goes', 'The table is sorted'], 'Always add a WHERE condition.'),
+    Q('VARCHAR(40) in CREATE TABLE means:', ['Text of up to 40 characters', 'A number up to 40', '40 records', 'A date'], 'It sets the field’s data type and length.'),
+  ],
+  'cs-validate-f5': [
+    Q('Typing 27 as 72 is a:', ['Transposition error', 'Transcription error of a missing letter', 'Range check', 'Format check'], 'Two characters have been swapped.'),
+    Q('Checking that a date is written DD/MM/YYYY is a:', ['Format check', 'Range check', 'Presence check', 'Lookup check'], 'It checks the pattern of the data.'),
+    Q('Checking that a class is one of F5A, F5B or F5C is a:', ['Lookup check', 'Length check', 'Type check', 'Check digit'], 'The value must be in an allowed list.'),
+    Q('Reading the printed text of a document into editable text uses:', ['OCR', 'OMR', 'MICR', 'RFID'], 'Optical character recognition.'),
+  ],
+  'cs-arrays-f5': [
+    Q('DECLARE Marks : ARRAY[1:40] OF INTEGER holds how many marks?', ['40', '39', '41', '1'], 'Indexes 1 to 40.'),
+    Q('To visit every item of a 2D array you usually need:', ['Two nested loops', 'No loop', 'One IF statement', 'A stack'], 'One loop for rows, one for columns.'),
+    Q('All the items of an array must be:', ['Of the same data type', 'Different types', 'Text only', 'Larger than 10'], 'An array of integers holds only integers.'),
+    Q('In a 2D array of 30 students and 6 tests, how many items are stored?', ['180', '36', '30', '6'], '30 × 6 = 180.'),
+  ],
+  'cs-adt-f5': [
+    Q('Removing an item from the front of a queue is called:', ['Dequeue', 'Push', 'Pop', 'Enqueue'], 'Enqueue adds at the rear.'),
+    Q('Characters typed faster than a program reads them wait in the:', ['Keyboard buffer, a queue', 'Stack of the browser', 'ROM', 'Cache only'], 'They are used in the order typed.'),
+    Q('In a linked list, inserting an item in order needs:', ['Only some pointers changed', 'Every item moved along', 'The list sorted again', 'A new array'], 'This is the advantage over an array.'),
+  ],
+  'cs-sort-f5': [
+    Q('A bubble sort stops when:', ['A whole pass makes no swaps', 'The first two items are swapped', 'It has made one pass', 'The list has 10 items'], 'No swaps means the list is in order.'),
+    Q('Sorting into descending order puts first the:', ['Largest value', 'Smallest value', 'Middle value', 'Last value typed'], 'Descending goes from largest to smallest.'),
+    Q('After two passes of a bubble sort into ascending order, which items are certainly in place?', ['The two largest, at the end', 'The two smallest, at the start', 'None', 'All of them'], 'Each pass places the largest remaining item.'),
+  ],
+  'cs-search-f5': [
+    Q('In binary search, mid ← (low + high) DIV 2. If low = 2 and high = 7, mid is:', ['4', '4.5', '5', '9'], '(2 + 7) DIV 2 = 9 DIV 2 = 4.'),
+    Q('Binary search knows an item is missing when:', ['low becomes greater than high', 'mid equals 0', 'The first item is checked', 'It reaches the middle'], 'There is nothing left to search.'),
+    Q('About how many comparisons does binary search need for one million sorted items?', ['20', '1 000 000', '500 000', '1 000'], '2 to the power 20 is about one million.'),
+  ],
+  'cs-dryrun-f5': [
+    Q('In a flowchart, a path that goes back up the chart shows:', ['A loop', 'The end of the program', 'An error', 'An input'], 'The steps repeat until the decision lets you out.'),
+    Q('Marks = [4, 9, 2]. After total ← 0, FOR i ← 1 TO 3: total ← total + Marks[i], total is:', ['15', '9', '4', '16'], '4 + 9 + 2 = 15.'),
+    Q('Why did the trace of the maximum example give position 2 and not 4 for the two marks of 17?', ['Because the condition was > and not >=, so an equal mark did not replace it', 'Because 4 is too large', 'Because arrays start at 0', 'Because the loop ended early'], 'With >= the last 17 would have been chosen.'),
+    Q('In a trace table, the value read from an array depends on:', ['The current value of the loop counter', 'The first value only', 'The output column', 'Nothing'], 'Marks[i] changes as i changes.'),
+  ],
+  'cs-exec-f5': [
+    Q('Which program copies an executable program into RAM to run it?', ['The loader', 'The linker', 'The compiler', 'The editor'], 'The CPU then runs it.'),
+    Q('Python source code is first turned into:', ['Bytecode', 'A printed listing', 'HTML', 'A database'], 'The Python virtual machine runs the bytecode.'),
+    Q('A routine from a library cannot be found when the program is built. This is a:', ['Linking error', 'Logic error', 'Syntax error', 'Validation error'], 'The linker cannot join the missing code.'),
+  ],
+  'cs-pylists-f5': [
+    Q('marks = [12, 15, 9]. After marks.append(14), len(marks) is:', ['4', '3', '14', '5'], 'append adds one item at the end.'),
+    Q('grid = [[1, 2], [3, 4]]. What is grid[1][0]?', ['3', '2', '1', '4'], 'grid[1] is [3, 4], and its item 0 is 3.'),
+    Q('Which Python gives the highest value in a list called marks?', ['max(marks)', 'marks.top', 'highest(marks)', 'marks[max]'], 'min(marks) gives the lowest.'),
+    Q('In Python, for i in range(len(marks)): gives i the values:', ['0 up to len(marks) − 1', '1 up to len(marks)', 'Only 0', 'The marks themselves'], 'range stops before its end value.'),
+  ],
+  'cs-testing-f5': [
+    Q('Testing that modules work correctly together is:', ['Integration testing', 'Unit testing', 'Beta testing', 'Spooling'], 'Unit testing tests each module alone.'),
+    Q('Testing by the software company’s own staff before outside users see it is:', ['Alpha testing', 'Beta testing', 'Acceptance testing', 'Linking'], 'Beta testing comes after, with real users.'),
+    Q('Choosing tests so that every branch of an IF is tried is part of:', ['White-box testing', 'Black-box testing', 'Verification', 'Mail merge'], 'The tester needs to see the code.'),
+  ],
+  'cs-osi-f5': [
+    Q('Which OSI layer encrypts and compresses data?', ['Presentation', 'Physical', 'Network', 'Data link'], 'Layer 6.'),
+    Q('Which OSI layer uses MAC addresses to send frames to the next device?', ['Data link', 'Application', 'Session', 'Transport'], 'Layer 2.'),
+    Q('A traditional telephone call that reserves one fixed path uses:', ['Circuit switching', 'Packet switching', 'Spooling', 'Paging'], 'The path is kept for the whole call.'),
+    Q('Which TCP/IP layer does the work of OSI layers 5, 6 and 7?', ['Application', 'Transport', 'Internet', 'Network access'], 'The top layer of the TCP/IP model.'),
+  ],
+  'cs-infra-f5': [
+    Q('Cameroon is linked to other continents mainly by:', ['Submarine fibre-optic cables', 'Bluetooth', 'Copper telephone wires only', 'Radio from schools'], 'They come ashore at Douala, Limbe and Kribi.'),
+    Q('Many small websites sharing one server is:', ['Shared hosting', 'A dedicated server', 'Peer-to-peer', 'A gateway'], 'It is the cheapest kind of hosting.'),
+    Q('In peer-to-peer file sharing, a file is downloaded:', ['In pieces from many users’ computers', 'Only from one central server', 'By post', 'From a printer'], 'BitTorrent works this way.'),
+    Q('The router that leads from a school network to the Internet is the:', ['Default gateway', 'DNS root server', 'Loader', 'Kernel'], 'Traffic for outside addresses goes to it.'),
+  ],
+  'cs-green-f5': [
+    Q('Which metal is found in old screen backlights and is poisonous?', ['Mercury', 'Gold', 'Aluminium', 'Copper'], 'Burning or crushing them releases it.'),
+    Q('Giving a working old computer to a community school is:', ['Donating, a form of reuse', 'Dumping', 'Piracy', 'Spooling'], 'It keeps the device in use longer.'),
+    Q('Which uses less energy?', ['A laptop', 'An old desktop with a large old-style screen', 'Two desktops', 'A desktop left on all night'], 'Laptops are designed to save battery power.'),
+  ],
+  'cs-law-f5': [
+    Q('Software that is free to try, then must be paid for, is:', ['Shareware', 'Freeware', 'Open source', 'Firmware'], 'Freeware stays free.'),
+    Q('The GPL licence requires that changed versions of the software:', ['Stay open source', 'Are sold', 'Are deleted', 'Hide their code'], 'The MIT licence is more permissive.'),
+    Q('Which body sets ICT policy for the government of Cameroon?', ['MINPOSTEL', 'ART', 'ANTIC', 'The GCE Board'], 'ART regulates operators; ANTIC handles security and .cm.'),
+    Q('One danger of pirated software, besides breaking the law, is:', ['It often carries malware', 'It runs faster', 'It is always newer', 'It needs no electricity'], 'Cracked copies are a common way to spread viruses.'),
+  ],
+  'cs-dbproject-f5': [
+    Q('In the library database, which table holds DueDate?', ['LOAN', 'BOOK', 'BORROWER', 'None'], 'The due date belongs to each loan.'),
+    Q('Returned is best stored with which data type?', ['Boolean', 'Text', 'Date', 'Real'], 'It is either yes or no.'),
+    Q('A sensible extra validation rule for LOAN is:', ['DueDate must be after DateOut', 'Title must be in capitals', 'Copies must be text', 'Name must be a number'], 'A book cannot be due before it is lent.'),
+  ],
+  'cs-paper1-f5': [
+    Q('What is the denary value of binary 1010 0001?', ['161', '81', '17', '1010'], '128 + 32 + 1 = 161.'),
+    Q('How many megabytes are there in 2 gigabytes (1 GB = 1024 MB)?', ['2048', '2000', '1024', '20'], '2 × 1024 = 2048.'),
+    Q('Which register holds the address of the next instruction?', ['The program counter', 'The accumulator', 'The MDR', 'The CIR'], 'It is increased after each fetch.'),
+    Q('Which of these is an output device?', ['A projector', 'A scanner', 'A barcode reader', 'A microphone'], 'The others are input devices.'),
+  ],
+  'cs-paper2-f5': [
+    Q('A question asks you to "Compare" two changeover methods. You should:', ['Give similarities and differences point by point', 'Describe only one method', 'Write one word', 'Draw a flowchart'], 'Comparing needs both methods in each point.'),
+    Q('In an algorithm answer, the total is never set to 0. This mistake causes:', ['A wrong total, because the starting value is unknown', 'A syntax error in the paper', 'Nothing at all', 'A faster program'], 'Always initialise totals and counters.'),
+    Q('After a mock examination, the most useful thing to do is:', ['Correct every mistake and revise the weak topics', 'Forget it', 'Only look at the mark', 'Rewrite the questions'], 'Mocks show what to revise before the real exam.'),
+  ],
 };
