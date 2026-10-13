@@ -12,5 +12,6 @@ import { LESSON_QUESTIONS as HOMEEC } from './homeec/lessonQuestions';
 import { LESSON_QUESTIONS as MATHS } from './maths/lessonQuestions';
 import { LESSON_QUESTIONS as ENGLISH } from './english/lessonQuestions';
 import { LESSON_QUESTIONS as FRENCH } from './french/lessonQuestions';
+import { LESSON_QUESTIONS as LITERATURE } from './literature/lessonQuestions';
 
-export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH };
+export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE };
