@@ -3,6 +3,7 @@
 // domains of life. Each topic carries the term and sequence in which it is
 // taught, so class tests can follow the school year.
 import { UNITS_4 } from './units4';
+import { UNITS_5 } from './units5';
 
 export const GROUPS = [
   { id: 'family', en: 'Family and social life', fr: 'Vie familiale et sociale' },
@@ -13,4 +14,4 @@ export const GROUPS = [
   { id: 'exam', en: 'Examination practice', fr: 'Préparation aux examens' },
 ];
 
-export const units = [...UNITS_4];
+export const units = [...UNITS_4, ...UNITS_5];
