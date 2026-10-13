@@ -33,7 +33,7 @@ const DAYS_EN = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const DAYS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
 export default function Me({ navigation }) {
-  const { user, pro, progress, stats, logout, prefs, savePrefs, subjects, setSubject, avatar, saveAvatar, removeAvatar, consentOk } = useApp();
+  const { user, pro, progress, stats, logout, prefs, savePrefs, subjects, setSubject, avatar, saveAvatar, removeAvatar } = useApp();
   const L = useL();
   // Profile picture: tap the picture to take a photo, choose one or remove it.
   const [photoMenu, setPhotoMenu] = useState(false);
@@ -126,17 +126,9 @@ export default function Me({ navigation }) {
 
         {photoMenu && (
           <V c="bg-surface-container-lowest rounded-xl shadow-sm">
-            {!consentOk ? (
-              <T c="font-body-md text-body-md text-on-surface-variant p-space-md" style={{ lineHeight: 22 }}>
-                {L('A parent or guardian needs to approve your account before you can add a profile picture.', 'Un parent ou tuteur doit approuver votre compte avant que vous puissiez ajouter une photo de profil.')}
-              </T>
-            ) : (
-              <>
-                <MenuRow first title={L('Take a photo', 'Prendre une photo')} sub={photoBusy ? L('Saving...', 'Enregistrement...') : null} onPress={() => !photoBusy && changePhoto('camera')} />
-                <MenuRow title={L('Choose from your pictures', 'Choisir dans vos photos')} onPress={() => !photoBusy && changePhoto('library')} />
-                {!!avatar && <MenuRow title={L('Remove the picture', 'Supprimer la photo')} onPress={() => !photoBusy && dropPhoto()} />}
-              </>
-            )}
+            <MenuRow first title={L('Take a photo', 'Prendre une photo')} sub={photoBusy ? L('Saving...', 'Enregistrement...') : null} onPress={() => !photoBusy && changePhoto('camera')} />
+            <MenuRow title={L('Choose from your pictures', 'Choisir dans vos photos')} onPress={() => !photoBusy && changePhoto('library')} />
+            {!!avatar && <MenuRow title={L('Remove the picture', 'Supprimer la photo')} onPress={() => !photoBusy && dropPhoto()} />}
             {!!photoError && (
               <T c="font-body-sm text-body-sm text-error px-space-md pb-space-md">{photoError}</T>
             )}

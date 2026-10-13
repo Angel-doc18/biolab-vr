@@ -8,7 +8,6 @@ import * as ai from './routes/ai.js';
 import * as admin from './routes/admin.js';
 import { paymentsConfigured } from './lib/providers.js';
 import { channels, sendNotice } from './lib/messaging.js';
-import * as consent from './routes/consent.js';
 import * as avatar from './routes/avatar.js';
 import * as models from './routes/models.js';
 import * as voice from './routes/voice.js';
@@ -19,9 +18,6 @@ const ID = '([A-Za-z0-9-]{8,64})';
 const routes = [
   ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), messaging: channels(env), payments: paymentsConfigured(env), voices: voice.voiceChoices(env), voice: voice.voiceTag(env) })],
   ['POST', '/v1/voice', voice.speak],
-  ['POST', '/v1/me/consent', consent.requestConsent],
-  ['GET', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentPage],
-  ['POST', '/consent/([A-Za-z0-9_-]{40,64})', consent.consentDecision],
   ['POST', '/v1/ai/report', ai.report],
   ['GET', '/v1/models/([a-z]{3,20})/link', models.modelLink],
   ['GET', '/v1/models/([a-z]{3,20})\\.glb', models.modelFile],
@@ -103,12 +99,12 @@ async function handle(request, env) {
 // Daily at 17:00 UTC (18:00 in Cameroon).
 async function scheduled(env) {
   const day = 86_400_000;
-  // Inactivity alerts to parents who approved the account, on day 3 and day 7 of a break.
+  // Inactivity alerts to the parent number the student gave, on day 3 and day 7 of a break.
   if (channels(env).length) {
     const { results } = await env.DB.prepare(
       `SELECT u.id, u.name, u.parent_phone, u.parent_report_lang, p.last_active FROM users u JOIN progress p ON p.user_id = u.id
        WHERE u.role = 'student' AND u.deleted_at IS NULL AND u.inactivity_alert = 1 AND u.parent_phone IS NOT NULL
-         AND u.consent_status IN ('granted', 'not_needed') AND p.last_active IS NOT NULL`
+         AND p.last_active IS NOT NULL`
     ).all();
     for (const s of results) {
       const idle = Math.floor((now() - s.last_active) / day);

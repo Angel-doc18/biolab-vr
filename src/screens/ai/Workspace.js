@@ -64,7 +64,7 @@ function Control({ icon, label, onPress, disabled, strong }) {
 }
 
 export default function Workspace({ navigation, route }) {
-  const { user, pro, progress, stats, quota, setQuota, refreshQuota, consentOk, subject: current } = useApp();
+  const { user, pro, progress, stats, quota, setQuota, refreshQuota, subject: current } = useApp();
   const L = useL();
   const lang = useLang();
   const p = route.params || {};
@@ -249,17 +249,6 @@ export default function Workspace({ navigation, route }) {
   return (
     <Screen bg="bg-surface" keyboard scrollRef={scroller} header={<StackHeader title={L('Workspace', 'Espace de travail')} subtitle={ctx?.short || name} subtitleColor="on-surface-variant" avatar={false} />}>
       <V c="pt-space-md pb-space-xl gap-space-md">
-        {!consentOk && (
-          <V c="bg-surface-container-low rounded-xl p-space-md gap-1">
-            <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-              {L('The tutor opens after your parent approves your account', 'Le tuteur s’ouvre après l’accord de votre parent')}
-            </T>
-            <P onPress={() => navigation.navigate('Guardian', { fromHome: true })} hitSlop={8}>
-              <T c="font-label-md text-label-md text-primary-container">{L('Send the approval link', 'Envoyer le lien d’accord')}</T>
-            </P>
-          </V>
-        )}
-
         {!sol && !busy && (
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
             {L(
@@ -424,7 +413,7 @@ export default function Workspace({ navigation, route }) {
             textAlignVertical="top"
             maxLength={1500}
           />
-          <Cta label={L('Solve it on the board', 'Résoudre au tableau')} icon="co_present" loading={busy} disabled={draft.trim().length < 3 || !consentOk} onPress={() => solve()} />
+          <Cta label={L('Solve it on the board', 'Résoudre au tableau')} icon="co_present" loading={busy} disabled={draft.trim().length < 3} onPress={() => solve()} />
           <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ fontSize: 11, lineHeight: 16 }}>
             {quota ? `${quota.asksLeft} ${L('questions left today', 'questions restantes aujourd’hui')}. ` : ''}
             {L('A question already solved for your class opens without using one. Solutions are made by AI; check them against your lessons.', 'Une question déjà résolue pour votre classe s’ouvre sans en utiliser. Les solutions sont faites par IA ; vérifiez-les avec vos leçons.')}

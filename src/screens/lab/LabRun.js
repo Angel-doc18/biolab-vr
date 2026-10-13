@@ -138,11 +138,7 @@ export default function LabRun({ navigation, route }) {
         e = await fetchExplanation({ kind: 'practical', subject: lab.subject, title: lab.title, items: method, context: lab.objective, lang, className: user?.className });
         setExplained(e);
       } catch (err) {
-        setNote(
-          err?.code === 'consent_required'
-            ? L('The tutor explains practicals once a parent approves your account. Use "Listen to the method" for now.', 'Le tuteur explique les TP après l’accord d’un parent. Utilisez « Écouter la méthode » pour l’instant.')
-            : err?.message || L('The tutor needs a connection the first time.', 'Le tuteur a besoin d’une connexion la première fois.')
-        );
+        setNote(err?.message || L('The tutor needs a connection the first time.', 'Le tuteur a besoin d’une connexion la première fois.'));
       } finally {
         setBusy(false);
       }

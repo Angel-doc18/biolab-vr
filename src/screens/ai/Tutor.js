@@ -90,7 +90,7 @@ const REASONS = [
 
 export default function Tutor({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const { user, pro, progress, stats, quota, setQuota, refreshQuota, consentOk, subject: current } = useApp();
+  const { user, pro, progress, stats, quota, setQuota, refreshQuota, subject: current } = useApp();
   const L = useL();
   const lang = useLang();
   const subject = route.params?.subject || current;
@@ -196,17 +196,6 @@ export default function Tutor({ navigation, route }) {
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 64 : 0}>
         <ScrollView ref={scroller} contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 18 }} keyboardShouldPersistTaps="handled">
-          {!consentOk && (
-            <V c="bg-surface-container-low rounded-xl p-space-md gap-1">
-              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-                {L('The tutor opens after your parent approves your account', 'Le tuteur s’ouvre après l’accord de votre parent')}
-              </T>
-              <P onPress={() => navigation.navigate('Guardian', { fromHome: true })} hitSlop={8}>
-                <T c="font-label-md text-label-md text-primary-container">{L('Send the approval link', 'Envoyer le lien d’accord')}</T>
-              </P>
-            </V>
-          )}
-
           {!messages.length && (
             <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
               {L(`Ask any GCE ${name} question. Answers explain step by step and point out what examiners give marks for.`, `Posez une question de ${name.toLowerCase()} du GCE. Les réponses expliquent étape par étape et indiquent ce que les examinateurs notent.`)}

@@ -85,12 +85,8 @@ export function Diagram({ id, caption = true, maxHeight, explain = false, subjec
       const e = await fetchExplanation({ kind: 'diagram', subject: subject || current, title: spec.title, items: parts, context, lang, className: user?.className });
       setText(e);
       return e;
-    } catch (e) {
-      setNote(
-        e?.code === 'consent_required'
-          ? L('The tutor explains diagrams once a parent approves your account. Reading the diagram for now.', 'Le tuteur explique les schémas après l’accord d’un parent. Lecture du schéma pour l’instant.')
-          : L('The tutor needs a connection the first time. Reading the diagram for now.', 'Le tuteur a besoin d’une connexion la première fois. Lecture du schéma pour l’instant.')
-      );
+    } catch {
+      setNote(L('The tutor needs a connection the first time. Reading the diagram for now.', 'Le tuteur a besoin d’une connexion la première fois. Lecture du schéma pour l’instant.'));
       return null;
     } finally {
       setBusy(false);

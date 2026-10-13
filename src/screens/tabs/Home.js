@@ -37,7 +37,7 @@ export function Section({ title, action, onAction, children }) {
 }
 
 function StudentHome({ navigation }) {
-  const { user, pro, progress, stats, quota, refreshQuota, refreshUnread, refreshMe, consentOk, subject, subjects } = useApp();
+  const { user, pro, progress, stats, quota, refreshQuota, refreshUnread, subject, subjects } = useApp();
   const L = useL();
   const lang = useLang();
   const [assignments, setAssignments] = useState([]);
@@ -46,14 +46,13 @@ function StudentHome({ navigation }) {
   const load = useCallback(async () => {
     refreshUnread();
     refreshQuota();
-    if (!consentOk) refreshMe().catch(() => {});
     try {
       const r = await get('/v1/me/assignments');
       setAssignments(r.items.filter((a) => !a.doneAt && a.dueAt > Date.now() - 86400000));
     } catch {
       // no connection: keep the last list
     }
-  }, [refreshQuota, refreshUnread, refreshMe, consentOk]);
+  }, [refreshQuota, refreshUnread]);
 
   useFocusEffect(
     useCallback(() => {
@@ -149,23 +148,6 @@ function StudentHome({ navigation }) {
             ]}
           />
         </Section>
-
-        {!consentOk && (
-          <P c="bg-surface-container-low border border-outline-variant p-space-md rounded-xl gap-1" onPress={() => navigation.navigate('Guardian', { fromHome: true })}>
-            <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-              {user?.consentStatus === 'pending'
-                ? L('Waiting for your parent’s approval', 'En attente de l’accord de votre parent')
-                : user?.consentStatus === 'refused'
-                ? L('Your parent did not approve the account', 'Votre parent n’a pas approuvé le compte')
-                : L('Confirm your date of birth', 'Confirmez votre date de naissance')}
-            </T>
-            <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
-              {user?.consentStatus === 'pending'
-                ? L('Your progress is kept on this phone until they approve. Tap to send the link again.', 'Votre progression reste sur ce téléphone jusqu’à leur accord. Touchez pour renvoyer le lien.')
-                : L('Students under 18 need a parent’s approval before progress is saved to the account and the tutor opens.', 'Les élèves de moins de 18 ans ont besoin de l’accord d’un parent avant l’enregistrement sur le compte et l’accès au tuteur.')}
-            </T>
-          </P>
-        )}
 
         <P c="bg-primary-container p-space-md rounded-xl gap-space-sm" onPress={() => navigation.navigate('Exams')}>
           <V c="flex-row items-end justify-between gap-space-sm">

@@ -3,7 +3,7 @@
 // base64 in D1. Students under 18 need a parent's approval first, as for all
 // personal data.
 import { HttpError, now, ok, readJson } from '../lib/http.js';
-import { publicUser, requireUser, requireConsent } from '../lib/auth.js';
+import { publicUser, requireUser } from '../lib/auth.js';
 
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BASE64 = 350_000; // about 260 KB of image
@@ -12,7 +12,6 @@ const MAGIC = { 'image/jpeg': '/9j/', 'image/png': 'iVBORw0KGgo', 'image/webp': 
 // PUT /v1/me/avatar  { base64, mediaType }
 export async function putAvatar(request, env) {
   const user = await requireUser(request, env);
-  requireConsent(user);
   const b = await readJson(request, 400 * 1024);
   const mime = TYPES.includes(b.mediaType) ? b.mediaType : null;
   const data = typeof b.base64 === 'string' ? b.base64.replace(/\s+/g, '') : '';

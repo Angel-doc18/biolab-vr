@@ -146,9 +146,6 @@ export function AppProvider({ children }) {
 
   // ---------- progress ----------
   const user = auth.user;
-  // Students under 18 need a parent's approval before anything is stored on the
-  // server; until then progress stays on this phone only.
-  const consentOk = !user || user.role !== 'student' || user.consentStatus === 'granted' || user.consentStatus === 'not_needed';
 
   // ---------- profile picture ----------
   // Kept on this phone as a data URI and fetched again only when it changes
@@ -234,7 +231,7 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (!user || loadedFor.current !== user.id) return;
     writeJson(progressKey(user.id), progress);
-    if (user.role !== 'student' || prefs.autoSync === false || !consentOk) return;
+    if (user.role !== 'student' || prefs.autoSync === false) return;
     clearTimeout(syncTimer.current);
     syncTimer.current = setTimeout(() => {
       const lastDay = progress.days[progress.days.length - 1];
@@ -255,7 +252,7 @@ export function AppProvider({ children }) {
         },
       }).catch(() => {});
     }, 3000);
-  }, [progress, user, stats, subjects, prefs.autoSync, consentOk]);
+  }, [progress, user, stats, subjects, prefs.autoSync]);
 
   const actions = useMemo(
     () => ({
@@ -361,7 +358,6 @@ export function AppProvider({ children }) {
       auth,
       user,
       pro: OPEN_FOR_TESTING || auth.pro,
-      consentOk,
       subjects,
       subject,
       setSubject,
@@ -385,7 +381,7 @@ export function AppProvider({ children }) {
       refreshUnread,
       ...actions,
     }),
-    [ready, prefs, savePrefs, auth, user, consentOk, subjects, subject, setSubject, applyUser, avatar, saveAvatar, removeAvatar, register, login, logout, updateMe, refreshMe, startSession, progress, stats, quota, refreshQuota, unread, refreshUnread, actions]
+    [ready, prefs, savePrefs, auth, user, subjects, subject, setSubject, applyUser, avatar, saveAvatar, removeAvatar, register, login, logout, updateMe, refreshMe, startSession, progress, stats, quota, refreshQuota, unread, refreshUnread, actions]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

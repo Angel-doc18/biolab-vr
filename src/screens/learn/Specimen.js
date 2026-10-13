@@ -119,12 +119,8 @@ function ModelScreen({ unit }) {
       });
       setLessons((all) => ({ ...all, [lang]: e }));
       return e;
-    } catch (e) {
-      setNote(
-        e?.code === 'consent_required'
-          ? L('The teacher explains models once a parent approves your account. Reading the parts for now.', 'Le professeur explique les modèles après l’accord d’un parent. Lecture des parties pour l’instant.')
-          : L('The teacher needs a connection the first time. Reading the parts for now.', 'Le professeur a besoin d’une connexion la première fois. Lecture des parties pour l’instant.')
-      );
+    } catch {
+      setNote(L('The teacher needs a connection the first time. Reading the parts for now.', 'Le professeur a besoin d’une connexion la première fois. Lecture des parties pour l’instant.'));
       return null;
     } finally {
       setBusy(false);

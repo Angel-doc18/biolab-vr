@@ -263,12 +263,8 @@ export default function Lesson({ navigation, route }) {
       try {
         e = await fetchExplanation({ kind: 'lesson', subject: unit.subject, title: lesson.title, items: parts, context: teachContext, lang, className: user?.className });
         setTaught(e);
-      } catch (err) {
-        setTeachNote(
-          err?.code === 'consent_required'
-            ? L('The teacher explains lessons once a parent approves your account. Reading the notes for now.', 'Le professeur explique les leçons après l’accord d’un parent. Lecture des notes pour l’instant.')
-            : L('The teacher needs a connection the first time. Reading the notes for now.', 'Le professeur a besoin d’une connexion la première fois. Lecture des notes pour l’instant.')
-        );
+      } catch {
+        setTeachNote(L('The teacher needs a connection the first time. Reading the notes for now.', 'Le professeur a besoin d’une connexion la première fois. Lecture des notes pour l’instant.'));
       } finally {
         setTeachBusy(false);
       }

@@ -1,4 +1,4 @@
-// Outgoing messages to phones: login codes, parent consent requests and alerts.
+// Outgoing messages to phones: login codes, parent reports and alerts.
 //
 // Channels are tried in order and the first one configured and working is used:
 //   1. WhatsApp Cloud API (approved templates; cheapest for codes in Cameroon)
