@@ -207,4 +207,146 @@ export const LESSON_QUESTIONS = {
     Q('"I have been learning French for three years" is:', ['J’apprends le français depuis trois ans.', 'J’ai appris le français pour trois ans.', 'J’ai été apprenant le français trois ans.', 'J’apprenais le français il y a trois ans.'], 'Présent + depuis.'),
     Q('"A red car" in French is:', ['une voiture rouge', 'une rouge voiture', 'un rouge voiture', 'une voiture rougee'], 'Colour adjectives follow the noun.'),
   ],
+
+  // ---------- Form 5, term 1 ----------
+  'fr-sepresenter-5': [
+    Q('« J’___ dix-sept ans. »', ['ai', 'suis', 'fais', 'a'], 'Age is given with « avoir ».'),
+    Q('The informal way to introduce your cousin to a friend is:', ['« Je te présente mon cousin. »', '« J’ai l’honneur de vous présenter mon cousin. »', '« Permettez-moi de vous présenter… »', '« Veuillez agréer mon cousin. »'], '« Je te présente » uses « tu ».'),
+    Q('« Que faites-vous dans la vie ? » asks:', ['what job someone does', 'where someone lives', 'how old someone is', 'what someone ate'], 'It is a polite question about one’s occupation.'),
+    Q('The most correct written form of the question is:', ['« Où habitez-vous ? »', '« Vous habitez où ? »', '« Où vous habitez ? »', '« Habitez où vous ? »'], 'Inversion is the careful written form.'),
+  ],
+  'fr-generations-5': [
+    Q('« La belle-fille » can mean:', ['the daughter-in-law', 'the granddaughter', 'the aunt', 'the godmother'], 'The wife of one’s son, also called la bru.'),
+    Q('« Les ascendants » are:', ['parents, grandparents and great-grandparents', 'children and grandchildren', 'neighbours', 'teachers'], 'The generations before you.'),
+    Q('« Faire des concessions » in a family conflict means:', ['each side accepts to give up something', 'one side wins everything', 'nobody speaks', 'the family separates'], 'A compromise.'),
+    Q('In « vrai ou faux » questions on a text, you must:', ['justify with a short quotation from the text', 'give no reason', 'copy the whole text', 'answer in English'], 'The justification earns the mark.'),
+  ],
+  'fr-recit-5': [
+    Q('The plus-que-parfait of « venir » with « ils » is:', ['ils étaient venus', 'ils avaient venu', 'ils sont venus', 'ils venaient'], '« Venir » takes être; imparfait of être + venus.'),
+    Q('« Quand je suis arrivé, le film ___ . » (commencer, earlier)', ['avait commencé', 'commencera', 'a commencé demain', 'commence'], 'The film began before I arrived.'),
+    Q('« Ils arrivèrent » is in the:', ['passé simple', 'passé composé', 'futur', 'présent'], 'The literary past tense, recognised in reading.'),
+    Q('The opening description of a story is usually in the:', ['imparfait', 'futur simple', 'impératif', 'subjonctif'], 'Descriptions and background: imparfait.'),
+  ],
+  'fr-bilinguisme-5': [
+    Q('Cameroon is often called:', ['« l’Afrique en miniature »', '« le pays du soleil levant »', '« la Suisse de l’Afrique »', '« le désert d’Afrique »'], 'Because of its great diversity.'),
+    Q('« Le repli identitaire » means:', ['turning in on one’s own group', 'learning many languages', 'travelling abroad', 'national unity'], 'It is the opposite of openness.'),
+    Q('Which spelling is correct?', ['la musique camerounaise', 'la musique Camerounaise', 'la Musique camerounaise', 'la musique Cameroun'], 'Adjectives of nationality take a small letter.'),
+    Q('« Le brassage culturel » is:', ['the mixing of cultures', 'a beer factory', 'a cultural war', 'a language exam'], 'Cultures meet and mix.'),
+  ],
+  'fr-allocution-5': [
+    Q('The salutations protocolaires begin with:', ['the most important person present', 'the students', 'the speaker’s friends', 'the youngest person'], 'Protocol order follows rank.'),
+    Q('« C’est pour moi un grand honneur de prendre la parole » belongs in:', ['the introduction', 'the conclusion', 'the signature', 'the objet'], 'The speaker explains why they speak.'),
+    Q('Which pair differs only by an oral and a nasal vowel?', ['beau / bon', 'chat / chien', 'mer / mère', 'rue / roue'], '/bo/ and /bɔ̃/.'),
+    Q('An allocution is written to be:', ['heard by an audience', 'read in silence by one friend', 'posted as a notice', 'kept secret'], 'Short, clear sentences suit listening.'),
+  ],
+  'fr-carriere-5': [
+    Q('A fisherman (un pêcheur) works in the:', ['secteur primaire', 'secteur secondaire', 'secteur tertiaire', 'secteur numérique only'], 'Fishing takes resources from nature.'),
+    Q('« Le savoir-être » refers to:', ['personal qualities such as punctuality and honesty', 'a diploma', 'a salary', 'a factory'], 'How one behaves at work.'),
+    Q('« La date limite » in a job advertisement is:', ['the last day to send the application', 'the date of birth', 'the salary date', 'the first day of work'], 'After it, applications are refused.'),
+    Q('« Je ___ devenir pilote. » (pouvoir, conditionnel)', ['pourrais', 'pourrai', 'peux bien', 'pouvais'], 'Conditionnel: future stem pourr- + -ais.'),
+  ],
+  'fr-cv-5': [
+    Q('In the « Formation » section of a CV, diplomas are listed:', ['from the most recent to the oldest', 'in alphabetical order', 'from the oldest to the most recent only', 'without dates'], 'Reverse chronological order.'),
+    Q('« Si vous ___ ma demande, je vous en serai reconnaissant. »', ['acceptez', 'accepterez', 'accepteriez', 'acceptiez'], 'Si + présent → futur.'),
+    Q('« Être titulaire du GCE A Level » means:', ['to hold the GCE A Level', 'to prepare for the GCE A Level', 'to fail the GCE A Level', 'to teach the GCE A Level'], 'Titulaire = holder.'),
+    Q('Which word is NOT suitable in a lettre de motivation?', ['super', 'solliciter', 'maîtriser', 'disponible'], '« Super » is familiar.'),
+  ],
+  'fr-devises-5': [
+    Q('The franc CFA of Cameroon is issued by:', ['la BEAC', 'la CONAC', 'ELECAM', 'la CRTV'], 'Banque des États de l’Afrique centrale.'),
+    Q('« Le vendeur m’a rendu la monnaie » means:', ['the seller gave me my change', 'the seller changed currency', 'the seller lent me money', 'the seller refused my money'], '« La monnaie » here is the change.'),
+    Q('Which is spelt correctly?', ['deux cents francs', 'deux cent francs', 'deux mils francs', 'deux milles francs'], '« Cent » takes -s when it ends the number.'),
+    Q('« Le bénéfice » of a small business is:', ['its profit', 'its loss', 'its loan', 'its shop'], 'What remains after paying the costs.'),
+  ],
+  'fr-enligne-5': [
+    Q('« Passer une commande » means:', ['to place an order', 'to pass an exam', 'to cancel a sale', 'to deliver a parcel'], 'You order goods.'),
+    Q('« Le livreur ___ demain matin. » (passer, futur)', ['passera', 'passerait', 'est passé', 'passait'], 'Futur simple: passera.'),
+    Q('The futur simple of « envoyer » with « je » is:', ['j’enverrai', 'j’envoierai', 'j’envoyerai', 'j’enverrais'], 'Irregular stem « enverr- ».'),
+    Q('A safe habit when buying online is to:', ['keep the receipts and screenshots', 'share your PIN', 'pay a stranger first', 'click every link'], 'Proofs protect you.'),
+  ],
+
+  // ---------- Form 5, terms 2 and 3 ----------
+  'fr-passive2-5': [
+    Q('The passive of « On construira une école » is:', ['Une école sera construite.', 'Une école est construite.', 'Une école a construit.', 'Une école serait construit.'], 'Futur: sera + participle agreeing with « école ».'),
+    Q('The passive of « Le vent arrachait les toits » is:', ['Les toits étaient arrachés par le vent.', 'Les toits ont arraché le vent.', 'Les toits sont arrachés par le vent.', 'Les toits seront arrachés par le vent.'], 'Imparfait: étaient + participle.'),
+    Q('« Le plastique se recycle difficilement » is an example of:', ['the pronominal passive', 'the imperative', 'the subjunctive', 'reported speech'], 'A reflexive form with a passive meaning.'),
+    Q('Which sentence cannot be put in the passive?', ['On parle de la pollution.', 'On pollue la rivière.', 'On trie les déchets.', 'On plante des arbres.'], '« Parler de » has no direct object.'),
+  ],
+  'fr-ecocitoyen-5': [
+    Q('« Le tri sélectif » is:', ['sorting waste by type', 'burning waste', 'buying new bags', 'cutting trees'], 'It makes recycling possible.'),
+    Q('« Il faut que chaque famille ___ ses déchets. » (trier)', ['trie', 'trier', 'triera', 'triait'], '« Il faut que » + subjunctive.'),
+    Q('Solar energy is:', ['une énergie renouvelable', 'un gaz à effet de serre', 'une pollution', 'un déchet'], 'The sun does not run out.'),
+    Q('« La désertification » threatens above all:', ['the Far North of Cameroon', 'the coast near Limbe', 'the forest of the East only', 'nowhere'], 'The Sahel zone is drying.'),
+  ],
+  'fr-signaler-5': [
+    Q('« Le braconnage » is:', ['illegal hunting', 'legal farming', 'tree planting', 'fishing with a licence'], 'Hunting protected animals or without a permit.'),
+    Q('The Dja faunal reserve is:', ['a UNESCO World Heritage site', 'a city', 'a river port', 'a school'], 'It is listed by UNESCO.'),
+    Q('« J’ai constaté que… » is used to:', ['state a fact you have observed', 'give an order', 'say goodbye', 'ask for money'], 'Useful in a report.'),
+    Q('« L’orpaillage illégal » is:', ['illegal gold mining', 'illegal fishing', 'illegal logging', 'illegal trading of birds'], 'It pollutes rivers.'),
+  ],
+  'fr-assainissement-5': [
+    Q('The affirmative imperative of « se faire vacciner » (vous) is:', ['Faites-vous vacciner.', 'Vous faites vacciner.', 'Faites vacciner-vous.', 'Faisez-vous vacciner.'], 'The pronoun follows with a hyphen.'),
+    Q('« Les caniveaux » are:', ['gutters that carry rainwater and waste water', 'kitchens', 'wells', 'hospitals'], 'Blocked gutters cause floods.'),
+    Q('Cholera spreads mainly through:', ['dirty water and food', 'mosquito bites', 'cold weather', 'sunlight'], 'Hygiene and boiled water prevent it.'),
+    Q('A public notice usually begins with:', ['a title in capitals, such as AVIS À LA POPULATION', 'a signature', 'a recipe', 'a question'], 'The title catches attention.'),
+  ],
+  'fr-etatcivil-5': [
+    Q('« Le dépouillement » is:', ['the counting of the votes', 'the campaign', 'the registration', 'the voting booth'], 'It follows the close of the poll.'),
+    Q('« ___ n’est censé ignorer la loi. »', ['Nul', 'Tous', 'Plusieurs', 'Chaque'], 'A classic legal maxim with « nul ».'),
+    Q('The minimum age to register to vote in Cameroon is:', ['20 years', '15 years', '18 years', '25 years'], 'The electoral majority in Cameroon is 20.'),
+    Q('« L’acte de décès » records:', ['a death', 'a birth', 'a marriage', 'a diploma'], 'Décès = death.'),
+  ],
+  'fr-corruption-5': [
+    Q('« Le corrupteur » is the person who:', ['offers the bribe', 'refuses the bribe', 'reports the bribe', 'judges the case'], 'Le corrompu is the one who receives.'),
+    Q('The CONAC was created in:', ['2006', '1960', '1990', '2020'], 'National Anti-Corruption Commission.'),
+    Q('« La probité » is a synonym of:', ['l’honnêteté', 'la fraude', 'la paresse', 'la richesse'], 'Integrity, honesty.'),
+    Q('« L’impunité » means:', ['the absence of punishment', 'a heavy punishment', 'a reward', 'a law'], 'It encourages wrongdoing.'),
+  ],
+  'fr-opposition-5': [
+    Q('« ___ la pluie, les électeurs sont venus voter. »', ['Malgré', 'Bien que', 'Tandis que', 'Même si'], 'A noun follows: malgré.'),
+    Q('« Il a beau ___, personne ne le croit. »', ['mentir', 'ment', 'mente', 'mentait'], '« Avoir beau » + infinitif.'),
+    Q('« Quoique » is followed by:', ['the subjunctive', 'the indicative future', 'a noun', 'an infinitive'], 'Like « bien que ».'),
+    Q('« Même s’il ___ riche, il paie ses impôts. »', ['est', 'soit', 'sera', 'serait'], '« Même si » + indicatif.'),
+  ],
+  'fr-addictions-5': [
+    Q('« Les paris sportifs » can cause:', ['an addiction to gambling', 'better marks', 'good health', 'nothing at all'], 'An addiction without a substance.'),
+    Q('« À ta place, je ___ à mes parents. » (parler)', ['parlerais', 'parlerai', 'parle', 'parlais'], '« À ta place » + conditionnel.'),
+    Q('« Ne te laisse pas influencer » means:', ['do not let others influence you', 'influence others', 'leave school', 'let yourself go'], 'Resist pressure.'),
+    Q('« Une surdose » is:', ['an overdose', 'a medicine for headaches', 'a small dose', 'a hospital'], 'Taking too much of a drug.'),
+  ],
+  'fr-concordance-5': [
+    Q('Elle a dit : « J’ai fini. » In reported speech:', ['Elle a dit qu’elle avait fini.', 'Elle a dit qu’elle a fini.', 'Elle a dit qu’elle finira.', 'Elle a dit si elle avait fini.'], 'Passé composé → plus-que-parfait.'),
+    Q('In reported speech with a past verb, « hier » becomes:', ['la veille', 'le lendemain', 'ce jour-là', 'demain'], 'The day before.'),
+    Q('Il m’a dit : « Assieds-toi ! » In reported speech:', ['Il m’a dit de m’asseoir.', 'Il m’a dit que je m’assieds.', 'Il m’a dit si je m’asseyais.', 'Il m’a dit assieds-toi.'], 'Impératif → de + infinitif.'),
+    Q('Ils ont demandé : « Est-ce que tu viendras ? » In reported speech:', ['Ils ont demandé si je viendrais.', 'Ils ont demandé que je viendrai.', 'Ils ont demandé si je viendrai.', 'Ils ont demandé est-ce que je viendrais.'], 'Yes/no question → si; futur → conditionnel.'),
+  ],
+  'fr-dunepart-5': [
+    Q('« En effet » introduces:', ['an explanation or proof', 'a contrast', 'the conclusion', 'a greeting'], 'It confirms the previous idea.'),
+    Q('« De surcroît » means:', ['moreover', 'therefore', 'however', 'firstly'], 'It adds a point.'),
+    Q('The three parts of a development paragraph are:', ['argument, explanation, illustration', 'title, date, signature', 'question, answer, greeting', 'objet, corps, formule'], 'The idea, why, and an example.'),
+    Q('« L’antithèse » in a dialectical plan presents:', ['the arguments against', 'the arguments for', 'the final greeting', 'the title'], 'The opposite view.'),
+  ],
+  'fr-medias-5': [
+    Q('« Un quotidien » is published:', ['every day', 'every week', 'every month', 'once a year'], 'Quotidien = daily.'),
+    Q('« Un hypertrucage » is:', ['a deepfake made with AI', 'a printing machine', 'a radio station', 'a fact-check'], 'Fake video or voice that looks real.'),
+    Q('A warning sign of fake news is:', ['« URGENT ! Partagez avant suppression ! »', 'a known source', 'a date and an author', 'the same news in serious media'], 'Emotional pressure to share.'),
+    Q('« Le chapeau » of an article is:', ['the short introduction under the title', 'the author’s hat', 'the advertisement', 'the last line'], 'It sums up the article.'),
+  ],
+  'fr-qcm-5': [
+    Q('Which word contains the sound /ɑ̃/?', ['temps', 'thym', 'thon', 'tonne'], '« em » before a consonant is /ɑ̃/.'),
+    Q('Which word contains the sound /ɲ/?', ['campagne', 'canne', 'cane', 'calme'], '« gn » is /ɲ/.'),
+    Q('Choose the antonym of « augmenter »:', ['diminuer', 'grandir', 'monter', 'ajouter'], 'Increase ↔ decrease.'),
+    Q('In « rose », the letter s is pronounced:', ['/z/', '/s/', '/ʃ/', 'not at all'], 'An s between two vowels sounds /z/.'),
+  ],
+  'fr-mock-5': [
+    Q('« J’habite à Bafoussam depuis 2020 » translates:', ['I have been living in Bafoussam since 2020.', 'I lived in Bafoussam in 2020 only.', 'I will live in Bafoussam from 2020.', 'I left Bafoussam in 2020.'], 'Présent + depuis for an action still going on.'),
+    Q('« Si tu étais venu, tu ___ le chef. » (voir)', ['aurais vu', 'verras', 'voyais', 'avais vu'], 'Si + plus-que-parfait → conditionnel passé.'),
+    Q('« Je viens de manger » means:', ['I have just eaten', 'I come to eat', 'I will eat', 'I ate yesterday'], 'Venir de + infinitif: the recent past.'),
+    Q('The conditionnel passé of « partir » with « elle » is:', ['elle serait partie', 'elle aurait parti', 'elle sera partie', 'elle était partie'], '« Partir » takes être; the participle agrees.'),
+  ],
+  'fr-paper2-5': [
+    Q('Mettez au pluriel : « Cet élève est attentif. »', ['Ces élèves sont attentifs.', 'Ces élève sont attentif.', 'Cettes élèves sont attentives.', 'Ces élèves est attentifs.'], 'Determiner, verb and adjective all change.'),
+    Q('« Remplacez par un pronom : Elle parle à ses amies. »', ['Elle leur parle.', 'Elle les parle.', 'Elle lui parle.', 'Elle y parle.'], '« parler à » + plural persons → leur.'),
+    Q('In Section B, a transformation answer should be:', ['the whole rewritten sentence', 'only the changed word', 'a translation into English', 'a summary of the text'], 'Copy the full sentence.'),
+    Q('Which is correct?', ['une décision prise', 'une décision pris', 'une décision prit', 'une décision prisse'], 'The participle agrees with the feminine noun.'),
+  ],
 };
