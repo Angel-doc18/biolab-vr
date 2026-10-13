@@ -74,6 +74,16 @@ export const SUBJECTS = [
     fr: 'Anglais',
     p1: { count: 50, minutes: 90 },
   },
+  {
+    id: 'french',
+    code: '0545',
+    level: 'O',
+    available: true,
+    classes: ['Form 4'],
+    en: 'French',
+    fr: 'Français',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'addmaths', code: '0575', level: 'O', en: 'Additional Mathematics', fr: 'Mathématiques additionnelles' },
   {
     id: 'computer',

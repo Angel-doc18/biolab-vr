@@ -16,9 +16,10 @@ import * as geography from './geography/units';
 import * as homeec from './homeec/units';
 import * as maths from './maths/units';
 import * as english from './english/units';
+import * as french from './french/units';
 import { CLASSES, classById, classLevel, subjectById } from './subjects';
 
-const MODULES = { biology, chemistry, physics, humanbio, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec, maths, english };
+const MODULES = { biology, chemistry, physics, humanbio, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec, maths, english, french };
 
 export const units = Object.entries(MODULES).flatMap(([subject, m]) => m.units.map((u) => ({ ...u, subject })));
 
