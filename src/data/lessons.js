@@ -10,13 +10,14 @@ import { LESSONS as A_PHYSICS } from './a-physics/lessons';
 import { LESSONS as COMPUTER } from './computer/lessons';
 import { LESSONS as GEOGRAPHY } from './geography/lessons';
 import { LESSONS as HOMEEC } from './homeec/lessons';
+import { LESSONS as MATHS } from './maths/lessons';
 import { LESSON_QUESTIONS } from './lessonQuestions';
 import { unitById } from './units';
 
 // Each lesson carries its own end-of-lesson questions (`quiz`) where extra ones
 // have been written for it.
 const withQuestions = (l) => (LESSON_QUESTIONS[l.id] ? { ...l, quiz: [...(l.quiz || []), ...LESSON_QUESTIONS[l.id]] } : l);
-export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC].map(withQuestions);
+export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS].map(withQuestions);
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));
 const byUnit = new Map();

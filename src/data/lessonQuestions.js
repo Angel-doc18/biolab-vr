@@ -9,5 +9,6 @@ import { LESSON_QUESTIONS as A_CHEMISTRY } from './a-chemistry/lessonQuestions';
 import { LESSON_QUESTIONS as COMPUTER } from './computer/lessonQuestions';
 import { LESSON_QUESTIONS as GEOGRAPHY } from './geography/lessonQuestions';
 import { LESSON_QUESTIONS as HOMEEC } from './homeec/lessonQuestions';
+import { LESSON_QUESTIONS as MATHS } from './maths/lessonQuestions';
 
-export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC };
+export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS };
