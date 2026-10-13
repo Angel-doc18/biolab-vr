@@ -63,22 +63,25 @@ function ReliefArt() {
       {area(13.1, 7.0, 34, '#d8b77d')}
       {area(13.9, 10.7, 12, '#c9a46a')}
       <Path d={`M${px(9.17)} ${py(4.45)} L${px(9.0)} ${py(4.0)} L${px(9.35)} ${py(4.0)} Z`} fill="#8d6e4a" />
-      <Txt x={px(10.3)} y={py(6.55)} size={8} weight="700">
+      <Txt x={px(10.55)} y={py(6.75)} size={8} weight="700">
         Western
       </Txt>
-      <Txt x={px(10.3)} y={py(6.25)} size={8} weight="700">
+      <Txt x={px(10.55)} y={py(6.48)} size={8} weight="700">
         Highlands
       </Txt>
-      <Txt x={px(13.1)} y={py(7.05)} size={8} weight="700">
-        Adamawa Plateau
+      <Txt x={px(13.0)} y={py(7.75)} size={8} weight="700">
+        Adamawa
       </Txt>
-      <Txt x={px(12.3)} y={py(4.4)} size={8} weight="700">
+      <Txt x={px(13.0)} y={py(7.48)} size={8} weight="700">
+        Plateau
+      </Txt>
+      <Txt x={px(12.9)} y={py(3.15)} size={8} weight="700">
         Southern Plateau
       </Txt>
-      <Txt x={px(13.4)} y={py(8.7)} size={7.5} weight="700">
+      <Txt x={px(13.6)} y={py(8.3)} size={7.5} weight="700">
         Benue lowlands
       </Txt>
-      <Txt x={px(14.55)} y={py(11.95)} size={7.5} weight="700">
+      <Txt x={px(14.05)} y={py(12.2)} size={7.5} weight="700" anchor="end">
         Chad plain
       </Txt>
       <Txt x={px(13.55)} y={py(11.25)} size={7.5} weight="700" anchor="end">
@@ -93,11 +96,11 @@ function ReliefArt() {
       <Town name="Douala" at={TOWNS.Douala} dx={5} dy={9} />
       <Town name="Yaoundé" at={TOWNS.Yaoundé} />
       <Town name="Kribi" at={TOWNS.Kribi} />
-      <Town name="Bamenda" at={TOWNS.Bamenda} dx={-5} anchor="end" />
-      <Town name="Ngaoundéré" at={TOWNS.Ngaoundéré} dy={11} />
-      <Town name="Garoua" at={TOWNS.Garoua} />
-      <Town name="Maroua" at={TOWNS.Maroua} />
-      <Town name="Bertoua" at={TOWNS.Bertoua} />
+      <Town name="Bamenda" at={TOWNS.Bamenda} dx={0} dy={12} anchor="middle" />
+      <Town name="Ngaoundéré" at={TOWNS.Ngaoundéré} dx={0} dy={12} anchor="middle" />
+      <Town name="Garoua" at={TOWNS.Garoua} dx={5} dy={13} anchor="middle" />
+      <Town name="Maroua" at={TOWNS.Maroua} dx={0} dy={12} anchor="middle" />
+      <Town name="Bertoua" at={TOWNS.Bertoua} dx={-5} anchor="end" />
       <Txt x={px(12.2)} y={py(1.55)} size={8} italic>
         Simplified sketch map
       </Txt>
@@ -121,13 +124,13 @@ function TransportArt() {
         <Circle key={n} cx={px(TOWNS[n][0])} cy={py(TOWNS[n][1])} r={5} fill="none" stroke="#1f6fb2" strokeWidth={1.6} />
       ))}
       <Circle cx={px(TOWNS.Garoua[0])} cy={py(TOWNS.Garoua[1])} r={5} fill="none" stroke="#1f6fb2" strokeWidth={1.6} />
-      <Town name="Douala" at={TOWNS.Douala} dx={7} dy={10} bold />
+      <Town name="Douala" at={TOWNS.Douala} dx={6} dy={-8} bold />
       <Town name="Limbe" at={TOWNS.Limbe} dx={-7} anchor="end" />
-      <Town name="Kribi" at={TOWNS.Kribi} dx={7} />
-      <Town name="Yaoundé" at={TOWNS.Yaoundé} bold />
-      <Town name="Ngaoundéré" at={TOWNS.Ngaoundéré} dx={-6} anchor="end" />
-      <Town name="Garoua" at={TOWNS.Garoua} dx={7} />
-      <Town name="Belabo" at={[13.3, 4.93]} dy={-5} />
+      <Town name="Kribi" at={TOWNS.Kribi} dx={7} dy={10} />
+      <Town name="Yaoundé" at={TOWNS.Yaoundé} dx={2} dy={15} bold />
+      <Town name="Ngaoundéré" at={TOWNS.Ngaoundéré} dx={0} dy={-6} anchor="middle" />
+      <Town name="Garoua" at={TOWNS.Garoua} dx={4} dy={15} anchor="middle" />
+      <Town name="Belabo" at={[13.3, 4.93]} dx={4} dy={9} />
       {/* key */}
       <Path d={`M${px(12.4)} ${py(12.6)} L${px(13.0)} ${py(12.6)}`} stroke="#2d3a45" strokeWidth={2.4} />
       <Txt x={px(12.3)} y={py(12.6) + 3} size={7.5} anchor="end">
