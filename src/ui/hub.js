@@ -13,6 +13,7 @@ export const SUBJECT_LOOK = {
   geography: { icon: 'public', tint: '#9a6a12', bg: '#f6eddb' },
   homeec: { icon: 'restaurant', tint: '#b0466f', bg: '#f7e4ec' },
   maths: { icon: 'calculate', tint: '#0f766e', bg: '#dcefed' },
+  english: { icon: 'translate', tint: '#4a4e9e', bg: '#e6e7f6' },
   // Advanced Level: the same colour as the Ordinary Level subject, a deeper shade.
   'a-biology': { icon: 'genetics', tint: '#24613d', bg: '#dcebe1' },
   'a-chemistry': { icon: 'experiment', tint: '#5e3591', bg: '#e6dcf4' },
