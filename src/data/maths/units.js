@@ -4,6 +4,7 @@
 // follow the school year. The Form 1 and Form 2 topics in units12.js join once
 // their lessons are written.
 import { UNITS_4 } from './units4';
+import { UNITS_5 } from './units5';
 
 export const GROUPS = [
   { id: 'numbers', en: 'Numbers, sets and matrices', fr: 'Nombres, ensembles et matrices' },
@@ -13,4 +14,4 @@ export const GROUPS = [
   { id: 'statistics', en: 'Statistics, probability and examination practice', fr: 'Statistiques, probabilités et préparation aux examens' },
 ];
 
-export const units = [...UNITS_4];
+export const units = [...UNITS_4, ...UNITS_5];

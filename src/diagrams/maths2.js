@@ -1286,6 +1286,9 @@ function NetworkArt() {
   );
 }
 
+// Shared with the Form 5 figures in maths3.js.
+export { Arc, Arrow, Axes, RightAngle, at, poly };
+
 export const MATHS_2 = {
   'number-sets': {
     title: 'The sets of numbers: ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ',

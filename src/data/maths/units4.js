@@ -5,7 +5,8 @@
 // practice). Topics of the MINESEC Form 4 syllabus that the scheme leaves out
 // (logarithms, matrices, vectors, graphs of quadratic and trigonometric
 // functions, loci and constructions, progressions, the Earth as a sphere and
-// networks) are kept and placed beside the topics they build on.
+// networks) are kept and placed beside the topics they build on. Topics the
+// Form 5 scheme teaches again carry `alsoIn` with their Form 5 place.
 //
 // Quiz convention: the correct option is written first in `a`; options are
 // shuffled when shown. A column vector is written on one line, for example
@@ -203,6 +204,7 @@ export const UNITS_4 = [
     n: 8,
     term: 1,
     seq: 2,
+    alsoIn: { 'Form 5': { n: 12, term: 2, seq: 4 } },
     group: 'numbers',
     icon: 'grid_on',
     diagram: 'matrix-inverse',
@@ -309,6 +311,7 @@ export const UNITS_4 = [
     n: 12,
     term: 2,
     seq: 3,
+    alsoIn: { 'Form 5': { n: 2, term: 1, seq: 1 } },
     group: 'algebra',
     icon: 'ssid_chart',
     diagram: 'parabola',
@@ -335,6 +338,7 @@ export const UNITS_4 = [
     n: 13,
     term: 2,
     seq: 3,
+    alsoIn: { 'Form 5': { n: 10, term: 2, seq: 3 } },
     group: 'algebra',
     icon: 'insights',
     diagram: 'direct-inverse',
@@ -439,6 +443,7 @@ export const UNITS_4 = [
     n: 17,
     term: 2,
     seq: 4,
+    alsoIn: { 'Form 5': { n: 13, term: 2, seq: 4 } },
     group: 'geometry',
     icon: 'north_east',
     diagram: 'vector-triangle',
@@ -517,6 +522,7 @@ export const UNITS_4 = [
     n: 20,
     term: 2,
     seq: 4,
+    alsoIn: { 'Form 5': { n: 8, term: 1, seq: 2 } },
     group: 'geometry',
     icon: 'architecture',
     diagram: 'loci',
@@ -545,6 +551,7 @@ export const UNITS_4 = [
     n: 21,
     term: 3,
     seq: 5,
+    alsoIn: { 'Form 5': { n: 16, term: 2, seq: 4 } },
     group: 'geometry',
     icon: 'change_history',
     diagram: 'elevation-depression',
@@ -571,6 +578,7 @@ export const UNITS_4 = [
     n: 22,
     term: 3,
     seq: 5,
+    alsoIn: { 'Form 5': { n: 17, term: 2, seq: 4 } },
     group: 'geometry',
     icon: 'polyline',
     diagram: 'sine-cosine-rule',
@@ -623,6 +631,7 @@ export const UNITS_4 = [
     n: 24,
     term: 3,
     seq: 5,
+    alsoIn: { 'Form 5': { n: 14, term: 2, seq: 4 } },
     group: 'solids',
     icon: 'deployed_code',
     diagram: 'solid-formulas',
@@ -675,6 +684,7 @@ export const UNITS_4 = [
     n: 26,
     term: 3,
     seq: 5,
+    alsoIn: { 'Form 5': { n: 11, term: 2, seq: 3 } },
     group: 'algebra',
     icon: 'format_list_numbered',
     diagram: 'ap-gp',

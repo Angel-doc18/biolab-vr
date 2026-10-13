@@ -25,6 +25,7 @@ import { PHYSICS_3 } from './physics3';
 import { CHEMISTRY_A } from './chemistryA';
 import { MATHS } from './maths';
 import { MATHS_2 } from './maths2';
+import { MATHS_3 } from './maths3';
 import { COMPUTER } from './computer';
 import { GEOGRAPHY } from './geography';
 import { HOMEEC } from './homeec';
@@ -44,7 +45,7 @@ import { PHYSICS_4 } from './physics4';
 import { PHYSICS_A } from './physicsA';
 import { FACTS } from './facts';
 
-const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
+const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...MATHS_3, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
 export const DIAGRAMS = Object.fromEntries(Object.entries(ALL).map(([k, s]) => [k, FACTS[k] && !s.facts ? { ...s, facts: FACTS[k] } : s]));
 
 // The parts the tutor teaches, in order: each named label (these light up on the
