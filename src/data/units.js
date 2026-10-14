@@ -21,9 +21,10 @@ import * as literature from './literature/units';
 import * as history from './history/units';
 import * as economics from './economics/units';
 import * as commerce from './commerce/units';
+import * as citizenship from './citizenship/units';
 import { CLASSES, classById, classLevel, subjectById } from './subjects';
 
-const MODULES = { biology, chemistry, physics, humanbio, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec, maths, english, french, literature, history, economics, commerce };
+const MODULES = { biology, chemistry, physics, humanbio, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec, maths, english, french, literature, history, economics, commerce, citizenship };
 
 export const units = Object.entries(MODULES).flatMap(([subject, m]) => m.units.map((u) => ({ ...u, subject })));
 

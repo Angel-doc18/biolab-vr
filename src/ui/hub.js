@@ -19,6 +19,7 @@ export const SUBJECT_LOOK = {
   history: { icon: 'history_edu', tint: '#556b2f', bg: '#ecefe1' },
   economics: { icon: 'trending_up', tint: '#0e6e8c', bg: '#dff0f5' },
   commerce: { icon: 'storefront', tint: '#a0522d', bg: '#f6e6dc' },
+  citizenship: { icon: 'how_to_vote', tint: '#2e7d32', bg: '#e3f1e4' },
   // Advanced Level: the same colour as the Ordinary Level subject, a deeper shade.
   'a-biology': { icon: 'genetics', tint: '#24613d', bg: '#dcebe1' },
   'a-chemistry': { icon: 'experiment', tint: '#5e3591', bg: '#e6dcf4' },

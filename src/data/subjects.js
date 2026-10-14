@@ -124,6 +124,16 @@ export const SUBJECTS = [
     fr: 'Commerce',
     p1: { count: 50, minutes: 90 },
   },
+  {
+    id: 'citizenship',
+    code: '0562',
+    level: 'O',
+    available: true,
+    classes: ['Form 4', 'Form 5'],
+    en: 'Citizenship Education',
+    fr: 'Éducation à la citoyenneté',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'addmaths', code: '0575', level: 'O', en: 'Additional Mathematics', fr: 'Mathématiques additionnelles' },
   {
     id: 'computer',
