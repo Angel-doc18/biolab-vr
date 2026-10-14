@@ -5,6 +5,7 @@ import { LESSON_QUESTIONS as CHEMISTRY } from './chemistry/lessonQuestions';
 import { LESSON_QUESTIONS as PHYSICS } from './physics/lessonQuestions';
 import { LESSON_QUESTIONS as HUMANBIO } from './humanbio/lessonQuestions';
 import { LESSON_QUESTIONS as A_PHYSICS } from './a-physics/lessonQuestions';
+import { LESSON_QUESTIONS as A_BIOLOGY } from './a-biology/lessonQuestions';
 import { LESSON_QUESTIONS as A_CHEMISTRY } from './a-chemistry/lessonQuestions';
 import { LESSON_QUESTIONS as COMPUTER } from './computer/lessonQuestions';
 import { LESSON_QUESTIONS as GEOGRAPHY } from './geography/lessonQuestions';
@@ -20,4 +21,4 @@ import { LESSON_QUESTIONS as CITIZENSHIP } from './citizenship/lessonQuestions';
 import { LESSON_QUESTIONS as GEOLOGY } from './geology/lessonQuestions';
 import { LESSON_QUESTIONS as LOGIC } from './logic/lessonQuestions';
 
-export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC };
+export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC };

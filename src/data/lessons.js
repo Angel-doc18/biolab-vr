@@ -5,6 +5,7 @@ import { LESSONS as BIOLOGY } from './biology/lessons';
 import { LESSONS as CHEMISTRY } from './chemistry/lessons';
 import { LESSONS as PHYSICS } from './physics/lessons';
 import { LESSONS as HUMANBIO } from './humanbio/lessons';
+import { LESSONS as A_BIOLOGY } from './a-biology/lessons';
 import { LESSONS as A_CHEMISTRY } from './a-chemistry/lessons';
 import { LESSONS as A_PHYSICS } from './a-physics/lessons';
 import { LESSONS as COMPUTER } from './computer/lessons';
@@ -26,7 +27,7 @@ import { unitById } from './units';
 // Each lesson carries its own end-of-lesson questions (`quiz`) where extra ones
 // have been written for it.
 const withQuestions = (l) => (LESSON_QUESTIONS[l.id] ? { ...l, quiz: [...(l.quiz || []), ...LESSON_QUESTIONS[l.id]] } : l);
-export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC].map(withQuestions);
+export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC].map(withQuestions);
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));
 const byUnit = new Map();

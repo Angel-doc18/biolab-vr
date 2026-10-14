@@ -189,7 +189,15 @@ export const SUBJECTS = [
   { id: 'food', code: '0540', level: 'O', en: 'Food and Nutrition', fr: 'Alimentation et nutrition' },
 
   // ---------- Advanced Level ----------
-  { id: 'a-biology', code: '0710', level: 'A', en: 'Biology', fr: 'Biologie' },
+  {
+    id: 'a-biology',
+    code: '0710',
+    level: 'A',
+    available: true,
+    en: 'Biology',
+    fr: 'Biologie',
+    p1: { count: 50, minutes: 90 },
+  },
   {
     id: 'a-chemistry',
     code: '0715',
