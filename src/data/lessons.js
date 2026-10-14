@@ -16,13 +16,14 @@ import { LESSONS as FRENCH } from './french/lessons';
 import { LESSONS as LITERATURE } from './literature/lessons';
 import { LESSONS as HISTORY } from './history/lessons';
 import { LESSONS as ECONOMICS } from './economics/lessons';
+import { LESSONS as COMMERCE } from './commerce/lessons';
 import { LESSON_QUESTIONS } from './lessonQuestions';
 import { unitById } from './units';
 
 // Each lesson carries its own end-of-lesson questions (`quiz`) where extra ones
 // have been written for it.
 const withQuestions = (l) => (LESSON_QUESTIONS[l.id] ? { ...l, quiz: [...(l.quiz || []), ...LESSON_QUESTIONS[l.id]] } : l);
-export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS].map(withQuestions);
+export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE].map(withQuestions);
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));
 const byUnit = new Map();

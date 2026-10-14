@@ -114,6 +114,16 @@ export const SUBJECTS = [
     fr: 'Économie',
     p1: { count: 50, minutes: 90 },
   },
+  {
+    id: 'commerce',
+    code: '0520',
+    level: 'O',
+    available: true,
+    classes: ['Form 4', 'Form 5'],
+    en: 'Commerce',
+    fr: 'Commerce',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'addmaths', code: '0575', level: 'O', en: 'Additional Mathematics', fr: 'Mathématiques additionnelles' },
   {
     id: 'computer',

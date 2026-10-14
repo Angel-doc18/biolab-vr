@@ -15,5 +15,6 @@ import { LESSON_QUESTIONS as FRENCH } from './french/lessonQuestions';
 import { LESSON_QUESTIONS as LITERATURE } from './literature/lessonQuestions';
 import { LESSON_QUESTIONS as HISTORY } from './history/lessonQuestions';
 import { LESSON_QUESTIONS as ECONOMICS } from './economics/lessonQuestions';
+import { LESSON_QUESTIONS as COMMERCE } from './commerce/lessonQuestions';
 
-export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS };
+export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE };
