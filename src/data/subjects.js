@@ -176,6 +176,16 @@ export const SUBJECTS = [
     fr: 'Géologie',
     p1: { count: 50, minutes: 90 },
   },
+  {
+    id: 'logic',
+    code: '0590',
+    level: 'O',
+    available: true,
+    classes: ['Form 3'],
+    en: 'Logic',
+    fr: 'Logique',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'food', code: '0540', level: 'O', en: 'Food and Nutrition', fr: 'Alimentation et nutrition' },
 
   // ---------- Advanced Level ----------

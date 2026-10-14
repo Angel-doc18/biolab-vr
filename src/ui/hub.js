@@ -21,6 +21,7 @@ export const SUBJECT_LOOK = {
   commerce: { icon: 'storefront', tint: '#a0522d', bg: '#f6e6dc' },
   citizenship: { icon: 'how_to_vote', tint: '#2e7d32', bg: '#e3f1e4' },
   geology: { icon: 'landscape', tint: '#8a5a44', bg: '#f3e7e0' },
+  logic: { icon: 'psychology', tint: '#4b3f72', bg: '#e9e6f2' },
   // Advanced Level: the same colour as the Ordinary Level subject, a deeper shade.
   'a-biology': { icon: 'genetics', tint: '#24613d', bg: '#dcebe1' },
   'a-chemistry': { icon: 'experiment', tint: '#5e3591', bg: '#e6dcf4' },
