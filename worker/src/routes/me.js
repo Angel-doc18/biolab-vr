@@ -2,7 +2,7 @@ import { HttpError, now, ok, readJson } from '../lib/http.js';
 import { publicUser, requireUser, isPro } from '../lib/auth.js';
 import { bool, int, oneOf, phone, str } from '../lib/validate.js';
 import { verifyPassword } from '../lib/crypto.js';
-import { SUBJECT_IDS, userSubjects } from '../lib/subjects.js';
+import { MAX_SUBJECTS, cleanSubjects, isSubjectId, userSubjects } from '../lib/subjects.js';
 
 export async function getMe(request, env) {
   const user = await requireUser(request, env);
@@ -43,10 +43,10 @@ export async function patchMe(request, env) {
   if ('inactivityAlert' in b) fields.inactivity_alert = bool(b.inactivityAlert, 'Inactivity alert') ? 1 : 0;
   if ('onboarded' in b) fields.onboarded = bool(b.onboarded, 'Onboarded') ? 1 : 0;
   if ('subjects' in b) {
-    if (!Array.isArray(b.subjects) || !b.subjects.length || b.subjects.some((s) => !SUBJECT_IDS.includes(s))) {
-      throw new HttpError(400, 'Choose at least one subject.', 'invalid_input');
-    }
-    fields.subjects = SUBJECT_IDS.filter((s) => b.subjects.includes(s)).join(',');
+    if (!Array.isArray(b.subjects) || !b.subjects.length) throw new HttpError(400, 'Choose at least one subject.', 'invalid_input');
+    if (b.subjects.length > MAX_SUBJECTS) throw new HttpError(400, `Choose at most ${MAX_SUBJECTS} subjects.`, 'invalid_input');
+    if (!b.subjects.every(isSubjectId)) throw new HttpError(400, 'One of the subjects is not recognised.', 'invalid_input');
+    fields.subjects = cleanSubjects(b.subjects).join(',');
   }
   const keys = Object.keys(fields);
   if (keys.length) {
@@ -110,7 +110,7 @@ export async function putProgress(request, env) {
   // Mastery, best Paper 1 and papers done in each subject the student takes.
   const subjectStats = {};
   if (s.subjects && typeof s.subjects === 'object') {
-    for (const id of SUBJECT_IDS) {
+    for (const id of cleanSubjects(Object.keys(s.subjects))) {
       const v = s.subjects[id];
       if (!v || typeof v !== 'object') continue;
       subjectStats[id] = {

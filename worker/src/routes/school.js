@@ -4,7 +4,7 @@ import { randomCode, uuid } from '../lib/crypto.js';
 import { int, oneOf, str } from '../lib/validate.js';
 import { notify } from '../lib/notify.js';
 import { buildReport } from './me.js';
-import { SUBJECT_IDS, userSubjects } from '../lib/subjects.js';
+import { cleanSubjects, isSubjectId, userSubjects } from '../lib/subjects.js';
 
 const REGIONS = ['Adamawa', 'Centre', 'East', 'Far North', 'Littoral', 'North', 'North West', 'South', 'South West', 'West'];
 
@@ -43,7 +43,8 @@ export async function createClass(request, env) {
   await limit(env.WRITE_LIMITER, `class:${user.id}`);
   const b = await readJson(request);
   const name = str(b.name, 'Class name', { min: 2, max: 60 });
-  const subject = oneOf(b.subject ?? 'biology', 'Subject', SUBJECT_IDS);
+  const subject = b.subject ?? 'biology';
+  if (!isSubjectId(subject)) throw new HttpError(400, 'Subject is not recognised.', 'invalid_input');
   const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?').bind(user.id).first();
   if (count.n >= 30) throw new HttpError(400, 'You have reached the limit of 30 classes.', 'limit');
   const prefix = (user.school_name || 'CLASS').replace(/[^A-Za-z]/g, '').slice(0, 4).toUpperCase() || 'CLASS';
@@ -141,7 +142,7 @@ export async function joinClass(request, env) {
   const mine = userSubjects(user);
   const subject = cls.subject || 'biology';
   if (!mine.includes(subject)) {
-    const next = SUBJECT_IDS.filter((s) => s === subject || mine.includes(s)).join(',');
+    const next = cleanSubjects([...mine, subject]).join(',');
     await env.DB.prepare('UPDATE users SET subjects = ?, updated_at = ? WHERE id = ?').bind(next, now(), user.id).run();
   }
   if (cls.school_id) {
