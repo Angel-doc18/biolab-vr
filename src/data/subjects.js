@@ -166,7 +166,16 @@ export const SUBJECTS = [
     fr: 'Économie sociale et familiale',
     p1: { count: 50, minutes: 90 },
   },
-  { id: 'geology', code: '0555', level: 'O', en: 'Geology', fr: 'Géologie' },
+  {
+    id: 'geology',
+    code: '0555',
+    level: 'O',
+    available: true,
+    classes: ['Form 4', 'Form 5'],
+    en: 'Geology',
+    fr: 'Géologie',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'food', code: '0540', level: 'O', en: 'Food and Nutrition', fr: 'Alimentation et nutrition' },
 
   // ---------- Advanced Level ----------

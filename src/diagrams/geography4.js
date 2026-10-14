@@ -151,6 +151,9 @@ function TransportArt() {
 const MAP_W = px(16.4) + 10;
 const MAP_H = py(1.4) + 10;
 
+// Shared with the Geology sketch map of Cameroon.
+export { Outline, Town, TOWNS, px, py };
+
 export const GEOGRAPHY_4 = {
   'farming-systems': columnsSpec('Farming systems of the world', [
     { head: 'Shifting\ncultivation', items: ['Clear, burn, plant', 'Move on after 2-3 years', 'Food for the family'] },
