@@ -10,6 +10,10 @@
 // sixth in the promotion weeks, so the topics of weeks 2 to 5, 7 to 9, 11 to
 // 13, 15 to 18, 20 to 21 and 23 to 24 belong to sequences 1 to 6.
 //
+// The Form 4 scheme opens by revising the Form 3 work on terms and
+// propositions (its weeks 2 to 9), so those topics also appear in Form 4 with
+// their place there (`alsoIn`).
+//
 // Quiz convention: the correct option is written first in `a`; options are
 // shuffled when shown.
 
@@ -23,6 +27,7 @@ export const UNITS_3 = [
     n: 1,
     term: 1,
     seq: 1,
+    alsoIn: { 'Form 4': { n: 1, term: 1, seq: 1 } },
     group: 'intro',
     icon: 'psychology',
     diagram: 'logic-intro',
@@ -49,6 +54,7 @@ export const UNITS_3 = [
     n: 2,
     term: 1,
     seq: 1,
+    alsoIn: { 'Form 4': { n: 2, term: 1, seq: 1 } },
     group: 'intro',
     icon: 'rule',
     diagram: 'logic-form-matter',
@@ -101,6 +107,7 @@ export const UNITS_3 = [
     n: 4,
     term: 1,
     seq: 2,
+    alsoIn: { 'Form 4': { n: 3, term: 1, seq: 1 } },
     group: 'terms',
     icon: 'account_tree',
     diagram: 'logic-operations',
@@ -127,6 +134,7 @@ export const UNITS_3 = [
     n: 5,
     term: 1,
     seq: 2,
+    alsoIn: { 'Form 4': { n: 4, term: 1, seq: 1 } },
     group: 'terms',
     icon: 'lightbulb',
     diagram: 'logic-concept',
@@ -155,6 +163,7 @@ export const UNITS_3 = [
     n: 6,
     term: 2,
     seq: 3,
+    alsoIn: { 'Form 4': { n: 5, term: 1, seq: 1 } },
     group: 'terms',
     icon: 'compare_arrows',
     diagram: 'logic-compext',
@@ -181,6 +190,7 @@ export const UNITS_3 = [
     n: 7,
     term: 2,
     seq: 3,
+    alsoIn: { 'Form 4': { n: 6, term: 1, seq: 1 } },
     group: 'terms',
     icon: 'diversity_3',
     diagram: 'logic-terms-kinds',
@@ -207,6 +217,7 @@ export const UNITS_3 = [
     n: 8,
     term: 2,
     seq: 4,
+    alsoIn: { 'Form 4': { n: 7, term: 1, seq: 1 } },
     group: 'terms',
     icon: 'category',
     diagram: 'logic-terms-kinds',
@@ -233,6 +244,7 @@ export const UNITS_3 = [
     n: 9,
     term: 2,
     seq: 4,
+    alsoIn: { 'Form 4': { n: 9, term: 1, seq: 2 } },
     group: 'propositions',
     icon: 'short_text',
     diagram: 'logic-standard-form',
@@ -259,6 +271,7 @@ export const UNITS_3 = [
     n: 10,
     term: 2,
     seq: 4,
+    alsoIn: { 'Form 4': { n: 10, term: 1, seq: 2 } },
     group: 'propositions',
     icon: 'format_list_bulleted',
     diagram: 'logic-aeio',
@@ -285,6 +298,7 @@ export const UNITS_3 = [
     n: 11,
     term: 2,
     seq: 4,
+    alsoIn: { 'Form 4': { n: 11, term: 1, seq: 2 } },
     group: 'propositions',
     icon: 'grid_view',
     diagram: 'logic-distribution',

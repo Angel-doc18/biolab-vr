@@ -181,7 +181,7 @@ export const SUBJECTS = [
     code: '0590',
     level: 'O',
     available: true,
-    classes: ['Form 3'],
+    classes: ['Form 3', 'Form 4', 'Form 5'],
     en: 'Logic',
     fr: 'Logique',
     p1: { count: 50, minutes: 90 },

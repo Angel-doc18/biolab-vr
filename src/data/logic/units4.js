@@ -1,0 +1,180 @@
+// Logic for Form 4, following the 2026/2027 national harmonised scheme of
+// work. Its weeks 2 to 9 revise the Form 3 topics on the nature of logic,
+// terms and categorical propositions, which appear in Form 4 through their
+// `alsoIn` places (units3.js). The new Form 4 work is below: definition and
+// division, the complete square of opposition, conversion, obversion and
+// contraposition, the fallacies of relevance, and promotion revision.
+//
+// The scheme's sequence tests fall at weeks 6, 10 and 15, with the rest in
+// the promotion weeks, so weeks 2 to 5 belong to sequence 1, weeks 7 to 9 to
+// sequence 2, weeks 11 to 14 to sequence 3, week 16 to sequence 4 and the
+// promotion revision to sequence 5.
+//
+// Quiz convention: the correct option is written first in `a`; options are
+// shuffled when shown.
+
+const Q = (q, a, why) => ({ q, a, why });
+
+export const UNITS_4 = [
+  // ======================= Term 1 =======================
+  {
+    id: 'lo-f4-definition',
+    form: 'Form 4',
+    n: 8,
+    term: 1,
+    seq: 1,
+    group: 'terms',
+    icon: 'sort_by_alpha',
+    diagram: 'logic-division',
+    ask: 'How do we define a term and divide a class correctly?',
+    title: 'Definition and logical division',
+    short: 'Definition, division',
+    focus: 'Definition by genus and differentia and its rules (not too wide or too narrow, not circular, not negative, not obscure); other kinds of definition; logical division of a genus into species and its rules; cross-division',
+    lessonIds: ['lo-definition-4', 'lo-division-4'],
+    vr: null,
+    quiz: [
+      Q('A definition by genus and differentia states:', ['the wider class and the feature that marks the thing off within it', 'a list of examples', 'the origin of the word only', 'a synonym only'], '"A triangle is a plane figure (genus) bounded by three straight lines (differentia)."'),
+      Q('"A man is a man" breaks the rule that a definition must not be:', ['circular', 'affirmative', 'short', 'clear'], 'It uses the term being defined.'),
+      Q('"A bird is an animal with two legs" is:', ['too wide', 'too narrow', 'circular', 'perfect'], 'Humans also have two legs.'),
+      Q('"A bird is a creature that sings" is:', ['too narrow', 'too wide', 'negative', 'circular'], 'Many birds do not sing.'),
+      Q('Logical division separates:', ['a genus into its species', 'a body into its parts', 'a word into letters', 'an argument into premises'], 'A class into sub-classes.'),
+      Q('Dividing students into "boys, girls and boarders" commits:', ['cross-division', 'a perfect division', 'a definition', 'a syllogism'], 'Two principles used at once.'),
+      Q('The species in a correct division must:', ['together make up the whole genus and not overlap', 'overlap a little', 'leave some members out', 'be defined first'], 'Exhaustive and exclusive.'),
+      Q('"Justice is not injustice" breaks the rule that a definition should not be:', ['negative', 'affirmative', 'convertible', 'clear'], 'Say what a thing is, not what it is not.'),
+    ],
+  },
+
+  // ======================= Term 2 =======================
+  {
+    id: 'lo-f4-square',
+    form: 'Form 4',
+    n: 12,
+    term: 2,
+    seq: 3,
+    group: 'inference',
+    icon: 'crop_square',
+    diagram: 'logic-square-rules',
+    ask: 'What can I infer from the truth or falsity of one proposition?',
+    title: 'The complete square of opposition',
+    short: 'Square of opposition',
+    focus: 'Contraries (A and E), subcontraries (I and O), contradictories (A and O, E and I) and subalterns (A to I, E to O); deducing the truth values of the other three propositions from one given proposition',
+    lessonIds: ['lo-square-3', 'lo-contraries-4', 'lo-subalterns-4'],
+    vr: null,
+    quiz: [
+      Q('Contraries (A and E):', ['cannot both be true but can both be false', 'cannot both be false', 'must have opposite truth values always', 'are always both true'], '"All are" and "None are" can both be false.'),
+      Q('Subcontraries (I and O):', ['cannot both be false but can both be true', 'cannot both be true', 'are always both false', 'are contradictories'], '"Some are" and "Some are not" can both be true.'),
+      Q('If A is true, then I is:', ['true', 'false', 'undetermined', 'meaningless'], 'Truth passes down from the universal.'),
+      Q('If I is false, then A is:', ['false', 'true', 'undetermined', 'contrary'], 'Falsity passes up from the particular.'),
+      Q('If A is false, the truth of E is:', ['undetermined', 'true', 'false', 'the same as A'], 'Contraries can both be false.'),
+      Q('If O is false, then A is:', ['true', 'false', 'undetermined', 'contrary'], 'A and O are contradictories.'),
+      Q('If E is true, then O is:', ['true', 'false', 'undetermined', 'contradictory'], 'Subalternation.'),
+      Q('If I is true, the truth of O is:', ['undetermined', 'true', 'false', 'the same as A'], 'Subcontraries can both be true.'),
+    ],
+  },
+  {
+    id: 'lo-f4-conversion',
+    form: 'Form 4',
+    n: 13,
+    term: 2,
+    seq: 3,
+    group: 'inference',
+    icon: 'swap_horiz',
+    diagram: 'logic-conversion',
+    ask: 'When can I swap the subject and predicate of a proposition?',
+    title: 'Immediate inference: conversion',
+    short: 'Conversion',
+    focus: 'Conversion: interchanging subject and predicate while keeping the quality; the rule that no term may be distributed in the converse unless it was distributed in the original; E and I convert simply, A by limitation, O not at all',
+    lessonIds: ['lo-conversion-4', 'lo-convpractice-4'],
+    vr: null,
+    quiz: [
+      Q('Conversion interchanges:', ['the subject and the predicate', 'the quality', 'the quantifier only', 'two propositions'], 'S and P change places.'),
+      Q('The converse of "No dogs are cats" is:', ['"No cats are dogs"', '"All cats are dogs"', '"Some dogs are not cats"', '"No dogs are non-cats"'], 'E converts simply.'),
+      Q('The converse of "Some teachers are footballers" is:', ['"Some footballers are teachers"', '"All footballers are teachers"', '"No footballers are teachers"', '"Some teachers are not footballers"'], 'I converts simply.'),
+      Q('"All doctors are graduates" converts validly to:', ['"Some graduates are doctors"', '"All graduates are doctors"', '"No graduates are doctors"', 'nothing'], 'A converts by limitation.'),
+      Q('An O proposition:', ['has no valid converse', 'converts simply', 'converts by limitation', 'becomes an A'], 'Its subject would become distributed.'),
+      Q('"All graduates are doctors" from "All doctors are graduates" commits:', ['illicit conversion', 'valid conversion', 'obversion', 'contraposition'], 'Graduates was undistributed.'),
+      Q('The original proposition in conversion is called the:', ['convertend', 'converse', 'obverse', 'contrapositive'], 'The result is the converse.'),
+      Q('Conversion by limitation changes:', ['a universal into a particular', 'a negative into an affirmative', 'subject into a new term', 'nothing'], 'All S are P becomes Some P are S.'),
+    ],
+  },
+  {
+    id: 'lo-f4-obversion',
+    form: 'Form 4',
+    n: 14,
+    term: 2,
+    seq: 3,
+    group: 'inference',
+    icon: 'flip',
+    diagram: 'logic-obversion',
+    ask: 'How do obversion and contraposition work?',
+    title: 'Immediate inference: obversion and contraposition',
+    short: 'Obversion, contraposition',
+    focus: 'Obversion: changing the quality and replacing the predicate by its complement, valid for A, E, I and O; contraposition by obverting, converting and obverting again; valid for A and O, for E by limitation, never for I',
+    lessonIds: ['lo-obversion-4', 'lo-contraposition-4'],
+    vr: null,
+    quiz: [
+      Q('Obversion changes the quality and replaces the predicate by:', ['its complement (non-P)', 'the subject', 'a synonym', 'nothing'], 'Two negatives make the same meaning.'),
+      Q('The obverse of "All students are learners" is:', ['"No students are non-learners"', '"Some learners are students"', '"No learners are students"', '"All learners are students"'], 'A becomes E.'),
+      Q('The obverse of "No snakes are mammals" is:', ['"All snakes are non-mammals"', '"No mammals are snakes"', '"Some snakes are mammals"', '"All mammals are snakes"'], 'E becomes A.'),
+      Q('The obverse of "Some fruits are not sweet" is:', ['"Some fruits are non-sweet"', '"Some sweet things are fruits"', '"No fruits are sweet"', '"All fruits are sweet"'], 'O becomes I.'),
+      Q('Obversion is valid for:', ['all four propositions', 'A only', 'E and I only', 'none'], 'It never changes the meaning.'),
+      Q('The full contrapositive of "All S are P" is:', ['"All non-P are non-S"', '"All P are S"', '"No S are non-P"', '"Some P are S"'], 'Obvert, convert, obvert.'),
+      Q('Contraposition is never valid for:', ['I propositions', 'A propositions', 'O propositions', 'E propositions by limitation'], 'Its obverse is an O, which cannot be converted.'),
+      Q('The complement of "voters" is:', ['"non-voters"', '"bad voters"', '"candidates"', '"electors"'], 'Everything that is not a voter.'),
+    ],
+  },
+  {
+    id: 'lo-f4-fallacies',
+    form: 'Form 4',
+    n: 15,
+    term: 2,
+    seq: 4,
+    group: 'fallacies',
+    icon: 'person_off',
+    diagram: 'logic-fallacies-f4',
+    ask: 'How do arguments attack the person instead of the point?',
+    title: 'Fallacies of relevance: ad hominem and ad populum',
+    short: 'Ad hominem, ad populum',
+    focus: 'The definition of a fallacy; argumentum ad hominem (abusive, circumstantial and "you too") and argumentum ad populum; finding fallacies of relevance in debates, adverts and social media',
+    lessonIds: ['lo-fallacy-3', 'lo-adhominem-4', 'lo-relevance-4'],
+    vr: null,
+    quiz: [
+      Q('Argumentum ad hominem attacks:', ['the person instead of the argument', 'the argument’s form', 'the crowd', 'the conclusion directly'], 'Literally "to the man".'),
+      Q('"Don’t listen to her ideas on the budget; she failed her exams in school" is:', ['abusive ad hominem', 'ad populum', 'a valid argument', 'ad misericordiam'], 'Character, not reasons.'),
+      Q('"Of course the cocoa farmer wants higher cocoa prices" used to reject his argument is:', ['circumstantial ad hominem', 'abusive ad hominem', 'ad populum', 'valid'], 'His interests do not make his reasons false.'),
+      Q('"You tell me not to smoke, but you smoke too" is the form of ad hominem called:', ['tu quoque (you too)', 'ad populum', 'begging the question', 'amphiboly'], 'Hypocrisy does not make the advice wrong.'),
+      Q('Ad populum argues that something is true because:', ['many people believe it', 'an expert says so', 'it is pitiful', 'force will be used'], 'Appeal to the crowd.'),
+      Q('A fallacy of relevance has premises that:', ['do not bear on the conclusion', 'are always false', 'are mathematical', 'contradict each other'], 'Irrelevant reasons.'),
+      Q('"Thousands of people share this post, so the news must be true" commits:', ['ad populum', 'tu quoque', 'circumstantial ad hominem', 'no fallacy'], 'Shares are not evidence.'),
+      Q('When is pointing to a speaker’s record relevant?', ['when we judge their reliability as a witness', 'whenever we disagree', 'never in any case', 'when we want to win'], 'Reasons are judged on their own merits.'),
+    ],
+  },
+
+  // ======================= Term 3 =======================
+  {
+    id: 'lo-f4-promotion',
+    form: 'Form 4',
+    n: 16,
+    term: 3,
+    seq: 5,
+    group: 'exam',
+    icon: 'checklist',
+    diagram: 'logic-eduction',
+    ask: 'How do I bring together all the immediate inferences before Form 5?',
+    title: 'Immediate inferences together and promotion revision',
+    short: 'Promotion revision',
+    focus: 'A summary table of the square of opposition, conversion, obversion and contraposition; chains of immediate inference; checking the work with the distribution table; revision for the promotion examination',
+    lessonIds: ['lo-eduction-4', 'lo-f4revision-4'],
+    vr: null,
+    quiz: [
+      Q('The obverse of the converse of "No S are P" is:', ['"All P are non-S"', '"No P are S"', '"Some S are P"', '"All S are non-P"'], 'Convert to No P are S, then obvert.'),
+      Q('Which inference uses the square of opposition?', ['From "All S are P" true, "Some S are not P" is false', 'From "No S are P", "No P are S"', 'From "All S are P", "No S are non-P"', 'From "All S are P", "All non-P are non-S"'], 'Contradictories.'),
+      Q('To check a conversion, look at:', ['the distribution of the terms', 'the length of the proposition', 'the speaker', 'the language'], 'No term may become distributed.'),
+      Q('Which immediate inference is valid for every proposition?', ['obversion', 'conversion', 'contraposition', 'none'], 'It keeps the meaning.'),
+      Q('"All non-P are non-S" is the contrapositive of:', ['"All S are P"', '"No S are P"', '"Some S are P"', '"Some S are not P"'], 'Full contraposition of A.'),
+      Q('Which cannot be converted?', ['O', 'E', 'I', 'A by limitation'], 'O has no valid converse.'),
+      Q('If "Some S are P" is false, then "No S are P" is:', ['true', 'false', 'undetermined', 'an A'], 'I and E are contradictories.'),
+      Q('The next stage of logic in Form 5 is:', ['mediate inference: the syllogism', 'grammar', 'arithmetic', 'spelling'], 'Two premises and a middle term.'),
+    ],
+  },
+];
