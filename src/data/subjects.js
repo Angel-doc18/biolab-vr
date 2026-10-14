@@ -104,6 +104,16 @@ export const SUBJECTS = [
     fr: 'Histoire',
     p1: { count: 50, minutes: 90 },
   },
+  {
+    id: 'economics',
+    code: '0525',
+    level: 'O',
+    available: true,
+    classes: ['Form 4', 'Form 5'],
+    en: 'Economics',
+    fr: 'Économie',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'addmaths', code: '0575', level: 'O', en: 'Additional Mathematics', fr: 'Mathématiques additionnelles' },
   {
     id: 'computer',
