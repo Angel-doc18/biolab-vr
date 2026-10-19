@@ -79,4 +79,77 @@ export const LESSON_QUESTIONS = {
     Q('Burning PVC is especially harmful because it releases:', ['HCl and toxic dioxins', 'Only water vapour', 'Oxygen', 'Pure carbon'], 'Controlled incinerators are needed.'),
     Q('Photochemical smog forms when nitrogen oxides and hydrocarbons react in:', ['Sunlight', 'Darkness', 'Water', 'Soil'], 'It produces ground-level ozone.'),
   ],
+  // ---------- Lower Sixth, 2026/2027 scheme additions ----------
+  'ac-atom-4': [
+    Q('The maximum number of electrons in the shell n = 3 is:', ['18', '8', '32', '9'], '2n² = 18.'),
+    Q('A p orbital is shaped like a:', ['dumbbell with two lobes', 'sphere', 'ring', 'cube'], 'Along x, y or z.'),
+    Q('Hund’s rule says the three 2p electrons of nitrogen are:', ['in separate orbitals with parallel spins', 'all paired in one orbital', 'in the 3s orbital', 'in two orbitals'], 'Singly before pairing.'),
+    Q('Sodium gives a flame colour of:', ['yellow-orange', 'lilac', 'brick-red', 'apple-green'], 'Electrons falling back emit that light.'),
+  ],
+  'ac-gas-1': [
+    Q('A gas collected over water at 101 kPa, with water vapour pressure 3 kPa, has a partial pressure of:', ['98 kPa', '104 kPa', '101 kPa', '3 kPa'], 'Subtract the water vapour.'),
+    Q('In R = 8.31 J K⁻¹ mol⁻¹, pressure must be in:', ['pascals', 'kilopascals', 'atmospheres', 'mm Hg'], 'And volume in m³.'),
+    Q('The white ring in the NH₃/HCl tube is:', ['ammonium chloride', 'sodium chloride', 'ammonia', 'chlorine'], 'NH₃ + HCl → NH₄Cl.'),
+    Q('A gas with M = 64 diffuses compared with oxygen (M = 32):', ['about 0.71 times as fast', 'twice as fast', 'half as fast', 'at the same rate'], '√(32 ÷ 64).'),
+  ],
+  'ac-gas-2': [
+    Q('Pressure of a gas is caused by:', ['molecules colliding with the container walls', 'molecules attracting each other', 'the weight of molecules', 'heat from the walls'], 'Kinetic theory.'),
+    Q('At very high pressure, real gases have Z greater than 1 because:', ['the volume of the molecules becomes significant', 'attractions increase', 'molecules stop moving', 'temperature falls'], 'Less free space.'),
+    Q('The van der Waals constant a is large for:', ['strongly attracting molecules such as NH₃', 'helium', 'hydrogen', 'neon'], 'It corrects for attractions.'),
+    Q('CO₂ cannot be liquefied by pressure above about:', ['31 °C', '100 °C', '0 °C', '−78 °C'], 'Its critical temperature.'),
+  ],
+  'ac-phase-3': [
+    Q('Colligative properties depend on:', ['the number of solute particles', 'the identity of the solute', 'the colour of the solution', 'the shape of the container'], 'Not on the kind of particle.'),
+    Q('Molality is measured in:', ['mol kg⁻¹', 'mol dm⁻³', 'g dm⁻³', 'kg mol⁻¹'], 'Moles per kilogram of solvent.'),
+    Q('Sodium chloride lowers the freezing point about twice as much as glucose at the same molality because:', ['it gives two ions per formula unit', 'it is heavier', 'it is covalent', 'it reacts with water'], 'More particles.'),
+    Q('Reverse osmosis is used to:', ['purify water by forcing it through a membrane', 'make salt', 'raise boiling points', 'measure Kf'], 'Desalination.'),
+  ],
+  'ac-kinetic-3': [
+    Q('For a zero-order reaction, a straight line is obtained by plotting:', ['[A] against time', 'ln[A] against time', '1/[A] against time', 'rate against 1/T'], 'Gradient −k.'),
+    Q('For a second-order reaction, a straight line is obtained by plotting:', ['1/[A] against time', '[A] against time', 'ln[A] against time', '[A]² against time'], 'Gradient k.'),
+    Q('The half-life of a second-order reaction:', ['increases as the concentration falls', 'is constant', 'decreases as the concentration falls', 'is zero'], 't½ = 1/(k[A]₀).'),
+    Q('In the iodine clock, the rate of reaction is taken as proportional to:', ['1/t, where t is the time for the blue-black colour', 't', 't²', 'the starch concentration'], 'A fixed amount of iodine forms each time.'),
+  ],
+  'ac-entropy-1': [
+    Q('Dissolving ammonium nitrate in water is spontaneous although endothermic because:', ['the entropy increases greatly', 'it releases heat', 'it forms a gas', 'it is catalysed'], 'Ions become dispersed.'),
+    Q('ΔS(surroundings) for a reaction at temperature T equals:', ['−ΔH/T', 'ΔH/T', 'ΔH × T', 'ΔG/T'], 'Heat given out raises the surroundings’ entropy.'),
+    Q('Standard entropies of substances are:', ['always positive', 'zero for elements', 'negative for solids', 'equal for all gases'], 'Unlike standard enthalpies of formation.'),
+    Q('For N₂(g) + 3H₂(g) → 2NH₃(g), ΔS of the system is:', ['negative', 'positive', 'zero', 'impossible to predict'], 'Four moles of gas become two.'),
+  ],
+  'ac-entropy-2': [
+    Q('Before using ΔG = ΔH − TΔS with ΔH in kJ, ΔS in J K⁻¹ mol⁻¹ must be:', ['divided by 1000', 'multiplied by 1000', 'left unchanged', 'squared'], 'Consistent units.'),
+    Q('A reaction with ΔH positive and ΔS negative is:', ['never feasible', 'always feasible', 'feasible at high T', 'feasible at low T'], 'Both terms make ΔG positive.'),
+    Q('Diamond is kinetically stable with respect to graphite because:', ['the activation energy for conversion is very high', 'ΔG is positive', 'it is a liquid', 'ΔH is zero'], 'Feasible but extremely slow.'),
+    Q('Aluminium is extracted by electrolysis rather than carbon reduction because:', ['reduction of its oxide by carbon is not feasible at practical temperatures', 'carbon is too expensive', 'aluminium is a liquid', 'aluminium oxide is soluble'], 'Al is very reactive.'),
+  ],
+  'ac-equil-3': [
+    Q('If Q is less than K, the reaction:', ['moves forward to make more products', 'moves backward', 'is at equilibrium', 'stops'], 'Q rises towards K.'),
+    Q('Adding a catalyst to a system at equilibrium:', ['does not change K or the position', 'increases K', 'shifts the position to the right', 'decreases K'], 'It only speeds up both directions.'),
+    Q('Adding silver ions to the Fe³⁺/SCN⁻ equilibrium makes the red colour:', ['paler, because SCN⁻ is removed', 'deeper', 'unchanged', 'turn blue'], 'The equilibrium shifts left.'),
+    Q('For an endothermic forward reaction, raising the temperature:', ['increases K', 'decreases K', 'leaves K unchanged', 'makes K zero'], 'Only temperature changes K.'),
+  ],
+  'ac-halogen-2': [
+    Q('Iodide ions with concentrated sulfuric acid produce a gas with a smell of rotten eggs:', ['hydrogen sulfide', 'sulfur dioxide', 'hydrogen chloride', 'chlorine'], 'Sulfur reduced to −2.'),
+    Q('HBr is best prepared from NaBr using:', ['phosphoric(V) acid', 'concentrated sulfuric acid', 'nitric acid', 'water'], 'A non-oxidising acid.'),
+    Q('Hydrogen chloride forms a white smoke with:', ['ammonia', 'water', 'oxygen', 'sodium hydroxide solution'], 'Ammonium chloride.'),
+    Q('Down Group VII, the thermal stability of HX:', ['decreases', 'increases', 'stays the same', 'first rises then falls'], 'The H–X bond weakens.'),
+  ],
+  'ac-halogen-3': [
+    Q('Chlorine is manufactured by:', ['electrolysis of brine', 'heating salt', 'reacting HCl with water', 'distilling sea water'], 'Hydrogen and NaOH are by-products.'),
+    Q('Iodised salt helps to prevent:', ['goitre', 'malaria', 'cholera', 'anaemia'], 'Iodine is needed for thyroid hormones.'),
+    Q('In the bleach titration, the number of moles of thiosulfate per mole of OCl⁻ is:', ['2', '1', '0.5', '4'], 'Through I₂.'),
+    Q('Bleach must not be mixed with acids because:', ['toxic chlorine gas is released', 'it explodes', 'it turns blue', 'it becomes water'], 'OCl⁻ + Cl⁻ + 2H⁺ → Cl₂ + H₂O.'),
+  ],
+  'ac-l6-paper1': [
+    Q('Paper 1 of A Level Chemistry lasts:', ['1½ hours', '3 hours', '2½ hours', '45 minutes'], 'Multiple choice.'),
+    Q('Before choosing an option in a calculation item, you should:', ['work out the answer yourself', 'pick the largest number', 'guess', 'skip it'], 'Then match.'),
+    Q('ΔTf = Kf × m uses m as:', ['molality', 'mass', 'molarity', 'moles of solvent'], 'mol kg⁻¹.'),
+    Q('The half-life of a first-order reaction is:', ['0.693/k', 'k/0.693', '1/(k[A]₀)', '[A]₀/2k'], 'Constant.'),
+  ],
+  'ac-l6-paper2': [
+    Q('A good Hess’s law answer begins by:', ['drawing the cycle with all enthalpy changes labelled', 'writing the answer', 'adding all numbers', 'guessing signs'], 'Method marks.'),
+    Q('Trends in ionisation energy should be explained using:', ['nuclear charge, distance and shielding', 'colour', 'mass only', 'density'], 'Structure and bonding.'),
+    Q('Inorganic observations should include:', ['colours, gases and precipitates with a balanced equation', 'only the product name', 'opinions', 'the price of chemicals'], 'What is seen and why.'),
+    Q('Answers to calculations should be given:', ['to a sensible number of significant figures with units', 'with as many digits as possible', 'without units', 'as fractions only'], 'Precision and units.'),
+  ],
 };
