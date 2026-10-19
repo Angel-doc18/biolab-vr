@@ -171,7 +171,7 @@ export const LESSONS_L6 = [
     { q: 'Write an equation for the cracking of decane, C₁₀H₂₂, into octane and ethene.', steps: ['Start with C₁₀H₂₂ → C₈H₁₈ + ?', 'Atoms left: C 10 − 8 = 2 and H 22 − 18 = 4, which is C₂H₄.', '**C₁₀H₂₂ → C₈H₁₈ + C₂H₄**.'] },
   ]),
 
-  L('ac-org1-4', 'ac-organic1', '4.4', 'Alkenes, alkynes and arenes', 14, ['Organic', 'Alkenes', 'Arenes'], [
+  L('ac-org1-4', 'ac-alkenes', '4.4', 'Alkenes, alkynes and arenes', 14, ['Organic', 'Alkenes', 'Arenes'], [
     '**Alkenes**, CₙH₂ₙ, contain a C=C double bond. The π electrons form an electron-rich region that attracts **electrophiles**, so alkenes undergo **electrophilic addition**. With bromine (in water or an organic solvent), the orange colour disappears: this is the **test for C=C**. Other additions: H₂ with a nickel catalyst (hydrogenation, used to harden vegetable oils into margarine); HBr; steam with a phosphoric acid catalyst (making ethanol); cold acidified KMnO₄, which gives a diol and is decolourised.',
     'Mechanism with HBr: the π electrons attack the δ+ hydrogen, forming a **carbocation** and Br⁻; then Br⁻ attacks the carbocation. With unsymmetrical alkenes, **Markovnikov’s rule** applies: the hydrogen adds to the carbon that already has more hydrogens, because this produces the more stable (secondary or tertiary) carbocation, stabilised by the electron-releasing alkyl groups.',
     'Alkenes undergo **addition polymerisation**: many ethene molecules join to form poly(ethene); propene gives poly(propene) and chloroethene gives PVC. **Alkynes**, CₙH₂ₙ₋₂, such as ethyne, also add reagents, usually in two stages; ethyne burns with a very hot flame used in welding.',

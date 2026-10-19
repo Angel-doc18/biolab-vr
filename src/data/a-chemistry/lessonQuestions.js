@@ -43,6 +43,10 @@ export const LESSON_QUESTIONS = {
     Q('Crude oil is separated into fractions by:', ['Fractional distillation', 'Cracking', 'Filtration', 'Electrolysis'], 'The fractions have different boiling ranges.'),
     Q('Alkanes are fairly unreactive because:', ['Their C–C and C–H bonds are strong and non-polar', 'They are ionic', 'They contain double bonds', 'They contain oxygen'], 'They react mainly by burning and free-radical substitution.'),
   ],
+  'ac-org1-4': [
+    Q('The general formula of the alkynes is:', ['CₙH₂ₙ₋₂', 'CₙH₂ₙ', 'CₙH₂ₙ₊₂', 'CₙHₙ'], 'Ethyne is C₂H₂.'),
+    Q('Ethyne is used in welding because:', ['It burns in oxygen with a very hot flame', 'It does not burn', 'It is unreactive', 'It is a liquid at room temperature'], 'The oxy-ethyne (oxy-acetylene) flame.'),
+  ],
   'ac-energy-2': [
     Q('The standard enthalpy of formation of an element in its standard state is:', ['Zero', 'Always positive', 'Always negative', 'Equal to its bond enthalpy'], 'Nothing is formed when an element is made from itself.'),
     Q('Using bond enthalpies, ΔH is approximately:', ['Σ(bonds broken) − Σ(bonds made)', 'Σ(bonds made) − Σ(bonds broken)', 'Σ(bonds broken) + Σ(bonds made)', 'Zero'], 'Breaking bonds takes in energy; making bonds gives it out.'),
@@ -151,5 +155,48 @@ export const LESSON_QUESTIONS = {
     Q('Trends in ionisation energy should be explained using:', ['nuclear charge, distance and shielding', 'colour', 'mass only', 'density'], 'Structure and bonding.'),
     Q('Inorganic observations should include:', ['colours, gases and precipitates with a balanced equation', 'only the product name', 'opinions', 'the price of chemicals'], 'What is seen and why.'),
     Q('Answers to calculations should be given:', ['to a sensible number of significant figures with units', 'with as many digits as possible', 'without units', 'as fractions only'], 'Precision and units.'),
+  ],
+  // ---------- Lower Sixth organic scheme additions ----------
+  'ac-org1-5': [
+    Q('E/Z isomerism requires:', ['restricted rotation and two different groups on each C of C=C', 'a chiral centre', 'a benzene ring', 'free rotation'], 'Each carbon needs two different groups.'),
+    Q('In the CIP rules, priority is decided first by:', ['the atomic number of the attached atom', 'the size of the group', 'the number of hydrogens', 'alphabetical order'], 'Higher atomic number, higher priority.'),
+    Q('A racemic mixture is optically inactive because:', ['the rotations of the two enantiomers cancel', 'it has no chiral centre', 'it absorbs all light', 'it is a gas'], 'Equal amounts rotate in opposite directions.'),
+    Q('Which amino acid has no chiral centre?', ['glycine', 'alanine', 'serine', 'valine'], 'Its R group is H.'),
+  ],
+  'ac-org1-6': [
+    Q('Branching lowers the boiling point of an alkane because:', ['the molecules pack less closely, so London forces are weaker', 'branched molecules are heavier', 'branching adds hydrogen bonds', 'branched alkanes are ionic'], 'Smaller contact area.'),
+    Q('Heating sodium ethanoate with soda lime gives:', ['methane', 'ethane', 'ethene', 'ethanol'], 'Decarboxylation.'),
+    Q('Complete combustion of 10 cm³ of propane needs:', ['50 cm³ of oxygen', '30 cm³ of oxygen', '10 cm³ of oxygen', '100 cm³ of oxygen'], 'C₃H₈ + 5O₂.'),
+    Q('Free-radical substitution is a poor way to make one pure halogenoalkane because:', ['it gives a mixture of substituted products', 'it needs no light', 'it is too slow', 'it gives only alkenes'], 'Further substitution occurs.'),
+  ],
+  'ac-alkene-1': [
+    Q('Ethene can be made by passing ethanol vapour over heated:', ['aluminium oxide', 'nickel', 'iron', 'copper'], 'Dehydration.'),
+    Q('Hydrogenation of an alkene needs:', ['a nickel catalyst at about 150 °C', 'UV light', 'concentrated sulfuric acid', 'iron(III) chloride'], 'Used to harden oils.'),
+    Q('In the addition of HBr, the first step forms:', ['a carbocation and a bromide ion', 'a free radical', 'a bromonium ion only', 'an alkane'], 'Heterolytic fission of H–Br.'),
+    Q('The π bond is weaker than the σ bond because:', ['sideways overlap of p orbitals is less effective', 'it has more electrons', 'it is ionic', 'it is longer than the molecule'], 'Less overlap.'),
+  ],
+  'ac-alkene-2': [
+    Q('Cold dilute KMnO₄ added to an alkene turns:', ['from purple to colourless', 'from colourless to purple', 'from orange to green', 'blue'], 'A test for C=C.'),
+    Q('A =CR₂ end of an alkene is oxidised by hot concentrated KMnO₄ to a:', ['ketone', 'carboxylic acid', 'carbon dioxide', 'diol'], 'No hydrogen on that carbon.'),
+    Q('LDPE is made using:', ['very high pressure and an oxygen initiator', 'Ziegler-Natta catalysts at low pressure', 'UV light only', 'nickel'], 'Free-radical polymerisation.'),
+    Q('Burning PVC waste releases:', ['hydrogen chloride and toxic dioxins', 'only water', 'oxygen', 'nitrogen'], 'Harmful to health.'),
+  ],
+  'ac-arene-1': [
+    Q('Kekulé proposed his benzene structure in:', ['1865', '1953', '1900', '1800'], 'Alternating single and double bonds.'),
+    Q('The delocalisation energy of benzene is about:', ['152 kJ mol⁻¹', '360 kJ mol⁻¹', '208 kJ mol⁻¹', '120 kJ mol⁻¹'], '360 − 208.'),
+    Q('C₆H₅OH is named:', ['phenol', 'benzyl alcohol', 'phenylamine', 'benzoic acid'], 'An OH on the ring.'),
+    Q('In benzene, the delocalised electrons come from:', ['one p orbital on each of the six carbons', 'the C–H bonds', 'lone pairs', 'hydrogen atoms'], 'Six π electrons.'),
+  ],
+  'ac-arene-2': [
+    Q('A halogen carrier for chlorinating benzene is:', ['aluminium chloride', 'nickel', 'UV light', 'sodium hydroxide'], 'A Lewis acid.'),
+    Q('The intermediate in electrophilic substitution is:', ['positively charged', 'negatively charged', 'a free radical', 'neutral'], 'The ring has lost two π electrons to E.'),
+    Q('Nitrobenzene is used to make:', ['dyes and drugs through phenylamine', 'fertilisers only', 'bleach', 'soap'], 'An important intermediate.'),
+    Q('Chlorine with methylbenzene in UV light without a catalyst substitutes:', ['the methyl group by free radicals', 'the ring', 'nothing', 'both at once'], 'Different conditions, different mechanism.'),
+  ],
+  'ac-l6-routes': [
+    Q('The reagent and condition to convert ethane to chloroethane are:', ['chlorine in UV light', 'HCl at room temperature', 'chlorine with FeCl₃', 'steam'], 'Free-radical substitution.'),
+    Q('Ethene to ethane-1,2-diol uses:', ['cold dilute KMnO₄', 'hot concentrated KMnO₄', 'steam', 'H₂ and Ni'], 'Mild oxidation.'),
+    Q('Benzene to nitrobenzene uses:', ['conc. HNO₃ and conc. H₂SO₄ below 55 °C', 'dilute HNO₃', 'NO₂ gas', 'HCl'], 'The nitrating mixture.'),
+    Q('Ethanol to ethene is a:', ['dehydration (elimination)', 'hydration', 'substitution', 'oxidation'], 'Water is removed.'),
   ],
 };

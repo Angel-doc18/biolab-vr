@@ -11,6 +11,11 @@
 // sequence tests fall at weeks 6, 12, 16, 22 and 26, so weeks 1 to 5, 7 to 11,
 // 13 to 15, 17 to 21, 23 to 25 and 27 to 28 belong to sequences 1 to 6.
 //
+// The Lower Sixth organic chemistry scheme runs from late term 2 into term 3:
+// bonding (hybridisation) and organic fundamentals with alkanes in term 2,
+// then new topics on alkenes and arenes in term 3. The mechanism lesson on
+// bond fission and curly arrows is also listed in Lower Sixth.
+//
 // Quiz convention: the correct option is written first in `a`; options are
 // shuffled when shown.
 import { BANK } from '../chemistry/bank';
@@ -88,7 +93,9 @@ export const units = [
   {
     id: 'ac-bonding',
     form: 'Lower Sixth',
-    n: 3,
+    n: 10,
+    term: 2,
+    seq: 4,
     group: 'matter',
     icon: 'hub',
     diagram: 'vsepr-shapes',
@@ -115,7 +122,9 @@ export const units = [
   {
     id: 'ac-organic1',
     form: 'Lower Sixth',
-    n: 4,
+    n: 11,
+    term: 2,
+    seq: 4,
     group: 'matter',
     icon: 'polyline',
     diagram: 'organic-structures',
@@ -123,7 +132,7 @@ export const units = [
     title: 'Organic Chemistry 1: Fundamentals and the Chemistry of Hydrocarbons',
     short: 'Organic Chemistry 1',
     focus: 'Homologous series, naming, isomerism, purifying and analysing organic compounds, petroleum, alkanes, alkenes, alkynes and arenes',
-    lessonIds: ['ac-org1-1', 'ac-org1-2', 'ac-org1-3', 'ac-org1-4'],
+    lessonIds: ['ac-org1-1', 'ac-org1-5', 'ac-org1-2', 'ac-mech-1', 'ac-org1-3', 'ac-org1-6'],
     model: 'ch-organic',
     vr: vrOf('ch-organic'),
     quiz: [
@@ -283,7 +292,7 @@ export const units = [
   {
     id: 'ac-halogens',
     form: 'Lower Sixth',
-    n: 10,
+    n: 12,
     term: 3,
     seq: 5,
     group: 'matter',
@@ -310,9 +319,65 @@ export const units = [
     ],
   },
   {
+    id: 'ac-alkenes',
+    form: 'Lower Sixth',
+    n: 13,
+    term: 3,
+    seq: 5,
+    group: 'matter',
+    icon: 'polyline',
+    diagram: 'ac-alkene-addition',
+    ask: 'Why do alkenes add bromine while alkanes do not?',
+    title: 'Alkenes and Addition Polymers',
+    short: 'Alkenes',
+    focus: 'The C=C double bond (σ and π bonds), restricted rotation and naming; preparing ethene by dehydration of ethanol; electrophilic addition of hydrogen, halogens, hydrogen halides and steam; the carbocation mechanism and Markovnikov’s rule; tests for unsaturation; mild and harsh oxidation with KMnO₄; addition polymerisation (LDPE, HDPE, PVC)',
+    lessonIds: ['ac-org1-4', 'ac-alkene-1', 'ac-alkene-2'],
+    vr: null,
+    quiz: [
+      Q('A C=C double bond consists of:', ['One σ bond and one π bond', 'Two σ bonds', 'Two π bonds', 'One ionic bond'], 'The π bond forms by sideways overlap.'),
+      Q('Ethene is prepared in the laboratory by:', ['Dehydrating ethanol with concentrated sulfuric acid or hot aluminium oxide', 'Cracking methane', 'Heating sodium ethanoate with soda lime', 'Hydrogenating ethyne with nickel'], 'Elimination of water.'),
+      Q('Alkenes undergo:', ['Electrophilic addition', 'Free-radical substitution only', 'Nucleophilic substitution', 'Electrophilic substitution'], 'The π electrons attract electrophiles.'),
+      Q('Bromine water added to an alkene:', ['Turns from orange to colourless', 'Turns purple', 'Stays orange', 'Gives a white precipitate'], 'The test for C=C.'),
+      Q('By Markovnikov’s rule, HCl adds to propene to give mainly:', ['2-chloropropane', '1-chloropropane', '1,2-dichloropropane', 'chloroethane'], 'Via the secondary carbocation.'),
+      Q('The order of carbocation stability is:', ['Tertiary > secondary > primary', 'Primary > secondary > tertiary', 'Secondary > tertiary > primary', 'All equal'], 'Alkyl groups release electrons.'),
+      Q('Ethene reacts with steam to form ethanol using:', ['A phosphoric acid catalyst at about 300 °C and 60 atm', 'Nickel at 150 °C', 'UV light', 'Concentrated nitric acid'], 'Industrial hydration.'),
+      Q('Cold dilute acidified KMnO₄ converts ethene into:', ['Ethane-1,2-diol', 'Ethanoic acid', 'Carbon dioxide only', 'Ethane'], 'Mild oxidation; purple to colourless.'),
+      Q('HDPE differs from LDPE in having:', ['Linear chains that pack closely', 'Branched chains', 'Lower density', 'Lower melting point'], 'Made with Ziegler-Natta catalysts.'),
+      Q('PVC is made by polymerising:', ['Chloroethene', 'Ethene', 'Propene', 'Styrene'], 'Poly(chloroethene).'),
+    ],
+  },
+  {
+    id: 'ac-arenes',
+    form: 'Lower Sixth',
+    n: 14,
+    term: 3,
+    seq: 5,
+    group: 'matter',
+    icon: 'hexagon',
+    diagram: 'ac-benzene-energy',
+    ask: 'Why does benzene prefer substitution to addition?',
+    title: 'Arenes: Benzene and Electrophilic Substitution',
+    short: 'Arenes',
+    focus: 'The Kekulé and delocalised models of benzene; bond lengths and the enthalpy of hydrogenation as evidence; naming monosubstituted benzenes; electrophilic substitution: nitration (the nitronium ion) and halogenation with Lewis acid halogen carriers; safety with aromatic compounds',
+    lessonIds: ['ac-arene-1', 'ac-arene-2'],
+    vr: null,
+    quiz: [
+      Q('The enthalpy of hydrogenation of benzene is less exothermic than predicted for the Kekulé structure because:', ['Benzene is stabilised by delocalised π electrons', 'Benzene has no double bonds at all', 'Hydrogen does not react with benzene', 'Benzene is ionic'], 'About 152 kJ mol⁻¹ more stable.'),
+      Q('In benzene, each carbon atom is:', ['sp² hybridised', 'sp³ hybridised', 'sp hybridised', 'not hybridised'], 'Three σ bonds at 120° plus one p orbital.'),
+      Q('Benzene does not decolourise bromine water because:', ['Addition would destroy the stable delocalised ring', 'It has no electrons', 'It is a gas', 'Bromine water is too dilute'], 'It reacts only with a catalyst, by substitution.'),
+      Q('C₆H₅NO₂ is named:', ['Nitrobenzene', 'Phenylamine', 'Nitrophenol', 'Benzoic acid'], 'A nitro group on the ring.'),
+      Q('The nitrating mixture is:', ['Concentrated nitric and concentrated sulfuric acids', 'Dilute nitric acid only', 'Nitric acid and water', 'Sulfuric acid and iron'], 'It produces NO₂⁺.'),
+      Q('Nitration of benzene is kept below 55 °C to:', ['Avoid further nitration to dinitrobenzene', 'Make the reaction faster', 'Prevent the acid freezing', 'Stop the benzene boiling at 20 °C'], 'Higher temperatures give multiple substitution.'),
+      Q('The role of FeBr₃ in the bromination of benzene is to:', ['Polarise bromine and produce the Br⁺ electrophile', 'Provide UV light', 'Remove water', 'Act as a reducing agent'], 'A halogen carrier (Lewis acid).'),
+      Q('In electrophilic substitution, the last step is:', ['Loss of H⁺ to restore the delocalised ring', 'Addition of a second electrophile', 'Loss of the electrophile', 'Breaking of the ring'], 'Aromatic stability is regained.'),
+      Q('All the C–C bonds in benzene are:', ['The same length, between single and double', 'Alternately long and short', 'Equal to C=C bonds', 'Equal to C–C single bonds'], '0.139 nm.'),
+      Q('Benzene is handled only in a fume cupboard because it is:', ['Toxic and carcinogenic', 'Explosive in water', 'Radioactive', 'Corrosive to glass'], 'Schools use methylbenzene instead.'),
+    ],
+  },
+  {
     id: 'ac-l6-papers',
     form: 'Lower Sixth',
-    n: 11,
+    n: 15,
     term: 3,
     seq: 6,
     group: 'exam',
@@ -322,7 +387,7 @@ export const units = [
     title: 'Lower Sixth Revision: Paper 1 and Paper 2 Drills',
     short: 'Exam drills',
     focus: 'The GCE A Level Chemistry papers (Paper 1 multiple choice, 1½ hours; Paper 2 structured, 3 hours; practical); multiple-choice technique; setting out calculations on gases, energetics, kinetics and equilibria; explaining trends in periodicity and the halogens',
-    lessonIds: ['ac-l6-paper1', 'ac-l6-paper2'],
+    lessonIds: ['ac-l6-paper1', 'ac-l6-paper2', 'ac-l6-routes'],
     vr: null,
     quiz: [
       Q('GCE A Level Chemistry is paper code:', ['0715', '0515', '0710', '0780'], '0515 is O Level Chemistry.'),
