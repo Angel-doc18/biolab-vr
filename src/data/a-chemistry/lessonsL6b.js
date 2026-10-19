@@ -70,7 +70,7 @@ export const LESSONS_L6B = [
   ]),
 
   // ---------- Kinetics ----------
-  L('ac-kinetic-3', 'ac-kinetics', '7.3', 'Integrated rate laws, the Arrhenius equation and mechanisms', 18, ['Kinetics', 'Practical'], [
+  L('ac-kinetic-3', 'ac-kinetics', '6.3', 'Integrated rate laws, the Arrhenius equation and mechanisms', 18, ['Kinetics', 'Practical'], [
     '**Integrated rate laws** link concentration and time:\n- **zero order**: [A] = [A]₀ − kt: a **straight line of [A] against t** (gradient −k); half-life t½ = [A]₀/2k, which **falls** as the reaction proceeds\n- **first order**: ln[A] = ln[A]₀ − kt: a straight line of **ln[A] against t** (gradient −k); **t½ = ln 2/k = 0.693/k, constant**\n- **second order**: 1/[A] = 1/[A]₀ + kt: a straight line of **1/[A] against t** (gradient k); t½ = 1/(k[A]₀), which **rises** as the reaction proceeds.\nPlot the data three ways: the straight line reveals the order.',
     'The **Arrhenius equation**, k = A e^(−Ea/RT), or **ln k = ln A − Ea/RT**: a graph of ln k against 1/T has gradient **−Ea/R**. With rate constants at two temperatures: **ln(k₂/k₁) = (Ea/R)(1/T₁ − 1/T₂)**. A rise of 10 K roughly doubles many rates near room temperature.',
     'A **mechanism** is the sequence of steps; the slowest is the **rate-determining step**, and only species in or before it appear in the rate equation. For 2NO₂ + F₂ → 2NO₂F with rate = k[NO₂][F₂]: step 1, NO₂ + F₂ → NO₂F + F (slow); step 2, NO₂ + F → NO₂F (fast). Practicals: the **iodine clock** (H₂O₂ + 2I⁻ + 2H⁺ → I₂ + 2H₂O, with a little thiosulfate and starch; the time to the blue-black colour gives the rate, rate ∝ 1/t); and the decomposition of H₂O₂ with **manganese(IV) oxide** catalyst, following the volume of oxygen.',

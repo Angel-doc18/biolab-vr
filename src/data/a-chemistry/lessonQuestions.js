@@ -55,6 +55,14 @@ export const LESSON_QUESTIONS = {
     Q('A large value of Kc means that at equilibrium:', ['The mixture contains mostly products', 'The mixture contains mostly reactants', 'The reaction is very fast', 'No reaction has happened'], 'Kc says nothing about the rate.'),
     Q('The partial pressure of a gas in a mixture equals:', ['Its mole fraction × the total pressure', 'Its mass × the total pressure', 'The total pressure ÷ its moles', 'Its volume × the temperature'], 'Mole fraction = moles of the gas ÷ total moles of gas.'),
   ],
+  'ac-acid-1': [
+    Q('In NH₃ + H₂O ⇌ NH₄⁺ + OH⁻, water acts as:', ['An acid, because it donates a proton', 'A base', 'A catalyst', 'An oxidising agent'], 'It gives H⁺ to ammonia.'),
+    Q('A weak acid with Ka = 1.0 × 10⁻⁴ mol dm⁻³ at 0.010 mol dm⁻³ has a pH of:', ['3.0', '2.0', '4.0', '6.0'], '[H⁺] = √(1.0 × 10⁻⁶) = 1.0 × 10⁻³.'),
+  ],
+  'ac-acid-2': [
+    Q('Human blood is buffered at about pH 7.4 mainly by:', ['Carbonic acid and hydrogencarbonate ions', 'Hydrochloric acid and chloride ions', 'Ammonia and ammonium ions', 'Sulfuric acid'], 'H₂CO₃ ⇌ H⁺ + HCO₃⁻.'),
+    Q('An indicator changes colour over a range of about:', ['pKin ± 1', 'pKin ± 5', 'exactly pH 7', '0.01 pH unit'], 'The two coloured forms must be in a visible ratio.'),
+  ],
   'ac-redox-1': [
     Q('The oxidation number of oxygen in hydrogen peroxide, H₂O₂, is:', ['−1', '−2', '0', '+2'], 'Peroxides are an exception to the usual −2.'),
     Q('A reaction in which one element is both oxidised and reduced is called:', ['Disproportionation', 'Neutralisation', 'Hydrolysis', 'Polymerisation'], 'Chlorine with cold alkali is an example.'),
@@ -198,5 +206,84 @@ export const LESSON_QUESTIONS = {
     Q('Ethene to ethane-1,2-diol uses:', ['cold dilute KMnO₄', 'hot concentrated KMnO₄', 'steam', 'H₂ and Ni'], 'Mild oxidation.'),
     Q('Benzene to nitrobenzene uses:', ['conc. HNO₃ and conc. H₂SO₄ below 55 °C', 'dilute HNO₃', 'NO₂ gas', 'HCl'], 'The nitrating mixture.'),
     Q('Ethanol to ethene is a:', ['dehydration (elimination)', 'hydration', 'substitution', 'oxidation'], 'Water is removed.'),
+  ],
+  // ---------- Upper Sixth physical chemistry scheme additions ----------
+  'ac-acid-3': [
+    Q('For a conjugate acid-base pair at 298 K, pKa + pKb equals:', ['14', '7', '1', '0'], 'Ka × Kb = Kw.'),
+    Q('At 50 °C, pure water has a pH of about 6.6. It is:', ['still neutral, because [H⁺] = [OH⁻]', 'acidic', 'alkaline', 'impure'], 'Kw is larger when the water is hot.'),
+    Q('A solution of sodium carbonate is:', ['alkaline', 'acidic', 'neutral', 'a buffer at pH 7'], 'CO₃²⁻ accepts protons from water.'),
+    Q('Diluting a strong acid tenfold raises its pH by:', ['1 unit', '0.5 unit', '10 units', 'nothing'], '[H⁺] falls tenfold.'),
+  ],
+  'ac-acid-4': [
+    Q('A buffer works best when:', ['[HA] and [A⁻] are about equal', 'only HA is present', 'the acid is strong', 'the solution is very dilute'], 'Its pH is then close to pKa.'),
+    Q('Adding 0.010 mol of NaOH to a buffer of 0.10 mol HA and 0.10 mol A⁻ changes the amounts to:', ['0.09 mol HA and 0.11 mol A⁻', '0.11 mol HA and 0.09 mol A⁻', '0.10 mol of each', '0.09 mol of each'], 'OH⁻ turns HA into A⁻.'),
+    Q('The pKa of the ammonium ion is about:', ['9.25', '4.75', '7.00', '14.0'], '14.00 − 4.75.'),
+    Q('To find Ka by half-neutralisation, you add to a fresh portion of the acid:', ['half the volume of alkali needed to neutralise it', 'the full volume of alkali', 'twice that volume', 'no alkali'], 'Then [HA] = [A⁻].'),
+  ],
+  'ac-acid-5': [
+    Q('The pH at the start of the titration of 0.100 mol dm⁻³ ethanoic acid is about:', ['2.9', '1.0', '4.8', '7.0'], '√(Ka × c).'),
+    Q('After the equivalence point, the pH is decided by:', ['the excess hydroxide ions', 'the ethanoic acid left', 'the indicator', 'the buffer ratio'], 'All the acid has reacted.'),
+    Q('In a potentiometric titration, the equivalence point is:', ['the middle of the steepest part of the curve', 'always where the pH is 7', 'the first reading', 'where pH = pKa'], 'The greatest gradient.'),
+    Q('Sodium carbonate titrated with hydrochloric acid shows:', ['two steep sections', 'one steep section at pH 7', 'no steep section', 'three steep sections'], 'CO₃²⁻ → HCO₃⁻ → CO₂.'),
+  ],
+  'ac-sol-1': [
+    Q('The units of Ksp for PbI₂ are:', ['mol³ dm⁻⁹', 'mol² dm⁻⁶', 'mol dm⁻³', 'no units'], 'Three concentration terms are multiplied.'),
+    Q('For an AB₂ salt with molar solubility s, Ksp equals:', ['4s³', 's²', '2s²', 's³'], 's × (2s)².'),
+    Q('Calcium hydroxide is unusual because its solubility:', ['falls as the temperature rises', 'rises with temperature', 'does not depend on temperature', 'is unlimited'], 'Keep the temperature constant in the experiment.'),
+    Q('Barium sulfate can be swallowed for X-ray images because:', ['so little dissolves that toxic Ba²⁺ is not absorbed', 'barium compounds are not toxic', 'it dissolves completely', 'it is a gas'], 'Its Ksp is very small.'),
+  ],
+  'ac-sol-2': [
+    Q('A precipitate forms when:', ['the ionic product exceeds Ksp', 'the ionic product is less than Ksp', 'Ksp is zero', 'the solution is diluted'], 'The solution is supersaturated.'),
+    Q('Adding Ag⁺ slowly to a mixture of Cl⁻ and I⁻ ions first precipitates:', ['silver iodide', 'silver chloride', 'both together', 'neither'], 'AgI has the smaller Ksp.'),
+    Q('Concentrated HCl added to saturated sodium chloride solution:', ['precipitates sodium chloride', 'dissolves more salt', 'gives off chlorine', 'has no effect'], 'The common ion is Cl⁻.'),
+    Q('Mixing equal volumes of two solutions changes each concentration by a factor of:', ['one half', 'two', 'one quarter', 'one'], 'The volume doubles.'),
+  ],
+  'ac-redox-3': [
+    Q('In a cell diagram, the double vertical line represents:', ['the salt bridge', 'a phase boundary', 'the voltmeter', 'the electrode'], 'A single line is a phase boundary.'),
+    Q('A high-resistance voltmeter is used so that:', ['almost no current flows and the e.m.f. is measured', 'the cell recharges', 'the reaction speeds up', 'no salt bridge is needed'], 'Current would lower the reading.'),
+    Q('By convention, the half-cell on the left of a cell diagram is where:', ['oxidation occurs', 'reduction occurs', 'no reaction occurs', 'hydrogen is always made'], 'It is the negative electrode.'),
+    Q('A positive E°cell may still give no visible reaction because:', ['the reaction may be very slow', 'E° values are unreliable', 'the reaction is endothermic', 'electrons cannot move'], 'Feasibility is not rate.'),
+  ],
+  'ac-electro-1': [
+    Q('At 298 K, the Nernst factor 2.303RT ÷ F equals about:', ['0.059 V', '0.59 V', '8.31 V', '96 500 V'], 'It is then divided by z.'),
+    Q('A concentration cell has a standard e.m.f. of:', ['0 V', '1.10 V', '0.059 V', '−0.76 V'], 'Both half-cells are the same.'),
+    Q('Raising [H⁺] makes acidified manganate(VII):', ['a stronger oxidising agent', 'a weaker oxidising agent', 'a reducing agent', 'no different'], 'H⁺ is on the oxidised side of the half-equation.'),
+    Q('For Cu²⁺/Cu, each tenfold dilution of the Cu²⁺ changes E by:', ['−0.0295 V', '−0.059 V', '+0.059 V', '−0.34 V'], '0.059 ÷ 2.'),
+  ],
+  'ac-electro-2': [
+    Q('In ΔG° = −zFE°, z is:', ['the number of moles of electrons transferred', 'the charge on the anion', 'the number of half-cells', 'the temperature'], 'Taken from the balanced equation.'),
+    Q('At 298 K, log K equals:', ['zE° ÷ 0.059', '0.059 ÷ zE°', 'zFE°', 'E° ÷ z'], 'From ΔG° = −RT ln K.'),
+    Q('A cell reaction with E°cell = 0 has an equilibrium constant of:', ['1', '0', 'infinity', '−1'], 'ΔG° = 0.'),
+    Q('ΔS° of a cell reaction can be found from:', ['the change of E° with temperature', 'the mass of the electrodes', 'the colour of the solutions', 'the current alone'], 'ΔS° = zF(dE°/dT).'),
+  ],
+  'ac-electro-3': [
+    Q('Q = It gives the charge in:', ['coulombs', 'amperes', 'volts', 'faradays'], 'With I in amperes and t in seconds.'),
+    Q('The same charge passes through solutions of Ag⁺ and Cu²⁺ in series. The ratio of moles of Ag to Cu deposited is:', ['2 : 1', '1 : 2', '1 : 1', '1 : 4'], 'Faraday’s second law.'),
+    Q('During the electrolysis of copper(II) sulfate with copper electrodes, the anode:', ['loses mass as copper dissolves', 'gains mass', 'gives off oxygen', 'is unchanged'], 'Cu → Cu²⁺ + 2e⁻.'),
+    Q('The volume of oxygen at s.t.p. released by 0.020 mol of electrons is:', ['0.112 dm³', '0.224 dm³', '0.448 dm³', '0.056 dm³'], 'Four moles of electrons per mole of O₂.'),
+  ],
+  'ac-kinetic-4': [
+    Q('The isolation method uses:', ['a large excess of every reactant except one', 'equal amounts of every reactant', 'no catalyst', 'a single temperature only'], 'Only one concentration changes noticeably.'),
+    Q('Samples from a reacting mixture are quenched by:', ['running them into ice-cold water', 'heating them', 'adding a catalyst', 'shaking them'], 'This stops the reaction before titrating.'),
+    Q('The hydrolysis of 2-bromo-2-methylpropane is first order overall. Its mechanism is:', ['SN1, through a carbocation', 'SN2, in one step', 'free-radical substitution', 'electrophilic addition'], 'Only the halogenoalkane is in the slow step.'),
+    Q('In the thiosulfate and acid experiment, the cross disappears because:', ['a precipitate of sulfur forms', 'the solution turns blue', 'a gas bubbles off', 'the acid is used up'], 'S₂O₃²⁻ + 2H⁺ → S + SO₂ + H₂O.'),
+  ],
+  'ac-u6-formulae': [
+    Q('pH + pOH at 298 K equals:', ['14', '7', '1', '10'], 'From Kw.'),
+    Q('The Faraday constant equals:', ['L × e', 'L ÷ e', 'R × T', 'e ÷ L'], '6.02 × 10²³ × 1.60 × 10⁻¹⁹ C.'),
+    Q('A pH value is usually given to:', ['two decimal places', 'no decimal places', 'five decimal places', 'one significant figure'], 'For example pH 4.76.'),
+    Q('Concentrations must be recalculated after two solutions are mixed because:', ['the total volume increases', 'the number of moles changes', 'the temperature changes', 'the solutes react with water'], 'Mixing dilutes both.'),
+  ],
+  'ac-u6-paper1': [
+    Q('Doubling the concentration of a reactant that is zero order:', ['does not change the rate', 'doubles the rate', 'quadruples the rate', 'halves the rate'], 'Its power is 0.'),
+    Q('To compare the solubilities of AgCl and Ag₂CrO₄ you should compare:', ['their molar solubilities calculated from Ksp', 'their Ksp values directly', 'their colours', 'their molar masses'], 'They are different types of salt.'),
+    Q('In a solubility item, an option equal to Ksp itself is usually:', ['a distractor', 'the answer', 'the unit', 'a misprint'], 'Solubility needs a square or cube root.'),
+    Q('A sharp colour change at about pH 9 suits a titration of:', ['a weak acid with a strong base', 'a strong acid with a weak base', 'a weak acid with a weak base', 'no titration'], 'The steep part lies above 7.'),
+  ],
+  'ac-u6-paper2': [
+    Q('A gradient should be found from:', ['a large triangle on the best-fit line', 'two neighbouring rows of the table', 'the first and last points always', 'the intercept'], 'This is the most precise method.'),
+    Q('An axis label should give:', ['the quantity and its unit', 'only the unit', 'only the symbol', 'only the scale'], 'For example 1/T / K⁻¹.'),
+    Q('In an electrochemistry answer, the electrons flow:', ['through the wire from the negative electrode to the positive electrode', 'through the salt bridge', 'through the wire from positive to negative', 'in both directions'], 'Ions carry the charge in the salt bridge.'),
+    Q('An Arrhenius gradient of −5000 K gives Ea of about:', ['42 kJ mol⁻¹', '5000 kJ mol⁻¹', '0.6 kJ mol⁻¹', '42 J mol⁻¹'], '5000 × 8.31 J mol⁻¹.'),
   ],
 };
