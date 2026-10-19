@@ -47,6 +47,24 @@ export const LESSON_QUESTIONS = {
     Q('The general formula of the alkynes is:', ['CₙH₂ₙ₋₂', 'CₙH₂ₙ', 'CₙH₂ₙ₊₂', 'CₙHₙ'], 'Ethyne is C₂H₂.'),
     Q('Ethyne is used in welding because:', ['It burns in oxygen with a very hot flame', 'It does not burn', 'It is unreactive', 'It is a liquid at room temperature'], 'The oxy-ethyne (oxy-acetylene) flame.'),
   ],
+  'ac-org2-1': [
+    Q('Heating a halogenoalkane with ethanolic KCN gives:', ['A nitrile with one more carbon atom', 'An alcohol', 'An alkene', 'An amine'], 'CN⁻ is the nucleophile.'),
+    Q('The triiodomethane test is positive for:', ['Ethanol', 'Methanol', 'Propan-1-ol', '2-methylpropan-2-ol'], 'Ethanol contains the CH₃CH(OH)– group.'),
+    Q('Alcohols react with PCl₅ to give:', ['A chloroalkane and steamy fumes of HCl', 'An ester', 'An alkene', 'Hydrogen'], 'A test for the –OH group.'),
+  ],
+  'ac-org2-2': [
+    Q('Esters are hydrolysed completely by:', ['Heating with aqueous sodium hydroxide', 'Cold water', 'Concentrated sulfuric acid alone', 'Bromine water'], 'The carboxylate salt forms, so the reaction cannot reverse.'),
+    Q('Saponification is:', ['The alkaline hydrolysis of fats and oils to make soap', 'The making of esters', 'Fermentation', 'Cracking'], 'Palm oil and palm kernel oil are used in Cameroon.'),
+    Q('Acidified dichromate(VI) turns from orange to green when warmed with:', ['Aldehydes', 'Ketones', 'Carboxylic acids', 'Esters'], 'Aldehydes are oxidised to acids.'),
+    Q('Nitriles are hydrolysed, by heating with dilute acid, to:', ['Carboxylic acids', 'Alcohols', 'Aldehydes', 'Amines'], 'R–CN → R–COOH.'),
+  ],
+  'ac-org2-3': [
+    Q('Addition polymers differ from condensation polymers because they form:', ['Without losing any small molecule', 'With loss of water', 'Only from amino acids', 'Only in living things'], 'The C=C bonds simply open.'),
+    Q('All the amino acids in proteins except glycine are:', ['Chiral', 'Gases', 'Strong acids', 'Insoluble in water'], 'Glycine’s R group is H.'),
+    Q('Proteins are hydrolysed back to amino acids by:', ['Heating with acid, or by enzymes', 'Cooling', 'Adding ethanol', 'UV light'], 'The peptide links break.'),
+    Q('Phenylamine is a weaker base than ethylamine because:', ['The nitrogen lone pair is delocalised into the benzene ring', 'Phenylamine has no lone pair', 'Ethylamine is an acid', 'Phenylamine is ionic'], 'The lone pair is less available to accept a proton.'),
+    Q('In solution, amino acids exist mainly as:', ['Zwitterions', 'Free radicals', 'Carbocations', 'Neutral molecules with no charges'], 'They carry ⁺H₃N– and –COO⁻ groups.'),
+  ],
   'ac-energy-2': [
     Q('The standard enthalpy of formation of an element in its standard state is:', ['Zero', 'Always positive', 'Always negative', 'Equal to its bond enthalpy'], 'Nothing is formed when an element is made from itself.'),
     Q('Using bond enthalpies, ΔH is approximately:', ['Σ(bonds broken) − Σ(bonds made)', 'Σ(bonds made) − Σ(bonds broken)', 'Σ(bonds broken) + Σ(bonds made)', 'Zero'], 'Breaking bonds takes in energy; making bonds gives it out.'),
@@ -66,10 +84,6 @@ export const LESSON_QUESTIONS = {
   'ac-redox-1': [
     Q('The oxidation number of oxygen in hydrogen peroxide, H₂O₂, is:', ['−1', '−2', '0', '+2'], 'Peroxides are an exception to the usual −2.'),
     Q('A reaction in which one element is both oxidised and reduced is called:', ['Disproportionation', 'Neutralisation', 'Hydrolysis', 'Polymerisation'], 'Chlorine with cold alkali is an example.'),
-  ],
-  'ac-org2-3': [
-    Q('Phenylamine is a weaker base than ethylamine because:', ['The nitrogen lone pair is delocalised into the benzene ring', 'Phenylamine has no lone pair', 'Ethylamine is an acid', 'Phenylamine is ionic'], 'The lone pair is less available to accept a proton.'),
-    Q('In solution, amino acids exist mainly as:', ['Zwitterions', 'Free radicals', 'Carbocations', 'Neutral molecules with no charges'], 'They carry ⁺H₃N– and –COO⁻ groups.'),
   ],
   'ac-mech-2': [
     Q('SN2 reactions are typical of:', ['Primary halogenoalkanes', 'Tertiary halogenoalkanes', 'Alkenes', 'Arenes'], 'Tertiary halogenoalkanes react by SN1.'),
@@ -285,5 +299,102 @@ export const LESSON_QUESTIONS = {
     Q('An axis label should give:', ['the quantity and its unit', 'only the unit', 'only the symbol', 'only the scale'], 'For example 1/T / K⁻¹.'),
     Q('In an electrochemistry answer, the electrons flow:', ['through the wire from the negative electrode to the positive electrode', 'through the salt bridge', 'through the wire from positive to negative', 'in both directions'], 'Ions carry the charge in the salt bridge.'),
     Q('An Arrhenius gradient of −5000 K gives Ea of about:', ['42 kJ mol⁻¹', '5000 kJ mol⁻¹', '0.6 kJ mol⁻¹', '42 J mol⁻¹'], '5000 × 8.31 J mol⁻¹.'),
+  ],
+  // ---------- Upper Sixth organic chemistry scheme additions ----------
+  'ac-halo-2': [
+    Q('An E1 elimination passes through:', ['a carbocation', 'a single transition state only', 'a free radical', 'a carbanion'], 'Like SN1, its slow step is ionisation.'),
+    Q('In the hydrolysis experiment, the halide ion is detected by:', ['silver nitrate, which forms a precipitate', 'bromine water', 'Tollens’ reagent', 'litmus'], 'AgCl white, AgBr cream, AgI yellow.'),
+    Q('In the preparation of 2-chloro-2-methylpropane, sodium hydrogencarbonate solution is used to:', ['remove acid from the organic layer', 'dry the product', 'make the reaction faster', 'form the chloride'], 'CO₂ is given off, so release the pressure.'),
+    Q('Elimination from 2-bromobutane gives mainly:', ['but-2-ene', 'but-1-ene', 'butane', 'butan-2-ol'], 'The more substituted alkene.'),
+  ],
+  'ac-alcohol-2': [
+    Q('Fermentation stops at about 15% ethanol because:', ['the yeast is killed by the ethanol', 'the sugar runs out at once', 'the temperature rises to 100 °C', 'oxygen enters'], 'Distillation is needed for stronger solutions.'),
+    Q('The industrial hydration of ethene uses:', ['a phosphoric acid catalyst at about 300 °C and 60 atm', 'yeast at 35 °C', 'nickel at 150 °C', 'UV light'], 'A fast, continuous process.'),
+    Q('Lucas reagent is:', ['zinc chloride in concentrated hydrochloric acid', 'acidified potassium dichromate', 'ammoniacal silver nitrate', 'iodine in sodium hydroxide'], 'It turns alcohols into chloroalkanes.'),
+    Q('Small alcohols mix with water because:', ['they form hydrogen bonds with water molecules', 'they are ionic', 'they are very heavy', 'they react with water'], 'The –OH group hydrogen bonds.'),
+  ],
+  'ac-phenol-1': [
+    Q('The pKa of phenol is about:', ['10', '4.8', '16', '1'], 'Weaker than carboxylic acids, stronger than ethanol.'),
+    Q('Phenol reacts with bromine water more easily than benzene because:', ['the oxygen lone pair makes the ring richer in electrons', 'phenol is a gas', 'benzene has no electrons', 'bromine water is a catalyst'], 'The ring is activated.'),
+    Q('Phenol dissolves in sodium hydroxide solution because:', ['it forms soluble sodium phenoxide', 'it is a base', 'it is non-polar', 'it gives off carbon dioxide'], 'An acid-base reaction.'),
+    Q('Neutral iron(III) chloride gives a violet colour with:', ['phenol', 'ethanol', 'ethanoic acid', 'propanone'], 'A test for phenols.'),
+  ],
+  'ac-carbonyl-2': [
+    Q('The product of HCN with ethanal is:', ['2-hydroxypropanenitrile', 'propanenitrile', 'ethanoic acid', 'ethanol'], 'One more carbon, with –OH and –CN on the same carbon.'),
+    Q('HCN addition to ethanal gives a racemic mixture because:', ['the planar C=O is attacked equally from both sides', 'HCN is optically active', 'the product has no chiral centre', 'only one side can be attacked'], 'Equal amounts of the two enantiomers.'),
+    Q('NaBH₄ acts by supplying:', ['hydride ions, H⁻, which act as nucleophiles', 'protons', 'free radicals', 'electrophiles'], 'H⁻ attacks the δ+ carbon.'),
+    Q('The 2,4-DNPH derivative is recrystallised and its melting point measured to:', ['identify the particular aldehyde or ketone', 'make it explode', 'find its colour', 'remove the carbonyl group'], 'Compare with data tables.'),
+  ],
+  'ac-carboxylic-1': [
+    Q('In the ethanoate ion, the two C–O bonds are:', ['the same length, because the charge is delocalised', 'one single and one double', 'both double bonds', 'both longer than single bonds'], 'Delocalisation over both oxygens.'),
+    Q('Carboxylic acids react with carbonates to give:', ['a salt, water and carbon dioxide', 'an ester', 'hydrogen only', 'an alcohol'], 'The fizzing is a test for –COOH.'),
+    Q('Which carboxylic acid also gives a silver mirror with Tollens’ reagent?', ['methanoic acid', 'ethanoic acid', 'propanoic acid', 'benzoic acid'], 'It has an aldehyde-like H–C=O.'),
+    Q('In a back-titration, the substance being analysed reacts with:', ['a known excess of a standard reagent', 'exactly enough reagent', 'an indicator only', 'nothing'], 'The excess is then titrated.'),
+  ],
+  'ac-acyl-1': [
+    Q('Acyl chlorides react faster than carboxylic acids with water because:', ['the carbonyl carbon is more δ+ and Cl⁻ leaves easily', 'they are ionic', 'they contain no oxygen', 'they are bases'], 'Both O and Cl withdraw electrons.'),
+    Q('The equilibrium constant Kc for making ethyl ethanoate from the acid and alcohol is about:', ['4', '1000', '0.01', '1'], 'About two-thirds converts from 1 : 1.'),
+    Q('Crude ethyl ethanoate is washed with sodium carbonate solution to:', ['remove acids', 'remove water', 'add sweetness', 'make more ester'], 'Release the CO₂ pressure.'),
+    Q('Phenols are best turned into esters by reacting them with:', ['an acyl chloride', 'a carboxylic acid', 'an aldehyde', 'an alkane'], 'Phenols react only slowly with acids.'),
+  ],
+  'ac-synth-1': [
+    Q('A primary alcohol is oxidised to an aldehyde, rather than an acid, by:', ['distilling the aldehyde off as it forms', 'heating under reflux', 'adding NaBH₄', 'cooling in ice'], 'It leaves before further oxidation.'),
+    Q('The only common way to put a functional group on an alkane is:', ['free-radical substitution with a halogen in UV light', 'adding water', 'oxidising with dichromate', 'adding HBr'], 'Alkanes are otherwise unreactive.'),
+    Q('Three steps of 70% yield each give an overall yield of about:', ['34%', '70%', '210%', '50%'], '0.70 × 0.70 × 0.70.'),
+    Q('An acyl chloride reacts with ammonia to give:', ['an amide', 'an ester', 'an amine', 'an aldehyde'], 'Addition-elimination.'),
+  ],
+  'ac-amine-1': [
+    Q('Ethylamine is a stronger base than ammonia because:', ['the ethyl group releases electrons towards the nitrogen', 'it has more hydrogen atoms', 'it is a gas', 'its lone pair is delocalised'], 'The +I effect.'),
+    Q('Amides are not basic because:', ['the nitrogen lone pair is delocalised towards the C=O group', 'they have no nitrogen', 'they are ionic', 'they are strong acids'], 'The lone pair is less available.'),
+    Q('Heating a halogenoalkane with ammonia gives a mixture of amines because:', ['the amine formed is itself a nucleophile and reacts further', 'ammonia is an electrophile', 'the reaction is reversible', 'the halogenoalkane decomposes'], 'Use excess ammonia to favour the primary amine.'),
+    Q('Benzenediazonium chloride is coupled with phenol in:', ['alkaline solution, below 10 °C', 'concentrated acid at 100 °C', 'ethanol under reflux', 'the gas phase'], 'Phenoxide ions couple readily.'),
+  ],
+  'ac-aminoacid-1': [
+    Q('In strongly acidic solution, glycine exists as:', ['⁺H₃NCH₂COOH', 'H₂NCH₂COO⁻', '⁺H₃NCH₂COO⁻', 'H₂NCH₂COOH'], 'The carboxylate is protonated.'),
+    Q('Amino acids have high melting points because:', ['they exist as zwitterions with strong ionic attractions', 'they are polymers', 'they contain metal ions', 'they are very heavy'], 'Ionic lattice.'),
+    Q('The baseline of a chromatogram is drawn in pencil because:', ['graphite does not dissolve in the solvent', 'ink is too expensive', 'pencil is easier to see', 'ink reacts with ninhydrin'], 'Ink would run with the solvent.'),
+    Q('Two different amino acids can form how many different dipeptides?', ['2', '1', '3', '4'], 'Gly-Ala and Ala-Gly.'),
+  ],
+  'ac-polymer-2': [
+    Q('Nylon-6,6 is so called because:', ['each monomer has six carbon atoms', 'it has six amide links', 'it melts at 66 °C', 'it was the sixth nylon'], 'Hexane-1,6-diamine and hexanedioic acid.'),
+    Q('In the nylon rope trick, the nylon forms:', ['where the two liquid layers meet', 'at the bottom of the beaker', 'in the air', 'only when heated'], 'The monomers meet at the interface.'),
+    Q('DNA is a condensation polymer of:', ['nucleotides', 'amino acids', 'glucose', 'ethene'], 'Joined by phosphodiester links.'),
+    Q('To find the monomers of a polyester you should:', ['break each ester link and add back water', 'remove all oxygen atoms', 'count the carbon atoms only', 'add hydrogen to every C=C'], 'Hydrolysis in reverse of condensation.'),
+  ],
+  'ac-spec-1': [
+    Q('The base peak in a mass spectrum is:', ['the tallest peak, set to 100%', 'the peak with the largest m/z', 'always the molecular ion', 'the smallest peak'], 'The most abundant ion.'),
+    Q('A molecule containing one chlorine atom shows M and M+2 peaks in the ratio:', ['3 : 1', '1 : 1', '1 : 3', '2 : 1'], '³⁵Cl : ³⁷Cl.'),
+    Q('A loss of 15 from the molecular ion shows the loss of:', ['a CH₃ group', 'an OH group', 'a water molecule', 'a COOH group'], 'CH₃ has mass 15.'),
+    Q('Only positive ions are detected in a mass spectrometer, so the neutral fragments:', ['do not appear in the spectrum', 'give the base peak', 'give the M+1 peak', 'appear as negative peaks'], 'They are not deflected or detected.'),
+  ],
+  'ac-spec-2': [
+    Q('A bond absorbs infrared radiation only if its vibration:', ['changes the dipole of the molecule', 'breaks the bond', 'produces light', 'involves a metal'], 'This is why N₂ and O₂ do not absorb.'),
+    Q('The O–H absorption of a carboxylic acid is:', ['very broad, from 2500 to 3300 cm⁻¹', 'sharp near 1700 cm⁻¹', 'near 2200 cm⁻¹', 'absent'], 'Strong hydrogen bonding broadens it.'),
+    Q('A sharp peak near 2250 cm⁻¹ suggests:', ['a C≡N group', 'an O–H group', 'a C–O bond', 'a C=C bond'], 'Nitriles absorb near 2200 to 2260 cm⁻¹.'),
+    Q('Infrared radiation is absorbed in the atmosphere by:', ['carbon dioxide, water vapour and methane', 'nitrogen and oxygen', 'argon only', 'ozone only'], 'Greenhouse gases.'),
+  ],
+  'ac-spec-3': [
+    Q('Samples for ¹H NMR are dissolved in CDCl₃ because:', ['it contains no ordinary hydrogen atoms to give a signal', 'it is coloured', 'it reacts with the sample', 'it is cheap'], 'Deuterium does not show in ¹H NMR.'),
+    Q('An aldehyde proton, –CHO, appears at about:', ['9 to 10 ppm', '1 ppm', '4 ppm', '0 ppm'], 'Far from TMS.'),
+    Q('An ethyl group gives in ¹H NMR:', ['a triplet (3H) and a quartet (2H)', 'two singlets', 'a doublet only', 'a septet'], 'CH₃ next to CH₂ and CH₂ next to CH₃.'),
+    Q('The number of peaks in the ¹³C NMR spectrum of propanone is:', ['2', '3', '1', '6'], 'Two equivalent CH₃ carbons and one C=O.'),
+  ],
+  'ac-synth-2': [
+    Q('Grignard reagents must be made in dry ether because:', ['water destroys them', 'ether is a catalyst', 'water makes them explode', 'they need oxygen'], 'They react with water to give alkanes.'),
+    Q('A Grignard reagent with carbon dioxide, followed by acid, gives:', ['a carboxylic acid with one more carbon', 'an alcohol', 'an alkane', 'a ketone'], 'Dry ice is the CO₂ source.'),
+    Q('Reduction of a nitrile with LiAlH₄ gives:', ['a primary amine', 'a carboxylic acid', 'an alcohol', 'an amide'], 'R–CN → R–CH₂NH₂.'),
+    Q('Friedel-Crafts reactions form a C–C bond between:', ['a benzene ring and an alkyl or acyl group', 'two alkenes', 'two alcohols', 'an amine and an acid'], 'With an AlCl₃ catalyst.'),
+  ],
+  'ac-u6-org1': [
+    Q('Which molecule shows optical isomerism?', ['2-hydroxypropanoic acid', 'propanoic acid', 'propan-2-ol', 'ethanoic acid'], 'C2 carries H, OH, CH₃ and COOH.'),
+    Q('Alkene + HBr is an example of:', ['electrophilic addition', 'nucleophilic substitution', 'free-radical substitution', 'addition-elimination'], 'The π electrons attack H⁺.'),
+    Q('A yellow precipitate with iodine in sodium hydroxide shows:', ['a CH₃CO– or CH₃CH(OH)– group', 'a phenol', 'a C=C bond', 'a carboxylic acid'], 'Triiodomethane forms.'),
+    Q('Which is the strongest acid?', ['ethanoic acid', 'phenol', 'water', 'ethanol'], 'pKa 4.76.'),
+  ],
+  'ac-u6-org2': [
+    Q('The first piece of evidence to read in a structure question is usually:', ['the molecular formula and Mr', 'the boiling point', 'the colour', 'the price'], 'Then the spectra.'),
+    Q('A curly arrow should start at:', ['a lone pair or a bond', 'an atom’s nucleus', 'a positive charge', 'empty space'], 'It shows where the electron pair comes from.'),
+    Q('In ¹H NMR, a peak that disappears on shaking with D₂O shows:', ['an O–H or N–H proton', 'a CH₃ group', 'an aromatic proton', 'TMS'], 'Exchange with deuterium.'),
+    Q('Recrystallisation purifies a solid by:', ['dissolving it in the minimum of hot solvent and letting it crystallise on cooling', 'heating it until it melts', 'distilling it', 'adding a catalyst'], 'Impurities stay in solution.'),
   ],
 };

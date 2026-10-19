@@ -101,7 +101,7 @@ export const LESSONS_U6B = [
     { q: 'Write the overall equation and E°cell for Mg(s) | Mg²⁺(aq) || Ag⁺(aq) | Ag(s).', steps: ['Left (oxidation): Mg → Mg²⁺ + 2e⁻. Right (reduction): Ag⁺ + e⁻ → Ag, doubled so that the electrons cancel.', 'Overall: **Mg + 2Ag⁺ → Mg²⁺ + 2Ag**.', 'E°cell = E°(right) − E°(left) = 0.80 − (−2.37) = **+3.17 V** (not doubled).'] },
   ]),
 
-  L('ac-electro-1', 'ac-electro', '5.1', 'The Nernst equation: cells away from standard conditions', 17, ['Electrochemistry', 'Practical'], [
+  L('ac-electro-1', 'ac-electro', '7.1', 'The Nernst equation: cells away from standard conditions', 17, ['Electrochemistry', 'Practical'], [
     'Electrode potentials change with concentration. For a half-cell **Ox + ze⁻ ⇌ Red**, the **Nernst equation** at 298 K is **E = E° + (0.059 ÷ z) log([Ox] ÷ [Red])**, where z is the number of electrons in the half-equation. Its general form is E = E° + (RT ÷ zF) ln([Ox] ÷ [Red]); at 298 K, 2.303RT ÷ F = 0.059 V. Pure solids and liquids are left out of the ratio.',
     'For a **metal in a solution of its ions**, Mᶻ⁺ + ze⁻ ⇌ M, the equation becomes **E = E° + (0.059 ÷ z) log[Mᶻ⁺]**. Diluting the ions makes E **less positive**: the equilibrium shifts to the left, releasing electrons. For Cu²⁺/Cu (z = 2), E falls by 0.0295 V for every tenfold dilution: 0.34 V at 1.0 mol dm⁻³, 0.31 V at 0.10 and 0.28 V at 0.010 mol dm⁻³. Raising [Ox] makes an oxidising agent stronger; this is why manganate(VII) is used in strongly acidic solution.',
     'A **concentration cell** has the same half-cell on both sides at different concentrations. Cu(s) | Cu²⁺(0.010 mol dm⁻³) || Cu²⁺(1.0 mol dm⁻³) | Cu(s) has E°cell = 0, yet its e.m.f. is 0.0295 × 2 = **0.059 V**; current flows until the two concentrations become equal. In the same way, a working cell’s e.m.f. falls as it discharges and its concentrations change.',
@@ -114,7 +114,7 @@ export const LESSONS_U6B = [
     { q: 'Find E for Fe³⁺/Fe²⁺ (E° = +0.77 V) when [Fe³⁺] = 0.10 mol dm⁻³ and [Fe²⁺] = 1.0 mol dm⁻³.', steps: ['z = 1: E = 0.77 + 0.059 log(0.10 ÷ 1.0).', 'E = 0.77 − 0.059 = **0.71 V**.'] },
   ]),
 
-  L('ac-electro-2', 'ac-electro', '5.2', 'Cell e.m.f., Gibbs free energy and equilibrium constants', 16, ['Electrochemistry', 'Thermodynamics'], [
+  L('ac-electro-2', 'ac-electro', '7.2', 'Cell e.m.f., Gibbs free energy and equilibrium constants', 16, ['Electrochemistry', 'Thermodynamics'], [
     'The electrical work a cell can do equals the fall in Gibbs free energy: **ΔG° = −zFE°cell**, where z is the number of moles of electrons transferred in the equation and **F = 96 500 C mol⁻¹**, the Faraday constant. The answer is in J mol⁻¹; divide by 1000 for kJ mol⁻¹. For the Daniell cell (z = 2, E° = +1.10 V): ΔG° = −2 × 96 500 × 1.10 = **−212 kJ mol⁻¹**.',
     'Since also ΔG° = −RT ln K, **ln K = zFE° ÷ RT**, or at 298 K **log K = zE° ÷ 0.059**. So:\n- E°cell positive, ΔG° negative, K greater than 1: feasible\n- E°cell zero, ΔG° zero, K equal to 1\n- E°cell negative, ΔG° positive, K less than 1.\nEven E° = +0.30 V with z = 2 gives K of about 10¹⁰, so a reaction with E°cell above about +0.3 V goes essentially to completion.',
     'The **temperature coefficient** of a cell links it to entropy: **ΔS° = zF × (dE°/dT)**, and then **ΔH° = ΔG° + TΔS°**. Measuring E° at several temperatures therefore gives all three thermodynamic quantities for the cell reaction. A cell whose e.m.f. falls as it warms has a negative ΔS°.',
@@ -127,7 +127,7 @@ export const LESSONS_U6B = [
     { q: 'For a cell with z = 2, E° falls by 5.0 × 10⁻⁴ V for each 1 K rise. Find ΔS°.', steps: ['dE°/dT = **−5.0 × 10⁻⁴ V K⁻¹**.', 'ΔS° = zF × dE°/dT = 2 × 96 500 × (−5.0 × 10⁻⁴) = **−96.5 J K⁻¹ mol⁻¹**.'] },
   ]),
 
-  L('ac-electro-3', 'ac-electro', '5.3', 'Faraday’s laws of electrolysis', 17, ['Electrochemistry', 'Practical'], [
+  L('ac-electro-3', 'ac-electro', '7.3', 'Faraday’s laws of electrolysis', 17, ['Electrochemistry', 'Practical'], [
     'In electrolysis, the amount of product depends on the **charge** passed: **Q = It** (coulombs = amperes × seconds). One mole of electrons carries **F = 96 500 C**, so moles of electrons = Q ÷ F. The Faraday constant is the Avogadro constant times the charge on one electron: **F = L × e**, about 6.02 × 10²³ × 1.60 × 10⁻¹⁹ C.',
     '**Faraday’s first law**: the mass of a substance liberated at an electrode is proportional to the quantity of electricity passed. **Faraday’s second law**: the same quantity of electricity liberates amounts of different substances in inverse proportion to the charges on their ions; 1 mol of electrons deposits 1 mol of Ag (from Ag⁺), ½ mol of Cu (from Cu²⁺) and ⅓ mol of Al (from Al³⁺). Cells joined in **series** carry the same current, so the same charge passes through each.',
     'Method for calculations:\n- Q = I × t, with t in seconds\n- moles of electrons = Q ÷ 96 500\n- moles of product from the electrode half-equation (Cu²⁺ + 2e⁻ → Cu: divide by 2; 4OH⁻ → O₂ + 2H₂O + 4e⁻: divide by 4)\n- mass = moles × M, or gas volume = moles × 22.4 dm³ at s.t.p. (24.0 dm³ at room temperature and pressure).',
@@ -141,7 +141,7 @@ export const LESSONS_U6B = [
   ]),
 
   // ---------- Kinetics ----------
-  L('ac-kinetic-4', 'ac-kinetics', '6.4', 'Kinetics experiments and deducing mechanisms', 18, ['Kinetics', 'Practical'], [
+  L('ac-kinetic-4', 'ac-kinetics', '8.4', 'Kinetics experiments and deducing mechanisms', 18, ['Kinetics', 'Practical'], [
     'Two experimental approaches:\n- **initial rates**: run the reaction several times with different starting concentrations and measure the rate at the very start, often with a **clock reaction** (the time t for a fixed small amount of product to form, so rate ∝ 1/t)\n- **continuous monitoring**: follow one reaction mixture over time by colorimetry, gas volume, conductivity or **sampling and titrating**.\nIn the **isolation method**, every reactant except one is in large excess, so only that one’s concentration changes noticeably and its order can be found on its own (a pseudo-order).',
     'Practical: the **acid-catalysed hydrolysis of methyl ethanoate**, CH₃COOCH₃ + H₂O → CH₃COOH + CH₃OH. At intervals, pipette 5 cm³ of the mixture into ice-cold water to **quench** it and titrate with NaOH. The titre Vt measures the acid catalyst plus the ethanoic acid formed; after a long time the final titre is V∞. **(V∞ − Vt) is proportional to the ester left.** A straight line of ln(V∞ − Vt) against time, or a constant half-life, shows the reaction is **first order** in the ester; water is in large excess, so it is pseudo-first order.',
     'Deducing mechanisms: the rate equation contains only the species in the **rate-determining step** and any steps before it.\n- **iodination of propanone** in acid, CH₃COCH₃ + I₂ → CH₃COCH₂I + HI: rate = k[CH₃COCH₃][H⁺], **zero order in I₂**, so iodine reacts only after the slow step, and H⁺ acts as a catalyst in it\n- **hydrolysis of 2-bromo-2-methylpropane**: rate = k[(CH₃)₃CBr], so the slow step is ionisation to a carbocation (SN1); for bromoethane, rate = k[CH₃CH₂Br][OH⁻], one step involving both species (SN2).\nA proposed mechanism must add up to the overall equation and agree with the rate equation.',
@@ -155,7 +155,7 @@ export const LESSONS_U6B = [
   ]),
 
   // ---------- Upper Sixth revision ----------
-  L('ac-u6-formulae', 'ac-u6-papers', '11.1', 'The physical chemistry formula matrix', 14, ['Examination'], [
+  L('ac-u6-formulae', 'ac-u6-papers', '14.1', 'The physical chemistry formula matrix', 14, ['Examination'], [
     'Equilibria and acids:\n- Kc from equilibrium concentrations; Kp from partial pressures, with p(A) = x(A) × p(total)\n- pH = −log[H⁺]; Kw = [H⁺][OH⁻] = 1.0 × 10⁻¹⁴ mol² dm⁻⁶ at 298 K; pH + pOH = 14\n- weak acid: [H⁺] = √(Ka × c); weak base: [OH⁻] = √(Kb × c); Ka × Kb = Kw\n- buffer: pH = pKa + log([A⁻] ÷ [HA])\n- solubility: AB salts s = √Ksp; AB₂ salts s = ∛(Ksp ÷ 4).',
     'Electrochemistry:\n- E°cell = E°(right) − E°(left) = E°(reduction) − E°(oxidation)\n- Nernst: E = E° + (0.059 ÷ z) log([Ox] ÷ [Red]) at 298 K\n- ΔG° = −zFE°; ΔG° = −RT ln K; ΔS° = zF(dE°/dT)\n- Q = It; moles of electrons = Q ÷ F; F = 96 500 C mol⁻¹ = L × e.',
     'Energetics and kinetics:\n- ΔG = ΔH − TΔS, with ΔS in kJ K⁻¹ mol⁻¹ when ΔH is in kJ mol⁻¹\n- rate = k[A]ᵐ[B]ⁿ; first-order half-life t½ = 0.693 ÷ k\n- straight lines: [A] against t (zero order), ln[A] against t (first order), 1/[A] against t (second order)\n- Arrhenius: ln k = ln A − Ea ÷ RT; the gradient of ln k against 1/T is −Ea ÷ R; ln(k₂ ÷ k₁) = (Ea ÷ R)(1/T₁ − 1/T₂).',
@@ -167,7 +167,7 @@ export const LESSONS_U6B = [
     { q: 'Hydrochloric acid and ethanoic acid (Ka 1.74 × 10⁻⁵ mol dm⁻³) are each diluted from 0.10 to 0.0010 mol dm⁻³. Compare the changes in pH.', steps: ['HCl: pH 1.00 → **3.00**, a rise of 2 units.', 'Ethanoic acid: √(1.74 × 10⁻⁵ × 0.10) gives pH 2.88; √(1.74 × 10⁻⁵ × 0.0010) = 1.32 × 10⁻⁴ gives pH **3.88**, a rise of only 1 unit.', 'The weak acid’s pH changes by half as much, because more of it ionises as it is diluted.'] },
   ]),
 
-  L('ac-u6-paper1', 'ac-u6-papers', '11.2', 'Paper 1 sprint: buffers, solubility, cells and orders', 13, ['Examination'], [
+  L('ac-u6-paper1', 'ac-u6-papers', '14.2', 'Paper 1 sprint: buffers, solubility, cells and orders', 13, ['Examination'], [
     'Paper 1 is **multiple choice** and lasts 1½ hours. Physical chemistry items are short calculations or questions about graphs. Work the answer out before reading the options, watch units and powers of ten, and use estimates to rule options out: √(1.8 × 10⁻¹⁰) must be about 10⁻⁵, not 10⁻¹⁰.',
     'Quick checks that save time:\n- a buffer with equal [HA] and [A⁻] has pH = pKa, and diluting it barely changes the pH\n- for AB salts, a smaller Ksp means less soluble; for salts of different types, compare s, not Ksp\n- doubling [A] multiplies the rate by 2 if first order in A, by 4 if second order and by 1 if zero order\n- a positive E°cell means a negative ΔG° and K greater than 1.',
     'Graph items: identify the order from the shape of concentration-time or rate-concentration graphs; locate the half-neutralisation and equivalence points on titration curves; choose the indicator whose range lies within the vertical section; read Ea from the gradient of an Arrhenius plot.',
@@ -179,7 +179,7 @@ export const LESSONS_U6B = [
     { q: 'Item: the solubility of BaSO₄ (Ksp 1.1 × 10⁻¹⁰ mol² dm⁻⁶) is about: A 1.0 × 10⁻⁵, B 1.1 × 10⁻¹⁰, C 5.5 × 10⁻¹¹, D 1.2 × 10⁻²⁰ mol dm⁻³.', steps: ['s = √Ksp = √(1.1 × 10⁻¹⁰) ≈ 1.05 × 10⁻⁵ mol dm⁻³.', '**Answer A.** B is Ksp itself, C halves it and D squares it: each option catches a common slip.'] },
   ]),
 
-  L('ac-u6-paper2', 'ac-u6-papers', '11.3', 'Paper 2 clinic: Nernst, Arrhenius and kinetics data', 15, ['Examination'], [
+  L('ac-u6-paper2', 'ac-u6-papers', '14.3', 'Paper 2 clinic: Nernst, Arrhenius and kinetics data', 15, ['Examination'], [
     'Paper 2 lasts 3 hours and has six compulsory structured questions: two physical, two inorganic and two organic. Physical chemistry questions usually combine a definition, a calculation in several steps and an explanation. Marks are awarded for each correct step, so set out the method even if the final answer goes wrong.',
     'Data-handling routine for kinetics:\n- tabulate the derived quantity (ln[A], 1/[A], 1/T, ln k) with units and sensible significant figures\n- choose scales that use more than half the grid, and label each axis with the quantity and its unit\n- draw the best straight line and find the gradient from a large triangle, not from two rows of the table\n- state the conclusion: the order, k with its unit, or Ea in kJ mol⁻¹.',
     'Electrochemistry routine: write both half-equations with their E° values; decide which is reduced (the more positive); give E°cell = E°(right) − E°(left); if concentrations are not standard, apply the Nernst equation to each half-cell first; then link to ΔG° = −zFE° if asked. State the direction of electron flow in the external circuit and the polarity of each electrode.',
