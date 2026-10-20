@@ -137,8 +137,8 @@ export async function sendCode(env, phone, code, lang = 'en') {
   }
   const text =
     lang === 'fr'
-      ? `ScienceAid : votre code est ${code}. Il expire dans 10 minutes. Ne le partagez avec personne.`
-      : `ScienceAid: your code is ${code}. It expires in 10 minutes. Do not share it with anyone.`;
+      ? `Klass8 : votre code est ${code}. Il expire dans 10 minutes. Ne le partagez avec personne.`
+      : `Klass8: your code is ${code}. It expires in 10 minutes. Do not share it with anyone.`;
   if (await sendSmsText(env, phone, text)) return 'sms';
   throw new HttpError(502, 'We could not send the code. Please try again in a minute.', 'messaging_failed');
 }

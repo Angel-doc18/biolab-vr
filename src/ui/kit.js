@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { Animated, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { createIconSet } from '@expo/vector-icons';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { LOGO_S } from './logoPath';
+import { LOGO_MARK } from './logoPath';
 import glyphMap from '../glyphmap.json';
 import tw, { C, color } from './tw';
 
@@ -162,13 +162,12 @@ export function Avatar({ name = '', size = 32, c = '', ring, uri }) {
   );
 }
 
-// Brand mark: the orbit cell from the approved logo.
-// The ScienceAid mark: a white S on a rounded brand-blue tile (white S alone when mono).
+// The Klass8 mark: a white K on a rounded brand-blue tile (white K alone when mono).
 export function Logo({ size = 32, mono }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       {!mono && <Rect x={0} y={0} width={100} height={100} rx={22} fill="#0369A1" />}
-      <Path d={LOGO_S} fill="#FFFFFF" />
+      <Path d={LOGO_MARK} fill="#FFFFFF" />
     </Svg>
   );
 }

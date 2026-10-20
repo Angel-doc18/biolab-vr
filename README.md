@@ -1,15 +1,16 @@
-# ScienceAid: Cameroon GCE Ordinary Level sciences
+# Klass8: Cameroon secondary school courses
 
-Mobile app (Expo SDK 57, React Native) for the Cameroon GCE Ordinary Level sciences, with a
-Cloudflare Worker API for accounts, progress, classes, parent reports, payments and the AI tutor.
-Biology (0510) is complete; Chemistry (0515), Physics (0580) and Human Biology (0565) are being
-added and are switched on in `src/data/subjects.js` once their content is finished.
+Mobile app (Expo SDK 57, React Native) for Cameroon secondary school students from Form 1 to
+Upper Sixth, following the MINESEC programmes and the 2026/2027 schemes of work, for class
+(term) exams and the GCE, with a Cloudflare Worker API for accounts, progress, classes, parent
+reports, payments and the AI tutor. Subjects are switched on in `src/data/subjects.js` once their
+content is finished.
 
 ## Download (Android)
 
 Direct download, no GitHub account needed:
 
-**https://github.com/Angel-doc18/biolab-vr/releases/latest/download/ScienceAid.apk**
+**https://github.com/Angel-doc18/biolab-vr/releases/latest/download/Klass8.apk**
 
 Every push to `main` builds a new APK and publishes it as release `v1.0.<build>`
 (`.github/workflows/android-release.yml`).

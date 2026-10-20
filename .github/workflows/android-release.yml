@@ -43,27 +43,29 @@ jobs:
           ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
 
       - name: Collect APK
-        # ScienceAid.apk is the current name; SciAid.apk keeps links shared before the rename working.
+        # Klass8.apk is the current name; ScienceAid.apk and SciAid.apk keep links shared before the renames working.
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk ScienceAid.apk
-          cp ScienceAid.apk SciAid.apk
+          cp android/app/build/outputs/apk/release/app-release.apk Klass8.apk
+          cp Klass8.apk ScienceAid.apk
+          cp Klass8.apk SciAid.apk
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: scienceaid-android
-          path: ScienceAid.apk
+          name: klass8-android
+          path: Klass8.apk
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: ScienceAid v1.0.${{ github.run_number }}
+          name: Klass8 v1.0.${{ github.run_number }}
           make_latest: true
           body: |
-            Android APK for ScienceAid (Cameroon GCE sciences).
-            Download **ScienceAid.apk** below, open it on your phone and allow "install unknown apps" when asked.
+            Android APK for Klass8 (Cameroon secondary school courses, GCE and class exams).
+            Download **Klass8.apk** below, open it on your phone and allow "install unknown apps" when asked.
           files: |
+            Klass8.apk
             ScienceAid.apk
             SciAid.apk
         env:
