@@ -90,7 +90,7 @@ export const LABS = [
   {
     id: 'ph-pendulum',
     unit: 'ph-measure',
-    units: ['ph-f5-kinematics', 'ap-circular-shm'],
+    units: ['ph-f5-kinematics', 'ap-oscillations'],
     subjects: ['a-physics'],
     kind: 'readings',
     short: 'Simple pendulum',
@@ -152,7 +152,7 @@ export const LABS = [
   {
     id: 'ph-density',
     unit: 'ph-f3-density',
-    units: ['ph-f1-measure', 'ph-f2-method', 'ap-matter'],
+    units: ['ph-f1-measure', 'ph-f2-method', 'ap-fluids'],
     subjects: ['a-physics'],
     kind: 'readings',
     short: 'Density',
@@ -488,7 +488,7 @@ export const LABS = [
   {
     id: 'ph-shc',
     unit: 'ph-thermal',
-    units: ['ap-thermal'],
+    units: ['ap-heat'],
     subjects: ['a-physics'],
     kind: 'readings',
     short: 'Specific heat capacity',
@@ -539,7 +539,7 @@ export const LABS = [
   {
     id: 'ph-cooling',
     unit: 'ph-thermal',
-    units: ['ph-f2-heatstate', 'ap-thermal'],
+    units: ['ph-f2-heatstate', 'ap-heat'],
     subjects: ['a-physics'],
     kind: 'readings',
     short: 'Cooling curve',
@@ -594,7 +594,7 @@ export const LABS = [
   {
     id: 'ph-conduction',
     unit: 'ph-thermal',
-    units: ['ph-f1-insulation', 'ph-f1-heatflow', 'ph-f2-materials', 'ap-thermal'],
+    units: ['ph-f1-insulation', 'ph-f1-heatflow', 'ph-f2-materials', 'ap-heat'],
     subjects: ['a-physics'],
     short: 'Conduction in rods',
     title: 'Which materials conduct heat best?',

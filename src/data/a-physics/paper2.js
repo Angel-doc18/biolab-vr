@@ -39,7 +39,7 @@ export const PAPER2 = [
     ],
   },
   {
-    id: 'app-s-shm', section: 'A', slot: 'short', unit: 'ap-circular-shm', topic: 'Simple harmonic motion',
+    id: 'app-s-shm', section: 'A', slot: 'short', unit: 'ap-oscillations', topic: 'Simple harmonic motion',
     stem: 'A simple pendulum of length 0.90 m swings with a small amplitude of 0.050 m.',
     hint: 'Write the defining equation of SHM, then use T = 2π√(l/g).',
     parts: [
@@ -48,7 +48,7 @@ export const PAPER2 = [
     ],
   },
   {
-    id: 'app-s-thermal', section: 'A', slot: 'short', unit: 'ap-thermal', topic: 'Thermal energy',
+    id: 'app-s-thermal', section: 'A', slot: 'short', unit: 'ap-heat', topic: 'Thermal energy',
     stem: 'An electric kettle rated 2.2 kW contains 1.5 kg of water at 25 °C (c = 4200 J kg⁻¹ K⁻¹; specific latent heat of vaporisation 2.26 × 10⁶ J/kg).',
     hint: 'Use Q = mcΔθ to the boiling point, then Q = ml for boiling.',
     parts: [

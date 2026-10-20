@@ -33,7 +33,7 @@ export const LESSONS_L6 = [
     { q: 'A force of 50 N pulls a box at 30° above the horizontal. Find its horizontal and vertical components.', steps: ['Horizontal = 50 cos 30° = 50 × 0.866 = **43.3 N**.', 'Vertical = 50 sin 30° = 50 × 0.5 = **25 N**.'] },
   ]),
 
-  L('ap-measure-2', 'ap-measure', '1.2', 'Errors, uncertainties and experimental skills', 13, ['Measurement', 'Practical'], [
+  L('ap-measure-2', 'ap-measure', '1.3', 'Errors, uncertainties and experimental skills', 13, ['Measurement', 'Practical'], [
     'No measurement is exact. **Random errors** scatter readings either side of the true value (reaction time with a stopwatch, judging a reading); they are reduced by **repeating** and averaging, and by measuring larger quantities (timing 20 oscillations, not one). **Systematic errors** shift every reading the same way (a zero error, a wrongly calibrated meter, parallax from the same side); repeating does not remove them, so the instrument must be checked or corrected.',
     '**Accuracy** is how close a result is to the true value; **precision** is how close repeated readings are to each other. The **uncertainty** of a reading is usually half the smallest division of an analogue scale, or the smallest digit of a digital meter. Instruments: metre rule (±1 mm), vernier calipers (±0.1 mm), micrometer screw gauge (±0.01 mm).',
     'Combining uncertainties: for **sums and differences**, add the **absolute** uncertainties; for **products and quotients**, add the **percentage (fractional)** uncertainties; for a **power**, multiply the percentage uncertainty by the power. Quote the final answer to a number of **significant figures** that matches the data, usually the least precise measurement.',
@@ -109,7 +109,7 @@ export const LESSONS_L6 = [
     { q: 'A uniform 4.0 m plank of weight 200 N rests on supports at its ends. A 600 N man stands 1.0 m from the left end. Find the force from each support.', steps: ['Moments about the left support: R_right × 4.0 = 600 × 1.0 + 200 × 2.0 = 1000, so R_right = **250 N**.', 'Vertical forces balance: R_left + 250 = 600 + 200, so R_left = **550 N**.'] },
   ]),
 
-  L('ap-work-1', 'ap-statics-energy', '4.2', 'Work, energy, power and efficiency', 13, ['Energy', 'Power'], [
+  L('ap-work-1', 'ap-statics-energy', '4.3', 'Work, energy, power and efficiency', 13, ['Energy', 'Power'], [
     '**Work done** = force × displacement in the direction of the force: **W = Fs cos θ**, in joules. No work is done if the displacement is at right angles to the force. Work done is the area under a force-displacement graph. Energy is the capacity to do work; when work is done, energy is transferred.',
     '**Kinetic energy** Ek = ½mv² (derived from v² = u² + 2as and F = ma). **Gravitational potential energy** change ΔEp = mgΔh near the Earth’s surface. **Elastic potential energy** in a stretched spring = ½kx² = ½Fx. The principle of **conservation of energy**: energy cannot be created or destroyed, only transferred; in a system with no friction, the loss of Ep equals the gain of Ek.',
     '**Power** is the rate of doing work or transferring energy: P = W/t, in watts. For a force moving at constant velocity, **P = Fv**: a car’s maximum speed is reached when the driving force (P/v) equals the resistive forces.',
@@ -134,7 +134,7 @@ export const LESSONS_L6 = [
     { q: 'A 900 kg car rounds a flat bend of radius 50 m. The maximum friction force is 6300 N. Find the greatest safe speed.', steps: ['Friction provides the centripetal force: mv²/r ≤ 6300.', 'v² = 6300 × 50 ÷ 900 = 350.', 'v = **18.7 m/s** (about 67 km/h).'] },
   ]),
 
-  L('ap-shm-1', 'ap-circular-shm', '5.2', 'Simple harmonic motion, damping and resonance', 15, ['Oscillations', 'SHM'], [
+  L('ap-shm-1', 'ap-oscillations', '7.1', 'Simple harmonic motion, damping and resonance', 15, ['Oscillations', 'SHM'], [
     'An oscillation is **simple harmonic** when the acceleration is **proportional to the displacement** from equilibrium and **directed towards** it: **a = −ω²x**. The motion is then x = A sin ωt (or A cos ωt), where A is the **amplitude** and ω = 2πf. The **period** T = 2π/ω is independent of the amplitude.',
     'Velocity v = ±ω√(A² − x²): **greatest (ωA) at the equilibrium position**, zero at the extremes. Acceleration is **greatest (ω²A) at the extremes**, zero at the equilibrium position. On graphs against time, velocity is a quarter-cycle (π/2) ahead of displacement, and acceleration is in antiphase with displacement.',
     'Two standard systems: the **mass on a spring**, **T = 2π√(m/k)**; and the **simple pendulum** for small swings, **T = 2π√(l/g)**, which is why a pendulum measures g. The total energy E = ½mω²A² is constant and continually exchanged between kinetic and potential energy.',
@@ -147,7 +147,7 @@ export const LESSONS_L6 = [
   ]),
 
   // ---------- 6. Thermal physics ----------
-  L('ap-therm-1', 'ap-thermal', '6.1', 'Temperature, thermometers and internal energy', 13, ['Thermal physics', 'Temperature'], [
+  L('ap-therm-1', 'ap-thermal', '8.1', 'Temperature, thermometers and internal energy', 13, ['Thermal physics', 'Temperature'], [
     '**Temperature** decides the direction of heat flow: heat flows from higher to lower temperature until **thermal equilibrium** is reached. The **thermodynamic (kelvin) scale** has its zero at **absolute zero**, where the internal energy is least; T(K) = θ(°C) + 273.15. A change of 1 K equals a change of 1 °C. (On the Fahrenheit scale, F = 1.8θ + 32.)',
     'A thermometer uses a **thermometric property** that changes steadily with temperature: the length of a liquid column (liquid-in-glass), the resistance of a metal wire (**resistance thermometer**), the pressure of a gas at constant volume (**gas thermometer**, the standard), or the e.m.f. of two metal junctions (**thermocouple**). Different thermometers agree only at the fixed points, because their properties do not vary in exactly the same way.',
     'Choosing a thermometer: liquid-in-glass is cheap and direct but limited in range; the resistance thermometer is accurate over a wide range but slow (large heat capacity); the **thermocouple** has a tiny junction and small heat capacity, so it responds fast, can be read remotely and works up to very high temperatures (furnaces); the gas thermometer is very accurate but bulky, used for calibration.',
@@ -159,7 +159,7 @@ export const LESSONS_L6 = [
     { q: 'A platinum resistance thermometer has resistance 4.00 Ω at 0 °C and 5.50 Ω at 100 °C. Its resistance in a liquid is 4.90 Ω. Find the temperature on this scale.', steps: ['θ = (R − R₀) ÷ (R₁₀₀ − R₀) × 100.', '= (4.90 − 4.00) ÷ (5.50 − 4.00) × 100 = 0.90 ÷ 1.50 × 100.', '= **60 °C** on the platinum resistance scale.'] },
   ]),
 
-  L('ap-therm-2', 'ap-thermal', '6.2', 'Specific heat capacity, latent heat and heat transfer', 15, ['Thermal physics', 'Heat transfer'], [
+  L('ap-therm-2', 'ap-heat', '9.1', 'Specific heat capacity, latent heat and heat transfer', 15, ['Thermal physics', 'Heat transfer'], [
     'The **specific heat capacity** c is the energy needed to raise the temperature of 1 kg of a substance by 1 K: **Q = mcΔθ**. Water’s high value (4200 J kg⁻¹ K⁻¹) makes it a good coolant and moderates coastal climates. It is measured electrically: a heater supplies energy **VIt** to a lagged block or liquid, and c = VIt ÷ (mΔθ); in the **method of mixtures**, heat lost by a hot body = heat gained by the cold water and calorimeter.',
     'The **specific latent heat** l is the energy needed to change the state of 1 kg without a temperature change: **Q = ml**. For water, latent heat of fusion = 3.3 × 10⁵ J/kg and of vaporisation = 2.26 × 10⁶ J/kg. Vaporisation needs more energy than melting because the molecules must be separated completely and work is done pushing back the atmosphere.',
     'Heat travels by **conduction** (in solids: lattice vibrations, and free electrons in metals), **convection** (bulk movement of fluids caused by density differences), **radiation** (infrared electromagnetic waves, needing no medium) and **evaporation**. The rate of conduction through a slab is **Q/t = kA(θ₁ − θ₂)/x**, where k is the **thermal conductivity** (copper 385, glass 1, air 0.025 W m⁻¹ K⁻¹).',
@@ -172,7 +172,7 @@ export const LESSONS_L6 = [
   ]),
 
   // ---------- 7. Current electricity ----------
-  L('ap-elec-1', 'ap-current', '7.1', 'Charge, current, potential difference and resistance', 14, ['Electricity'], [
+  L('ap-elec-1', 'ap-current', '13.1', 'Charge, current, potential difference and resistance', 14, ['Electricity'], [
     '**Electric current** is the rate of flow of charge: **I = Q/t**, so one coulomb is one ampere-second. In metals the charge carriers are free electrons; in electrolytes and gases they are ions. The current in a conductor is I = **nAvq**, where n is the number of carriers per m³, A the cross-section, v the **drift velocity** (often less than 1 mm/s) and q the charge on each carrier.',
     '**Potential difference** is the energy transferred per unit charge from electrical to other forms: **V = W/Q**, so 1 V = 1 J/C. **Resistance** R = V/I, in ohms. **Ohm’s law**: the current in a metallic conductor is proportional to the p.d. across it, provided the temperature is constant. I-V graphs: a straight line through the origin for an ohmic resistor; a curve for a **filament lamp** (resistance rises as it heats); for a **diode**, current flows only above about 0.6 V in the forward direction.',
     'The resistance of a wire is **R = ρL/A**, where ρ is the **resistivity** of the material (copper 1.7 × 10⁻⁸ Ω m). The resistance of a metal rises with temperature, as vibrating ions obstruct the electrons; that of a **thermistor** (NTC) falls, as more charge carriers are freed.',
@@ -184,7 +184,7 @@ export const LESSONS_L6 = [
     { q: 'A 2.0 kW kettle runs on 220 V for 3 minutes. Find the current, its resistance and the energy used.', steps: ['I = P/V = 2000 ÷ 220 = **9.1 A**.', 'R = V/I = 220 ÷ 9.1 = **24 Ω** (or V²/P).', 'Energy = Pt = 2000 × 180 = **3.6 × 10⁵ J** (0.10 kWh).'] },
   ]),
 
-  L('ap-elec-2', 'ap-current', '7.2', 'E.m.f., internal resistance and Kirchhoff’s laws', 14, ['Electricity', 'Circuits'], [
+  L('ap-elec-2', 'ap-current', '13.2', 'E.m.f., internal resistance and Kirchhoff’s laws', 14, ['Electricity', 'Circuits'], [
     'The **electromotive force (e.m.f.)** of a source is the energy converted from other forms to electrical energy per unit charge passing through it. Real sources have **internal resistance r**, so some energy is wasted inside. **E = V + Ir**, so the terminal p.d. **V = E − Ir** falls as the current rises. Plotting V against I gives a straight line with intercept E and gradient −r.',
     '**Maximum power** is delivered to an external load when its resistance equals the internal resistance (R = r), but the efficiency is then only 50%. Car batteries have very small internal resistance so they can supply the large current to the starter motor.',
     '**Kirchhoff’s first law** (conservation of **charge**): the sum of currents into any junction equals the sum of currents out. **Kirchhoff’s second law** (conservation of **energy**): around any closed loop, the sum of the e.m.f.s equals the sum of the p.d.s (IR terms).',
@@ -196,7 +196,7 @@ export const LESSONS_L6 = [
     { q: 'When a cell drives 0.50 A, its terminal p.d. is 1.40 V; when it drives 1.0 A, the terminal p.d. is 1.30 V. Find its e.m.f. and internal resistance.', steps: ['E = V + Ir gives E = 1.40 + 0.50r and E = 1.30 + 1.0r.', 'Subtract: 0 = 0.10 − 0.50r, so r = **0.20 Ω**.', 'E = 1.40 + 0.50 × 0.20 = **1.50 V**.'] },
   ]),
 
-  L('ap-elec-3', 'ap-current', '7.3', 'Potential dividers, the potentiometer and the Wheatstone bridge', 14, ['Electricity', 'Practical'], [
+  L('ap-elec-3', 'ap-current', '13.3', 'Potential dividers, the potentiometer and the Wheatstone bridge', 14, ['Electricity', 'Practical'], [
     'A **potential divider** is two resistors in series across a supply; the output across one is **Vout = Vin × R₂/(R₁ + R₂)**. Replacing a resistor with a **thermistor** or an **LDR** makes a sensor circuit whose output changes with temperature or light, used to switch on fans, alarms or street lights.',
     'The **potentiometer** is a long uniform resistance wire carrying a steady current from a driver cell, so the p.d. along it is proportional to length. To measure an e.m.f., a jockey is moved along the wire until the galvanometer in the test circuit reads **zero (balance)**. Because no current flows from the cell under test at balance, the potentiometer measures its **e.m.f.** exactly, unlike a voltmeter. Comparing two cells: E₁/E₂ = l₁/l₂. It can also measure internal resistance: r = R(l₀ − l)/l.',
     'The **Wheatstone bridge** has four resistors P, Q, R and S with a galvanometer between the middle points. At balance no current flows through the galvanometer and **P/Q = R/S**. The **metre bridge** is a practical form using a 1 m wire: an unknown resistance X is found from X/R = l/(100 − l).',
@@ -209,7 +209,7 @@ export const LESSONS_L6 = [
   ]),
 
   // ---------- 8. Properties of matter ----------
-  L('ap-matter-1', 'ap-matter', '8.1', 'Elasticity: Hooke’s law, stress, strain and the Young modulus', 14, ['Matter', 'Elasticity'], [
+  L('ap-matter-1', 'ap-matter', '10.1', 'Elasticity: Hooke’s law, stress, strain and the Young modulus', 14, ['Matter', 'Elasticity'], [
     'In solids, atoms are held at an equilibrium separation where attractive and repulsive forces balance; the **force-separation** and **potential energy-separation** curves explain why solids resist both stretching and compression. Solids may be **crystalline** (regular lattice, metals), **amorphous** or **glassy** (no long-range order) or **polymeric** (long chain molecules, rubber).',
     '**Hooke’s law**: the extension of a spring or wire is proportional to the load, F = kx, up to the **limit of proportionality**. Beyond the **elastic limit** the material is permanently (plastically) deformed. Springs in series: 1/k = 1/k₁ + 1/k₂; in parallel: k = k₁ + k₂.',
     'To compare materials rather than particular samples: **stress** σ = F/A (Pa), **strain** ε = extension/original length (no units), and the **Young modulus E = stress/strain = FL/(Ax)**. It is measured by hanging loads on a long thin wire and measuring the extension with a vernier against a reference wire (Searle’s apparatus), the diameter with a micrometer at several places.',
@@ -221,7 +221,7 @@ export const LESSONS_L6 = [
     { q: 'A steel wire 2.0 m long with diameter 0.50 mm stretches 2.0 mm under a load of 40 N. Find the Young modulus.', steps: ['Cross-section: A = π(0.25 × 10⁻³)² = 1.96 × 10⁻⁷ m².', 'Stress = 40 ÷ 1.96 × 10⁻⁷ = 2.04 × 10⁸ Pa.', 'Strain = 2.0 × 10⁻³ ÷ 2.0 = 1.0 × 10⁻³.', 'E = stress ÷ strain = **2.0 × 10¹¹ Pa**, the usual value for steel.'] },
   ]),
 
-  L('ap-matter-2', 'ap-matter', '8.2', 'Density, pressure in fluids and surface tension', 13, ['Matter', 'Fluids'], [
+  L('ap-matter-2', 'ap-matter', '10.3', 'Density, pressure in fluids and surface tension', 13, ['Matter', 'Fluids'], [
     'The **kinetic model** explains the states: in solids molecules vibrate about fixed positions; in liquids they are still close but can move past each other, so liquids flow and are nearly incompressible; in gases they are far apart and move randomly at high speed. **Density** ρ = m/V; a gas is about a thousand times less dense than its liquid.',
     '**Pressure** is force per unit area, p = F/A, in pascals. In a fluid at rest, the pressure at depth h below the surface is **p = hρg** (plus atmospheric pressure at the surface), acting equally in all directions. This is the basis of manometers, barometers, hydraulic machines (pressure is transmitted equally through a liquid) and the need for thick dam walls.',
     'Molecules at a liquid surface are pulled inwards by their neighbours, so the surface behaves like a stretched skin with **surface tension** γ, the force per unit length acting along the surface (N/m). It explains spherical drops, insects walking on water and capillary rise. The excess pressure inside a drop is **2γ/r**, and inside a soap bubble (two surfaces) **4γ/r**. Surface tension **decreases as temperature rises** and is lowered by detergents.',
@@ -234,7 +234,7 @@ export const LESSONS_L6 = [
   ]),
 
   // ---------- 9. Gases and thermodynamics ----------
-  L('ap-gas-1', 'ap-gases', '9.1', 'The gas laws, the ideal gas equation and kinetic theory', 15, ['Gases', 'Kinetic theory'], [
+  L('ap-gas-1', 'ap-gases', '12.1', 'The gas laws, the ideal gas equation and kinetic theory', 15, ['Gases', 'Kinetic theory'], [
     'For a fixed mass of gas: **Boyle’s law**, pV = constant at constant temperature; **Charles’s law**, V/T = constant at constant pressure; the **pressure law**, p/T = constant at constant volume, with T in kelvin. Extrapolating V or p against θ to zero gives absolute zero, about −273 °C. Combined: pV/T = constant.',
     'An **ideal gas** obeys **pV = nRT** exactly, where n is the number of moles and R = 8.31 J mol⁻¹ K⁻¹. In terms of molecules, **pV = NkT**, where N is the number of molecules and the **Boltzmann constant** k = R/N_A = 1.38 × 10⁻²³ J K⁻¹. Real gases behave most like ideal gases at low pressure and high temperature.',
     'The **kinetic theory** assumes that a gas consists of a very large number of molecules in random motion, of negligible volume, with no forces between them except during collisions, which are perfectly elastic and of negligible duration. Each collision with a wall changes the molecule’s momentum; the force per unit area gives **pV = ⅓Nm⟨c²⟩**, where ⟨c²⟩ is the **mean square speed**.',
@@ -247,7 +247,7 @@ export const LESSONS_L6 = [
     { q: 'Find the r.m.s. speed of nitrogen molecules (M = 0.028 kg/mol) at 300 K.', steps: ['c(rms) = √(3RT/M) = √(3 × 8.31 × 300 ÷ 0.028).', '= √(2.67 × 10⁵).', '= **517 m/s**.'] },
   ]),
 
-  L('ap-gas-2', 'ap-gases', '9.2', 'Internal energy and the first law of thermodynamics', 14, ['Thermodynamics'], [
+  L('ap-gas-2', 'ap-gases', '12.2', 'Internal energy and the first law of thermodynamics', 14, ['Thermodynamics'], [
     'For an **ideal gas**, there are no intermolecular forces, so its internal energy is entirely the random kinetic energy of its molecules and depends **only on its temperature**: U = (3/2)nRT for a monatomic gas.',
     'The **first law of thermodynamics** is the conservation of energy applied to heat and work: **ΔU = Q + W**, where ΔU is the increase in internal energy, Q the heat supplied **to** the system and W the work done **on** the system. (Some books write ΔU = Q − W, with W the work done **by** the gas; be clear which convention is used.)',
     'When a gas expands at constant pressure, the work it does is **pΔV**; generally, work is the **area under the p-V graph**. Special changes: **isothermal** (constant temperature, ΔU = 0, so heat in = work done by the gas; slow changes in good thermal contact); **adiabatic** (no heat exchange, Q = 0: rapid compression warms the gas, as in a bicycle pump or a diesel engine; rapid expansion cools it, as when gas escapes from a cylinder); **isovolumetric** (constant volume, W = 0, ΔU = Q).',
