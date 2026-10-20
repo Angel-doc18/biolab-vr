@@ -21,7 +21,7 @@ const L = (id, unit, n, title, minutes, tags, body, figure, tip, check, terms, e
 
 export const LESSONS_U6 = [
   // ---------- 1. Gravitational fields ----------
-  L('ap-grav-1', 'ap-gravity', '1.1', 'Newton’s law of gravitation, field strength and potential', 14, ['Fields', 'Gravitation'], [
+  L('ap-grav-1', 'ap-gravity', '4.1', 'Newton’s law of gravitation, field strength and potential', 14, ['Fields', 'Gravitation'], [
     'A **field** is a region in which a body experiences a force. **Newton’s law of gravitation**: two point masses attract each other with a force proportional to the product of their masses and inversely proportional to the square of their separation: **F = Gm₁m₂/r²**, with G = 6.67 × 10⁻¹¹ N m² kg⁻². Spherical bodies such as planets act as if their mass were at their centre.',
     '**Gravitational field strength** g is the force per unit mass: g = F/m. Outside a sphere of mass M, **g = GM/r²**, an inverse-square law. Near the Earth’s surface g is about 9.8 N/kg; it decreases with height. Field lines point towards the mass; near the surface the field is nearly uniform.',
     '**Gravitational potential** V at a point is the work done per unit mass in bringing a small mass from infinity to that point: **V = −GM/r**. It is zero at infinity and **negative** everywhere else, because the field is attractive. The change in potential energy when a mass m moves between two points is mΔV; near the surface this reduces to mgΔh.',
@@ -33,7 +33,7 @@ export const LESSONS_U6 = [
     { q: 'Find the gravitational force between the Earth (6.0 × 10²⁴ kg) and the Moon (7.4 × 10²² kg), 3.8 × 10⁸ m apart.', steps: ['F = Gm₁m₂/r² = 6.67 × 10⁻¹¹ × 6.0 × 10²⁴ × 7.4 × 10²² ÷ (3.8 × 10⁸)².', 'Numerator = 2.96 × 10³⁷; denominator = 1.44 × 10¹⁷.', 'F = **2.1 × 10²⁰ N**.'] },
   ]),
 
-  L('ap-grav-2', 'ap-gravity', '1.2', 'Satellites, orbits and escape velocity', 14, ['Fields', 'Satellites'], [
+  L('ap-grav-2', 'ap-gravity', '4.2', 'Satellites, orbits and escape velocity', 14, ['Fields', 'Satellites'], [
     'A satellite in a circular orbit of radius r moves under gravity alone, which provides the centripetal force: **GMm/r² = mv²/r**, so **v = √(GM/r)**: higher orbits are slower. The period is T = 2πr/v, which leads to **T² = (4π²/GM) r³**, **Kepler’s third law** (T² ∝ r³), true for all bodies orbiting the same central mass.',
     'A **geostationary** satellite orbits above the equator, in the same direction as the Earth spins, with a **period of 24 hours**, so it stays above the same point. Its orbital radius is about 4.2 × 10⁷ m (about 36 000 km above the surface). These satellites carry television and communications; dish antennas in Cameroon point at fixed satellites. **Low polar orbits** (a period of about 90 minutes) are used for weather, mapping and observation, since the Earth turns beneath them.',
     'The total energy of an orbiting satellite is E = Ek + Ep = ½GMm/r − GMm/r = **−GMm/2r**. Astronauts feel weightless because they and their craft are in free fall together, not because gravity is absent.',
@@ -46,7 +46,7 @@ export const LESSONS_U6 = [
   ]),
 
   // ---------- 2. Electric fields and capacitors ----------
-  L('ap-efield-1', 'ap-electric', '2.1', 'Coulomb’s law, electric field strength and potential', 15, ['Fields', 'Electrostatics'], [
+  L('ap-efield-1', 'ap-electric', '1.1', 'Coulomb’s law, electric field strength and potential', 15, ['Fields', 'Electrostatics'], [
     'Charges exert forces on each other: like charges repel, unlike charges attract. **Coulomb’s law**: the force between two point charges is **F = Q₁Q₂/(4πε₀r²)**, where ε₀ = 8.85 × 10⁻¹² F/m is the permittivity of free space (1/(4πε₀) ≈ 9.0 × 10⁹ N m² C⁻²). Like gravity it is an inverse-square law, but much stronger and it can be attractive or repulsive.',
     '**Electric field strength** E is the force per unit positive charge: **E = F/Q** (N/C). For a point charge, **E = Q/(4πε₀r²)**, pointing away from positive and towards negative charge. Between two parallel plates with p.d. V and separation d, the field is **uniform**: **E = V/d** (V/m), with straight, parallel, equally spaced field lines.',
     '**Electric potential** V at a point is the work done per unit positive charge in bringing a charge from infinity to that point: for a point charge **V = Q/(4πε₀r)**, positive near a positive charge. The work done moving a charge q through a p.d. V is **W = qV**. Field strength is the negative potential gradient, E = −dV/dr; equipotentials are perpendicular to field lines.',
@@ -58,7 +58,7 @@ export const LESSONS_U6 = [
     { q: 'Find the electric field strength and potential 0.10 m from a point charge of +2.0 × 10⁻⁹ C.', steps: ['E = Q/(4πε₀r²) = 9.0 × 10⁹ × 2.0 × 10⁻⁹ ÷ 0.10² = **1800 N/C**, directed away from the charge.', 'V = Q/(4πε₀r) = 9.0 × 10⁹ × 2.0 × 10⁻⁹ ÷ 0.10 = **180 V**.'] },
   ]),
 
-  L('ap-cap-1', 'ap-electric', '2.2', 'Capacitors: capacitance, energy and discharge', 15, ['Capacitors'], [
+  L('ap-cap-1', 'ap-electric', '1.3', 'Capacitors: capacitance, energy and discharge', 15, ['Capacitors'], [
     'A **capacitor** stores charge on two conducting plates separated by an insulator (**dielectric**). When connected to a supply, equal and opposite charges +Q and −Q build up on the plates. **Capacitance** C = Q/V, in farads; practical capacitors are measured in μF, nF and pF. For a parallel-plate capacitor, **C = ε₀εᵣA/d**: larger plates, closer plates and a dielectric with higher relative permittivity εᵣ all increase C.',
     'The **energy stored** is the area under the Q-V graph: **W = ½QV = ½CV² = Q²/2C**. Capacitors in **parallel** add: C = C₁ + C₂; in **series**, 1/C = 1/C₁ + 1/C₂ (and each carries the same charge).',
     'When a charged capacitor **discharges** through a resistor R, the current, charge and p.d. all decay **exponentially**: **Q = Q₀e^(−t/RC)**. The **time constant** τ = RC is the time for the charge to fall to 1/e (37%) of its starting value; the half-life is 0.69RC. When **charging** through R, Q = Q₀(1 − e^(−t/RC)) and the current falls exponentially.',
@@ -71,7 +71,7 @@ export const LESSONS_U6 = [
   ]),
 
   // ---------- 3. Magnetism and induction ----------
-  L('ap-mag-1', 'ap-magnetic', '3.1', 'Magnetic fields and forces on currents and charges', 15, ['Magnetism'], [
+  L('ap-mag-1', 'ap-magnetic', '2.1', 'Magnetic fields and forces on currents and charges', 15, ['Magnetism'], [
     'Magnetic fields are produced by magnets and by **moving charges** (currents). Field patterns: concentric circles round a straight wire (right-hand grip rule); a field like a bar magnet’s from a **solenoid**, very uniform inside it. The field strength, **magnetic flux density** B, is measured in **teslas**. For a long straight wire B = μ₀I/(2πr); inside a long solenoid B = μ₀nI, where n is turns per metre and μ₀ = 4π × 10⁻⁷ H/m.',
     'A current-carrying conductor in a magnetic field feels a force **F = BIL sin θ**, greatest when the wire is at right angles to the field; its direction is given by **Fleming’s left-hand rule**. This is the principle of the **electric motor** and the moving-coil meter. Two parallel wires carrying currents in the same direction attract.',
     'A charge q moving at speed v at right angles to a field feels **F = Bqv**, always perpendicular to its velocity, so it moves in a **circle**: Bqv = mv²/r gives **r = mv/(Bq)**. This is used in mass spectrometers, cyclotrons and to deflect electron beams. In crossed electric and magnetic fields, only particles with v = E/B pass undeflected (a velocity selector).',
@@ -83,7 +83,7 @@ export const LESSONS_U6 = [
     { q: 'A 0.15 m wire carries 3.0 A at 60° to a uniform 0.40 T field. Find the force on it.', steps: ['F = BIL sin θ = 0.40 × 3.0 × 0.15 × sin 60°.', '= 0.18 × 0.866.', '= **0.16 N**, perpendicular to both the wire and the field.'] },
   ]),
 
-  L('ap-induct-1', 'ap-magnetic', '3.2', 'Electromagnetic induction, generators and transformers', 15, ['Induction'], [
+  L('ap-induct-1', 'ap-magnetic', '2.3', 'Electromagnetic induction, generators and transformers', 15, ['Induction'], [
     '**Magnetic flux** through an area A at right angles to a field B is **Φ = BA** (webers); for a coil of N turns, the **flux linkage** is NΦ. An e.m.f. is **induced** whenever the flux linking a circuit changes: a magnet moved into a coil, a coil rotating in a field, a conductor cutting field lines, or a changing current in a nearby coil.',
     '**Faraday’s law**: the induced e.m.f. is equal to the **rate of change of flux linkage**. **Lenz’s law**: the induced current flows in such a direction as to **oppose the change** that produces it; this is a consequence of the conservation of energy. Together: **E = −N dΦ/dt**. A straight rod of length L moving at speed v across a field B has E = BLv.',
     'An **a.c. generator** has a coil rotating at angular speed ω in a magnetic field; the flux linkage varies sinusoidally, and the e.m.f. is **E = BANω sin ωt**, with peak value BANω. The direction is given by **Fleming’s right-hand rule**. Most of Cameroon’s electricity comes from generators turned by water at the dams.',
@@ -96,7 +96,7 @@ export const LESSONS_U6 = [
   ]),
 
   // ---------- 4. Alternating currents ----------
-  L('ap-ac-1', 'ap-ac', '4.1', 'Alternating current: r.m.s. values, reactance and impedance', 14, ['a.c.'], [
+  L('ap-ac-1', 'ap-ac', '3.1', 'Alternating current: r.m.s. values, reactance and impedance', 14, ['a.c.'], [
     'An alternating current varies sinusoidally: **I = I₀ sin ωt**, with ω = 2πf. Its average over a cycle is zero, so we use the **root mean square (r.m.s.)** value: the steady current that would produce the **same heating effect** in a resistor. For a sinusoidal wave, **I(rms) = I₀/√2** and **V(rms) = V₀/√2**. The Cameroon mains is about 220 V r.m.s. at 50 Hz, so its peak is about 311 V.',
     'Mean power in a resistor: **P = I(rms)V(rms) = I(rms)²R = ½I₀²R**. Meters normally read r.m.s. values. On an oscilloscope, the peak voltage is read from the vertical sensitivity (V/div) and the period from the time base (ms/div), giving f = 1/T.',
     'In a **capacitor**, the current **leads** the p.d. by 90° (π/2), and the opposition to a.c. is its **reactance Xc = 1/(2πfC)**: it blocks d.c. and passes high frequencies easily. In an **inductor**, the current **lags** the p.d. by 90°, and its reactance **XL = 2πfL** increases with frequency. A pure capacitor or inductor uses no average power.',
@@ -108,7 +108,7 @@ export const LESSONS_U6 = [
     { q: 'A 100 Ω resistor and a capacitor of reactance 75 Ω are in series across a 220 V r.m.s. supply. Find the impedance, the current and the phase angle.', steps: ['Z = √(100² + 75²) = √15 625 = **125 Ω**.', 'I(rms) = 220 ÷ 125 = **1.76 A**.', 'tan φ = 75 ÷ 100 = 0.75, so φ = **37°** (the current leads the supply voltage).'] },
   ]),
 
-  L('ap-ac-2', 'ap-ac', '4.2', 'Rectification and smoothing', 12, ['a.c.', 'Electronics'], [
+  L('ap-ac-2', 'ap-ac', '3.3', 'Rectification and smoothing', 12, ['a.c.', 'Electronics'], [
     '**Rectification** converts a.c. into d.c. using **diodes**, which conduct in one direction only. **Half-wave rectification**: one diode in series with the load lets through only one half of each cycle; the output is unidirectional but pulsing, with large gaps, and half the power is lost.',
     '**Full-wave rectification** uses a **bridge rectifier** of four diodes: during each half-cycle two diodes conduct, and the current flows the same way through the load in both halves. The output is a series of positive half-sine pulses at twice the supply frequency (100 Hz from 50 Hz mains).',
     '**Smoothing**: a capacitor connected across the load charges up to the peak voltage and then discharges slowly through the load between peaks, filling the gaps. The variation left is the **ripple**. Smoothing is better (smaller ripple) when the **time constant RC is much greater than the time between peaks**: a larger capacitor or a larger load resistance.',
@@ -158,7 +158,7 @@ export const LESSONS_U6 = [
     { q: 'In a Young’s slit experiment, the slits are 0.50 mm apart and the screen is 1.2 m away. Ten fringe spacings measure 14.4 mm. Find the wavelength.', steps: ['Fringe spacing x = 14.4 ÷ 10 = 1.44 mm = 1.44 × 10⁻³ m.', 'λ = ax/D = 0.50 × 10⁻³ × 1.44 × 10⁻³ ÷ 1.2.', 'λ = **6.0 × 10⁻⁷ m** (600 nm, orange light).'] },
   ]),
 
-  L('ap-optics-1', 'ap-light', '6.2', 'Refraction, lenses and optical instruments', 14, ['Optics'], [
+  L('ap-optics-1', 'ap-light', '6.3', 'Refraction, lenses and optical instruments', 14, ['Optics'], [
     'Light travels in straight lines (rays). **Refraction** is the change of direction when light passes between media of different optical density, because its speed changes. **Snell’s law**: n₁ sin θ₁ = n₂ sin θ₂, and the refractive index of a medium n = c/v. When light goes from a denser to a less dense medium at more than the **critical angle** c (sin c = 1/n), it is **totally internally reflected**: used in optical fibres, endoscopes, prisms in binoculars and the sparkle of diamonds.',
     'Thin **lenses** form images. A **converging (convex)** lens brings parallel rays to a real **principal focus** F; a **diverging (concave)** lens spreads them as if from a virtual focus. The lens formula (real-is-positive convention) is **1/f = 1/u + 1/v**, and the linear **magnification m = v/u** = image height/object height. The **power** of a lens is P = 1/f (dioptres, f in metres).',
     'Images by a converging lens: object beyond 2F gives a real, inverted, diminished image (camera, eye); between F and 2F, a real, inverted, magnified image (projector); inside F, a virtual, upright, magnified image (**magnifying glass**). Ray diagrams use three rays: parallel to the axis then through F; through the optical centre undeviated; through F then parallel.',
