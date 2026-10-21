@@ -75,8 +75,8 @@ export const LESSONS_L6B = [
 
   // ---------- 10. Sequences and series ----------
   L('pm-seq-1', 'mm-l6-sequences', '10.1', 'Arithmetic and geometric progressions', 16, ['Sequences'], [
-    'An **arithmetic progression** (AP) adds a constant **common difference** d each time: a, a + d, a + 2d, … Its nth term is **uₙ = a + (n − 1)d** and the sum of the first n terms is **Sₙ = ½n(2a + (n − 1)d) = ½n(a + l)**, where l is the last term. Three numbers x, y, z are in AP when y − x = z − y, so the middle one is the average.',
-    'A **geometric progression** (GP) multiplies by a constant **common ratio** r: a, ar, ar², … Its nth term is **uₙ = arⁿ⁻¹** and the sum is **Sₙ = a(1 − rⁿ)/(1 − r)** (r ≠ 1). Three numbers are in GP when y/x = z/y, that is y² = xz.',
+    'An **arithmetic progression** (AP) adds a constant **common difference** d each time: a, a + d, a + 2d, … Its nth term is **uₙ = a + (n − 1)d** and the sum of the first n terms is **Sₙ = ½n(2a + (n − 1)d) = ½n(a + l)**, where l is the last term. Three numbers x, y, z are in AP when y − x = z − y, so the middle one is the **arithmetic mean** (x + z)/2 of the other two.',
+    'A **geometric progression** (GP) multiplies by a constant **common ratio** r: a, ar, ar², … Its nth term is **uₙ = arⁿ⁻¹** and the sum is **Sₙ = a(1 − rⁿ)/(1 − r)** (r ≠ 1). Three numbers are in GP when y/x = z/y, that is y² = xz, so the middle one is the **geometric mean** √(xz) (for positive terms).',
     'Problems usually give two facts that become two simultaneous equations in a and d (or a and r). To find how many terms are needed for a sum to exceed a value, solve an inequality; with a GP this needs logarithms: 2ⁿ > 1000 gives n > lg 1000 ÷ lg 2 = 9.97, so n = 10.',
     'Applications: savings with simple interest grow as an AP; with compound interest, as a GP (P(1 + i)ⁿ); depreciation of a machine by 15% a year is a GP with r = 0.85; the total length of a pattern of stacked tins or seats in rows is an AP sum.',
   ], 'am-ap-gp', 'AP: add d. GP: multiply by r. Write two facts as two equations.',

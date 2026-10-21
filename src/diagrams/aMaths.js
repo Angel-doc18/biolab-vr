@@ -14,6 +14,7 @@ import { Circle, G, Line, Path, Rect } from 'react-native-svg';
 import { Head, Txt } from './Diagram';
 import { columnsSpec, flowSpec } from './charts';
 
+export const AM = { O: '#33414d', GRID: '#e3e8ee', GREY: '#6b7a88', BLUE: '#1f6fb2', RED: '#c8463d', GREEN: '#2e7d32', AMBER: '#b9770e', PURPLE: '#7b4fa8', SHADE: '#dbe8f6', PINK: '#f8ddd9', CREAM: '#fbefd0' };
 const O = '#33414d';
 const GRID = '#e3e8ee';
 const GREY = '#6b7a88';
@@ -25,11 +26,11 @@ const PURPLE = '#7b4fa8';
 const SHADE = '#dbe8f6';
 const PINK = '#f8ddd9';
 const CREAM = '#fbefd0';
-const path = (pts) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
-const rad = (d) => (d * Math.PI) / 180;
+export const path = (pts) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+export const rad = (d) => (d * Math.PI) / 180;
 const PI = Math.PI;
 
-function Arrow({ x1, y1, x2, y2, c = O, w = 1.4, size = 6, dash }) {
+export function Arrow({ x1, y1, x2, y2, c = O, w = 1.4, size = 6, dash }) {
   const len = Math.hypot(x2 - x1, y2 - y1) || 1;
   return (
     <G>
@@ -39,31 +40,31 @@ function Arrow({ x1, y1, x2, y2, c = O, w = 1.4, size = 6, dash }) {
   );
 }
 
-function Dot({ x, y, c = O, r = 3, open }) {
+export function Dot({ x, y, c = O, r = 3, open }) {
   return <Circle cx={x} cy={y} r={r} fill={open ? '#ffffff' : c} stroke={c} strokeWidth={open ? 1.4 : 0} />;
 }
 
 // A small square marking a right angle at (x, y) between unit directions u and v.
-function RightAngle({ x, y, u, v, s = 7 }) {
+export function RightAngle({ x, y, u, v, s = 7 }) {
   const p1 = [x + u[0] * s, y + u[1] * s];
   const p2 = [x + (u[0] + v[0]) * s, y + (u[1] + v[1]) * s];
   const p3 = [x + v[0] * s, y + v[1] * s];
   return <Path d={path([p1, p2, p3])} stroke={O} strokeWidth={1} fill="none" />;
 }
-const unit = (dx, dy) => {
+export const unit = (dx, dy) => {
   const l = Math.hypot(dx, dy) || 1;
   return [dx / l, dy / l];
 };
 
 // A coordinate frame: (x, y) to the drawing, for x0 ≤ x ≤ x1 and y0 ≤ y ≤ y1.
-function frame({ left, top, ux, uy = ux, x0, x1, y0, y1 }) {
+export function frame({ left, top, ux, uy = ux, x0, x1, y0, y1 }) {
   const X = (x) => left + (x - x0) * ux;
   const Y = (y) => top + (y1 - y) * uy;
   return { X, Y, x0, x1, y0, y1 };
 }
 
 // The graph of fn between a and b, broken wherever it leaves the frame.
-function curve(f, fn, a, b, n = 200) {
+export function curve(f, fn, a, b, n = 200) {
   const segs = [];
   let cur = [];
   for (let i = 0; i <= n; i++) {
@@ -80,7 +81,7 @@ function curve(f, fn, a, b, n = 200) {
 
 // Grid lines at whole units, axes through the origin, numbered ticks and the
 // axis names. xs and ys are [value, text] pairs.
-function Axes({ f, xs = [], ys = [], grid = 1, xName = 'x', yName = 'y', origin = true, xLab }) {
+export function Axes({ f, xs = [], ys = [], grid = 1, xName = 'x', yName = 'y', origin = true, xLab }) {
   const { X, Y, x0, x1, y0, y1 } = f;
   const ax = Y(Math.min(Math.max(0, y0), y1));
   const ay = X(Math.min(Math.max(0, x0), x1));
@@ -130,11 +131,11 @@ function Axes({ f, xs = [], ys = [], grid = 1, xName = 'x', yName = 'y', origin 
     </G>
   );
 }
-const ticks = (vals) => vals.map((v) => [v, v < 0 ? `−${-v}` : `${v}`]);
+export const ticks = (vals) => vals.map((v) => [v, v < 0 ? `−${-v}` : `${v}`]);
 
 // A matrix in brackets with its top-left corner at (x, y). `hl` lists cells
 // [row, col] to shade; `bar` draws the augmented-matrix bar before that column.
-function Matrix({ x, y, rows, cw = 24, ch = 18, size = 9.5, hl = [], hlFill = CREAM, bar, italic }) {
+export function Matrix({ x, y, rows, cw = 24, ch = 18, size = 9.5, hl = [], hlFill = CREAM, bar, italic }) {
   const h = rows.length * ch;
   const w = 16 + rows[0].length * cw;
   return (

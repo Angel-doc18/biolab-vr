@@ -182,11 +182,11 @@ export const LESSONS_L6C = [
     { q: 'Show that x³ − 3x + 1 = 0 has a root between 0 and 1.', steps: ['f(0) = 1 > 0 and f(1) = 1 − 3 + 1 = −1 < 0.', 'f is a polynomial, so it is continuous on [0, 1].', 'The sign changes, so by the intermediate value theorem **there is a root between 0 and 1**.'] },
   ]),
 
-  // ---------- 21. Revision ----------
-  L('pm-l6-paper1', 'mm-l6-papers', '21.1', 'The A Level mathematics papers and Paper 1 drills', 13, ['Examination'], [
+  // ---------- 24. Revision ----------
+  L('pm-l6-paper1', 'mm-l6-papers', '24.1', 'The A Level mathematics papers and Paper 1 drills', 13, ['Examination'], [
     'Pure Mathematics is examined within GCE **Pure Mathematics with Mechanics (0765)** and **Pure Mathematics with Statistics (0770)**. Each has three papers: **Paper 1** (1½ hours, multiple choice) and **Papers 2 and 3** (3 hours each, structured questions). In June 2026, Paper 1 of both subjects was sat on Thursday 11 June, and Papers 2 and 3 on Friday 12 June. Check your school’s past papers for how the questions are shared between pure and applied topics.',
     'Multiple-choice technique in mathematics:\n- work the answer out on rough paper, then match it\n- **test the options**: substitute a simple value such as x = 0, 1 or 2 into an identity or a general formula to eliminate wrong options\n- check the sign and the interval in inequalities and trigonometric equations\n- use the discriminant, the factor theorem or det = 0 rather than solving fully when only a condition is asked for.',
-    'Lower Sixth topics to drill: quadratics and the discriminant, moduli, the factor and remainder theorems, partial fractions, logic and truth tables, lines and circles, logarithms, functions and inverses, sequences and series, the binomial theorem, radians and identities, matrices, counting, vectors and limits.',
+    'Lower Sixth topics to drill: quadratics and the discriminant, moduli, the factor and remainder theorems, partial fractions, logic and truth tables, lines and circles, logarithms, functions and inverses, sequences and series, the binomial theorem, radians and identities, matrices, counting, vectors, limits, derivatives and integrals.',
     'Practise in timed sets of 10 items, allowing a little over 2 minutes per item, and record the idea behind every mistake.',
   ], 'am-gce-maths', 'Test the options with a simple value of x.',
   ['An option for the expansion of (1 + x)⁻² is 1 − 2x + 3x². Testing with x = 0.1 gives:', ['1.0 − 0.2 + 0.03 = 0.83, close to 1/1.21 = 0.826, so it is plausible', 'a negative number, so it is wrong', 'exactly 1', 'no information'], 'A quick numerical check.'],
@@ -195,7 +195,7 @@ export const LESSONS_L6C = [
     { q: 'Item: if (x − 2) is a factor of x³ − kx + 2, then k = A 3, B 5, C 4, D 1.', steps: ['f(2) = 8 − 2k + 2 = 0.', '10 = 2k, so k = 5.', '**Answer B**.'] },
   ]),
 
-  L('pm-l6-paper2', 'mm-l6-papers', '21.2', 'Paper 2 practice: long answers, proofs and vectors', 15, ['Examination'], [
+  L('pm-l6-paper2', 'mm-l6-papers', '24.2', 'Paper 2 practice: long answers, proofs and vectors', 15, ['Examination'], [
     'Long questions build in steps: an early part often gives a result to be used "hence" in a later part. If you cannot prove a given result, **use it anyway** in the next part: the later marks are still available.',
     'Setting out: write every line of working; state the method ("using the factor theorem", "by the remainder theorem", "expanding along the first row"); keep exact values (surds, π, fractions) unless a decimal answer is asked for; give angles in the unit asked (degrees or radians).',
     'Proofs: in induction, write the four parts (base case, assumption, step, conclusion); in identities, start from one side and finish at the other; in "show that" questions, the final line must match the given result exactly.',

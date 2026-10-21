@@ -46,6 +46,7 @@ import { CHEMISTRY_U6B } from './chemistryU6b';
 import { PHYSICS_L6 } from './physicsL6';
 import { PHYSICS_U6 } from './physicsU6';
 import { A_MATHS } from './aMaths';
+import { A_MATHS_2 } from './aMaths2';
 import { LOGIC_2 } from './logic2';
 import { COMPUTER } from './computer';
 import { GEOGRAPHY } from './geography';
@@ -66,7 +67,7 @@ import { PHYSICS_4 } from './physics4';
 import { PHYSICS_A } from './physicsA';
 import { FACTS } from './facts';
 
-const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...MATHS_3, ...ENGLISH, ...ENGLISH_2, ...FRENCH, ...FRENCH_2, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...LOGIC_2, ...A_BIOLOGY, ...A_BIOLOGY_2, ...CHEMISTRY_L6, ...CHEMISTRY_L6B, ...CHEMISTRY_U6, ...CHEMISTRY_U6B, ...PHYSICS_L6, ...PHYSICS_U6, ...A_MATHS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
+const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...MATHS_3, ...ENGLISH, ...ENGLISH_2, ...FRENCH, ...FRENCH_2, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...LOGIC_2, ...A_BIOLOGY, ...A_BIOLOGY_2, ...CHEMISTRY_L6, ...CHEMISTRY_L6B, ...CHEMISTRY_U6, ...CHEMISTRY_U6B, ...PHYSICS_L6, ...PHYSICS_U6, ...A_MATHS, ...A_MATHS_2, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
 export const DIAGRAMS = Object.fromEntries(Object.entries(ALL).map(([k, s]) => [k, FACTS[k] && !s.facts ? { ...s, facts: FACTS[k] } : s]));
 
 // The parts the tutor teaches, in order: each named label (these light up on the
