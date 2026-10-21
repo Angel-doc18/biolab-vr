@@ -23,13 +23,14 @@ import { LESSONS as GEOLOGY } from './geology/lessons';
 import { LESSONS as LOGIC } from './logic/lessons';
 import { LESSONS as A_MATHS } from './a-maths/lessons';
 import { LESSONS as A_MATHS_MECH } from './a-maths-mech/lessons';
+import { LESSONS as A_MATHS_STAT } from './a-maths-stat/lessons';
 import { LESSON_QUESTIONS } from './lessonQuestions';
 import { unitById } from './units';
 
 // Each lesson carries its own end-of-lesson questions (`quiz`) where extra ones
 // have been written for it.
 const withQuestions = (l) => (LESSON_QUESTIONS[l.id] ? { ...l, quiz: [...(l.quiz || []), ...LESSON_QUESTIONS[l.id]] } : l);
-export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...A_MATHS, ...A_MATHS_MECH].map(withQuestions);
+export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...A_MATHS, ...A_MATHS_MECH, ...A_MATHS_STAT].map(withQuestions);
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));
 const byUnit = new Map();

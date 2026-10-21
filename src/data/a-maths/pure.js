@@ -19,9 +19,11 @@ export const PURE_GROUPS = [
 const PURE = [...PURE_L6.map((t) => ({ ...t, form: 'Lower Sixth', vr: null })), ...PURE_U6.map((t) => ({ ...t, form: 'Upper Sixth', vr: null }))];
 
 // `revised` places Lower Sixth topics in the Upper Sixth as well, where a
-// subject's scheme revises them: { key: { n, term, seq } }.
-export const pureUnits = (prefix, revised = {}) =>
-  PURE.map(({ key, ...t }) => ({ id: `${prefix}-${key}`, ...t, ...(revised[key] ? { alsoIn: { 'Upper Sixth': revised[key] } } : {}) }));
+// subject's scheme revises them: { key: { n, term, seq } }. `places` moves a
+// topic within its own class where a subject's scheme teaches it at another
+// time: { key: { n, term, seq } }.
+export const pureUnits = (prefix, revised = {}, places = {}) =>
+  PURE.map(({ key, ...t }) => ({ id: `${prefix}-${key}`, ...t, ...(places[key] || {}), ...(revised[key] ? { alsoIn: { 'Upper Sixth': revised[key] } } : {}) }));
 
 // Topics that belong to one subject only (its applied mathematics).
 export const ownUnits = (prefix, list, form) => list.map(({ key, ...t }) => ({ id: `${prefix}-${key}`, form, vr: null, ...t }));
