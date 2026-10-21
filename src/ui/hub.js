@@ -26,6 +26,8 @@ export const SUBJECT_LOOK = {
   'a-biology': { icon: 'genetics', tint: '#24613d', bg: '#dcebe1' },
   'a-chemistry': { icon: 'experiment', tint: '#5e3591', bg: '#e6dcf4' },
   'a-physics': { icon: 'electric_bolt', tint: '#17548a', bg: '#d9e6f4' },
+  'a-maths-mech': { icon: 'functions', tint: '#0b5b55', bg: '#d6ebe8' },
+  'a-maths-stat': { icon: 'query_stats', tint: '#0b5b55', bg: '#d6ebe8' },
 };
 const look = (id) => SUBJECT_LOOK[id] || SUBJECT_LOOK.biology;
 

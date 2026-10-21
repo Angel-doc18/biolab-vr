@@ -1,0 +1,261 @@
+// Extra questions for the end of A Level Pure Mathematics lessons, so that every
+// lesson ends with at least five questions on what it teaches.
+//
+// Convention: the correct option is written first; options are shuffled when shown.
+
+const Q = (q, a, why) => ({ q, a, why });
+
+export const LESSON_QUESTIONS = {
+  'pm-quad-1': [
+    Q('The vertex of y = (x + 2)² − 5 is:', ['(−2, −5)', '(2, −5)', '(−2, 5)', '(2, 5)'], 'a(x − p)² + q has vertex (p, q).'),
+    Q('If Δ = 0, the graph of a quadratic:', ['touches the x-axis at one point', 'cuts it twice', 'misses it', 'is a straight line'], 'One repeated root.'),
+    Q('An equation with roots 2 and −5 is:', ['x² + 3x − 10 = 0', 'x² − 3x − 10 = 0', 'x² + 3x + 10 = 0', 'x² − 7x + 10 = 0'], 'Sum −3, product −10.'),
+    Q('For 3x² + 6x − 1 = 0, αβ equals:', ['−⅓', '−2', '⅓', '2'], 'c/a.'),
+  ],
+  'pm-quad-2': [
+    Q('x² > 9 means:', ['x < −3 or x > 3', '−3 < x < 3', 'x > 3 only', 'x > 9'], 'Outside the roots ±3.'),
+    Q('In a sign diagram, a factor (x − a) changes sign at:', ['x = a', 'x = −a', 'x = 0', 'it never changes sign'], 'Negative before a, positive after.'),
+    Q('Why must you not multiply both sides of an inequality by (x − 2)?', ['it may be negative, which would reverse the inequality', 'it is zero', 'it is too long', 'it changes x'], 'Use a sign diagram instead.'),
+    Q('The solution of (x − 4)/(x + 1) ≤ 0 is:', ['−1 < x ≤ 4', '−1 ≤ x ≤ 4', 'x ≤ −1 or x ≥ 4', 'x < 4'], 'x = −1 is excluded.'),
+  ],
+  'pm-poly-1': [
+    Q('|−7| equals:', ['7', '−7', '0', '49'], 'Distance from zero.'),
+    Q('|x| = −2 has:', ['no solutions', 'x = −2', 'x = ±2', 'x = 2'], 'A modulus is never negative.'),
+    Q('The graph of y = |x − 2| has its vertex at:', ['(2, 0)', '(−2, 0)', '(0, 2)', '(0, −2)'], 'Where x − 2 = 0.'),
+    Q('To solve |f(x)| = |g(x)| you can:', ['square both sides', 'take logs', 'divide by x', 'differentiate'], 'Both sides are non-negative.'),
+  ],
+  'pm-poly-2': [
+    Q('The remainder when x² + 3x + 5 is divided by (x + 1) is:', ['3', '9', '5', '1'], 'f(−1) = 1 − 3 + 5.'),
+    Q('If f(3) = 0, then a factor of f(x) is:', ['(x − 3)', '(x + 3)', '(3x)', '(x − ⅓)'], 'The factor theorem.'),
+    Q('A cubic with roots 1, 2 and −1 and leading coefficient 1 is:', ['(x − 1)(x − 2)(x + 1)', '(x + 1)(x + 2)(x − 1)', '(x − 1)(x + 2)(x + 1)', 'x³ − 2'], 'Each root a gives a factor (x − a).'),
+    Q('Before long division of x³ + 5 by (x − 1), write the dividend as:', ['x³ + 0x² + 0x + 5', 'x³ + 5x', 'x² + 5', 'x³ − 5'], 'Keep the missing powers.'),
+  ],
+  'pm-pf-1': [
+    Q('Partial fractions reverse the process of:', ['adding algebraic fractions', 'differentiating', 'expanding brackets', 'factorising numbers'], 'They split a fraction back up.'),
+    Q('In x/((x + 1)(x + 2)) = A/(x + 1) + B/(x + 2), B equals:', ['2', '−1', '1', '−2'], 'Put x = −2: −2 = −B.'),
+    Q('A repeated factor (x + 3)² needs how many partial fractions?', ['2', '1', '3', '4'], 'A/(x + 3) + B/(x + 3)².'),
+    Q('A quick check on partial fractions is to:', ['substitute a value of x into both forms', 'differentiate both', 'square both', 'multiply by zero'], 'Both sides must agree.'),
+  ],
+  'pm-pf-2': [
+    Q('x² + 4 is irreducible because:', ['its discriminant is negative', 'it is even', 'it has a constant', 'it is squared'], '0 − 16 < 0.'),
+    Q('For (x² + 3)/((x − 1)(x² + 1)), the total number of constants is:', ['3', '2', '4', '1'], 'Degree of the denominator.'),
+    Q('(2x² + 3x)/(x² − 1) must first be:', ['divided, since it is improper', 'split directly', 'squared', 'inverted'], 'Equal degrees.'),
+    Q('The partial fraction for an irreducible quadratic factor has a numerator of the form:', ['Ax + B', 'A', 'Ax²', 'A/x'], 'One degree less.'),
+  ],
+  'pm-logic-1': [
+    Q('With three propositions, a truth table has:', ['8 rows', '6 rows', '3 rows', '9 rows'], '2³.'),
+    Q('p ∨ q is false only when:', ['both p and q are false', 'p is false', 'q is false', 'both are true'], 'Disjunction.'),
+    Q('The inverse of p ⇒ q is:', ['¬p ⇒ ¬q', '¬q ⇒ ¬p', 'q ⇒ p', 'p ⇒ ¬q'], 'Not equivalent to the original.'),
+    Q('p ⇔ q is true when:', ['p and q have the same truth value', 'p is true only', 'q is false only', 'they differ'], 'If and only if.'),
+  ],
+  'pm-logic-2': [
+    Q('n² + n + 41 is not always prime: a counter-example is:', ['n = 40', 'n = 1', 'n = 2', 'n = 10'], '40² + 40 + 41 = 41².'),
+    Q('Proving √2 is irrational uses:', ['proof by contradiction', 'induction', 'a counter-example', 'a truth table'], 'Assume √2 = p/q in lowest terms.'),
+    Q('In an induction proof, the inductive hypothesis is:', ['the assumption that the result holds for n = k', 'the base case', 'the conclusion', 'a counter-example'], 'It is used to prove n = k + 1.'),
+    Q('An induction proof is incomplete if it lacks:', ['the conclusion sentence', 'a diagram', 'a calculator', 'a table'], 'Every part carries marks.'),
+  ],
+  'pm-line-1': [
+    Q('The gradient of a line perpendicular to one of gradient ⅔ is:', ['−3/2', '3/2', '−⅔', '⅔'], 'Negative reciprocal.'),
+    Q('The line y = 3 is:', ['horizontal', 'vertical', 'through the origin', 'of gradient 3'], 'Gradient 0.'),
+    Q('Points (1, 1), (2, 3), (3, 5) are:', ['collinear', 'a right-angled triangle', 'on a circle centred at the origin', 'equally far from (0, 0)'], 'Both gradients are 2.'),
+    Q('The equation of the line through (0, 4) with gradient −2 is:', ['y = −2x + 4', 'y = 4x − 2', 'y = −2x − 4', 'y = 2x + 4'], 'y = mx + c.'),
+  ],
+  'pm-line-2': [
+    Q('The distance from (1, 2) to the line x = 5 is:', ['4', '5', '3', '2'], 'Horizontal distance.'),
+    Q('If 1 + m₁m₂ = 0, the lines are:', ['perpendicular', 'parallel', 'the same', 'at 45°'], 'm₁m₂ = −1.'),
+    Q('The distance from (0, 0) to 4x − 3y + 15 = 0 is:', ['3', '5', '15', '4'], '15 ÷ 5.'),
+    Q('The distance between y = 2x + 1 and y = 2x + 6 is:', ['√5', '5', '1', '5/√2'], 'Write as 2x − y + 1 = 0 and 2x − y + 6 = 0: 5 ÷ √5.'),
+  ],
+  'pm-circle-1': [
+    Q('The centre of x² + y² − 10y = 0 is:', ['(0, 5)', '(0, −5)', '(5, 0)', '(10, 0)'], '2f = −10.'),
+    Q('The point (3, 4) lies on the circle:', ['x² + y² = 25', 'x² + y² = 7', 'x² + y² = 5', 'x² + y² = 49'], '9 + 16.'),
+    Q('A circle has centre (1, −2) and passes through (4, 2). Its radius is:', ['5', '3', '4', '25'], '√(9 + 16).'),
+    Q('x² + y² + 2gx + 2fy + c = 0 is a real circle only if:', ['g² + f² − c > 0', 'c > 0', 'g = f', 'c = 0'], 'The radius squared must be positive.'),
+  ],
+  'pm-circle-2': [
+    Q('The normal to a circle at a point passes through:', ['the centre', 'the origin always', 'the tangent point only', 'nowhere'], 'It lies along the radius.'),
+    Q('If the distance from the centre to a line is less than the radius, the line:', ['cuts the circle twice', 'touches it', 'misses it', 'is a diameter always'], 'It is a secant.'),
+    Q('Two circles with radii 3 and 5 and centres 8 apart:', ['touch externally', 'touch internally', 'do not meet', 'cut twice'], '3 + 5 = 8.'),
+    Q('The tangent to x² + y² = 25 at (3, 4) is:', ['3x + 4y = 25', '4x + 3y = 25', '3x − 4y = 25', 'y = 4'], 'Perpendicular to the radius of gradient 4/3.'),
+  ],
+  'pm-log-1': [
+    Q('16^(3/4) equals:', ['8', '12', '64', '4'], '(⁴√16)³ = 2³.'),
+    Q('√12 + √27 simplifies to:', ['5√3', '√39', '13√3', '6√3'], '2√3 + 3√3.'),
+    Q('The conjugate of 4 − √5 is:', ['4 + √5', '−4 + √5', '−4 − √5', '√5 − 4'], 'Change the sign of the surd.'),
+    Q('a⁰ equals (a ≠ 0):', ['1', '0', 'a', 'undefined'], 'aⁿ ÷ aⁿ.'),
+  ],
+  'pm-log-2': [
+    Q('ln e equals:', ['1', '0', 'e', '10'], 'e¹ = e.'),
+    Q('2 log 3 + log 4 equals:', ['log 36', 'log 24', 'log 10', 'log 12'], 'log 9 + log 4.'),
+    Q('log(x + y) equals:', ['no simpler expression in general', 'log x + log y', 'log x × log y', 'log xy'], 'There is no such law.'),
+    Q('To reduce y = abˣ to a straight line, plot:', ['lg y against x', 'lg y against lg x', 'y against x', 'y against lg x'], 'lg y = x lg b + lg a.'),
+  ],
+  'pm-set-1': [
+    Q('The empty set has how many subsets?', ['1', '0', '2', 'infinitely many'], 'Only itself.'),
+    Q('(A ∪ B)′ equals:', ['A′ ∩ B′', 'A′ ∪ B′', 'A ∩ B', 'A ∪ B'], 'De Morgan.'),
+    Q('ℚ is the set of:', ['rational numbers', 'real numbers', 'integers', 'natural numbers'], 'Fractions p/q.'),
+    Q('(1, 2) and (2, 1) are:', ['different ordered pairs', 'the same ordered pair', 'sets', 'not in ℝ²'], 'Order matters in pairs.'),
+  ],
+  'pm-set-2': [
+    Q('A relation that is reflexive, antisymmetric and transitive is:', ['an order relation', 'an equivalence relation', 'a function', 'empty'], 'For example ≤.'),
+    Q('Congruence of triangles is:', ['an equivalence relation', 'not symmetric', 'not reflexive', 'an order relation'], 'All three properties hold.'),
+    Q('In an arrow diagram of a mapping, each element of the domain has:', ['exactly one arrow leaving it', 'at least two arrows', 'no arrows', 'arrows coming in only'], 'One image each.'),
+    Q('Equivalence classes of an equivalence relation:', ['do not overlap and cover the whole set', 'always overlap', 'are all the same', 'are empty'], 'A partition.'),
+  ],
+  'pm-func-1': [
+    Q('The largest domain of f(x) = √(4 − x) is:', ['x ≤ 4', 'x ≥ 4', 'x > 0', 'all real x'], '4 − x ≥ 0.'),
+    Q('cos x is:', ['an even function', 'an odd function', 'neither', 'not periodic'], 'cos(−x) = cos x.'),
+    Q('y = 2f(x) is y = f(x):', ['stretched by factor 2 parallel to the y-axis', 'stretched parallel to the x-axis', 'moved up 2', 'moved right 2'], 'Every y-value doubles.'),
+    Q('If f(x) = x + 3 and g(x) = 2x, then gf(1) is:', ['8', '5', '7', '6'], 'f(1) = 4, g(4) = 8.'),
+  ],
+  'pm-func-2': [
+    Q('A horizontal line meets the graph of an injective function:', ['at most once', 'exactly twice', 'never', 'at least twice'], 'The horizontal line test.'),
+    Q('The domain of f⁻¹ is:', ['the range of f', 'the domain of f', 'all real numbers', 'the codomain always'], 'Inputs and outputs swap.'),
+    Q('f(x) = x³ on ℝ is:', ['bijective', 'not injective', 'not surjective', 'constant'], 'Every real number is the cube of exactly one real number.'),
+    Q('The inverse of f(x) = 1/x (x ≠ 0) is:', ['1/x itself', 'x', '−1/x', 'x²'], 'f is its own inverse.'),
+  ],
+  'pm-seq-1': [
+    Q('The sum of the first 10 odd numbers is:', ['100', '50', '90', '110'], 'n² for n odd numbers.'),
+    Q('The 6th term of 3, 6, 12, … is:', ['96', '48', '192', '36'], '3 × 2⁵.'),
+    Q('If 2, x, 18 are in GP, x can be:', ['6 or −6', '10', '9', '6 only'], 'x² = 36.'),
+    Q('If 4, x, 10 are in AP, x is:', ['7', '6', '8', '40'], 'The average.'),
+  ],
+  'pm-seq-2': [
+    Q('A GP with r = 2:', ['has no sum to infinity', 'converges', 'has sum a/(1 − 2)', 'is an AP'], '|r| ≥ 1.'),
+    Q('0.333… equals:', ['1/3', '3/10', '33/100', '3/9 + 1'], '0.3 ÷ 0.9.'),
+    Q('A sequence 1, −1, 1, −1, … is:', ['periodic', 'convergent', 'increasing', 'an AP'], 'It repeats every 2 terms.'),
+    Q('uₙ₊₁ = 2uₙ + 1 with u₁ = 1 gives u₃ =', ['7', '5', '3', '9'], 'u₂ = 3, u₃ = 7.'),
+  ],
+  'pm-sum-1': [
+    Q('Σ (r = 1 to 5) (2r + 1) equals:', ['35', '30', '25', '40'], '2 × 15 + 5.'),
+    Q('The number of terms in Σ (r = 4 to 12) is:', ['9', '8', '12', '4'], '12 − 4 + 1.'),
+    Q('Σ (r = 1 to n) 2r equals:', ['n(n + 1)', 'n²', '2n', 'n(n − 1)'], '2 × ½n(n + 1).'),
+    Q('Σ (r = 1 to 3) r³ equals:', ['36', '14', '27', '6'], '1 + 8 + 27.'),
+  ],
+  'pm-sum-2': [
+    Q('The harmonic series 1 + ½ + ⅓ + … :', ['diverges', 'converges to 2', 'converges to 1', 'converges to e'], 'Its terms tend to 0, but it still diverges.'),
+    Q('1/(r(r + 2)) in partial fractions is:', ['½(1/r − 1/(r + 2))', '1/r − 1/(r + 2)', '2(1/r − 1/(r + 2))', '1/r + 1/(r + 2)'], 'Check with r = 1: ⅓.'),
+    Q('Σ (r = 1 to ∞) 1/(r(r + 2)) equals:', ['¾', '1', '½', '2'], '½(1 + ½).'),
+    Q('Terms of a series tending to zero is:', ['necessary but not sufficient for convergence', 'sufficient for convergence', 'never true for convergent series', 'irrelevant'], 'The harmonic series is the counter-example.'),
+  ],
+  'pm-bin-1': [
+    Q('6C3 equals:', ['20', '120', '18', '15'], '6!/(3! 3!).'),
+    Q('The sum of the coefficients of (1 + x)⁵ is:', ['32', '25', '10', '5'], 'Put x = 1: 2⁵.'),
+    Q('The 3rd term of (1 + x)⁷ is:', ['21x²', '7x²', '35x²', '21x³'], 'r = 2: 7C2 x².'),
+    Q('nC1 equals:', ['n', '1', 'n − 1', 'n!'], 'Choose one of n.'),
+  ],
+  'pm-bin-2': [
+    Q('(1 + x)^½ expanded starts:', ['1 + ½x − ⅛x²', '1 + ½x + ⅛x²', '1 − ½x', '1 + x + x²'], 'n(n − 1)/2 = −⅛.'),
+    Q('(2 + x)⁻¹ is first written as:', ['½(1 + x/2)⁻¹', '2(1 + x)⁻¹', '(1 + 2x)⁻¹', '½(1 + 2x)⁻¹'], 'Take out 2⁻¹.'),
+    Q('The expansion of (2 + x)⁻¹ is valid for:', ['|x| < 2', '|x| < 1', '|x| < ½', 'all x'], '|x/2| < 1.'),
+    Q('The coefficient of x in (1 − x)⁻³ is:', ['3', '−3', '1', '6'], '(−3)(−x).'),
+  ],
+  'pm-rad-1': [
+    Q('2π/3 radians in degrees is:', ['120°', '60°', '240°', '150°'], '2 × 60°.'),
+    Q('1 radian is about:', ['57.3°', '60°', '45°', '90°'], '180° ÷ π.'),
+    Q('For small θ in radians, sin θ ≈', ['θ', '1', '1 − θ', 'θ²'], 'Small-angle approximation.'),
+    Q('An arc of length 10 cm on a circle of radius 4 cm subtends:', ['2.5 rad', '40 rad', '0.4 rad', '5 rad'], 'θ = s/r.'),
+  ],
+  'pm-rad-2': [
+    Q('The range of cos⁻¹ x is:', ['0 to π', '−π/2 to π/2', '0 to 2π', '−π to π'], 'Principal values.'),
+    Q('y = sin x has maximum value 1 at x =', ['π/2', '0', 'π', '3π/2'], 'Between 0 and 2π.'),
+    Q('sec x is undefined when:', ['cos x = 0', 'sin x = 0', 'tan x = 0', 'x = 0'], 'sec x = 1/cos x.'),
+    Q('y = sin(x + π/2) is the same as:', ['cos x', '−sin x', '−cos x', 'tan x'], 'A shift of π/2 left.'),
+  ],
+  'pm-trig-1': [
+    Q('tan(A + B) equals:', ['(tan A + tan B)/(1 − tan A tan B)', 'tan A + tan B', '(tan A − tan B)/(1 + tan A tan B)', 'tan A tan B'], 'Compound angle formula.'),
+    Q('sin²A expressed with cos 2A is:', ['½(1 − cos 2A)', '½(1 + cos 2A)', '1 − cos 2A', 'cos 2A − 1'], 'From cos 2A = 1 − 2 sin²A.'),
+    Q('1 + cot²θ equals:', ['cosec²θ', 'sec²θ', 'tan²θ', 'sin²θ'], 'Divide by sin²θ.'),
+    Q('sin 2A at A = 30° equals:', ['√3/2', '½', '1', '√3'], '2 × ½ × √3/2.'),
+  ],
+  'pm-trig-2': [
+    Q('cos θ = −½ for 0° ≤ θ < 360° gives:', ['120° and 240°', '60° and 300°', '120° only', '150° and 210°'], 'Cosine negative in the 2nd and 3rd quadrants.'),
+    Q('Dividing sin θ cos θ = sin θ by sin θ can lose the solutions of:', ['sin θ = 0', 'cos θ = 1', 'tan θ = 1', 'nothing'], 'Factorise instead.'),
+    Q('In a cos θ + b sin θ = R cos(θ − α), tan α equals:', ['b/a', 'a/b', 'ab', 'a + b'], 'R sin α = b, R cos α = a.'),
+    Q('The minimum value of 5 cos(θ − α) is:', ['−5', '0', '5', '−1'], 'Cosine has minimum −1.'),
+  ],
+  'pm-mat-1': [
+    Q('Matrices can be added only when they have:', ['the same order', 'the same determinant', 'square shape', 'equal entries'], 'Entry by entry.'),
+    Q('A symmetric matrix satisfies:', ['Aᵀ = A', 'A⁻¹ = A', 'det A = 0', 'A = I'], 'Equal to its transpose.'),
+    Q('(AB)ᵀ equals:', ['BᵀAᵀ', 'AᵀBᵀ', 'AB', 'BA'], 'Reverse the order.'),
+    Q('2[1 3; 0 2] equals:', ['[2 6; 0 4]', '[2 3; 0 2]', '[3 5; 2 4]', '[1 6; 0 4]'], 'Multiply every entry.'),
+  ],
+  'pm-mat-2': [
+    Q('det [2 0; 0 3] equals:', ['6', '5', '0', '1'], 'Product of the diagonal.'),
+    Q('The sign of the cofactor in row 1, column 2 is:', ['negative', 'positive', 'zero', 'it depends on the entry'], '(−1)^(1 + 2).'),
+    Q('If det A = 3 and det B = 2, then det(AB) equals:', ['6', '5', '1.5', '9'], 'det(AB) = det A × det B.'),
+    Q('A⁻¹A equals:', ['I', '0', 'A', 'A²'], 'The identity.'),
+  ],
+  'pm-sys-1': [
+    Q('Swapping two equations in a system:', ['does not change the solutions', 'changes the solutions', 'makes it inconsistent', 'doubles the solutions'], 'An allowed row operation.'),
+    Q('Echelon form has zeros:', ['below the leading diagonal', 'on the diagonal', 'in the last column', 'everywhere'], 'Then back-substitute.'),
+    Q('A last row [0 0 2 | 6] gives:', ['z = 3', 'z = 6', 'z = 12', 'no solution'], '2z = 6.'),
+    Q('Three planes meeting along a common line give:', ['infinitely many solutions', 'no solution', 'one solution', 'two solutions'], 'One free parameter.'),
+  ],
+  'pm-sys-2': [
+    Q('Cramer’s rule can be used only when:', ['det A ≠ 0', 'det A = 0', 'B = 0', 'A is not square'], 'It divides by det A.'),
+    Q('For x + y = 4, x − y = 2, Cramer’s rule gives x =', ['3', '1', '2', '4'], 'det A = −2; det Aₓ = −6.'),
+    Q('The system AX = 0 with det A ≠ 0 has:', ['only the solution X = 0', 'no solution', 'infinitely many solutions', 'two solutions'], 'X = A⁻¹0 = 0.'),
+    Q('x + 2y = 3, 2x + 4y = 5 has:', ['no solution', 'one solution', 'infinitely many solutions', 'x = 1'], 'Parallel lines.'),
+  ],
+  'pm-comb-1': [
+    Q('0! equals:', ['1', '0', 'undefined', '−1'], 'By definition.'),
+    Q('The number of arrangements of BANANA is:', ['60', '720', '120', '360'], '6!/(3! 2!).'),
+    Q('7 people round a circular table can sit in:', ['720 ways', '5040 ways', '7 ways', '120 ways'], '6!.'),
+    Q('nPr equals:', ['n!/(n − r)!', 'n!/r!', 'n!/(r!(n − r)!)', 'r!'], 'Ordered selections.'),
+  ],
+  'pm-comb-2': [
+    Q('10C8 equals:', ['45', '90', '10', '80'], '10C2.'),
+    Q('Choosing a president and a secretary from 10 people:', ['90 ways', '45 ways', '20 ways', '100 ways'], 'Different roles: 10P2.'),
+    Q('The number of ways to choose 0 items from n is:', ['1', '0', 'n', 'n!'], 'Choose nothing: one way.'),
+    Q('nCr + nC(r + 1) equals:', ['(n + 1)C(r + 1)', 'nC(r + 2)', '2 nCr', '(n − 1)Cr'], 'Pascal’s rule.'),
+  ],
+  'pm-vec-1': [
+    Q('The magnitude of 3i − 4j is:', ['5', '7', '1', '25'], '√(9 + 16).'),
+    Q('Vectors 2i + 4j and i + 2j are:', ['parallel', 'perpendicular', 'equal', 'of equal length'], 'One is twice the other.'),
+    Q('The centroid of triangle ABC has position vector:', ['⅓(a + b + c)', '½(a + b + c)', 'a + b + c', '(a + b)/2'], 'The average of the vertices.'),
+    Q('If OA = 2i + j and OB = 5i + 5j, then |AB| is:', ['5', '7', '√41', '25'], 'AB = 3i + 4j.'),
+  ],
+  'pm-vec-2': [
+    Q('i·j equals:', ['0', '1', 'k', '−1'], 'Perpendicular unit vectors.'),
+    Q('If a·b < 0, the angle between a and b is:', ['obtuse', 'acute', 'a right angle', 'zero'], 'cos θ < 0.'),
+    Q('(3i + 4j)·(3i + 4j) equals:', ['25', '7', '5', '12'], '|a|².'),
+    Q('The work done by F = 2i + 3j N over s = 4i − j m is:', ['5 J', '11 J', '8 J', '−5 J'], '8 − 3.'),
+  ],
+  'pm-line3d-1': [
+    Q('A point on the line r = (2, 1, 0) + λ(1, 3, −2) is:', ['(3, 4, −2)', '(1, 3, −2)', '(2, 1, 1)', '(0, 0, 0)'], 'λ = 1.'),
+    Q('Lines in a plane that are not parallel must:', ['intersect', 'be skew', 'be perpendicular', 'never meet'], 'Skew lines need three dimensions.'),
+    Q('The direction vector of the line through A(1, 0, 2) and B(3, 1, 5) is:', ['(2, 1, 3)', '(4, 1, 7)', '(1, 0, 2)', '(3, 1, 5)'], 'b − a.'),
+    Q('A plane with normal (2, −1, 3) through the origin is:', ['2x − y + 3z = 0', '2x − y + 3z = 1', 'x + y + z = 0', '2x + y + 3z = 0'], 'r·n = 0.'),
+  ],
+  'pm-line3d-2': [
+    Q('The shortest distance from a point to a line is measured:', ['at right angles to the line', 'along the line', 'from the origin', 'parallel to the x-axis'], 'The perpendicular is shortest.'),
+    Q('For skew lines, the common perpendicular is perpendicular to:', ['both direction vectors', 'one direction only', 'the position vectors', 'the x-axis'], 'Two scalar products are zero.'),
+    Q('The distance between the parallel lines y = 0 and y = 3 in the plane z = 0 is:', ['3', '0', '9', '√3'], 'Measured perpendicularly.'),
+    Q('To find the closest approach of two aircraft on straight paths, you would use:', ['the shortest distance between two lines', 'the angle between planes', 'Pythagoras only', 'the area of a triangle'], 'If the paths are skew.'),
+  ],
+  'pm-lim-1': [
+    Q('lim (x → 2) (3x + 1) equals:', ['7', '6', '3', 'undefined'], 'Substitute.'),
+    Q('lim (x → 0) (tan x)/x equals:', ['1', '0', '∞', 'π'], 'tan x = sin x/cos x.'),
+    Q('lim (x → 0⁺) 1/x is:', ['+∞', '−∞', '0', '1'], 'Positive and growing.'),
+    Q('lim (x → 4) (√x − 2)/(x − 4) equals:', ['¼', '½', '0', '4'], 'Rationalise: 1/(√x + 2).'),
+  ],
+  'pm-lim-2': [
+    Q('lim (x → ∞) (4x³ + 1)/(2x³ − x) equals:', ['2', '4', '0', '∞'], 'Leading coefficients.'),
+    Q('The graph of (x² − 1)/(x − 1) has at x = 1:', ['a removable discontinuity (a hole)', 'a vertical asymptote', 'a jump', 'no problem'], 'It equals x + 1 elsewhere.'),
+    Q('tan x is continuous everywhere except at:', ['x = π/2 + nπ', 'x = nπ', 'x = 0', 'nowhere'], 'Where cos x = 0.'),
+    Q('The intermediate value theorem needs the function to be:', ['continuous on the interval', 'increasing', 'a polynomial', 'positive'], 'Then a sign change guarantees a root.'),
+  ],
+  'pm-l6-paper1': [
+    Q('A quick way to test an identity option is to:', ['substitute a simple value of x', 'differentiate it', 'square it', 'ignore it'], 'Wrong options fail at a test value.'),
+    Q('Paper 1 of 0765 and 0770 is:', ['multiple choice, 1½ hours', 'structured, 3 hours', 'a practical', 'an oral'], 'Papers 2 and 3 are 3 hours each.'),
+    Q('To find k for equal roots, use:', ['the discriminant = 0', 'the factor theorem', 'det = 0', 'a sign diagram'], 'b² − 4ac = 0.'),
+    Q('A matrix with a parameter has no inverse when:', ['its determinant is zero', 'its trace is zero', 'it is symmetric', 'it is 2 × 2'], 'Set det = 0.'),
+  ],
+  'pm-l6-paper2': [
+    Q('In a "show that" question, the last line should:', ['match the given result exactly', 'be a decimal', 'be left out', 'state a different result'], 'You are proving the given answer.'),
+    Q('If you cannot do part (a) of a "hence" question, you should:', ['use the result of part (a) in part (b) anyway', 'stop', 'skip the whole question', 'guess part (b)'], 'Later marks are still available.'),
+    Q('Exact answers mean:', ['keeping surds, π and fractions', 'rounding to 1 d.p.', 'using decimals', 'using a calculator only'], 'Unless a decimal is asked for.'),
+    Q('In vector questions, AB is written as:', ['b − a', 'a − b', 'a + b', 'ab'], 'End minus start.'),
+  ],
+};

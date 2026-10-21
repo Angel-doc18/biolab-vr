@@ -25,9 +25,11 @@ import * as commerce from './commerce/units';
 import * as citizenship from './citizenship/units';
 import * as geology from './geology/units';
 import * as logic from './logic/units';
+import * as aMathsMech from './a-maths-mech/units';
+import * as aMathsStat from './a-maths-stat/units';
 import { CLASSES, classById, classLevel, subjectById } from './subjects';
 
-const MODULES = { biology, chemistry, physics, humanbio, 'a-biology': aBiology, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec, maths, english, french, literature, history, economics, commerce, citizenship, geology, logic };
+const MODULES = { biology, chemistry, physics, humanbio, 'a-biology': aBiology, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec, maths, english, french, literature, history, economics, commerce, citizenship, geology, logic, 'a-maths-mech': aMathsMech, 'a-maths-stat': aMathsStat };
 
 export const units = Object.entries(MODULES).flatMap(([subject, m]) => m.units.map((u) => ({ ...u, subject })));
 
