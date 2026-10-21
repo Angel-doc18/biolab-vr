@@ -5,6 +5,7 @@
 // tests stay with the subject the student takes; both share the same lessons
 // (listed by `lessonIds`).
 import { PURE_L6 } from './pureL6';
+import { PURE_U6 } from './pureU6';
 
 export const PURE_GROUPS = [
   { id: 'algebra', en: 'Algebra and logic', fr: 'Algèbre et logique' },
@@ -15,6 +16,12 @@ export const PURE_GROUPS = [
   { id: 'exam', en: 'Examination practice', fr: 'Préparation aux examens' },
 ];
 
-const PURE = PURE_L6.map((t) => ({ ...t, form: 'Lower Sixth', vr: null }));
+const PURE = [...PURE_L6.map((t) => ({ ...t, form: 'Lower Sixth', vr: null })), ...PURE_U6.map((t) => ({ ...t, form: 'Upper Sixth', vr: null }))];
 
-export const pureUnits = (prefix) => PURE.map(({ key, ...t }) => ({ id: `${prefix}-${key}`, ...t }));
+// `revised` places Lower Sixth topics in the Upper Sixth as well, where a
+// subject's scheme revises them: { key: { n, term, seq } }.
+export const pureUnits = (prefix, revised = {}) =>
+  PURE.map(({ key, ...t }) => ({ id: `${prefix}-${key}`, ...t, ...(revised[key] ? { alsoIn: { 'Upper Sixth': revised[key] } } : {}) }));
+
+// Topics that belong to one subject only (its applied mathematics).
+export const ownUnits = (prefix, list, form) => list.map(({ key, ...t }) => ({ id: `${prefix}-${key}`, form, vr: null, ...t }));

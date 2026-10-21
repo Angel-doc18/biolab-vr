@@ -21,5 +21,6 @@ import { LESSON_QUESTIONS as CITIZENSHIP } from './citizenship/lessonQuestions';
 import { LESSON_QUESTIONS as GEOLOGY } from './geology/lessonQuestions';
 import { LESSON_QUESTIONS as LOGIC } from './logic/lessonQuestions';
 import { LESSON_QUESTIONS as A_MATHS } from './a-maths/lessonQuestions';
+import { LESSON_QUESTIONS as A_MATHS_MECH } from './a-maths-mech/lessonQuestions';
 
-export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...A_MATHS };
+export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...A_MATHS, ...A_MATHS_MECH };

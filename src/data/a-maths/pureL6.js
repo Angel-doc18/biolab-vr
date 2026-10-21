@@ -149,8 +149,8 @@ export const PURE_L6 = [
     ask: 'How do I find the centre and radius from the general equation of a circle?',
     title: 'The Circle',
     short: 'The circle',
-    focus: 'The equation (x − a)² + (y − b)² = r², the general form x² + y² + 2gx + 2fy + c = 0 with centre (−g, −f) and radius √(g² + f² − c), circles through given points, tangents and normals, intersections of a line and a circle, the length of a tangent from an external point',
-    lessonIds: ['pm-circle-1', 'pm-circle-2'],
+    focus: 'The equation (x − a)² + (y − b)² = r², the general form x² + y² + 2gx + 2fy + c = 0 with centre (−g, −f) and radius √(g² + f² − c), circles through given points, tangents and normals, intersections of a line and a circle, the length of a tangent from an external point, two circles that touch or cut orthogonally, the radical axis and circles through the intersections of two circles',
+    lessonIds: ['pm-circle-1', 'pm-circle-2', 'pm-circle-3'],
     quiz: [
       Q('The circle (x − 2)² + (y + 3)² = 16 has centre and radius:', ['(2, −3) and 4', '(−2, 3) and 4', '(2, −3) and 16', '(2, 3) and 4'], 'Compare with (x − a)² + (y − b)² = r².'),
       Q('x² + y² − 4x + 6y − 12 = 0 has centre:', ['(2, −3)', '(−2, 3)', '(4, −6)', '(−4, 6)'], 'Centre (−g, −f) with 2g = −4, 2f = 6.'),

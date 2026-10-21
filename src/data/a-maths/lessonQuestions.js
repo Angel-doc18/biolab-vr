@@ -356,4 +356,106 @@ export const LESSON_QUESTIONS = {
     Q('∫ tan x dx equals:', ['−ln|cos x| + c', 'sec²x + c', 'ln|sin x| + c', 'tan²x/2 + c'], 'tan x = sin x / cos x, an f′/f form with a minus sign.'),
     Q('In a definite integral by substitution, you must also:', ['change the limits to values of u', 'add a constant', 'differentiate the answer', 'keep the limits in x'], 'Or change back to x before substituting.'),
   ],
+  'pm-circle-3': [
+    Q('Circles of radii 2 and 7 with centres 5 units apart:', ['touch internally', 'touch externally', 'meet in two points', 'do not meet'], '7 − 2 = 5.'),
+    Q('Two circles are orthogonal when C₁C₂² equals:', ['r₁² + r₂²', '(r₁ + r₂)²', 'r₁r₂', '(r₁ − r₂)²'], 'The radii to a common point are perpendicular.'),
+    Q('Subtracting the equations of two intersecting circles gives:', ['the line of their common chord', 'a third circle', 'the line of centres', 'a parabola'], 'The x² and y² terms cancel.'),
+    Q('Circles with centres 10 apart and radii 3 and 4:', ['do not meet', 'touch externally', 'meet in two points', 'touch internally'], '10 > 3 + 4.'),
+    Q('S₁ + kS₂ = 0 (k ≠ −1) represents:', ['a circle through the intersections of S₁ = 0 and S₂ = 0', 'a straight line always', 'the line of centres', 'no curve'], 'A given point fixes k.'),
+  ],
+  'pu-int-1': [
+    Q('∫ x eˣ dx by parts uses u =', ['x', 'eˣ', 'x eˣ', '1'], 'x becomes simpler when differentiated.'),
+    Q('∫ (0 to 1) √(1 − x²) dx equals:', ['π/4', 'π/2', '1', '½'], 'A quarter of a unit circle.'),
+    Q('For ∫ 1/(4 + x²) dx, a suitable substitution is:', ['x = 2 tan θ', 'x = 2 sin θ', 'x = 4 tan θ', 'u = 4 + x²'], 'Then 4 + x² = 4 sec²θ.'),
+  ],
+  'pu-int-2': [
+    Q('∫ 1/(x² + 2x + 2) dx equals:', ['tan⁻¹(x + 1) + c', 'ln(x² + 2x + 2) + c', 'sin⁻¹(x + 1) + c', '½ tan⁻¹(x + 1) + c'], 'x² + 2x + 2 = (x + 1)² + 1.'),
+    Q('∫ 1/√(9 − x²) dx equals:', ['sin⁻¹(x/3) + c', '⅓ sin⁻¹(x/3) + c', 'tan⁻¹(x/3) + c', '√(9 − x²) + c'], 'a = 3.'),
+    Q('∫ 2x/(x² + 1) dx equals:', ['ln(x² + 1) + c', 'tan⁻¹x + c', '2 tan⁻¹x + c', 'x²/(x² + 1) + c'], 'An f′/f form, not an inverse tangent.'),
+  ],
+  'pu-int-3': [
+    Q('∫ sin x cos x dx equals:', ['½ sin²x + c', 'sin x + cos x + c', '−cos 2x + c', 'sin²x cos x + c'], 'An f′ × f form (or −¼ cos 2x + c).'),
+    Q('sin²x written with a double angle is:', ['½(1 − cos 2x)', '½(1 + cos 2x)', '2 sin x cos x', '1 − cos 2x'], 'From cos 2x = 1 − 2sin²x.'),
+    Q('∫ (0 to π/2) cos²x dx equals:', ['π/4', 'π/2', '1', '½'], '[½x + ¼ sin 2x] from 0 to π/2.'),
+  ],
+  'pu-iapp-1': [
+    Q('Rotating y = 1/x, 1 ≤ x ≤ 2, about the x-axis gives volume:', ['π/2', 'π ln 2', '2π', 'π'], 'π∫ x⁻² dx = π[−1/x] from 1 to 2.'),
+    Q('The area between a curve and the y-axis is:', ['∫ x dy', '∫ y dx', '∫ x dx', '∫ y dy'], 'Horizontal strips.'),
+    Q('For a region between two curves rotated about the x-axis, the volume is:', ['π∫ (y₁² − y₂²) dx', 'π∫ (y₁ − y₂)² dx', 'π∫ (y₁ − y₂) dx', '2π∫ y₁y₂ dx'], 'Outer disc minus inner disc.'),
+  ],
+  'pu-iapp-2': [
+    Q('The centroid of the region under y = x² from 0 to 2 is:', ['(1.5, 1.2)', '(1, 2)', '(1.5, 2)', '(1, 1.2)'], 'A x̄ = 4 and A ȳ = 3.2 with A = 8/3.'),
+    Q('The centre of mass of a solid cone of height h is, above its base:', ['h/4', 'h/3', 'h/2', '3h/4'], 'By integration.'),
+    Q('The mean value of f over [a, b] is:', ['(1/(b − a)) ∫ (a to b) f(x) dx', '∫ (a to b) f(x) dx', '½(f(a) + f(b))', 'f((a + b)/2)'], 'Area ÷ width.'),
+  ],
+  'pu-de-1': [
+    Q('A quantity decays at a rate proportional to itself. It satisfies:', ['N = N₀e^(−kt)', 'N = N₀ − kt', 'N = N₀/t', 'N = kt²'], 'dN/dt = −kN.'),
+    Q('The solution of dy/dx = 3x² with y = 1 at x = 0 is:', ['y = x³ + 1', 'y = 3x³ + 1', 'y = x³', 'y = 6x + 1'], 'Integrate directly.'),
+    Q('Separating dy/dx = y² gives:', ['∫ y⁻² dy = ∫ dx', '∫ y² dy = ∫ dx', 'y = x²', '∫ dy = ∫ y² dx'], 'Divide by y².'),
+  ],
+  'pu-de-2': [
+    Q('dy/dx + y/x = 1 has integrating factor:', ['x', 'eˣ', '1/x', 'ln x'], 'e^(∫1/x dx) = e^(ln x).'),
+    Q('After multiplying by the integrating factor I, the left side becomes:', ['d/dx (Iy)', 'I dy/dx only', 'dI/dx', 'y dI/dx'], 'That is why I is chosen.'),
+    Q('With y = vx, dy/dx equals:', ['v + x dv/dx', 'x dv/dx', 'v dv/dx', 'v + dv/dx'], 'Product rule.'),
+  ],
+  'pu-de-3': [
+    Q('The auxiliary equation of 2y″ + 3y′ − 2y = 0 is:', ['2m² + 3m − 2 = 0', 'm² + 3m − 2 = 0', '2m + 3 = 0', '2m² − 3m + 2 = 0'], 'Replace y″ by m², y′ by m, y by 1.'),
+    Q('Auxiliary roots 1 and −4 give:', ['y = Aeˣ + Be^(−4x)', 'y = (A + Bx)eˣ', 'y = A cos 4x + B sin 4x', 'y = Aeˣ − 4B'], 'Two real roots.'),
+    Q('Simple harmonic motion y″ + ω²y = 0 has period:', ['2π/ω', 'ω/(2π)', '2πω', 'π/ω'], 'cos ωx repeats every 2π/ω.'),
+  ],
+  'pu-cx-1': [
+    Q('(3 + i)(3 − i) equals:', ['10', '8', '9 − i', '10 + 6i'], '9 − i² = 10.'),
+    Q('1/i equals:', ['−i', 'i', '1', '−1'], 'Multiply top and bottom by −i.'),
+    Q('If 3 − 2i is a root of a real quadratic, the other root is:', ['3 + 2i', '−3 + 2i', '−3 − 2i', '2 − 3i'], 'Conjugate pairs.'),
+  ],
+  'pu-cx-2': [
+    Q('arg(1 + i) equals:', ['π/4', 'π/2', '−π/4', '3π/4'], 'First quadrant, equal parts.'),
+    Q('2e^(iπ/2) equals:', ['2i', '2', '−2', '−2i'], 'cos π/2 + i sin π/2 = i.'),
+    Q('Multiplying z by i rotates it about O through:', ['π/2', 'π', 'π/4', '2π'], 'i = e^(iπ/2).'),
+  ],
+  'pu-cx-3': [
+    Q('(cos π/6 + i sin π/6)⁶ equals:', ['−1', '1', 'i', '−i'], 'cos π + i sin π.'),
+    Q('The fourth roots of unity are:', ['1, i, −1, −i', '1 and −1', '1, ω, ω²', '±1 ± i'], 'e^(kπi/2), k = 0, 1, 2, 3.'),
+    Q('With z = e^(iθ), z + 1/z equals:', ['2 cos θ', '2 sin θ', '2i sin θ', '1'], 'e^(iθ) + e^(−iθ).'),
+  ],
+  'pu-loci-1': [
+    Q('The Cartesian equation of |z| = 5 is:', ['x² + y² = 25', 'x + y = 5', 'x² + y² = 5', 'y = 5'], 'Distance 5 from O.'),
+    Q('|z − 2| = |z − 6| is the line:', ['x = 4', 'y = 4', 'x = 8', 'y = x'], 'Half-way between 2 and 6.'),
+    Q('|z − 1 − i| ≤ 1 is:', ['a disc of radius 1 centred at (1, 1)', 'a circle only', 'a half-plane', 'a line'], 'The circle and its inside.'),
+  ],
+  'pu-loci-2': [
+    Q('arg z = π describes:', ['the negative real axis', 'the positive real axis', 'the imaginary axis', 'the circle |z| = π'], 'Angle π from O.'),
+    Q('|z| ≤ 2 with 0 ≤ arg z ≤ π/2 is:', ['a quarter of a disc', 'a half disc', 'a circle', 'a triangle'], 'The first-quadrant part.'),
+    Q('The extreme arguments on a circle not containing O are given by:', ['the tangents from O', 'the line through the centre', 'the radius', 'the real axis'], 'The two touching lines.'),
+  ],
+  'pu-plane-1': [
+    Q('The plane through (1, 2, 3) with normal i + j + k is:', ['x + y + z = 6', 'x + y + z = 1', 'x + 2y + 3z = 0', 'x + y + z = 3'], 'r·n = a·n = 6.'),
+    Q('The distance from (0, 0, 0) to x + 2y + 2z = 6 is:', ['2', '6', '3', '1'], '6 ÷ 3.'),
+    Q('A normal to the plane containing directions i and j is:', ['k', 'i + j', 'i − j', '0'], 'i × j = k.'),
+  ],
+  'pu-plane-2': [
+    Q('The angle between planes with normals i and j is:', ['90°', '0°', '45°', '60°'], 'i·j = 0.'),
+    Q('A line with direction 2i − j + k and a plane with normal i + 2j are:', ['parallel (or the line lies in the plane)', 'perpendicular', 'at 45°', 'at 30°'], 'd·n = 2 − 2 + 0 = 0.'),
+    Q('To find a point on the line of intersection of two planes, you can:', ['put z = 0 and solve the two equations', 'add the equations', 'take the cross product only', 'set x = y = z'], 'Any convenient value of one coordinate.'),
+  ],
+  'pu-num-1': [
+    Q('f(x) = x³ − x − 1 has a root between:', ['1 and 2', '0 and 1', '2 and 3', '−1 and 0'], 'f(1) = −1, f(2) = 5.'),
+    Q('Bisection on [1, 2] tests next:', ['x = 1.5', 'x = 1', 'x = 2', 'x = 1.25'], 'The mid-point.'),
+    Q('To show a root is 2.095 to 3 d.p., check signs at:', ['2.0945 and 2.0955', '2.09 and 2.10', '2 and 3', '2.095 and 2.096'], 'The ends of the rounding interval.'),
+  ],
+  'pu-num-2': [
+    Q('The trapezium rule with one strip on [0, 2] for y = x² gives:', ['4', '8/3', '2', '8'], '½ × 2 × (0 + 4).'),
+    Q('For y = eˣ the trapezium rule:', ['overestimates', 'underestimates', 'is exact', 'cannot be used'], 'eˣ is concave up.'),
+    Q('Halving h in the trapezium rule usually:', ['makes the estimate more accurate', 'makes no difference', 'halves the answer', 'doubles the error'], 'More strips fit the curve better.'),
+  ],
+  'pu-u6-paper1': [
+    Q('Paper 1 of 0765 and 0770 contains:', ['multiple-choice items', 'essays', 'only proofs', 'practical work'], '1½ hours.'),
+    Q('To check an option for a differential equation, you can:', ['substitute it into the equation and the condition', 'integrate it twice', 'square it', 'ignore the condition'], 'Both must hold.'),
+    Q('An item you cannot finish quickly should be:', ['marked and returned to later', 'left blank for ever', 'answered first', 'copied'], 'Keep moving.'),
+  ],
+  'pu-u6-paper2': [
+    Q('A solution to a differential equation can be checked by:', ['substituting it back into the equation', 'integrating it', 'drawing a tree', 'using the trapezium rule'], 'Both sides must agree.'),
+    Q('Arguments of complex numbers are normally given:', ['in radians, between −π and π', 'in degrees from 0 to 360', 'as decimals of a turn', 'without a sign'], 'The principal value.'),
+    Q('In a "hence" question you should:', ['use the result of the previous part', 'start again from nothing', 'skip it', 'use a different method'], 'The marks follow the given route.'),
+  ],
 };

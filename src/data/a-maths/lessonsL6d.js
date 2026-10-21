@@ -37,6 +37,19 @@ export const LESSONS_L6D = [
     { q: 'P moves so that its distance from (0, 3) equals its distance from the line y = −3. Find its locus.', steps: ['Distance to (0, 3): √(x² + (y − 3)²); distance to the line: |y + 3|.', 'Square both: x² + y² − 6y + 9 = y² + 6y + 9.', '**x² = 12y**, a parabola.'] },
   ]),
 
+  // ---------- 6. Two circles ----------
+  L('pm-circle-3', 'mm-l6-circles', '6.3', 'Two circles: touching, orthogonal circles and the radical axis', 16, ['Coordinate geometry'], [
+    'Two circles with centres C₁ and C₂ and radii r₁ and r₂:\n- **touch externally** when C₁C₂ = r₁ + r₂\n- **touch internally** when C₁C₂ = |r₁ − r₂|\n- meet in two points when |r₁ − r₂| < C₁C₂ < r₁ + r₂\n- do not meet otherwise.',
+    'Two circles are **orthogonal** when their tangents at a common point are perpendicular. Then each radius to that point is a tangent to the other circle, so **C₁C₂² = r₁² + r₂²**. For x² + y² + 2g₁x + 2f₁y + c₁ = 0 and x² + y² + 2g₂x + 2f₂y + c₂ = 0 the condition is **2g₁g₂ + 2f₁f₂ = c₁ + c₂**.',
+    'Subtracting the equations of two circles, S₁ − S₂ = 0, gives a straight line, the **radical axis**; when the circles meet, it is the line of their common chord. The equation S₁ + kS₂ = 0 (k ≠ −1) gives every circle through their points of intersection, and a given point fixes k.',
+  ], 'am-orthogonal-circles', 'Compare the distance between the centres with the sum and the difference of the radii.',
+  ['Circles of radii 3 and 5 whose centres are 8 units apart:', ['touch externally', 'touch internally', 'meet in two points', 'do not meet'], '3 + 5 = 8.'],
+  [['Orthogonal circles', 'Circles that cut at right angles: C₁C₂² = r₁² + r₂².'], ['Radical axis', 'The line S₁ − S₂ = 0; for circles that meet, the line of the common chord.'], ['Common chord', 'The segment joining the two points where two circles meet.']],
+  [
+    { q: 'Show that the circles x² + y² − 4x = 0 and x² + y² + 6y = 0 are orthogonal.', steps: ['Centres (2, 0) and (0, −3); radii 2 and 3.', 'C₁C₂² = 2² + 3² = 13 and r₁² + r₂² = 4 + 9 = 13.', 'They are equal, so the circles are **orthogonal**; the condition 2g₁g₂ + 2f₁f₂ = 0 = c₁ + c₂ agrees.'] },
+    { q: 'Find the line of the common chord of x² + y² = 25 and x² + y² − 6x − 8y = 0.', steps: ['Subtract: (x² + y² − 25) − (x² + y² − 6x − 8y) = 0.', '6x + 8y − 25 = 0.', 'The common chord lies on **6x + 8y = 25**.'] },
+  ]),
+
   // ---------- 13. Solving triangles ----------
   L('pm-rad-3', 'mm-l6-radians', '13.3', 'Solving triangles: the sine rule, the cosine rule and the area', 15, ['Trigonometry'], [
     'In any triangle ABC, with sides a, b and c opposite the angles A, B and C:\n- the **sine rule**: a/sin A = b/sin B = c/sin C\n- the **cosine rule**: a² = b² + c² − 2bc cos A, or cos A = (b² + c² − a²)/(2bc)\n- the **area**: ½ab sin C (two sides and the angle between them).',
