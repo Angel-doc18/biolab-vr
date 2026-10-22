@@ -15,21 +15,30 @@ import { today } from '../lib/notify.js';
 // set VOICE_ENGINE to one of them, OWN_VOICE_ID to the voice made in that
 // service, and its key as a secret (ELEVENLABS_API_KEY or FISH_API_KEY). Until
 // both are set, or if the service fails, MeloTTS is used.
+// 'kokoro' is Kokoro-82M on the school's own server (KOKORO_URL, with the shared
+// key KOKORO_VOICE_KEY as a secret). That server picks one voice for English and
+// one for French (KOKORO_VOICE names them, so phones notice a change), keeps
+// every clip on its disk and speaks the lesson notes ahead of time overnight.
 // One engine is used for everything, so the voice never changes mid-lesson.
 const AURA_VOICES = ['draco', 'pandora'];
 const OWN_KEY = { elevenlabs: 'ELEVENLABS_API_KEY', fish: 'FISH_API_KEY' };
 const ownReady = (env) => !!(OWN_KEY[env.VOICE_ENGINE] && env[OWN_KEY[env.VOICE_ENGINE]] && env.OWN_VOICE_ID);
-export const voiceEngine = (env) => (ownReady(env) ? env.VOICE_ENGINE : env.VOICE_ENGINE === 'aura' ? 'aura' : 'melo');
+const kokoroReady = (env) => env.VOICE_ENGINE === 'kokoro' && !!env.KOKORO_URL && !!env.KOKORO_VOICE_KEY;
+export const voiceEngine = (env) => (ownReady(env) || kokoroReady(env) ? env.VOICE_ENGINE : env.VOICE_ENGINE === 'aura' ? 'aura' : 'melo');
 export const voiceChoices = (env) => {
   const engine = voiceEngine(env);
-  return engine === 'aura' ? AURA_VOICES : OWN_KEY[engine] ? ['own'] : ['melo'];
+  return engine === 'aura' ? AURA_VOICES : OWN_KEY[engine] ? ['own'] : engine === 'kokoro' ? ['kokoro'] : ['melo'];
 };
 // Names the voice the server speaks in, so phones know when it has changed and
 // stop replaying clips kept in the old voice.
 export const voiceTag = (env) => {
   const engine = voiceEngine(env);
-  return OWN_KEY[engine] ? `${engine}:${env.OWN_VOICE_ID}:${env.OWN_VOICE_MODEL || ''}` : engine;
+  if (OWN_KEY[engine]) return `${engine}:${env.OWN_VOICE_ID}:${env.OWN_VOICE_MODEL || ''}`;
+  return engine === 'kokoro' ? `kokoro:${env.KOKORO_VOICE || ''}` : engine;
 };
+// Engines that speak English and French in the same voice, with MeloTTS as the
+// stand-in when they fail.
+const SINGLE = ['own', 'kokoro'];
 const MAX_TEXT = 600;
 // New speech made per day, in characters (cached sentences are free). The total
 // can be changed with the VOICE_DAILY_CHARS variable.
@@ -118,8 +127,28 @@ async function ownVoice(env, text) {
   }
 }
 
+// The school's Kokoro server, as MP3. A new sentence takes about as long to make
+// as it does to say, so the wait allows for the longest piece the app sends.
+async function kokoroVoice(env, text, lang) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 55_000);
+  try {
+    const res = await fetch(`${env.KOKORO_URL.replace(/\/+$/, '')}/tts`, {
+      method: 'POST',
+      signal: ctrl.signal,
+      headers: { 'x-voice-key': env.KOKORO_VOICE_KEY, 'content-type': 'application/json' },
+      body: JSON.stringify({ text, lang }),
+    });
+    if (!res.ok) throw new Error(`kokoro ${res.status}`);
+    return new Uint8Array(await res.arrayBuffer());
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function synthesize(env, { text, lang, voice }) {
   if (voice === 'own') return ownVoice(env, text);
+  if (voice === 'kokoro') return kokoroVoice(env, text, lang);
   if (lang === 'en' && voice !== 'melo') return toBytes(await env.AI.run('@cf/deepgram/aura-2-en', { text, speaker: voice, encoding: 'mp3' }));
   return smallerWav(await toBytes(await env.AI.run('@cf/myshell-ai/melotts', { prompt: text, lang })));
 }
@@ -140,12 +169,12 @@ export async function speak(request, env) {
   const body = await readJson(request, 8 * 1024);
   const lang = oneOf(body.lang || 'en', 'Language', ['en', 'fr']);
   const text = str(body.text, 'Text', { min: 1, max: MAX_TEXT }).replace(/\s+/g, ' ');
-  const own = voiceChoices(env)[0] === 'own';
-  const choices = own ? ['own'] : lang === 'fr' ? ['melo'] : voiceChoices(env);
+  const single = SINGLE.includes(voiceChoices(env)[0]);
+  const choices = single ? voiceChoices(env) : lang === 'fr' ? ['melo'] : voiceChoices(env);
   const voice = choices.includes(body.voice) ? body.voice : choices[0];
   const keep = body.keep !== false;
 
-  const key = await sha256(`v3|${lang}|${voice === 'own' ? voiceTag(env) : voice}|${text}`);
+  const key = await sha256(`v3|${lang}|${SINGLE.includes(voice) ? voiceTag(env) : voice}|${text}`);
   if (env.VOICE_CACHE) {
     const hit = await env.VOICE_CACHE.get(key, 'arrayBuffer');
     if (hit) return audio(hit, 'hit');
@@ -167,14 +196,14 @@ export async function speak(request, env) {
   } catch (e) {
     const msg = String(e?.message || e);
     console.error('voice_failed', voice, msg);
-    if (voice !== 'own') {
+    if (!SINGLE.includes(voice)) {
       // 4006: the account's daily Workers AI allowance is used up until 00:00 UTC.
       if (msg.includes('4006')) throw new HttpError(503, 'The natural voice has reached today’s limit.', 'voice_quota');
       throw new HttpError(503, 'The natural voice is not available right now.', 'voice_off');
     }
-    // The cloned voice failed (its service is down or its allowance is used up):
-    // say it in MeloTTS this time, and do not keep it, so the cloned voice is
-    // tried again next time.
+    // The cloned voice or the school's server failed (down, busy or out of
+    // allowance): say it in MeloTTS this time, and do not keep it, so the
+    // natural voice is tried again next time.
     try {
       spoken = 'melo';
       bytes = await synthesize(env, { text, lang, voice: 'melo' });

@@ -72,7 +72,7 @@ const routes = [
 ].map(([method, path, handler]) => [method, new RegExp(`^${path}$`), handler]);
 
 // Browsers are only allowed from the origins listed in ALLOWED_ORIGINS (the web
-// preview during development). The mobile app is not a browser and needs no CORS.
+// app and the local web preview). The mobile app is not a browser and needs no CORS.
 function corsHeaders(request, env) {
   const origin = request.headers.get('origin');
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);

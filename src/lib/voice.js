@@ -108,7 +108,8 @@ function clip(text, lang, keep) {
     if (Date.now() < pauseUntil) throw new Error('natural voice paused');
     let got;
     try {
-      got = await postBytes('/v1/voice', { text, lang, voice, keep }, { timeout: 20000 });
+      // The voice server makes a new sentence in about the time it takes to say.
+      got = await postBytes('/v1/voice', { text, lang, voice, keep }, { timeout: 60000 });
     } catch (e) {
       if (e.code === 'voice_off' || e.code === 'voice_quota') pauseUntil = Date.now() + 15 * 60_000;
       else if (e.status === 401 || e.code === 'unauthorized' || e.code === 'offline') pauseUntil = Date.now() + 60_000;
@@ -257,9 +258,13 @@ async function run(pieces, lang, rate, mine, keep) {
   for (let i = 0; i < pieces.length; i++) {
     if (mine !== turn) return false;
     if (!phone) {
-      // Ask for the next pieces while this one plays, so there is no gap.
-      for (const k of [1, 2]) if (i + k < pieces.length) clip(pieces[i + k], lang, keep).catch(() => {});
-      const uri = await naturalUri(pieces[i], lang, keep);
+      const now = naturalUri(pieces[i], lang, keep);
+      // Ask for the next pieces while this one plays, so there is no gap: a moment
+      // later, so a server that speaks one piece at a time starts with this one.
+      setTimeout(() => {
+        for (const k of [1, 2]) if (mine === turn && i + k < pieces.length) clip(pieces[i + k], lang, keep).catch(() => {});
+      }, 300);
+      const uri = await now;
       if (mine !== turn) return false;
       if (uri) {
         try {

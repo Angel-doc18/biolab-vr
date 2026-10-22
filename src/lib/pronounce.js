@@ -314,24 +314,32 @@ export function forSpeech(input, lang = 'en') {
 }
 
 // Splits text into pieces of whole sentences, each short enough for one request.
-export function speechChunks(text, max = 360) {
+// The first piece is short (about ten seconds of speech), so a voice made on
+// demand starts soon while the rest is made; a long first sentence is still
+// kept whole unless it is half as long again.
+export function speechChunks(text, max = 360, first = 160) {
   const sentences = String(text || '').match(/[^.!?;:]+[.!?;:]*\s*/g) || [];
   const out = [];
   let cur = '';
+  // What the piece being built may hold, and the length at which one sentence is cut.
+  const room = () => (out.length ? max : first);
+  const cutAt = () => (out.length ? max : Math.round(first * 1.5));
   for (const raw of sentences) {
     let sent = raw.trim();
-    while (sent.length > max) {
-      const cut = sent.lastIndexOf(',', max) > max / 2 ? sent.lastIndexOf(',', max) + 1 : sent.lastIndexOf(' ', max);
-      const at = cut > 0 ? cut : max;
+    while (sent.length > cutAt()) {
       if (cur) {
         out.push(cur);
         cur = '';
+        continue;
       }
+      const lim = room();
+      const cut = sent.lastIndexOf(',', lim) > lim / 2 ? sent.lastIndexOf(',', lim) + 1 : sent.lastIndexOf(' ', lim);
+      const at = cut > 0 ? cut : lim;
       out.push(sent.slice(0, at).trim());
       sent = sent.slice(at).trim();
     }
     if (!sent) continue;
-    if (cur && cur.length + sent.length + 1 > max) {
+    if (cur && cur.length + sent.length + 1 > room()) {
       out.push(cur);
       cur = sent;
     } else cur = cur ? `${cur} ${sent}` : sent;
