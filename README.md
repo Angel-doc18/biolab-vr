@@ -34,7 +34,7 @@ Every push to `main` builds a new APK and publishes it as release `v1.0.<build>`
 - `src/data`: units and practice questions, lessons, labs, Paper 2 questions, plan limits
 - `src/state`: app store (session, progress, sync), progress maths, selectors
 - `src/three`: procedural 3D models, touch viewer and stereo VR
-- `worker`: the API (Cloudflare Worker + D1)
+- `worker`: the API and the voice server (Docker on Klass8's own server)
 
 ## Develop
 
@@ -45,25 +45,24 @@ npx expo start          # scan the QR with Expo Go (SDK 57)
 
 Point the app at a local API with `EXPO_PUBLIC_API_URL=http://localhost:8787`.
 
-## API (Cloudflare Worker)
+## API (Klass8's own server)
 
-Live at https://biospatial-vr-ai.biospatial-vr.workers.dev (`GET /v1/health` shows which services are configured).
-Secrets are set with Wrangler and are never committed or bundled in the app:
+Live at https://klass8.ebenesaid.com/v1/ (`GET /v1/health` shows which services are configured).
+It runs on the Hostinger VPS in Docker, beside the ebenesaid sites (never change those):
+
+- `worker/src`: the routes; `worker/server`: Node with SQLite (`/opt/klass8-api/data/klass8.db`,
+  migrations applied on start, a backup every night in `data/backups`, 14 kept)
+- `worker/voice`: the tutor's voice (Kokoro-82M), which also speaks the lesson notes ahead of time overnight
 
 ```bash
-cd worker
-npx wrangler deploy
-npx wrangler secret put GROQ_API_KEY            # AI tutor and marking
-npx wrangler secret put FAPSHI_API_USER         # mobile money payments
-npx wrangler secret put FAPSHI_API_KEY
-npx wrangler secret put FAPSHI_WEBHOOK_SECRET   # also set FAPSHI_ENV = "live" in wrangler.toml
-npx wrangler secret put TWILIO_ACCOUNT_SID      # SMS codes and parent alerts
-npx wrangler secret put TWILIO_AUTH_TOKEN
-npx wrangler secret put TWILIO_FROM
-npx wrangler d1 migrations apply biospatial-db --remote
+sh worker/deploy.sh api      # or: sh worker/deploy.sh voice
 ```
 
-Fapshi webhook URL: `https://biospatial-vr-ai.biospatial-vr.workers.dev/v1/billing/fapshi-webhook`.
+Settings are in `worker/server/settings.env`. Secrets live only in `/opt/klass8-api/.env` on the
+server (chmod 600) and are never committed or bundled in the app; the list is at the top of
+`settings.env`. After changing them, run `sh worker/deploy.sh api` again.
 
-Local API: create `worker/.dev.vars` with `JWT_SECRET` and `ALLOWED_ORIGINS`, then
-`npx wrangler d1 migrations apply biospatial-db --local` and `npx wrangler dev --local`.
+Fapshi webhook URL: `https://klass8.ebenesaid.com/v1/billing/fapshi-webhook`.
+
+Local API: create `worker/.dev.vars` with `JWT_SECRET` and `ALLOWED_ORIGINS`, then in `worker`
+run `DATA_DIR=.data npm run dev` (port 8787).

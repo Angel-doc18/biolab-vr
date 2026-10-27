@@ -1,4 +1,4 @@
-// Klass8 API (Cloudflare Worker + D1).
+// Klass8 API: the routes, run by server/main.js on Klass8's own server.
 import { HttpError, json, now } from './lib/http.js';
 import * as auth from './routes/auth.js';
 import * as me from './routes/me.js';

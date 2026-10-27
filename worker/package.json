@@ -1,13 +1,13 @@
 {
-  "name": "biospatial-vr-api",
+  "name": "klass8-api",
   "private": true,
   "type": "module",
   "scripts": {
-    "deploy": "wrangler deploy",
-    "migrate": "wrangler d1 migrations apply biospatial-db --remote"
+    "start": "node --disable-warning=ExperimentalWarning server/main.js",
+    "dev": "node --disable-warning=ExperimentalWarning --env-file=server/settings.env --env-file=.dev.vars server/main.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "latest",
-    "zod": "latest"
+    "@anthropic-ai/sdk": "^0.129.0",
+    "zod": "^4.6.5"
   }
 }

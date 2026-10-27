@@ -1,13 +1,15 @@
 // The tutor's natural voice. The app sends text already written out for speech
-// (formulae, units and symbols in words). Audio is made by Workers AI and kept
-// in KV, so the same sentence in the same voice is only ever paid for once.
+// (formulae, units and symbols in words). On Klass8's own server the voice is
+// Kokoro (worker/voice), which keeps every clip it makes, so the same sentence
+// is only ever spoken once. The other engines need Cloudflare Workers AI (env.AI)
+// or a voice service's key, and keep clips in KV (VOICE_CACHE) when it exists.
 import { HttpError, limit, readJson } from '../lib/http.js';
 import { requireUser } from '../lib/auth.js';
 import { oneOf, str } from '../lib/validate.js';
 import { sha256 } from '../lib/crypto.js';
 import { today } from '../lib/notify.js';
 
-// The engines. 'melo' (MeloTTS, the default) is a neural voice cheap enough to
+// The engines. 'melo' (MeloTTS, the fallback) is a neural voice cheap enough to
 // run all day on the Workers free allowance (about 18 neurons per minute of
 // speech). 'aura' (Deepgram Aura 2, British voices) sounds better but costs
 // about 150 times more: set VOICE_ENGINE = "aura" only on the Workers Paid plan.
@@ -127,20 +129,23 @@ async function ownVoice(env, text) {
   }
 }
 
-// The school's Kokoro server, as MP3. A new sentence takes about as long to make
-// as it does to say, so the wait allows for the longest piece the app sends.
-async function kokoroVoice(env, text, lang) {
+// The school's Kokoro server, as MP3. It keeps every clip it has made, and those
+// come back at once and cost nothing; with `make` false it gives only a kept
+// clip. A new sentence takes about as long to make as it does to say, so the
+// wait allows for the longest piece the app sends.
+async function kokoroVoice(env, text, lang, make = true) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 55_000);
   try {
     const res = await fetch(`${env.KOKORO_URL.replace(/\/+$/, '')}/tts`, {
       method: 'POST',
       signal: ctrl.signal,
-      headers: { 'x-voice-key': env.KOKORO_VOICE_KEY, 'content-type': 'application/json' },
+      headers: { 'x-voice-key': env.KOKORO_VOICE_KEY, 'x-may-make': make ? '1' : '0', 'content-type': 'application/json' },
       body: JSON.stringify({ text, lang }),
     });
+    if (res.status === 429) throw new HttpError(429, 'The natural voice has reached today’s limit.', 'voice_quota');
     if (!res.ok) throw new Error(`kokoro ${res.status}`);
-    return new Uint8Array(await res.arrayBuffer());
+    return { bytes: new Uint8Array(await res.arrayBuffer()), fresh: res.headers.get('x-voice-cache') !== 'hit' };
   } finally {
     clearTimeout(timer);
   }
@@ -148,7 +153,7 @@ async function kokoroVoice(env, text, lang) {
 
 export async function synthesize(env, { text, lang, voice }) {
   if (voice === 'own') return ownVoice(env, text);
-  if (voice === 'kokoro') return kokoroVoice(env, text, lang);
+  if (voice === 'kokoro') return (await kokoroVoice(env, text, lang)).bytes;
   if (lang === 'en' && voice !== 'melo') return toBytes(await env.AI.run('@cf/deepgram/aura-2-en', { text, speaker: voice, encoding: 'mp3' }));
   return smallerWav(await toBytes(await env.AI.run('@cf/myshell-ai/melotts', { prompt: text, lang })));
 }
@@ -165,7 +170,7 @@ const audio = (bytes, cache) =>
 // POST /v1/voice { text, lang, voice?, keep? }  ->  audio/mpeg (English) or audio/wav (French)
 export async function speak(request, env) {
   const user = await requireUser(request, env);
-  if (!env.AI) throw new HttpError(503, 'The natural voice is not available.', 'voice_off');
+  if (!env.AI && voiceEngine(env) !== 'kokoro') throw new HttpError(503, 'The natural voice is not available.', 'voice_off');
   const body = await readJson(request, 8 * 1024);
   const lang = oneOf(body.lang || 'en', 'Language', ['en', 'fr']);
   const text = str(body.text, 'Text', { min: 1, max: MAX_TEXT }).replace(/\s+/g, ' ');
@@ -185,15 +190,19 @@ export async function speak(request, env) {
   const { results } = await env.DB.prepare('SELECT user_id, chars FROM voice_usage WHERE day = ? AND user_id IN (?, ?)').bind(day, user.id, '*').all();
   const used = Object.fromEntries(results.map((r) => [r.user_id, r.chars]));
   const allDay = Number(env.VOICE_DAILY_CHARS) || ALL_DAY;
-  if ((used[user.id] || 0) + text.length > PER_USER_DAY || (used['*'] || 0) + text.length > allDay) {
-    throw new HttpError(429, 'The natural voice has reached today’s limit.', 'voice_quota');
-  }
+  const over = (used[user.id] || 0) + text.length > PER_USER_DAY || (used['*'] || 0) + text.length > allDay;
+  // Clips the school's server has already made cost nothing, so there the
+  // limit stops only new speech.
+  if (over && voice !== 'kokoro') throw new HttpError(429, 'The natural voice has reached today’s limit.', 'voice_quota');
 
   let bytes;
   let spoken = voice;
+  let fresh = true;
   try {
-    bytes = await synthesize(env, { text, lang, voice });
+    if (voice === 'kokoro') ({ bytes, fresh } = await kokoroVoice(env, text, lang, !over));
+    else bytes = await synthesize(env, { text, lang, voice });
   } catch (e) {
+    if (e instanceof HttpError) throw e;
     const msg = String(e?.message || e);
     console.error('voice_failed', voice, msg);
     if (!SINGLE.includes(voice)) {
@@ -204,6 +213,7 @@ export async function speak(request, env) {
     // The cloned voice or the school's server failed (down, busy or out of
     // allowance): say it in MeloTTS this time, and do not keep it, so the
     // natural voice is tried again next time.
+    if (!env.AI) throw new HttpError(503, 'The natural voice is not available right now.', 'voice_off');
     try {
       spoken = 'melo';
       bytes = await synthesize(env, { text, lang, voice: 'melo' });
@@ -214,8 +224,8 @@ export async function speak(request, env) {
   if (bytes.byteLength < 256) throw new HttpError(503, 'The natural voice is not available right now.', 'voice_off');
 
   const add = 'INSERT INTO voice_usage (user_id, day, chars) VALUES (?, ?, ?) ON CONFLICT(user_id, day) DO UPDATE SET chars = chars + excluded.chars';
-  await env.DB.batch([env.DB.prepare(add).bind(user.id, day, text.length), env.DB.prepare(add).bind('*', day, text.length)]);
+  if (fresh) await env.DB.batch([env.DB.prepare(add).bind(user.id, day, text.length), env.DB.prepare(add).bind('*', day, text.length)]);
   const kept = keep && spoken === voice;
   if (kept && env.VOICE_CACHE) await env.VOICE_CACHE.put(key, bytes, { metadata: { lang, voice, n: text.length } }).catch(() => {});
-  return audio(bytes, kept ? 'new' : 'once');
+  return audio(bytes, !kept ? 'once' : fresh ? 'new' : 'hit');
 }
