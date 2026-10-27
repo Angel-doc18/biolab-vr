@@ -104,8 +104,8 @@ export const LESSONS_FU6A = [
     { q: 'Find ∫ (0 to 1) x³eˣ dx.', steps: ['I₀ = e − 1, so I₁ = e − I₀ = 1 and I₂ = e − 2I₁ = e − 2.', 'I₃ = e − 3I₂ = e − 3e + 6.', '**I₃ = 6 − 2e**, about 0.563.'] },
   ]),
 
-  // ---------- 5. Arc length and surfaces of revolution ----------
-  L('fp-arc-1', 'fm-u6-arc-surface', '5.1', 'Arc length in Cartesian, parametric and polar form', 17, ['Calculus'], [
+  // ---------- 8. Arc length and surfaces of revolution ----------
+  L('fp-arc-1', 'fm-u6-arc-surface', '8.1', 'Arc length in Cartesian, parametric and polar form', 17, ['Calculus'], [
     'A small piece of a curve, δs, is nearly straight, so δs² ≈ δx² + δy². Dividing by δx² and letting δx → 0 gives the **arc length s = ∫ (a to b) √(1 + (dy/dx)²) dx**.',
     'For a parametric curve x(t), y(t): **s = ∫ √((dx/dt)² + (dy/dt)²) dt**. For a polar curve r(θ), δs² ≈ δr² + r²δθ², so **s = ∫ √(r² + (dr/dθ)²) dθ**.',
     'The square root rarely simplifies unless the curve is chosen to make it a perfect square, so look for one: 1 + sinh²x = cosh²x, (1 − t²)² + 4t² = (1 + t²)², 2(1 + cos θ) = 4cos²(θ/2).',
@@ -119,7 +119,7 @@ export const LESSONS_FU6A = [
     { q: 'Find the length of the cardioid r = a(1 + cos θ).', steps: ['r² + (dr/dθ)² = a²(1 + cos θ)² + a²sin²θ = 2a²(1 + cos θ) = 4a²cos²(θ/2).', 'By symmetry, s = 2 ∫ (0 to π) 2a cos(θ/2) dθ = 4a[2 sin(θ/2)] (0 to π).', '**s = 8a**.'] },
   ]),
 
-  L('fp-arc-2', 'fm-u6-arc-surface', '5.2', 'Surfaces of revolution', 17, ['Calculus'], [
+  L('fp-arc-2', 'fm-u6-arc-surface', '8.2', 'Surfaces of revolution', 17, ['Calculus'], [
     'When an arc is turned through a full revolution about the x-axis, each small piece δs sweeps out a band of radius y and area about 2πy δs. So the curved **surface area is S = 2π ∫ y ds**, with ds = √(1 + (dy/dx)²) dx, or √((dx/dt)² + (dy/dt)²) dt for a parametric curve.',
     'About the y-axis the radius of each band is x: **S = 2π ∫ x ds**.',
     'Do not confuse it with the volume of revolution, π ∫ y² dx: the surface area uses ds and the first power of y.',
@@ -132,8 +132,8 @@ export const LESSONS_FU6A = [
     { q: 'The arc y = x³, 0 ≤ x ≤ 1, is turned about the x-axis. Find the surface area.', steps: ['S = 2π ∫ (0 to 1) x³√(1 + 9x⁴) dx; put u = 1 + 9x⁴, du = 36x³ dx.', 'S = (2π/36) ∫ (1 to 10) √u du = (π/18)(2/3)[u^(3/2)] (1 to 10).', '**S = (π/27)(10√10 − 1) ≈ 3.56**.'] },
   ]),
 
-  // ---------- 6. Improper integrals ----------
-  L('fp-imp-1', 'fm-u6-improper', '6.1', 'Improper integrals', 16, ['Calculus'], [
+  // ---------- 9. Improper integrals ----------
+  L('fp-imp-1', 'fm-u6-improper', '9.1', 'Improper integrals', 16, ['Calculus'], [
     'An integral is **improper** when a limit is infinite or when the integrand becomes infinite somewhere in the range. It is defined as a limit of proper integrals, for example ∫ (a to ∞) f(x) dx = lim (b → ∞) ∫ (a to b) f(x) dx. If the limit exists, the integral **converges** to it; otherwise it **diverges**.',
     '∫ (1 to ∞) x⁻ᵖ dx converges, to 1/(p − 1), when p > 1, and diverges when p ≤ 1. ∫ (0 to 1) x⁻ᵖ dx converges when p < 1.',
     'If the integrand is infinite inside the range, split the integral there and treat each part as a limit. ∫ (−1 to 1) 1/x² dx diverges, although the careless working [−1/x] (−1 to 1) gives −2, an impossible negative area.',
@@ -147,8 +147,8 @@ export const LESSONS_FU6A = [
     { q: 'Does ∫ (1 to ∞) 1/√x dx converge?', steps: ['∫ (1 to b) x^(−½) dx = [2√x] (1 to b) = 2√b − 2.', 'As b → ∞, 2√b − 2 grows without limit.', '**It diverges** (p = ½ ≤ 1).'] },
   ]),
 
-  // ---------- 7. Conic sections ----------
-  L('fp-con-1', 'fm-u6-conics', '7.1', 'The parabola and the ellipse', 18, ['Coordinate geometry'], [
+  // ---------- 10. Conic sections ----------
+  L('fp-con-1', 'fm-u6-conics', '10.1', 'The parabola and the ellipse', 18, ['Coordinate geometry'], [
     'A **conic** is the set of points P whose distance from a fixed point S, the **focus**, is e times their distance PM from a fixed line, the **directrix**: SP = e × PM. e is the **eccentricity**: e < 1 gives an ellipse, e = 1 a parabola and e > 1 a hyperbola.',
     '**The parabola y² = 4ax**: focus (a, 0), directrix x = −a, parametric point (at², 2at). The gradient at (at², 2at) is 1/t, so the **tangent is ty = x + at²** and the **normal is y + tx = 2at + at³**.',
     '**The ellipse x²/a² + y²/b² = 1** (a > b): **b² = a²(1 − e²)**, foci (±ae, 0), directrices x = ±a/e, parametric point (a cos θ, b sin θ). The tangent at (x₁, y₁) is xx₁/a² + yy₁/b² = 1. For every point of the ellipse, SP + S′P = 2a.',
@@ -161,7 +161,7 @@ export const LESSONS_FU6A = [
     { q: 'Find the eccentricity, the foci and the directrices of x²/25 + y²/9 = 1.', steps: ['a = 5, b = 3: 9 = 25(1 − e²), so e² = 16/25 and e = 4/5.', 'ae = 4 and a/e = 25/4.', '**e = 4/5; foci (±4, 0); directrices x = ±25/4.** Check at (0, 3): SP + S′P = 5 + 5 = 10 = 2a.'] },
   ]),
 
-  L('fp-con-2', 'fm-u6-conics', '7.2', 'The hyperbola and the rectangular hyperbola', 17, ['Coordinate geometry'], [
+  L('fp-con-2', 'fm-u6-conics', '10.2', 'The hyperbola and the rectangular hyperbola', 17, ['Coordinate geometry'], [
     '**The hyperbola x²/a² − y²/b² = 1**: **b² = a²(e² − 1)**, foci (±ae, 0), directrices x = ±a/e, **asymptotes y = ±(b/a)x**, and parametric point (a sec θ, b tan θ), or (a cosh u, b sinh u) for the right-hand branch. For every point, |SP − S′P| = 2a. The tangent at (x₁, y₁) is xx₁/a² − yy₁/b² = 1.',
     'The asymptotes come from replacing the 1 by 0: x²/a² − y²/b² = 0 gives y = ±(b/a)x. Far from O the curve runs close to them.',
     'A **rectangular hyperbola** has perpendicular asymptotes: a = b and e = √2. Turned through 45° it becomes **xy = c²**, with parametric point (ct, c/t) and the axes as asymptotes. Its **tangent at (ct, c/t) is x + t²y = 2ct**.',

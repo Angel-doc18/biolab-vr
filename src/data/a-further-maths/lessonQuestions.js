@@ -1,7 +1,9 @@
 // Extra questions for the end of the Further Mathematics lessons (0775), so
-// that every lesson ends with at least five questions on what it teaches.
+// that every lesson ends with at least five questions on what it teaches. The
+// Further Mechanics questions are in lessonQuestionsMech.js.
 //
 // Convention: the correct option is written first; options are shuffled when shown.
+import { MECH_QUESTIONS } from './lessonQuestionsMech';
 
 const Q = (q, a, why) => ({ q, a, why });
 
@@ -189,4 +191,5 @@ export const LESSON_QUESTIONS = {
     Q('[2 1; 4 2] maps the plane onto the line:', ['y = 2x', 'y = −2x', 'y = x/2', 'x = 0'], 'Every image is a multiple of (1, 2).'),
     Q('The kernel of [2 1; 4 2] is the line:', ['y = −2x', 'y = 2x', 'y = x', 'x = 0'], '2x + y = 0.'),
   ],
+  ...MECH_QUESTIONS,
 };

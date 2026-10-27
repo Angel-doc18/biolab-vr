@@ -1,6 +1,7 @@
 // Further Pure Mathematics topics of GCE Advanced Level Further Mathematics
 // (0775), following the 2026/2027 National Harmonized Scheme of Work for the
-// Lower Sixth and the Upper Sixth. (The scheme prints the code as "725",
+// Lower Sixth and the Upper Sixth. They are numbered together with the Further
+// Mechanics topics (furtherMech.js), which are taught in the same terms. (The scheme prints the code as "725",
 // which is Economics; Further Mathematics is 0775.) Where a topic is the same
 // as one of Pure Mathematics (0765/0770), it lists the same lessons and uses
 // the same quiz; the new further topics have their own.
@@ -86,7 +87,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-linear-systems',
-    n: 5,
+    n: 7,
     term: 1,
     seq: 2,
     group: 'structures',
@@ -101,7 +102,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-vectors',
-    n: 6,
+    n: 8,
     term: 1,
     seq: 2,
     group: 'geometry',
@@ -116,7 +117,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-lines-space',
-    n: 7,
+    n: 9,
     term: 1,
     seq: 2,
     group: 'geometry',
@@ -131,7 +132,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-planes',
-    n: 8,
+    n: 10,
     term: 1,
     seq: 2,
     group: 'geometry',
@@ -146,7 +147,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-polar',
-    n: 9,
+    n: 14,
     term: 2,
     seq: 3,
     group: 'geometry',
@@ -172,7 +173,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-complex',
-    n: 10,
+    n: 15,
     term: 2,
     seq: 3,
     group: 'numbers',
@@ -187,7 +188,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-de-moivre',
-    n: 11,
+    n: 18,
     term: 2,
     seq: 4,
     group: 'numbers',
@@ -213,7 +214,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-hyperbolic',
-    n: 12,
+    n: 19,
     term: 2,
     seq: 4,
     group: 'calculus',
@@ -239,7 +240,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-binomial',
-    n: 13,
+    n: 20,
     term: 2,
     seq: 4,
     group: 'algebra',
@@ -254,7 +255,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-hyperbolic-calculus',
-    n: 14,
+    n: 24,
     term: 3,
     seq: 5,
     group: 'calculus',
@@ -280,7 +281,7 @@ export const FP_L6 = [
   },
   {
     key: 'l6-papers',
-    n: 15,
+    n: 26,
     term: 3,
     seq: 6,
     group: 'exam',
@@ -289,8 +290,8 @@ export const FP_L6 = [
     ask: 'How is Further Mathematics examined?',
     title: 'Lower Sixth Revision: Further Mathematics Drills',
     short: 'Exam drills',
-    focus: 'The three GCE Further Mathematics papers, multiple-choice drills on logic, roots, vectors and polar curves, and structured answers on induction, roots of equations, planes and hyperbolic functions',
-    lessonIds: ['fp-l6-paper1', 'fp-l6-paper2'],
+    focus: 'The three GCE Further Mathematics papers, multiple-choice drills on logic, roots, vectors and polar curves, structured answers on induction, roots of equations, planes and hyperbolic functions, and mechanics practical work: collecting data, drawing graphs and estimating uncertainties',
+    lessonIds: ['fp-l6-paper1', 'fp-l6-paper2', 'fme-l6-paper'],
     quiz: [
       Q('GCE Further Mathematics has the code:', ['0775', '0725', '0765', '0770'], '0725 is Economics.'),
       Q('In 2026, Further Mathematics Paper 1 lasted:', ['1½ hours', '3 hours', '2½ hours', '2 hours'], 'Multiple choice.'),
@@ -413,7 +414,7 @@ export const FP_U6 = [
   },
   {
     key: 'u6-arc-surface',
-    n: 5,
+    n: 8,
     term: 1,
     seq: 2,
     group: 'calculus',
@@ -439,7 +440,7 @@ export const FP_U6 = [
   },
   {
     key: 'u6-improper',
-    n: 6,
+    n: 9,
     term: 1,
     seq: 2,
     group: 'calculus',
@@ -465,7 +466,7 @@ export const FP_U6 = [
   },
   {
     key: 'u6-conics',
-    n: 7,
+    n: 10,
     term: 1,
     seq: 2,
     group: 'geometry',
@@ -491,7 +492,7 @@ export const FP_U6 = [
   },
   {
     key: 'u6-de-first',
-    n: 8,
+    n: 13,
     term: 2,
     seq: 3,
     group: 'calculus',
@@ -517,7 +518,7 @@ export const FP_U6 = [
   },
   {
     key: 'u6-de-second',
-    n: 9,
+    n: 14,
     term: 2,
     seq: 3,
     group: 'calculus',
@@ -543,7 +544,7 @@ export const FP_U6 = [
   },
   {
     key: 'u6-numerical',
-    n: 10,
+    n: 17,
     term: 2,
     seq: 4,
     group: 'calculus',
@@ -569,7 +570,7 @@ export const FP_U6 = [
   },
   {
     key: 'u6-groups',
-    n: 11,
+    n: 18,
     term: 2,
     seq: 4,
     group: 'structures',
@@ -595,7 +596,7 @@ export const FP_U6 = [
   },
   {
     key: 'u6-papers',
-    n: 12,
+    n: 21,
     term: 3,
     seq: 5,
     group: 'exam',
@@ -604,8 +605,8 @@ export const FP_U6 = [
     ask: 'How should I prepare for the Further Mathematics papers?',
     title: 'Upper Sixth Revision: Further Mathematics Papers',
     short: 'Further exam drills',
-    focus: 'Paper 1 multiple-choice drills on eigenvalues, reduction formulae, groups and polar curves, and structured further pure questions on differential equations, linear transformations and conics, set out in full',
-    lessonIds: ['fp-u6-paper1', 'fp-u6-paper2'],
+    focus: 'Paper 1 multiple-choice drills on eigenvalues, reduction formulae, groups and polar curves, structured further pure questions on differential equations, linear transformations and conics, and further mechanics questions on vertical circles, oblique impacts, moments of inertia and stability, set out in full',
+    lessonIds: ['fp-u6-paper1', 'fp-u6-paper2', 'fme-u6-paper'],
     quiz: [
       Q('In 2026, Further Mathematics Papers 1 and 2 were sat on:', ['Saturday 13 June', 'Friday 12 June', 'Monday 15 June', 'Thursday 11 June'], 'Paper 3 followed on Monday 15 June.'),
       Q('The eigenvalues of [3 0; 1 2] are:', ['3 and 2', '3 and 1', '5', '6'], 'A triangular matrix shows them on its diagonal.'),

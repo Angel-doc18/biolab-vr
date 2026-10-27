@@ -20,8 +20,8 @@ const L = (id, unit, n, title, minutes, tags, body, figure, tip, check, terms, e
 });
 
 export const LESSONS_FU6B = [
-  // ---------- 8. First order differential equations ----------
-  L('fp-de-1', 'fm-u6-de-first', '8.3', 'Substitutions: homogeneous and Bernoulli equations', 18, ['Differential equations'], [
+  // ---------- 13. First order differential equations ----------
+  L('fp-de-1', 'fm-u6-de-first', '13.3', 'Substitutions: homogeneous and Bernoulli equations', 18, ['Differential equations'], [
     'Some first order equations become separable or linear after a substitution. A **homogeneous** equation dy/dx = F(y/x) uses **y = vx**, so that dy/dx = v + x dv/dx; the equation then separates in v and x.',
     'A **Bernoulli** equation dy/dx + P(x)y = Q(x)yⁿ (n ≠ 0, 1) becomes linear with **z = y¹⁻ⁿ**. Divide by yⁿ and use dz/dx = (1 − n)y⁻ⁿ dy/dx: the result is dz/dx + (1 − n)Pz = (1 − n)Q, solved with an integrating factor.',
     'An **exact** equation already has a left side that is the derivative of a product: x² dy/dx + 2xy = d/dx(x²y), so it integrates at once.',
@@ -34,8 +34,8 @@ export const LESSONS_FU6B = [
     { q: 'Solve dy/dx + y/x = xy².', steps: ['Bernoulli with n = 2: z = y⁻¹, dz/dx = −y⁻² dy/dx. Dividing by y²: −dz/dx + z/x = x, so dz/dx − z/x = −x.', 'Integrating factor e^(−ln x) = 1/x: d/dx(z/x) = −1, so z/x = −x + c and z = cx − x².', '**y = 1/(cx − x²)**.'] },
   ]),
 
-  // ---------- 9. Second order differential equations ----------
-  L('fp-de-2', 'fm-u6-de-second', '9.2', 'Particular integrals, special cases and forced oscillations', 18, ['Differential equations'], [
+  // ---------- 14. Second order differential equations ----------
+  L('fp-de-2', 'fm-u6-de-second', '14.2', 'Particular integrals, special cases and forced oscillations', 18, ['Differential equations'], [
     'For a y″ + b y′ + c y = f(x) the general solution is **y = complementary function + particular integral**. Try a particular integral of the same form as f(x): a polynomial of the same degree for a polynomial; ke^(px) for e^(px); A cos qx + B sin qx for cos qx or sin qx.',
     '**Special cases**: if the trial PI is already part of the CF, multiply it by x (by x² if p is a repeated root of the auxiliary equation). For y″ − 3y′ + 2y = e^(2x), 2 is a root of m² − 3m + 2 = 0, so try kxe^(2x).',
     '**Forced oscillations**: ẍ + ω²x = F cos pt. For p ≠ ω the PI is (F/(ω² − p²)) cos pt. For p = ω, **resonance**, the PI is (F/(2ω)) t sin ωt, which grows without limit. With damping, ẍ + 2kẋ + ω²x = F cos pt, the CF dies away and the motion settles to the PI, the **steady state**.',
@@ -48,8 +48,8 @@ export const LESSONS_FU6B = [
     { q: 'Solve ẍ + 4x = 3 sin t, with x = 0 and ẋ = 0 when t = 0.', steps: ['CF: A cos 2t + B sin 2t. Try C sin t: −C sin t + 4C sin t = 3 sin t, so C = 1.', 'x = A cos 2t + B sin 2t + sin t. x(0) = 0 gives A = 0; ẋ = 2B cos 2t + cos t, so 2B + 1 = 0 and B = −½.', '**x = sin t − ½ sin 2t**.'] },
   ]),
 
-  // ---------- 10. Numerical methods ----------
-  L('fp-num-1', 'fm-u6-numerical', '10.1', 'Euler’s method and the Taylor series method', 17, ['Numerical methods'], [
+  // ---------- 17. Numerical methods ----------
+  L('fp-num-1', 'fm-u6-numerical', '17.1', 'Euler’s method and the Taylor series method', 17, ['Numerical methods'], [
     'To solve dy/dx = f(x, y) with y(x₀) = y₀ numerically, move along the x-axis in steps of h. **Euler’s method** follows the tangent at the start of each step: **yₙ₊₁ = yₙ + h f(xₙ, yₙ)**, xₙ₊₁ = xₙ + h.',
     'The error in each step is roughly proportional to h², and the total error over a fixed range roughly proportional to h: halving h roughly halves the error, at the cost of twice as many steps.',
     'The **Taylor series method** uses more terms: y(x₀ + h) ≈ y₀ + hy′₀ + (h²/2!)y″₀ + (h³/3!)y‴₀, where y″ and y‴ come from differentiating the differential equation. Each extra term makes the result much more accurate.',
@@ -62,7 +62,7 @@ export const LESSONS_FU6B = [
     { q: 'For the same equation, use the Taylor series method with one step h = 0.2 and terms up to h³.', steps: ['y′ = x + y, so y′(0) = 1; y″ = 1 + y′, so y″(0) = 2; y‴ = y″, so y‴(0) = 2.', 'y(0.2) ≈ 1 + 0.2(1) + (0.04/2)(2) + (0.008/6)(2).', '**y(0.2) ≈ 1.24267**, within 0.00014 of the exact 1.24281.'] },
   ]),
 
-  L('fp-num-2', 'fm-u6-numerical', '10.2', 'Simpson’s rule and bounds for an integral', 17, ['Numerical methods'], [
+  L('fp-num-2', 'fm-u6-numerical', '17.2', 'Simpson’s rule and bounds for an integral', 17, ['Numerical methods'], [
     '**Simpson’s rule**, with an even number n of strips of width h: **∫ (a to b) y dx ≈ (h/3)[y₀ + yₙ + 4(y₁ + y₃ + … + yₙ₋₁) + 2(y₂ + y₄ + … + yₙ₋₂)]**. It fits a parabola through each three consecutive points, and it is exact for cubics.',
     'Halving h divides the error of Simpson’s rule by about 16 (the error is roughly proportional to h⁴), against about 4 for the trapezium rule (proportional to h²).',
     '**Bounds from rectangles**: for an increasing function, rectangles with their left-hand heights lie under the curve and give a lower bound; with their right-hand heights they lie above it and give an upper bound. The true value lies between. For a decreasing function the roles swap.',
@@ -75,8 +75,8 @@ export const LESSONS_FU6B = [
     { q: 'Find lower and upper bounds for ∫ (1 to 2) 1/x dx with 4 rectangles.', steps: ['1/x is decreasing, so right-hand heights give a lower bound: 0.25(0.8 + 0.666667 + 0.571429 + 0.5) = 0.6345.', 'Left-hand heights give an upper bound: 0.25(1 + 0.8 + 0.666667 + 0.571429) = 0.7595.', '**0.6345 < ∫ (1 to 2) 1/x dx < 0.7595**; the true value is ln 2 = 0.6931.'] },
   ]),
 
-  // ---------- 11. Group theory ----------
-  L('fp-grp-1', 'fm-u6-groups', '11.1', 'Binary operations and the group axioms', 18, ['Abstract algebra'], [
+  // ---------- 18. Group theory ----------
+  L('fp-grp-1', 'fm-u6-groups', '18.1', 'Binary operations and the group axioms', 18, ['Abstract algebra'], [
     'A **binary operation** ∗ on a set G combines any two elements a and b to give a ∗ b. G is **closed** under ∗ when a ∗ b is always in G.',
     '(G, ∗) is a **group** when four axioms hold: **closure**; **associativity**, (a ∗ b) ∗ c = a ∗ (b ∗ c); an **identity** e with a ∗ e = e ∗ a = a for every a; and an **inverse** a⁻¹ for every a, with a ∗ a⁻¹ = a⁻¹ ∗ a = e. If also a ∗ b = b ∗ a for all a and b, the group is **abelian**.',
     'Examples: (ℤ, +) is a group with identity 0; (ℤ, ×) is not, since 2 has no inverse in ℤ; the non-zero real numbers form a group under ×; {0, 1, 2, 3} under addition modulo 4 is a group; {1, 3, 5, 7} under multiplication modulo 8 is a group in which every element is its own inverse.',
@@ -89,7 +89,7 @@ export const LESSONS_FU6B = [
     { q: 'Do the 2 × 2 matrices with determinant 1 form a group under matrix multiplication?', steps: ['Closure: det(AB) = det A × det B = 1. Matrix multiplication is associative. The identity I has determinant 1.', 'det A = 1 ≠ 0, so A⁻¹ exists, and det(A⁻¹) = 1/det A = 1.', '**Yes, it is a group**, and it is not abelian, since AB and BA usually differ.'] },
   ]),
 
-  L('fp-grp-2', 'fm-u6-groups', '11.2', 'Cyclic groups, subgroups, Lagrange’s theorem and isomorphism', 18, ['Abstract algebra'], [
+  L('fp-grp-2', 'fm-u6-groups', '18.2', 'Cyclic groups, subgroups, Lagrange’s theorem and isomorphism', 18, ['Abstract algebra'], [
     'A group is **cyclic** when one element g **generates** it: every element is a power of g. The cube roots of unity {1, ω, ω²} under multiplication are cyclic, generated by ω; addition modulo n is cyclic, generated by 1. Every cyclic group is abelian.',
     'A **subgroup** is a subset that is itself a group under the same operation. **Lagrange’s theorem**: in a finite group, the order of a subgroup divides the order of the group. So the order of every element divides the order of the group, and a group of prime order is cyclic.',
     '**Permutation groups**: the symmetries of an equilateral triangle (three rotations and three reflections) form a group of order 6, the same as the permutations of three objects. It is not abelian: a reflection followed by a rotation is not the same as the rotation followed by the reflection.',
@@ -102,8 +102,8 @@ export const LESSONS_FU6B = [
     { q: 'Explain why a group of order 6 cannot have a subgroup of order 4.', steps: ['By Lagrange’s theorem the order of a subgroup divides the order of the group.', '4 does not divide 6.', '**No subgroup of order 4 is possible.**'] },
   ]),
 
-  // ---------- 12. The papers ----------
-  L('fp-u6-paper1', 'fm-u6-papers', '12.1', 'Paper 1 drills: eigenvalues, reduction formulae, groups and polar curves', 14, ['Examination'], [
+  // ---------- 21. The papers ----------
+  L('fp-u6-paper1', 'fm-u6-papers', '21.1', 'Paper 1 drills: eigenvalues, reduction formulae, groups and polar curves', 14, ['Examination'], [
     'Paper 1 (1½ hours, multiple choice) covers the whole syllabus. In 2026 it was sat with Paper 2 on Saturday 13 June, and Paper 3 followed on Monday 15 June.',
     'Fast checks that save time: the eigenvalues add to the trace and multiply to the determinant; Iₙ = ((n − 1)/n)Iₙ₋₂ for sinⁿx and cosⁿx on [0, π/2]; the order of an element divides the order of the group; polar curves meet where their values of r are equal, but the pole must be checked separately.',
     'For conics: b² = a²(1 − e²) for an ellipse and b² = a²(e² − 1) for a hyperbola. For series: write only the first two or three terms.',
@@ -117,7 +117,7 @@ export const LESSONS_FU6B = [
     { q: 'Find ∫ (0 to π/2) cos⁴x dx.', steps: ['I₄ = (3/4)I₂ = (3/4)(1/2)I₀.', 'I₀ = π/2.', '**I₄ = 3π/16**.'] },
   ]),
 
-  L('fp-u6-paper2', 'fm-u6-papers', '12.2', 'Structured questions: differential equations, transformations and conics', 18, ['Examination'], [
+  L('fp-u6-paper2', 'fm-u6-papers', '21.2', 'Structured questions: differential equations, transformations and conics', 18, ['Examination'], [
     'Structured questions reward a complete method. For a second order equation, write the auxiliary equation, the complementary function, the trial particular integral and its substitution, then the general solution, and only then apply the initial conditions.',
     'For a linear transformation, state the matrix and its determinant and say what the determinant means (the area scale factor; singular or not), then find the image or the kernel by solving equations.',
     'For conics, sketch the curve with its foci and directrices or asymptotes marked, and use the parameter to find tangents and normals.',
