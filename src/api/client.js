@@ -1,10 +1,10 @@
-// HTTPS client for the Klass8 API (the Worker keeps its original address). Tokens live in the OS keychain
+// HTTPS client for the Klass8 API, on Klass8's own server. Tokens live in the OS keychain
 // (expo-secure-store); the access token is short-lived and refreshed on demand.
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { knownOffline } from '../lib/online';
 
-export const API_BASE = (process.env.EXPO_PUBLIC_API_URL || process.env.EXPO_PUBLIC_AI_PROXY_URL || 'https://biospatial-vr-ai.biospatial-vr.workers.dev').replace(/\/+$/, '');
+export const API_BASE = (process.env.EXPO_PUBLIC_API_URL || 'https://klass8.ebenesaid.com').replace(/\/+$/, '');
 
 const KEY = 'biospatial.session';
 const memory = { session: null };
