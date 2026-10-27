@@ -1,0 +1,4 @@
+# Files that run or are read on the Linux server keep Unix line endings.
+worker/** text=auto eol=lf
+website/** text=auto eol=lf
+*.sh text eol=lf
