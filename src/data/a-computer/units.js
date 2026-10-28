@@ -1,9 +1,12 @@
-// GCE Advanced Level Computer Science (0795) by class: the Lower Sixth topics
-// of the 2026/2027 harmonised scheme of work. Unit ids start with "acs-".
+// GCE Advanced Level Computer Science (0795) by class: the Lower Sixth and
+// Upper Sixth topics of the 2026/2027 harmonised scheme of work. Unit ids start
+// with "acs-".
 import { UNITS_L6 } from './unitsL6';
+import { UNITS_U6 } from './unitsU6';
 
 export const GROUPS = [
   { id: 'data', en: 'Data representation', fr: 'Représentation des données' },
+  { id: 'databases', en: 'Databases', fr: 'Bases de données' },
   { id: 'systems', en: 'Computer systems and architecture', fr: 'Systèmes informatiques et architecture' },
   { id: 'software', en: 'System software', fr: 'Logiciels système' },
   { id: 'networks', en: 'Networks and communication', fr: 'Réseaux et communication' },
@@ -14,4 +17,4 @@ export const GROUPS = [
   { id: 'exam', en: 'Examination practice', fr: 'Préparation aux examens' },
 ];
 
-export const units = [...UNITS_L6];
+export const units = [...UNITS_L6, ...UNITS_U6];

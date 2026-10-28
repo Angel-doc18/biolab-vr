@@ -188,8 +188,8 @@ function BstArt() {
 }
 
 // ---------- a weighted graph and its adjacency matrix ----------
-const V = { A: [36, 96], B: [116, 32], C: [116, 160], D: [200, 86], E: [236, 160] };
-const GE = [
+export const V = { A: [36, 96], B: [116, 32], C: [116, 160], D: [200, 86], E: [236, 160] };
+export const GE = [
   ['A', 'B', 4],
   ['A', 'C', 2],
   ['B', 'D', 5],
@@ -197,7 +197,7 @@ const GE = [
   ['C', 'E', 10],
   ['D', 'E', 2],
 ];
-const NAMES = ['A', 'B', 'C', 'D', 'E'];
+export const NAMES = ['A', 'B', 'C', 'D', 'E'];
 function weight(a, b) {
   const e = GE.find(([p, q]) => (p === a && q === b) || (p === b && q === a));
   return e ? e[2] : 0;
@@ -354,7 +354,7 @@ function BigOArt() {
 }
 
 // ---------- UML class boxes ----------
-function ClassBox({ x, y, w, name, attrs = [], methods = [], fill = SKY, object }) {
+export function ClassBox({ x, y, w, name, attrs = [], methods = [], fill = SKY, object }) {
   const hA = attrs.length * 14 + 6;
   const hM = methods.length * 14 + 6;
   return (
@@ -381,7 +381,7 @@ function ClassBox({ x, y, w, name, attrs = [], methods = [], fill = SKY, object 
   );
 }
 // The hollow triangle of inheritance, its tip at (x, y), with lines to the subclasses.
-function Inherit({ x, y, kids, yKids }) {
+export function Inherit({ x, y, kids, yKids }) {
   const bar = y + 22;
   return (
     <G>

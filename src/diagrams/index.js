@@ -54,6 +54,7 @@ import { A_FURTHER } from './aFurther';
 import { A_FURTHER_MECH } from './aFurtherMech';
 import { A_COMPUTER } from './aComputer';
 import { A_COMPUTER_2 } from './aComputer2';
+import { A_COMPUTER_3 } from './aComputer3';
 import { LOGIC_2 } from './logic2';
 import { COMPUTER } from './computer';
 import { GEOGRAPHY } from './geography';
@@ -74,7 +75,7 @@ import { PHYSICS_4 } from './physics4';
 import { PHYSICS_A } from './physicsA';
 import { FACTS } from './facts';
 
-const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...MATHS_3, ...ENGLISH, ...ENGLISH_2, ...FRENCH, ...FRENCH_2, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...LOGIC_2, ...A_BIOLOGY, ...A_BIOLOGY_2, ...CHEMISTRY_L6, ...CHEMISTRY_L6B, ...CHEMISTRY_U6, ...CHEMISTRY_U6B, ...PHYSICS_L6, ...PHYSICS_U6, ...A_MATHS, ...A_MATHS_2, ...A_MATHS_3, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER, ...A_FURTHER_MECH, ...A_COMPUTER, ...A_COMPUTER_2, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
+const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...MATHS_3, ...ENGLISH, ...ENGLISH_2, ...FRENCH, ...FRENCH_2, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...LOGIC_2, ...A_BIOLOGY, ...A_BIOLOGY_2, ...CHEMISTRY_L6, ...CHEMISTRY_L6B, ...CHEMISTRY_U6, ...CHEMISTRY_U6B, ...PHYSICS_L6, ...PHYSICS_U6, ...A_MATHS, ...A_MATHS_2, ...A_MATHS_3, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER, ...A_FURTHER_MECH, ...A_COMPUTER, ...A_COMPUTER_2, ...A_COMPUTER_3, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
 export const DIAGRAMS = Object.fromEntries(Object.entries(ALL).map(([k, s]) => [k, FACTS[k] && !s.facts ? { ...s, facts: FACTS[k] } : s]));
 
 // The parts the tutor teaches, in order: each named label (these light up on the

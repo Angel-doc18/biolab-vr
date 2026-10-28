@@ -3,6 +3,7 @@
 //
 // Convention: the correct option is written first; options are shuffled when shown.
 import { QUESTIONS_B } from './lessonQuestionsB';
+import { QUESTIONS_U6 } from './lessonQuestionsU6';
 
 const Q = (q, a, why) => ({ q, a, why });
 
@@ -129,4 +130,5 @@ export const LESSON_QUESTIONS = {
     Q('The body that regulates telecommunications operators in Cameroon is:', ['ART', 'ANTIC', 'MINESEC', 'GCE Board'], 'The Telecommunications Regulatory Board.'),
   ],
   ...QUESTIONS_B,
+  ...QUESTIONS_U6,
 };
