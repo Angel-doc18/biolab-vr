@@ -3,6 +3,7 @@
 //
 // Convention: the correct option is written first; options are shuffled when shown.
 import { QUESTIONS_B } from './lessonQuestionsB';
+import { QUESTIONS_U6 } from './lessonQuestionsU6';
 
 const Q = (q, a, why) => ({ q, a, why });
 
@@ -117,4 +118,5 @@ export const LESSON_QUESTIONS = {
     Q('ping reports packet loss when:', ['some echo requests get no reply', 'the network is fast', 'DNS works', 'the cable is new'], 'A sign of a poor link.'),
   ],
   ...QUESTIONS_B,
+  ...QUESTIONS_U6,
 };
