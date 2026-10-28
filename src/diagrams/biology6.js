@@ -10,7 +10,8 @@ import { columnsSpec, cycleSpec, flowSpec } from './charts';
 const O = '#33414d';
 
 // ---------- a genetic cross (parents, gametes, offspring square) ----------
-function crossSpec(title, { names, genotypes, left, top, cells, fills, ratio }) {
+// `note` is one more fact to teach, with the spot the pointer rests on.
+function crossSpec(title, { names, genotypes, left, top, cells, fills, ratio, note }) {
   const art = () => {
     const cell = (x, y, t) => (
       <G key={`${x}${y}`}>
@@ -74,7 +75,15 @@ function crossSpec(title, { names, genotypes, left, top, cells, fills, ratio }) 
       </G>
     );
   };
-  return { title, w: 360, h: 210, art, labels: [] };
+  const facts = [
+    `The parents are ${names[0].toLowerCase()} (${genotypes[0]}) and ${names[1].toLowerCase()} (${genotypes[1]}).`,
+    `Each gamete carries one allele: ${left.join(' or ')} from the first parent and ${top.join(' or ')} from the second.`,
+    `The Punnett square joins every gamete with every other: ${cells.join(', ')}.`,
+    `So the offspring are ${ratio}.`,
+    ...(note ? [note[0]] : []),
+  ];
+  const points = [[226, 52], [184, 84], [240, 172], [226, 202], ...(note ? [note[1]] : [])];
+  return { title, w: 360, h: 210, art, labels: [], facts, points };
 }
 
 // ---------- mitosis ----------
@@ -251,6 +260,7 @@ export const BIOLOGY_6 = {
     cells: ['RR', 'RW', 'RW', 'WW'],
     fills: { RR: '#f6c7bf', RW: '#fbe1ec', WW: '#ffffff' },
     ratio: '1 red : 2 pink : 1 white',
+    note: ['Neither allele is dominant, so RW flowers are pink, between red and white.', [272, 124]],
   }),
   'sex-determination': crossSpec('How the sex of a child is decided', {
     names: ['Mother', 'Father'],
@@ -260,6 +270,7 @@ export const BIOLOGY_6 = {
     cells: ['XX', 'XY', 'XX', 'XY'],
     fills: { XX: '#fbe1ec', XY: '#e6eef8' },
     ratio: '1 girl : 1 boy (a 50% chance each time)',
+    note: ['The mother can give only X; the father gives X or Y, so the father’s sperm decides the sex.', [284, 84]],
   }),
   'sex-linkage': crossSpec('Haemophilia: a carrier mother and a normal father', {
     names: ['Carrier mother', 'Normal father'],
@@ -269,6 +280,7 @@ export const BIOLOGY_6 = {
     cells: ['XH XH', 'XH Y', 'XH Xh', 'Xh Y'],
     fills: { 'XH XH': '#e6f1df', 'XH Y': '#e6f1df', 'XH Xh': '#fff4d6', 'Xh Y': '#f8d7d4' },
     ratio: 'normal girl, normal boy, carrier girl, haemophiliac boy',
+    note: ['The haemophilia allele h is on the X chromosome, so a son who gets the mother’s Xh has the disease.', [272, 156]],
   }),
   'variation-graphs': {
     title: 'Continuous and discontinuous variation in a class',

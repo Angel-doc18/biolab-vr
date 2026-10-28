@@ -45,6 +45,10 @@ npx expo start          # scan the QR with Expo Go (SDK 58)
 
 Point the app at a local API with `EXPO_PUBLIC_API_URL=http://localhost:8787`.
 
+After adding or changing a diagram or its facts, run `node tools/diagram-points.js`: it works out where
+the teacher's pointer rests for each fact and writes `src/diagrams/points.js`. To watch the pointer
+walk through a figure, open the web preview with `?gallery=<diagram key>&tour`.
+
 ## API (Klass8's own server)
 
 Live at https://klass8.ebenesaid.com/v1/ (`GET /v1/health` shows which services are configured).

@@ -92,6 +92,20 @@ function pointerAngle([, tx, ty, px, py], f, len) {
   return deg(prefer.find(inside) ?? prefer[0]);
 }
 
+// Where the handle goes when the pointer rests on a spot with no label (a fact
+// being explained): below the spot where possible, so the words above it stay
+// readable, and inside the frame.
+function spotAngle([px, py], f, len) {
+  const deg = (d) => (d * Math.PI) / 180;
+  const inside = (d) => {
+    const ex = px + Math.cos(deg(d)) * len;
+    const ey = py + Math.sin(deg(d)) * len;
+    return ex >= f.x && ex <= f.x + f.w && ey >= f.y && ey <= f.y + f.h;
+  };
+  const prefer = [50, 130, 20, 160, -40, -140];
+  return deg(prefer.find(inside) ?? prefer[0]);
+}
+
 // state: 'lit' (being explained), 'dim' (another label is) or undefined.
 function Label({ text, tx, ty, px, py, size = SIZE, state, onPress }) {
   const lines = String(text).split('\n');
@@ -146,15 +160,17 @@ function frame(w, h, list) {
   return { x: x0 - 3, y: y0 - 2, w: x1 - x0 + 6, h: y1 - y0 + 4 };
 }
 
-// active: index of the label being explained (the others fade); onLabel(i) when
-// a label with a ruled line is tapped.
-export function DiagramView({ spec, maxHeight, labels = true, active = null, onLabel, state }) {
+// active: index of the label being explained (the others fade); point: the
+// [x, y] spot of a fact being explained, for parts that have no label;
+// onLabel(i) when a label with a ruled line is tapped.
+export function DiagramView({ spec, maxHeight, labels = true, active = null, point = null, onLabel, state }) {
   if (!spec) return null;
   const { w, h, art, labels: list = [] } = spec;
   const f = labels ? frame(w, h, list) : { x: 0, y: 0, w, h };
   // The teacher's pointer rests on the part being explained.
   const target = labels && active != null && list[active] && list[active][3] != null ? list[active] : null;
   const len = Math.max(40, Math.min(84, Math.min(f.w, f.h) * 0.26));
+  const aim = target ? { x: target[3], y: target[4], a: pointerAngle(target, f, len) } : point ? { x: point[0], y: point[1], a: spotAngle(point, f, len) } : null;
   return (
     <View style={{ width: '100%', aspectRatio: f.w / f.h, maxHeight, alignSelf: 'center' }}>
       <Svg width="100%" height="100%" viewBox={`${f.x} ${f.y} ${f.w} ${f.h}`}>
@@ -173,7 +189,7 @@ export function DiagramView({ spec, maxHeight, labels = true, active = null, onL
               onPress={onLabel && px != null ? () => onLabel(i) : undefined}
             />
           ))}
-        {!!target && <Pointer x={target[3]} y={target[4]} a={pointerAngle(target, f, len)} len={len} ring={Math.max(5, len * 0.14)} />}
+        {!!aim && <Pointer x={aim.x} y={aim.y} a={aim.a} len={len} ring={Math.max(5, len * 0.14)} />}
       </Svg>
     </View>
   );

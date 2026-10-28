@@ -75,9 +75,14 @@ import { CHEMISTRY_5 } from './chemistry5';
 import { PHYSICS_4 } from './physics4';
 import { PHYSICS_A } from './physicsA';
 import { FACTS } from './facts';
+import { POINTS } from './points';
 
 const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...MATHS_3, ...ENGLISH, ...ENGLISH_2, ...FRENCH, ...FRENCH_2, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...LOGIC_2, ...A_BIOLOGY, ...A_BIOLOGY_2, ...CHEMISTRY_L6, ...CHEMISTRY_L6B, ...CHEMISTRY_U6, ...CHEMISTRY_U6B, ...PHYSICS_L6, ...PHYSICS_U6, ...A_MATHS, ...A_MATHS_2, ...A_MATHS_3, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER, ...A_FURTHER_MECH, ...A_COMPUTER, ...A_COMPUTER_2, ...A_COMPUTER_3, ...A_ICT, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
-export const DIAGRAMS = Object.fromEntries(Object.entries(ALL).map(([k, s]) => [k, FACTS[k] && !s.facts ? { ...s, facts: FACTS[k] } : s]));
+// Each fact gets the spot the teacher's pointer rests on while it is explained:
+// worked out exactly by the chart builders, and for drawn figures from the
+// generated table in points.js (made by tools/diagram-points.js).
+const withFacts = (s, k) => (FACTS[k] && !s.facts ? { ...s, facts: FACTS[k] } : s);
+export const DIAGRAMS = Object.fromEntries(Object.entries(ALL).map(([k, s]) => [k, POINTS[k] ? { ...withFacts(s, k), points: POINTS[k] } : withFacts(s, k)]));
 
 // The parts the tutor teaches, in order: each named label (these light up on the
 // drawing), then what the drawing shows in words.
@@ -104,6 +109,8 @@ export function Diagram({ id, caption = true, maxHeight, explain = false, subjec
   const lineIdx = labelIndexes(spec); // label index of each named structure
   const seg = voice.index >= 0 ? segments[voice.index] : null;
   const active = seg?.at != null && seg.at < names.length ? lineIdx[seg.at] : null;
+  // A fact has no label, so the pointer rests on its spot on the drawing.
+  const point = seg?.at != null && seg.at >= names.length ? spec.points?.[seg.at - names.length] || null : null;
 
   // Without a connection (or before a parent has approved the account) the parts
   // are still read out, which is better than nothing.
@@ -148,7 +155,7 @@ export function Diagram({ id, caption = true, maxHeight, explain = false, subjec
 
   return (
     <V c="gap-1">
-      <DiagramView spec={spec} maxHeight={maxHeight} active={active} onLabel={teach && names.length ? onLabel : undefined} />
+      <DiagramView spec={spec} maxHeight={maxHeight} active={active} point={point} onLabel={teach && names.length ? onLabel : undefined} />
       {caption && !!spec.title && (
         <T c="font-body-sm text-body-sm text-on-surface-variant text-center" style={{ lineHeight: 18 }}>
           {spec.title}

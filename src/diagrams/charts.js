@@ -3,7 +3,8 @@
 // returns a diagram spec { title, w, h, art, labels, facts }. Text in a box is
 // given with "\n" for line breaks, so nothing depends on measuring text. `facts`
 // says in words what the chart shows, so the tutor can teach a chart that has
-// no ruled labels.
+// no ruled labels; `points` gives, for each fact, the spot the teacher's
+// pointer rests on while that fact is explained.
 import { G, Line, Path, Rect } from 'react-native-svg';
 import { Head, Txt } from './Diagram';
 
@@ -71,7 +72,8 @@ export function flowSpec(title, steps, { perRow = 3, boxW = 104, boxH = 52, gap 
       )}
     </G>
   );
-  return { title, w, h, art, labels: [], facts: [...steps.map((s, i) => `Step ${i + 1}: ${flat(s)}`), ...(note ? [note] : [])] };
+  const points = [...pos.map((p) => [p.x + boxW / 2, p.y + boxH - 4]), ...(note ? [[w / 2, h - 4]] : [])];
+  return { title, w, h, art, labels: [], facts: [...steps.map((s, i) => `Step ${i + 1}: ${flat(s)}`), ...(note ? [note] : [])], points };
 }
 
 // Stages that repeat, arranged round a circle with arrows between them.
@@ -117,7 +119,8 @@ export function cycleSpec(title, stages, { r = 78, boxW = 104, boxH = 44, centre
       )}
     </G>
   );
-  return { title, w, h, art, labels: [], facts: [...stages.map((s, i) => `Stage ${i + 1}: ${flat(s)}`), `After stage ${n}, the cycle starts again at stage 1.`] };
+  const points = [...pts.map((p) => [p.x, p.y + boxH / 2 - 4]), [pts[0].x, pts[0].y + boxH / 2 - 4]];
+  return { title, w, h, art, labels: [], facts: [...stages.map((s, i) => `Stage ${i + 1}: ${flat(s)}`), `After stage ${n}, the cycle starts again at stage 1.`], points };
 }
 
 // A root that divides into groups, each with a list of examples underneath.
@@ -149,7 +152,8 @@ export function treeSpec(title, root, groups, { colW = 104, gap = 10, itemH = 15
       ))}
     </G>
   );
-  return { title, w, h, art, labels: [], facts: groups.map((g) => `${flat(g.name)}: for example ${g.items.join(', ')}`) };
+  const points = groups.map((_, i) => [xs[i] + colW / 2, groupY + groupH - 4]);
+  return { title, w, h, art, labels: [], facts: groups.map((g) => `${flat(g.name)}: for example ${g.items.join(', ')}`), points };
 }
 
 // Side-by-side columns, each with a heading and a list (for comparisons).
@@ -188,5 +192,6 @@ export function columnsSpec(title, columns, { colW = 110, gap = 10, itemH = 15, 
         ))}
     </G>
   );
-  return { title, w, h, art, labels: [], facts: columns.map((c) => `${flat(c.head)}: ${c.items.join('; ')}`) };
+  const points = columns.map((_, i) => [xs[i] + colW / 2, 40]);
+  return { title, w, h, art, labels: [], facts: columns.map((c) => `${flat(c.head)}: ${c.items.join('; ')}`), points };
 }
