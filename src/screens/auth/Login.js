@@ -5,6 +5,7 @@ import { Field, Label } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { routeAfterAuth } from '../../navigation/routes';
+import { NeedsInternet } from '../../ui/Offline';
 
 // Accepts 6XXXXXXXX, +237 6XX..., or an email address.
 function normaliseIdentifier(v) {
@@ -84,6 +85,7 @@ export default function Login({ navigation }) {
             maxLength={128}
           />
         </V>
+        <NeedsInternet what={{ en: 'log in', fr: 'vous connecter' }} />
         <ErrorNote error={error} />
         <Cta variant="dark" icon={null} label={L('Log in', 'Se connecter')} loading={busy} onPress={submit} c="mt-space-xs" />
       </V>

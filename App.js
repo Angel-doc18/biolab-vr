@@ -10,6 +10,7 @@ import { Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800Ext
 import { AppProvider, useApp } from './src/state/store';
 import { LangContext } from './src/i18n';
 import AppNavigator from './src/navigation/AppNavigator';
+import { OfflineBanner } from './src/ui/Offline';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -36,6 +37,7 @@ function Root() {
   return (
     <LangContext.Provider value={prefs.lang}>
       <AppNavigator />
+      <OfflineBanner />
       <StatusBar style="dark" />
     </LangContext.Provider>
   );

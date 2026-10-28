@@ -13,6 +13,7 @@ import { focusUnit } from '../../state/selectors';
 import { unitById, unitsFor, unitsShown } from '../../data/units';
 import { contextFor } from '../../lib/tutorContext';
 import { subjectName } from '../../data/subjects';
+import { NeedsInternet } from '../../ui/Offline';
 
 // The topic an answer is about: the topic of this subject whose key words the
 // question and answer mention most.
@@ -261,6 +262,7 @@ export default function Tutor({ navigation, route }) {
         </ScrollView>
 
         <V c="bg-surface-container-lowest px-margin pt-space-sm gap-1.5 border-t border-surface-container" style={{ paddingBottom: insets.bottom + 8 }}>
+          <NeedsInternet what={{ en: 'ask the tutor a new question', fr: 'poser une nouvelle question au tuteur' }} />
           <V c="flex-row items-end gap-space-xs">
             <Input
               c="flex-1 min-h-[44px] max-h-[120px] bg-surface-container-low px-3 py-2.5 rounded-xl text-body-md"

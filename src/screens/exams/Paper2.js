@@ -17,6 +17,7 @@ import { paper1Plan } from '../../lib/exam';
 import { buildPaper2, p2ById, paper2Config, paper2Total, questionMarks } from '../../data/paper2';
 import { subjectName } from '../../data/subjects';
 import { pickAnswerPhoto } from '../../lib/photo';
+import { NeedsInternet } from '../../ui/Offline';
 
 // Biology keeps its original key so an unfinished paper survives the update.
 const keyFor = (subject) => (subject === 'biology' ? 'bs:p2:session:v2' : `bs:p2:session:v2:${subject}`);
@@ -272,6 +273,7 @@ export default function Paper2({ navigation, route }) {
                 </T>
               </V>
             )}
+            {phase !== 'results' && <NeedsInternet what={{ en: 'have Paper 2 marked', fr: 'faire corriger l’épreuve 2' }} />}
             <ErrorNote error={error} />
             {phase === 'results' && <ScoreCard awarded={awarded} max={TOTAL} L={L} />}
             {!pro && phase === 'results' && (

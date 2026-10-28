@@ -6,6 +6,7 @@ import { get, post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { OPEN_FOR_TESTING, PLANS as LOCAL_PLANS, fcfa } from '../../data/plan';
+import { NeedsInternet } from '../../ui/Offline';
 
 // Builds published on Google Play sell nothing inside the app (Play's payments
 // policy); students there unlock the course with a voucher from their school.
@@ -235,6 +236,7 @@ export default function Paywall({ navigation, route }) {
                 {L('A payment request appears on this phone. Approve it there with your PIN; never type your PIN in this app. Payments are handled by Fapshi.', 'Une demande de paiement apparaît sur ce téléphone. Validez-la avec votre code PIN ; ne tapez jamais votre PIN dans l’application. Paiements traités par Fapshi.')}
               </T>
               {!open && <T c="font-body-sm text-body-sm text-error">{L('Mobile money payments are not open yet. A school voucher works now.', 'Les paiements mobile money ne sont pas encore ouverts. Un code d’école fonctionne déjà.')}</T>}
+              <NeedsInternet what={{ en: 'pay', fr: 'payer' }} />
               <ErrorNote error={error} />
               <Cta variant="dark" icon={null} label={`${L('Pay', 'Payer')} ${amount ? fcfa(amount) : ''}`} loading={busy && !voucher} disabled={!open} onPress={pay} />
             </V>

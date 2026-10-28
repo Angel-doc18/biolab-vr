@@ -1,9 +1,13 @@
-// Downloads and storage: what the app keeps on this phone, and controls to free it.
+// Downloads and storage: the offline pack, what the app keeps on this phone,
+// and controls to free it.
 import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { P, T, V } from '../../ui/kit';
-import { Screen, StackHeader, useToast } from '../../ui/chrome';
+import { Bar, P, T, V } from '../../ui/kit';
+import { Cta, Screen, StackHeader, useToast } from '../../ui/chrome';
+import { deleteKeptExplanations, keptExplanationsSize } from '../../lib/explain';
+import { packLive, packState, startPack, stopPack, watchPack } from '../../lib/offlinePack';
+import { useOnline } from '../../lib/online';
 import { Toggle } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
@@ -37,8 +41,103 @@ function Row({ title, sub, action, onAction, first }) {
   );
 }
 
+const ago = (t, L) => {
+  const d = Math.floor((Date.now() - t) / 86400000);
+  return d <= 0 ? L('today', 'aujourd’hui') : d === 1 ? L('yesterday', 'hier') : L(`${d} days ago`, `il y a ${d} jours`);
+};
+
+// Download the teacher's explanations of the whole class, with live progress.
+function OfflinePack({ user, prefs, savePrefs, L }) {
+  const online = useOnline();
+  const [live, setLive] = useState(packLive);
+  const [last, setLast] = useState(null);
+  const [kept, setKept] = useState(keptExplanationsSize);
+  useEffect(() => {
+    packState().then(setLast);
+    return watchPack((st) => {
+      setLive(st);
+      if (!st.running) {
+        setKept(keptExplanationsSize());
+        packState().then(setLast);
+      }
+    });
+  }, []);
+  const wifiOnly = prefs.packWifiOnly !== false;
+  const p = live.progress;
+  const pct = p?.total ? p.done / p.total : 0;
+  const ended = live.result?.reason;
+  const why = {
+    done: L('Everything for your class is on this phone. Run it again after updates: only new explanations download.', 'Tout pour votre classe est sur ce téléphone. Relancez après les mises à jour : seules les nouvelles explications se téléchargent.'),
+    stopped: L('Stopped. Tap Download to carry on where it stopped.', 'Arrêté. Touchez Télécharger pour reprendre où il s’est arrêté.'),
+    offline: L('The connection was lost. Tap Download when you are online to carry on.', 'La connexion a été perdue. Touchez Télécharger une fois en ligne pour reprendre.'),
+    wifi: L('Waiting for Wi-Fi. Connect to Wi-Fi, or switch off "Wi-Fi only" below.', 'En attente du Wi-Fi. Connectez-vous au Wi-Fi ou désactivez « Wi-Fi seulement ».'),
+    account: L('Your account could not download explanations. Sign in again, then try once more.', 'Votre compte n’a pas pu télécharger les explications. Reconnectez-vous puis réessayez.'),
+    error: L(`${live.result?.failed || 0} items could not be downloaded. Tap Download to try them again.`, `${live.result?.failed || 0} éléments n’ont pas pu être téléchargés. Touchez Télécharger pour réessayer.`),
+  }[ended];
+  return (
+    <Section title={L('Use Klass8 offline', 'Utiliser Klass8 hors ligne')}>
+      <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
+        {L(
+          'Lessons, diagrams, quizzes and Paper 1 already work without data. Download the teacher’s explanations of every lesson, diagram and practical in your class, and the 3D models, so they work offline too. Offline, explanations are read in your phone’s own voice.',
+          'Les leçons, schémas, quiz et l’épreuve 1 fonctionnent déjà sans données. Téléchargez les explications du professeur pour chaque leçon, schéma et TP de votre classe, et les modèles 3D, pour les utiliser hors ligne. Hors ligne, les explications sont lues avec la voix du téléphone.'
+        )}
+      </T>
+      <V c="bg-surface-container-lowest rounded-xl shadow-sm p-space-md gap-space-sm">
+        <T c="font-label-lg text-label-lg text-on-surface">
+          {L(`${kept.count} explanations on this phone`, `${kept.count} explications sur ce téléphone`)}
+          {kept.bytes ? ` (${fmt(kept.bytes)})` : ''}
+        </T>
+        {!!last && !live.running && (
+          <T c="font-body-sm text-body-sm text-on-surface-variant">
+            {L(`Last download ${ago(last.at, L)}: ${last.done} of ${last.total} ready.`, `Dernier téléchargement ${ago(last.at, L)} : ${last.done} sur ${last.total} prêts.`)}
+          </T>
+        )}
+        {live.running && (
+          <V c="gap-1">
+            <Bar pct={pct} />
+            <T c="font-body-sm text-body-sm text-on-surface-variant">
+              {p ? L(`${p.done} of ${p.total} ready`, `${p.done} sur ${p.total} prêts`) : L('Preparing the list', 'Préparation de la liste')}
+            </T>
+          </V>
+        )}
+        {!live.running && !!why && (
+          <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 19 }}>
+            {why}
+          </T>
+        )}
+        {!online && !live.running && (
+          <T c="font-body-sm text-body-sm text-error">{L('You are offline. Connect to the internet to download.', 'Vous êtes hors ligne. Connectez-vous à Internet pour télécharger.')}</T>
+        )}
+        {live.running ? (
+          <Cta variant="soft" label={L('Stop', 'Arrêter')} icon={null} lead="stop" onPress={stopPack} />
+        ) : (
+          <Cta label={L('Download for offline use', 'Télécharger pour le hors ligne')} icon="download" disabled={!online} onPress={() => startPack({ user, lang: prefs.lang, wifiOnly })} />
+        )}
+        <V c="flex-row items-center justify-between gap-space-sm">
+          <V c="flex-1">
+            <T c="font-label-lg text-label-lg text-on-surface">{L('Wi-Fi only', 'Wi-Fi seulement')}</T>
+            <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Saves your mobile data.', 'Économise vos données mobiles.')}</T>
+          </V>
+          <Toggle on={wifiOnly} onPress={() => savePrefs({ packWifiOnly: !wifiOnly })} accessibilityLabel={L('Wi-Fi only', 'Wi-Fi seulement')} />
+        </V>
+        {kept.count > 0 && !live.running && (
+          <P
+            onPress={() => {
+              deleteKeptExplanations();
+              setKept(keptExplanationsSize());
+            }}
+            hitSlop={8}
+          >
+            <T c="font-label-md text-label-md text-error">{L('Delete downloaded explanations', 'Supprimer les explications téléchargées')}</T>
+          </P>
+        )}
+      </V>
+    </Section>
+  );
+}
+
 export default function Offline({ navigation }) {
-  const { prefs, savePrefs } = useApp();
+  const { prefs, savePrefs, user } = useApp();
   const L = useL();
   const [models, setModels] = useState([]);
   const [sizes, setSizes] = useState({ progress: 0, chat: 0, drafts: 0 });
@@ -82,6 +181,7 @@ export default function Offline({ navigation }) {
   return (
     <Screen bg="bg-surface" header={<StackHeader close title={L('Downloads and storage', 'Téléchargements et stockage')} avatar={false} />}>
       <V c="pt-space-md pb-space-xl gap-space-lg">
+        <OfflinePack user={user} prefs={prefs} savePrefs={savePrefs} L={L} />
         <Section title={L('3D models', 'Modèles 3D')}>
           <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
             {L('Each model downloads the first time you open it and is kept here, so it opens without data afterwards.', 'Chaque modèle se télécharge à la première ouverture et reste ici : il s’ouvre ensuite sans données.')}

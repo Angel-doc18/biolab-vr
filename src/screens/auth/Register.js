@@ -4,6 +4,7 @@ import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { Check, Field, PhoneField, StrengthMeter, passwordValid, validPhone } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
+import { NeedsInternet } from '../../ui/Offline';
 
 export default function Register({ navigation }) {
   const { register } = useApp();
@@ -110,6 +111,7 @@ export default function Register({ navigation }) {
               </T>
             </T>
           </Check>
+          <NeedsInternet what={{ en: 'create your account', fr: 'créer votre compte' }} />
           <ErrorNote error={error} />
           <Cta variant="dark" icon={null} label={L('Create account', 'Créer le compte')} loading={busy} onPress={submit} />
         </V>

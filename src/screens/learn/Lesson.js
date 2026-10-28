@@ -14,6 +14,7 @@ import { lessonLocked } from '../../data/plan';
 import { lessonQuiz } from '../../lib/lessonQuiz';
 import { useNarrator } from '../../lib/narrator';
 import { fetchExplanation, segmentsOf } from '../../lib/explain';
+import { lessonTeaching } from '../../lib/teach';
 
 // Body text with **key terms** in bold and *scientific names* in italics. A lone
 // * with spaces round it (C * 9) stays a multiplication sign.
@@ -217,18 +218,10 @@ export default function Lesson({ navigation, route }) {
   const [segs, setSegs] = useState([]);
   const resumeAt = useRef(0);
   const nBody = lesson.body.length;
-  const parts = useMemo(
-    () =>
-      [
-        ...lesson.body.map(plain),
-        ...(lesson.examples || []).map((e) => `Worked example. ${plain(e.q)} Steps: ${e.steps.map((s, j) => `(${j + 1}) ${plain(s)}`).join(' ')}`),
-      ].slice(0, 16),
-    [lesson]
-  );
-  const teachContext = useMemo(
-    () => `Exam tip: ${plain(lesson.tip)} Key terms: ${(lesson.terms || []).map(([t, d]) => `${t}: ${d}`).join('; ')}`.slice(0, 2000),
-    [lesson]
-  );
+  // The same request the offline download makes, so they share one kept copy.
+  const teaching = useMemo(() => lessonTeaching(lesson), [lesson]);
+  const parts = teaching.items;
+  const teachContext = teaching.context;
   const seg = voice.index >= 0 ? segs[voice.index] : null;
   // Follow the part being taught (or read) so it stays on screen.
   const scrollRef = useRef(null);

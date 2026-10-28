@@ -2,6 +2,7 @@
 // (expo-secure-store); the access token is short-lived and refreshed on demand.
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { knownOffline } from '../lib/online';
 
 export const API_BASE = (process.env.EXPO_PUBLIC_API_URL || process.env.EXPO_PUBLIC_AI_PROXY_URL || 'https://biospatial-vr-ai.biospatial-vr.workers.dev').replace(/\/+$/, '');
 
@@ -66,6 +67,8 @@ export function onSessionLost(fn) {
 }
 
 async function raw(path, { method = 'GET', body, token, timeout = 20000, binary = false } = {}) {
+  // Known to be offline: say so at once instead of waiting for a time-out.
+  if (knownOffline()) throw new ApiError('You are offline. Connect to the internet to do this.', { code: 'offline' });
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
   let res;

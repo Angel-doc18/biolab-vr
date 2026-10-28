@@ -11,6 +11,7 @@ import { bankFor } from '../../data/paper2';
 import { topicLabel, unitById } from '../../data/units';
 import { subjectLabel } from '../../data/subjects';
 import { pickAnswerPhoto } from '../../lib/photo';
+import { NeedsInternet } from '../../ui/Offline';
 
 const partsFor = (subject) => bankFor(subject).flatMap((q) => q.parts.filter((p) => p.kind === 'text').map((p) => ({ q, p, key: `${q.id}:${p.label}` })));
 
@@ -186,6 +187,7 @@ export default function MarkAnswer({ navigation, route }) {
           <Input c="min-h-[150px] p-space-sm rounded-lg bg-surface-container-lowest border border-outline-variant text-body-md" multiline textAlignVertical="top" placeholder={L('Your answer', 'Votre réponse')} value={text} onChangeText={setText} maxLength={4000} />
         )}
 
+        <NeedsInternet what={{ en: 'have your answer marked', fr: 'faire corriger votre réponse' }} />
         <ErrorNote error={error} />
         {busy ? (
           <V c="items-center gap-1 py-space-sm">

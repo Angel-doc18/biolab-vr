@@ -16,6 +16,7 @@ import { unitById, unitsShown } from '../../data/units';
 import { lessonById } from '../../data/lessons';
 import { focusUnit } from '../../state/selectors';
 import { subjectName } from '../../data/subjects';
+import { NeedsInternet } from '../../ui/Offline';
 
 const BOARD = '#fbfaf5';
 const INK = '#1f2a37';
@@ -393,6 +394,7 @@ export default function Workspace({ navigation, route }) {
           </>
         )}
 
+        <NeedsInternet what={{ en: 'solve a new question on the board', fr: 'résoudre une nouvelle question au tableau' }} />
         <ErrorNote error={error} />
         {error?.code === 'quota' && (
           <P c="self-start" onPress={() => navigation.navigate('Paywall', { reason: 'ai' })} hitSlop={8}>

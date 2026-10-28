@@ -77,6 +77,12 @@ async function bytesFor(name) {
   return got.bytes();
 }
 
+// Downloads a model ahead of time (for the offline pack), if not already kept.
+export async function keepModel(name) {
+  if (Platform.OS === 'web' || isDownloaded(name)) return;
+  await bytesFor(name);
+}
+
 // ---------- GLB reading (the layout tools/models writes) ----------
 const ascii = (u8) => {
   let s = '';
