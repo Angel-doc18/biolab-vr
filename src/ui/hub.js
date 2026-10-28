@@ -29,6 +29,7 @@ export const SUBJECT_LOOK = {
   'a-maths-mech': { icon: 'functions', tint: '#0b5b55', bg: '#d6ebe8' },
   'a-maths-stat': { icon: 'query_stats', tint: '#0b5b55', bg: '#d6ebe8' },
   'a-further-maths': { icon: 'all_inclusive', tint: '#0b5b55', bg: '#d6ebe8' },
+  'a-computer': { icon: 'terminal', tint: '#263238', bg: '#dfe4e7' },
 };
 const look = (id) => SUBJECT_LOOK[id] || SUBJECT_LOOK.biology;
 
