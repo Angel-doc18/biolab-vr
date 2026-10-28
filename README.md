@@ -1,6 +1,6 @@
 # Klass8: Cameroon secondary school courses
 
-Mobile app (Expo SDK 57, React Native) for Cameroon secondary school students from Form 1 to
+Mobile app (Expo SDK 58, React Native) for Cameroon secondary school students from Form 1 to
 Upper Sixth, following the MINESEC programmes and the 2026/2027 schemes of work, for class
 (term) exams and the GCE, with a Cloudflare Worker API for accounts, progress, classes, parent
 reports, payments and the AI tutor. Subjects are switched on in `src/data/subjects.js` once their
@@ -40,7 +40,7 @@ Every push to `main` builds a new APK and publishes it as release `v1.0.<build>`
 
 ```bash
 npm install
-npx expo start          # scan the QR with Expo Go (SDK 57)
+npx expo start          # scan the QR with Expo Go (SDK 58)
 ```
 
 Point the app at a local API with `EXPO_PUBLIC_API_URL=http://localhost:8787`.
