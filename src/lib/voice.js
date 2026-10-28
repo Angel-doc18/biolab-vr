@@ -125,7 +125,8 @@ function clip(text, lang, keep) {
     const f = new File(voiceDir(), `${key}${once}.${wav ? 'wav' : 'mp3'}`);
     if (f.exists) f.delete();
     f.create();
-    f.write(bytes);
+    // Since SDK 58 writing is asynchronous: the clip must be complete before it plays.
+    await f.write(bytes);
     return f.uri;
   })();
   clips.set(id, p);
@@ -250,11 +251,17 @@ async function naturalUri(piece, lang, keep) {
   }
 }
 
+// A session holds one explanation of several parts: once the natural voice
+// fails, the phone's voice carries on to the end of the explanation instead of
+// switching back when the server recovers, so the speaker never changes.
+export const voiceSession = () => ({ phone: false });
+
 // One voice for the whole text: the natural voice when it can be had, otherwise
 // the phone's voice from start to finish, so it never changes mid-sentence.
-async function run(pieces, lang, rate, mine, keep) {
+async function run(pieces, lang, rate, mine, keep, session) {
   await audioMode();
-  let phone = Date.now() < pauseUntil;
+  let phone = session?.phone || Date.now() < pauseUntil;
+  if (phone && session) session.phone = true;
   for (let i = 0; i < pieces.length; i++) {
     if (mine !== turn) return false;
     if (!phone) {
@@ -275,6 +282,7 @@ async function run(pieces, lang, rate, mine, keep) {
         }
       }
       phone = true;
+      if (session) session.phone = true;
     }
     await phoneSays(pieces[i], lang, rate);
   }
@@ -282,7 +290,8 @@ async function run(pieces, lang, rate, mine, keep) {
 }
 
 // options: lang ('en' | 'fr') or language ('en-GB'), rate, keep (false for one-off
-// text such as a reading just taken), onStart, onDone, onStopped, onError.
+// text such as a reading just taken), session (from voiceSession(), shared by the
+// parts of one explanation), onStart, onDone, onStopped, onError.
 export function speak(text, options = {}) {
   stop();
   turn += 1;
@@ -291,7 +300,7 @@ export function speak(text, options = {}) {
   const pieces = speechChunks(forSpeech(text, lang));
   pending = { mine, onStopped: options.onStopped };
   options.onStart?.();
-  run(pieces, lang, options.rate ?? 0.95, mine, options.keep !== false)
+  run(pieces, lang, options.rate ?? 0.95, mine, options.keep !== false, options.session)
     .then((finished) => {
       if (pending?.mine === mine) pending = null;
       if (finished) options.onDone?.();
@@ -317,6 +326,5 @@ export const naturalVoiceOn = () => Date.now() >= pauseUntil;
 // Fetches the first part of a text ahead of time, for example the next step.
 export function prepare(text, options = {}) {
   const lang = langOf(options);
-  const first = speechChunks(forSpeech(text, lang))[0];
-  if (first) clip(first, lang, options.keep !== false).catch(() => {});
+  for (const piece of speechChunks(forSpeech(text, lang)).slice(0, 2)) clip(piece, lang, options.keep !== false).catch(() => {});
 }

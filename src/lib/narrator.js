@@ -3,7 +3,7 @@
 // say() reads a single text and reports it under a key, so its button can
 // show that it is playing.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { prepare, speak, stop as stopVoice } from './voice';
+import { prepare, speak, stop as stopVoice, voiceSession } from './voice';
 
 export function useNarrator(lang = 'en') {
   const [index, setIndex] = useState(-1);
@@ -24,6 +24,8 @@ export function useNarrator(lang = 'en') {
       run.current += 1;
       const mine = run.current;
       setSaying(null);
+      // One voice for every part of this explanation.
+      const session = voiceSession();
       const say = (i) => {
         if (mine !== run.current) return;
         if (i >= segments.length) {
@@ -35,6 +37,7 @@ export function useNarrator(lang = 'en') {
         if (i + 1 < segments.length) prepare(segments[i + 1].text, { lang });
         speak(segments[i].text, {
           lang,
+          session,
           onDone: () => say(i + 1),
           // Another part of the screen started speaking.
           onStopped: () => mine === run.current && setIndex(-1),

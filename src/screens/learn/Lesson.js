@@ -303,6 +303,8 @@ export default function Lesson({ navigation, route }) {
     scrollRef.current?.scrollTo({ y: Math.max(0, top - 80), animated: true });
   }, [showAt, nBody]);
   const started = useRef(Date.now());
+  // One voice for the whole reading of the lesson.
+  const readSession = useRef(null);
 
   const speakFrom = (i) => {
     if (i >= script.length) {
@@ -316,6 +318,7 @@ export default function Lesson({ navigation, route }) {
     Speech.speak(script[i], {
       language: 'en-GB',
       rate: 0.92,
+      session: readSession.current,
       onDone: () => playRef.current && speakFrom(i + 1),
       onError: () => {
         playRef.current = false;
@@ -332,6 +335,7 @@ export default function Lesson({ navigation, route }) {
       if (voice.playing) voice.stop();
       playRef.current = true;
       setPlaying(true);
+      readSession.current = Speech.voiceSession();
       speakFrom(para);
     }
   };

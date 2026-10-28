@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { prepare, speak, stop as stopVoice } from '../../lib/voice';
+import { prepare, speak, stop as stopVoice, voiceSession } from '../../lib/voice';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader } from '../../ui/chrome';
 import { post } from '../../api/client';
@@ -126,6 +126,8 @@ export default function Workspace({ navigation, route }) {
     stopVoice();
     const mine = run.current;
     const n = s.steps.length;
+    // One voice for every step of this walkthrough.
+    const session = voiceSession();
     setPlaying(true);
     const later = (fn, ms) => {
       if (mine === run.current) timer.current = setTimeout(fn, ms);
@@ -137,7 +139,7 @@ export default function Workspace({ navigation, route }) {
         const end = () => mine === run.current && setPlaying(false);
         if (voice && s.answer) {
           later(end, Math.max(10000, s.answer.length * 150));
-          speak(`${L('So the answer is:', 'Donc la réponse est :')} ${s.answer}`, { lang, onDone: end, onError: end, onStopped: end });
+          speak(`${L('So the answer is:', 'Donc la réponse est :')} ${s.answer}`, { lang, session, onDone: end, onError: end, onStopped: end });
         } else end();
         return;
       }
@@ -154,7 +156,7 @@ export default function Workspace({ navigation, route }) {
           later(() => go(i + 1), ms);
         };
         const watch = setTimeout(() => mine === run.current && move(0), Math.max(15000, say.length * 120));
-        speak(say, { lang, onDone: () => move(450), onError: () => move(readTime(say)) });
+        speak(say, { lang, session, onDone: () => move(450), onError: () => move(readTime(say)) });
       } else {
         later(() => go(i + 1), readTime(say || s.steps[i].board));
       }
