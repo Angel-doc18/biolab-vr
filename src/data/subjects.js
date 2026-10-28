@@ -289,7 +289,15 @@ export const SUBJECTS = [
     fr: 'Informatique',
     p1: { count: 50, minutes: 90 },
   },
-  { id: 'a-ict', code: '0796', level: 'A', en: 'Information and Communication Technology', fr: 'Technologies de l’information et de la communication' },
+  {
+    id: 'a-ict',
+    code: '0796',
+    level: 'A',
+    available: true,
+    en: 'Information and Communication Technology',
+    fr: 'Technologies de l’information et de la communication',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'a-geology', code: '0755', level: 'A', en: 'Geology', fr: 'Géologie' },
   { id: 'a-food', code: '0740', level: 'A', en: 'Food Science and Nutrition', fr: 'Science alimentaire et nutrition' },
 ];

@@ -15,7 +15,7 @@ import { ClassBox, GE, Inherit, NAMES, V } from './aComputer2';
 const { O, MUTED, BLUE, RED, GREEN, SKY, LEAF, SAND, LILAC, ROSE } = CS;
 
 // A small table: `cols` are [heading, width]; `rows` are arrays of cells.
-function Table({ x, y, cols, rows, rh = 16, size = 7.5, head = SAND, fills }) {
+export function Table({ x, y, cols, rows, rh = 16, size = 7.5, head = SAND, fills }) {
   const xs = cols.reduce((a, [, w], i) => [...a, i ? a[i - 1] + cols[i - 1][1] : x], []);
   return (
     <G>
