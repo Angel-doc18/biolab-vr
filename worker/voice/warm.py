@@ -2,12 +2,14 @@
 """Speaks the lesson texts ahead of time, overnight, so lessons play at once.
 
 Run by cron at 21:00 UTC (22:00 in Cameroon). It goes through texts.json in
-order (pieces already on disk come back in milliseconds) and stops at 06:00 UTC,
-so daytime requests from students never wait behind it.
+order (pieces already on disk come back in milliseconds) and stops at 06:00 UTC.
+Its pieces are sent at low priority, so a student's piece is always made first.
+`python3 warm.py now` runs it at once, whatever the hour.
 """
 import datetime
 import json
 import os
+import sys
 import time
 import urllib.request
 
@@ -17,6 +19,8 @@ STOP_HOUR_UTC = 6
 
 
 def late():
+    if 'now' in sys.argv[1:]:
+        return False
     h = datetime.datetime.now(datetime.timezone.utc).hour
     return STOP_HOUR_UTC <= h < 21
 
@@ -30,7 +34,7 @@ for p in pieces:
     req = urllib.request.Request(
         'http://127.0.0.1:8880/tts',
         data=json.dumps({'text': p['text'], 'lang': p['lang']}).encode(),
-        headers={'content-type': 'application/json', 'x-voice-key': KEY},
+        headers={'content-type': 'application/json', 'x-voice-key': KEY, 'x-voice-priority': 'low'},
     )
     try:
         with urllib.request.urlopen(req, timeout=300) as res:

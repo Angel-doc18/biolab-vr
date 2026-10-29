@@ -184,6 +184,12 @@ export async function speak(request, env) {
     const hit = await env.VOICE_CACHE.get(key, 'arrayBuffer');
     if (hit) return audio(hit, 'hit');
   }
+  // A clip the school's server already keeps costs nothing either, so it is
+  // given at once, outside the limits; only new speech is counted.
+  if (voice === 'kokoro') {
+    const kept = await kokoroVoice(env, text, lang, false).catch(() => null);
+    if (kept) return audio(kept.bytes, 'hit');
+  }
 
   await limit(env.VOICE_LIMITER, `voice:${user.id}`, 'Too many requests. Try again shortly.');
   const day = today();
@@ -213,7 +219,10 @@ export async function speak(request, env) {
     // The cloned voice or the school's server failed (down, busy or out of
     // allowance): say it in MeloTTS this time, and do not keep it, so the
     // natural voice is tried again next time.
-    if (!env.AI) throw new HttpError(503, 'The natural voice is not available right now.', 'voice_off');
+    // Without a stand-in (the school's own server) it is only a moment's
+    // trouble, such as a restart: the phone asks again shortly instead of
+    // switching to its own voice for a long time.
+    if (!env.AI) throw new HttpError(503, 'The natural voice is busy. Try again shortly.', 'voice_busy');
     try {
       spoken = 'melo';
       bytes = await synthesize(env, { text, lang, voice: 'melo' });

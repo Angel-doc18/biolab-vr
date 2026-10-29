@@ -6,6 +6,7 @@ RUN pip install --no-cache-dir "kokoro>=0.9.4" soundfile fastapi "uvicorn[standa
 RUN python -m spacy download en_core_web_sm
 WORKDIR /app
 COPY server.py ./
-ENV HF_HOME=/models
+# Few memory arenas: the model's memory is reused instead of growing.
+ENV HF_HOME=/models MALLOC_ARENA_MAX=2
 EXPOSE 8880
 CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8880", "--workers", "1"]
