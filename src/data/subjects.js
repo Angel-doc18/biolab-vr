@@ -307,6 +307,15 @@ export const SUBJECTS = [
     fr: 'Anglais',
     p1: { count: 50, minutes: 90 },
   },
+  {
+    id: 'a-french',
+    code: '0745',
+    level: 'A',
+    available: true,
+    en: 'French',
+    fr: 'Français',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'a-geology', code: '0755', level: 'A', en: 'Geology', fr: 'Géologie' },
   { id: 'a-food', code: '0740', level: 'A', en: 'Food Science and Nutrition', fr: 'Science alimentaire et nutrition' },
 ];
