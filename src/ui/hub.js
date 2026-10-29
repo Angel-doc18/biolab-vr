@@ -31,6 +31,7 @@ export const SUBJECT_LOOK = {
   'a-further-maths': { icon: 'all_inclusive', tint: '#0b5b55', bg: '#d6ebe8' },
   'a-computer': { icon: 'terminal', tint: '#263238', bg: '#dfe4e7' },
   'a-ict': { icon: 'devices', tint: '#0d4f6c', bg: '#d8e8ef' },
+  'a-english': { icon: 'history_edu', tint: '#3d3f86', bg: '#e3e4f4' },
 };
 const look = (id) => SUBJECT_LOOK[id] || SUBJECT_LOOK.biology;
 

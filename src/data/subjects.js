@@ -298,6 +298,15 @@ export const SUBJECTS = [
     fr: 'Technologies de l’information et de la communication',
     p1: { count: 50, minutes: 90 },
   },
+  {
+    id: 'a-english',
+    code: '0730',
+    level: 'A',
+    available: true,
+    en: 'English Language',
+    fr: 'Anglais',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'a-geology', code: '0755', level: 'A', en: 'Geology', fr: 'Géologie' },
   { id: 'a-food', code: '0740', level: 'A', en: 'Food Science and Nutrition', fr: 'Science alimentaire et nutrition' },
 ];
