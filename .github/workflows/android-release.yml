@@ -8,6 +8,12 @@ on:
 permissions:
   contents: write
 
+# One build at a time, newest push wins, so the "latest" release and the
+# download page always carry the newest commit.
+concurrency:
+  group: android-release
+  cancel-in-progress: true
+
 jobs:
   android:
     name: Build & publish APK
@@ -70,3 +76,20 @@ jobs:
             SciAid.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare the download site
+        # The page starts the download as soon as it opens; the APK sits beside it.
+        run: |
+          mkdir -p site
+          cp .github/pages/index.html site/index.html
+          cp Klass8.apk site/Klass8.apk
+
+      - name: Publish the download site to gh-pages
+        # Served by GitHub Pages once Pages is set to deploy from the gh-pages branch.
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: Klass8 v1.0.${{ github.run_number }} download site
