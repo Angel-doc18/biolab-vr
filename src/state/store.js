@@ -36,26 +36,36 @@ export function AppProvider({ children }) {
   const loadedFor = useRef(null);
   const syncTimer = useRef(null);
 
+  // Forgets the sign-in on this phone when the server refuses it (the account
+  // was removed, or the app now talks to a different server), so the old
+  // profile is never shown again.
+  const dropSession = () => {
+    setSession(null).catch(() => {});
+    AsyncStorage.multiRemove([USER, AVATAR]).catch(() => {});
+    setAuth({ status: 'guest', user: null, pro: false });
+    setAvatarUri(null);
+  };
+
   // ---------- boot ----------
   useEffect(() => {
     (async () => {
       const p = await readJson(PREFS, null);
       if (p) setPrefs((x) => ({ ...x, ...p }));
-      const session = await loadSession();
       const cached = await readJson(USER, null);
+      // Read after the profile, so a sign-in dropped in the meantime is not restored.
+      const session = await loadSession();
       if (session && cached?.user) {
         setAuth({ status: 'authed', user: cached.user, pro: Boolean(cached.pro) });
         await loadProgress(cached.user.id);
-        refreshMe().catch(() => {});
+        refreshMe().catch((e) => {
+          if (e?.status === 401) dropSession();
+        });
       } else {
         setAuth({ status: 'guest', user: null, pro: false });
       }
       setReady(true);
     })();
-    return onSessionLost(() => {
-      AsyncStorage.removeItem(USER).catch(() => {});
-      setAuth({ status: 'guest', user: null, pro: false });
-    });
+    return onSessionLost(dropSession);
   }, []);
 
   async function loadProgress(userId) {
