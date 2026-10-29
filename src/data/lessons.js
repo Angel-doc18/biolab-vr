@@ -29,13 +29,14 @@ import { LESSONS as A_COMPUTER } from './a-computer/lessons';
 import { LESSONS as A_ICT } from './a-ict/lessons';
 import { LESSONS as A_ENGLISH } from './a-english/lessons';
 import { LESSONS as A_FRENCH } from './a-french/lessons';
+import { LESSONS as A_LITERATURE } from './a-literature/lessons';
 import { LESSON_QUESTIONS } from './lessonQuestions';
 import { unitById } from './units';
 
 // Each lesson carries its own end-of-lesson questions (`quiz`) where extra ones
 // have been written for it.
 const withQuestions = (l) => (LESSON_QUESTIONS[l.id] ? { ...l, quiz: [...(l.quiz || []), ...LESSON_QUESTIONS[l.id]] } : l);
-export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...A_MATHS, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER_MATHS, ...A_COMPUTER, ...A_ICT, ...A_ENGLISH, ...A_FRENCH].map(withQuestions);
+export const LESSONS = [...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_CHEMISTRY, ...A_PHYSICS, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...A_MATHS, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER_MATHS, ...A_COMPUTER, ...A_ICT, ...A_ENGLISH, ...A_FRENCH, ...A_LITERATURE].map(withQuestions);
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));
 const byUnit = new Map();

@@ -28,5 +28,6 @@ import { LESSON_QUESTIONS as A_COMPUTER } from './a-computer/lessonQuestions';
 import { LESSON_QUESTIONS as A_ICT } from './a-ict/lessonQuestions';
 import { LESSON_QUESTIONS as A_ENGLISH } from './a-english/lessonQuestions';
 import { LESSON_QUESTIONS as A_FRENCH } from './a-french/lessonQuestions';
+import { LESSON_QUESTIONS as A_LITERATURE } from './a-literature/lessonQuestions';
 
-export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...A_MATHS, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER_MATHS, ...A_COMPUTER, ...A_ICT, ...A_ENGLISH, ...A_FRENCH };
+export const LESSON_QUESTIONS = { ...BIOLOGY, ...CHEMISTRY, ...PHYSICS, ...HUMANBIO, ...A_BIOLOGY, ...A_PHYSICS, ...A_CHEMISTRY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...MATHS, ...ENGLISH, ...FRENCH, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...A_MATHS, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER_MATHS, ...A_COMPUTER, ...A_ICT, ...A_ENGLISH, ...A_FRENCH, ...A_LITERATURE };
