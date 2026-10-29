@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download Klass8</title>
+<meta name="description" content="Download the Klass8 Android app: Cameroon secondary school courses, GCE and class exams.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230369a1'/%3E%3Cpath fill='%23fff' d='M24.38 81V19H36.09V47.59L59.69 19H73.98L48.06 49.57L75.62 81H60.81L36.09 52.76V81Z'/%3E%3C/svg%3E">
+<noscript><meta http-equiv="refresh" content="1; url=Klass8.apk"></noscript>
+<style>
+  :root { --bg: #f7f9ff; --card: #ffffff; --ink: #001e31; --muted: #41566a; --brand: #0369a1; --brand-ink: #ffffff; --line: #d6e3f1; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b1620; --card: #12212e; --ink: #e7f2ff; --muted: #a9bccd; --brand: #3a9ad9; --brand-ink: #04121c; --line: #22384a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+  main { width: 100%; max-width: 420px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px 24px; }
+  .mark { width: 64px; height: 64px; border-radius: 15px; background: #0369a1; display: block; }
+  h1 { font-size: 24px; line-height: 1.25; margin: 18px 0 6px; }
+  p { margin: 0 0 14px; color: var(--muted); }
+  .status { color: var(--ink); font-weight: 600; }
+  a.button { display: block; text-align: center; background: var(--brand); color: var(--brand-ink); text-decoration: none; font-weight: 700; padding: 14px 18px; border-radius: 12px; margin: 18px 0 22px; }
+  a.button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  ol { margin: 0; padding-left: 20px; color: var(--muted); }
+  li { margin-bottom: 8px; }
+  li strong { color: var(--ink); }
+  footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="Klass8">
+    <rect width="100" height="100" rx="22" fill="#0369a1"/>
+    <path fill="#ffffff" d="M24.38 81V19H36.09V47.59L59.69 19H73.98L48.06 49.57L75.62 81H60.81L36.09 52.76V81Z"/>
+  </svg>
+  <h1>Klass8 for Android</h1>
+  <p class="status" id="status">Your download is starting.</p>
+  <p>Courses, diagrams, quizzes and GCE practice for Form 1 to Upper Sixth.</p>
+  <a class="button" id="download" href="Klass8.apk" download="Klass8.apk">Download Klass8</a>
+  <ol>
+    <li><strong>Open the downloaded file</strong> Klass8.apk from your notifications or the Downloads folder.</li>
+    <li>If your phone asks, <strong>allow your browser to install apps</strong>, then go back.</li>
+    <li>Tap <strong>Install</strong>, then open Klass8.</li>
+  </ol>
+  <footer>Already installed? Open this page again to get the newest version.</footer>
+</main>
+<script>
+  // Start the download as soon as the page opens; the button stays as a fallback.
+  setTimeout(function () {
+    window.location.href = 'Klass8.apk';
+    document.getElementById('status').textContent = 'If the download did not start, tap the button below.';
+  }, 400);
+</script>
+</body>
+</html>

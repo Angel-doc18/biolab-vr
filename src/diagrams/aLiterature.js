@@ -310,10 +310,10 @@ export const A_LITERATURE = {
       'It mirrors the main plot, repeating its theme in another key.',
     ],
     points: [
-      [116, 44],
-      [116, 114],
-      [304, 80],
-      [190, 76],
+      [136, 44],
+      [136, 114],
+      [316, 82],
+      [208, 76],
     ],
   },
   'ali-feet': {
