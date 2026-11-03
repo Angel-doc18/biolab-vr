@@ -111,6 +111,7 @@ function clip(text, lang, keep) {
       // The voice server makes a new sentence in about the time it takes to say.
       got = await postBytes('/v1/voice', { text, lang, voice, keep }, { timeout: 60000 });
     } catch (e) {
+      // voice_busy (the server restarting, for example) is retried by the player.
       if (e.code === 'voice_off' || e.code === 'voice_quota') pauseUntil = Date.now() + 15 * 60_000;
       else if (e.status === 401 || e.code === 'unauthorized' || e.code === 'offline') pauseUntil = Date.now() + 60_000;
       throw e;
@@ -233,54 +234,85 @@ let turn = 0;
 let pending = null;
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+// Pieces asked for ahead of the one playing. The server makes new speech one
+// piece at a time, in the order asked, so they are asked for one after another.
+const AHEAD = 3;
+// How long to keep trying the natural voice before the phone's voice takes over:
+// briefly before it has been heard, and long enough for the voice server to
+// restart once it has, so the voice does not change in the middle.
+const PATIENCE_START = [800, 2500];
+const PATIENCE_HEARD = [1000, 2000, 4000, 7000, 10000];
 
-// The natural clip for one piece, trying a second time before giving up.
-async function naturalUri(piece, lang, keep) {
-  try {
-    return await clip(piece, lang, keep);
-  } catch {
-    if (Date.now() < pauseUntil) return null; // the server said no: do not ask again now
-    await wait(700);
+// Plays one piece in the natural voice; false when it could not be had in time.
+async function playNatural(piece, lang, keep, mine, session) {
+  const waits = session?.heard ? PATIENCE_HEARD : PATIENCE_START;
+  let giveUpAt = 0;
+  for (let attempt = 0; ; attempt++) {
+    if (mine !== turn) return false;
     try {
-      return await clip(piece, lang, keep);
+      const uri = await clip(piece, lang, keep);
+      if (mine !== turn) return false;
+      await playUri(uri);
+      return true;
     } catch {
-      // Keep the phone's voice for a little while instead of switching back and forth.
-      pauseUntil = Math.max(pauseUntil, Date.now() + 30_000);
-      return null;
+      if (!giveUpAt) giveUpAt = Date.now() + waits.reduce((a, b) => a + b, 0) + 6000;
+      // the server said no (limit reached, voice off): do not keep asking
+      if (mine !== turn || Date.now() < pauseUntil || attempt >= waits.length || Date.now() > giveUpAt) break;
+      await wait(waits[attempt]);
     }
   }
+  if (mine === turn) pauseUntil = Math.max(pauseUntil, Date.now() + 30_000);
+  return false;
 }
 
-// A session holds one explanation of several parts: once the natural voice
-// fails, the phone's voice carries on to the end of the explanation instead of
-// switching back when the server recovers, so the speaker never changes.
-export const voiceSession = () => ({ phone: false });
+// A session holds one explanation of several parts: once the natural voice has
+// been heard it is waited for, and if it is lost all the same, the phone's voice
+// carries on to the end instead of switching back, so the speaker changes at
+// most once.
+export const voiceSession = () => ({ phone: false, heard: false });
 
 // One voice for the whole text: the natural voice when it can be had, otherwise
 // the phone's voice from start to finish, so it never changes mid-sentence.
-async function run(pieces, lang, rate, mine, keep, session) {
+// `next` is the text spoken after this one: its first pieces are asked for once
+// this text's pieces are in.
+async function run(pieces, lang, rate, mine, keep, session, next) {
   await audioMode();
   let phone = session?.phone || Date.now() < pauseUntil;
   if (phone && session) session.phone = true;
+  let at = 0;
+  let asked = 0;
+  let asking = false;
+  const more = () => {
+    if (asking || phone || mine !== turn) return;
+    if (asked >= pieces.length) {
+      if (next) prepare(next, { lang, keep });
+      next = null;
+      return;
+    }
+    if (asked > at + AHEAD) return;
+    const k = asked++;
+    asking = true;
+    clip(pieces[k], lang, keep).then(
+      () => {
+        asking = false;
+        more();
+      },
+      () => {
+        asking = false;
+        asked = Math.min(asked, k); // asked again when the player reaches it
+      }
+    );
+  };
   for (let i = 0; i < pieces.length; i++) {
     if (mine !== turn) return false;
     if (!phone) {
-      const now = naturalUri(pieces[i], lang, keep);
-      // Ask for the next pieces while this one plays, so there is no gap: a moment
-      // later, so a server that speaks one piece at a time starts with this one.
-      setTimeout(() => {
-        for (const k of [1, 2]) if (mine === turn && i + k < pieces.length) clip(pieces[i + k], lang, keep).catch(() => {});
-      }, 300);
-      const uri = await now;
-      if (mine !== turn) return false;
-      if (uri) {
-        try {
-          await playUri(uri);
-          continue;
-        } catch {
-          if (mine !== turn) return false;
-        }
+      at = i;
+      more();
+      if (await playNatural(pieces[i], lang, keep, mine, session)) {
+        if (session) session.heard = true;
+        continue;
       }
+      if (mine !== turn) return false;
       phone = true;
       if (session) session.phone = true;
     }
@@ -291,16 +323,18 @@ async function run(pieces, lang, rate, mine, keep, session) {
 
 // options: lang ('en' | 'fr') or language ('en-GB'), rate, keep (false for one-off
 // text such as a reading just taken), session (from voiceSession(), shared by the
-// parts of one explanation), onStart, onDone, onStopped, onError.
+// parts of one explanation), quick (the first text of an explanation: short
+// pieces first, so it starts sooner), next (the text that follows, asked for
+// ahead), onStart, onDone, onStopped, onError.
 export function speak(text, options = {}) {
   stop();
   turn += 1;
   const mine = turn;
   const lang = langOf(options);
-  const pieces = speechChunks(forSpeech(text, lang));
+  const pieces = options.quick ? speechChunks(forSpeech(text, lang), 360, 100, true) : speechChunks(forSpeech(text, lang));
   pending = { mine, onStopped: options.onStopped };
   options.onStart?.();
-  run(pieces, lang, options.rate ?? 0.95, mine, options.keep !== false, options.session)
+  run(pieces, lang, options.rate ?? 0.95, mine, options.keep !== false, options.session, options.next)
     .then((finished) => {
       if (pending?.mine === mine) pending = null;
       if (finished) options.onDone?.();
@@ -323,8 +357,21 @@ export function stop() {
 // False while the natural voice is unavailable and the phone's voice is used.
 export const naturalVoiceOn = () => Date.now() >= pauseUntil;
 
-// Fetches the first part of a text ahead of time, for example the next step.
+// Fetches the first part of a text ahead of time, for example the next step:
+// the first piece, then the second.
 export function prepare(text, options = {}) {
   const lang = langOf(options);
-  for (const piece of speechChunks(forSpeech(text, lang)).slice(0, 2)) clip(piece, lang, options.keep !== false).catch(() => {});
+  const keep = options.keep !== false;
+  const [a, b] = speechChunks(forSpeech(text, lang));
+  if (!a) return;
+  const first = clip(a, lang, keep);
+  if (b) first.then(() => clip(b, lang, keep)).catch(() => {});
+  else first.catch(() => {});
+}
+
+// Learns the server's voice and sets up the audio before the first word, so a
+// lesson's first sentence is not kept waiting for them.
+export function warmVoice() {
+  serverVoice();
+  audioMode();
 }

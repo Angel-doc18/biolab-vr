@@ -1,6 +1,6 @@
 // Every labelled diagram in the app, by key. Lessons name one in `figure`,
 // units in `diagram`, Paper 2 questions in `figure`, practicals in `diagram`.
-import { useState } from 'react';
+import { useImperativeHandle, useRef, useState } from 'react';
 import { T, V } from '../ui/kit';
 import ListenButton from '../ui/ListenButton';
 import { useApp } from '../state/store';
@@ -97,38 +97,49 @@ export const partsOf = (spec) => [...labelTexts(spec), ...(spec?.facts || [])].s
 // teacher at the board: for every part, what it is, what it does and its role in
 // the whole. Each label lights up while it is being explained, and tapping a
 // label explains just that part.
-export function Diagram({ id, caption = true, maxHeight, explain = false, subject, context }) {
+// A lesson holds a `ref` to go straight on from its own explanation: prime()
+// fetches the teacher's words quietly, firstText() is what the teacher says
+// first, and explain({ session, after, onEnd, still }) teaches the diagram in the
+// lesson's voice (still() false: the student has moved on, so it does not start).
+export function Diagram({ id, caption = true, maxHeight, explain = false, subject, context, ref }) {
   const spec = DIAGRAMS[id];
   const { subject: current, user } = useApp();
   const L = useL();
   const lang = useLang();
   const voice = useNarrator(lang);
-  const [text, setText] = useState(null); // { intro, items, summary }
+  const got = useRef(null); // the teacher's explanation { intro, items, summary }, once fetched
+  const quiet = useRef(null); // a quiet fetch for a lesson, still on its way
+  const missed = useRef(false); // that fetch failed: the parts are read out instead
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState(null);
   const [segments, setSegments] = useState([]);
-  if (!spec) return null;
-  const names = labelTexts(spec);
-  const parts = partsOf(spec);
-  const lineIdx = labelIndexes(spec); // label index of each named structure
+  const names = spec ? labelTexts(spec) : [];
+  const parts = spec ? partsOf(spec) : [];
+  const lineIdx = spec ? labelIndexes(spec) : []; // label index of each named structure
   const seg = voice.index >= 0 ? segments[voice.index] : null;
   const active = seg?.at != null && seg.at < names.length ? lineIdx[seg.at] : null;
   // A fact has no label, so the pointer rests on its spot on the drawing.
-  const point = seg?.at != null && seg.at >= names.length ? spec.points?.[seg.at - names.length] || null : null;
+  const point = seg?.at != null && seg.at >= names.length ? spec?.points?.[seg.at - names.length] || null : null;
+  const teach = explain && parts.length > 0;
 
   // Without a connection (or before a parent has approved the account) the parts
   // are still read out, which is better than nothing.
   const basic = () => [{ text: spec.title, at: null }, ...parts.map((p, i) => ({ text: p, at: i }))];
 
+  const fetchText = () =>
+    fetchExplanation({ kind: 'diagram', subject: subject || current, title: spec.title, items: parts, context, lang, className: user?.className }).then((e) => {
+      got.current = e;
+      return e;
+    });
+
   // The teacher's explanation, fetched once and kept.
   const load = async () => {
-    if (text) return text;
+    if (got.current) return got.current;
+    if (quiet.current && (await quiet.current)) return got.current;
     setBusy(true);
     setNote(null);
     try {
-      const e = await fetchExplanation({ kind: 'diagram', subject: subject || current, title: spec.title, items: parts, context, lang, className: user?.className });
-      setText(e);
-      return e;
+      return await fetchText();
     } catch {
       setNote(L('The tutor needs a connection the first time. Reading the diagram for now.', 'Le tuteur a besoin d’une connexion la première fois. Lecture du schéma pour l’instant.'));
       return null;
@@ -145,6 +156,29 @@ export function Diagram({ id, caption = true, maxHeight, explain = false, subjec
     voice.play(list);
   };
 
+  useImperativeHandle(ref, () => ({
+    prime: () => {
+      if (!teach || got.current || quiet.current) return;
+      quiet.current = fetchText()
+        .catch(() => {
+          missed.current = true;
+          return null;
+        })
+        .finally(() => (quiet.current = null));
+    },
+    firstText: () => (got.current ? segmentsOf(got.current)[0]?.text || null : missed.current && spec ? spec.title : null),
+    explain: async ({ session, after, onEnd, still } = {}) => {
+      if (!teach) return onEnd?.();
+      const e = await load();
+      if (still && !still()) return;
+      const list = e ? segmentsOf(e) : basic();
+      setSegments(list);
+      voice.play(list, { session, after, onEnd });
+    },
+  }));
+
+  if (!spec) return null;
+
   // Tapping a label explains that part: what it does and its role in the whole.
   const onLabel = async (i) => {
     const at = lineIdx.indexOf(i);
@@ -154,8 +188,6 @@ export function Diagram({ id, caption = true, maxHeight, explain = false, subjec
     setSegments(one);
     voice.play(one);
   };
-
-  const teach = explain && parts.length > 0;
 
   return (
     <V c="gap-1">

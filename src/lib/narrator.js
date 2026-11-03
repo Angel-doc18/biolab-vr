@@ -3,7 +3,7 @@
 // say() reads a single text and reports it under a key, so its button can
 // show that it is playing.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { prepare, speak, stop as stopVoice, voiceSession } from './voice';
+import { speak, stop as stopVoice, voiceSession, warmVoice } from './voice';
 
 export function useNarrator(lang = 'en') {
   const [index, setIndex] = useState(-1);
@@ -18,14 +18,16 @@ export function useNarrator(lang = 'en') {
   }, []);
 
   // segments: [{ text, key }]; starts at `from` and calls onEnd after the last one.
+  // session: the voice of an explanation this one carries on from (for example
+  // the lesson before its diagram), so the voice stays the same. after: the
+  // text spoken next (or a function giving it), asked for ahead of time.
+  // Returns the session, for whatever follows.
   const play = useCallback(
-    (segments, { from = 0, onEnd } = {}) => {
+    (segments, { from = 0, onEnd, session = voiceSession(), after } = {}) => {
       stopVoice();
       run.current += 1;
       const mine = run.current;
       setSaying(null);
-      // One voice for every part of this explanation.
-      const session = voiceSession();
       const say = (i) => {
         if (mine !== run.current) return;
         if (i >= segments.length) {
@@ -34,10 +36,13 @@ export function useNarrator(lang = 'en') {
           return;
         }
         setIndex(i);
-        if (i + 1 < segments.length) prepare(segments[i + 1].text, { lang });
+        const next = i + 1 < segments.length ? segments[i + 1].text : typeof after === 'function' ? after() : after;
         speak(segments[i].text, {
           lang,
           session,
+          // The first words of a new explanation start with a short piece.
+          quick: i === from && !session.heard,
+          next,
           onDone: () => say(i + 1),
           // Another part of the screen started speaking.
           onStopped: () => mine === run.current && setIndex(-1),
@@ -45,6 +50,7 @@ export function useNarrator(lang = 'en') {
         });
       };
       say(from);
+      return session;
     },
     [lang]
   );
@@ -58,18 +64,18 @@ export function useNarrator(lang = 'en') {
       setIndex(-1);
       setSaying(key);
       const end = () => mine === run.current && setSaying(null);
-      speak(text, { lang, keep, onDone: end, onStopped: end, onError: end });
+      speak(text, { lang, keep, quick: true, onDone: end, onStopped: end, onError: end });
     },
     [lang]
   );
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    warmVoice();
+    return () => {
       run.current += 1;
       stopVoice();
-    },
-    []
-  );
+    };
+  }, []);
 
   return { index, playing: index >= 0, saying, play, stop, say };
 }

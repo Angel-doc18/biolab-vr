@@ -225,7 +225,7 @@ export default function Lesson({ navigation, route }) {
   const seg = voice.index >= 0 ? segs[voice.index] : null;
   // Follow the part being taught (or read) so it stays on screen.
   const scrollRef = useRef(null);
-  const layoutY = useRef({ body: 0, examples: 0, para: [], example: [] });
+  const layoutY = useRef({ body: 0, examples: 0, figures: 0, para: [], example: [], figure: [] });
   const followAt = seg?.at ?? null;
   const teacherSays = (at) =>
     seg && seg.at === at ? (
@@ -239,7 +239,27 @@ export default function Lesson({ navigation, route }) {
       </V>
     ) : null;
 
+  // After the lesson the teacher goes straight on to the diagram under it, in
+  // the same voice, and then to the next diagram if there is one. Anything the
+  // student starts or stops in the meantime ends the chain.
+  const figRefs = useRef([]);
+  const chain = useRef(0);
+  const explainFigures = (k, session) => {
+    const fig = figRefs.current[k];
+    if (!fig) return;
+    const mine = chain.current;
+    const y = layoutY.current;
+    scrollRef.current?.scrollTo({ y: Math.max(0, y.figures + (y.figure[k] || 0) - 80), animated: true });
+    fig.explain({
+      session,
+      still: () => mine === chain.current,
+      after: () => figRefs.current[k + 1]?.firstText(),
+      onEnd: () => mine === chain.current && explainFigures(k + 1, session),
+    });
+  };
+
   const teach = async () => {
+    chain.current += 1;
     if (voice.playing) {
       resumeAt.current = voice.index;
       voice.stop();
@@ -268,10 +288,14 @@ export default function Lesson({ navigation, route }) {
     }
     const list = segmentsOf(e);
     setSegs(list);
-    voice.play(list, {
+    figRefs.current[0]?.prime();
+    const mine = chain.current;
+    const session = voice.play(list, {
       from: resumeAt.current < list.length ? resumeAt.current : 0,
+      after: () => figRefs.current[0]?.firstText(),
       onEnd: () => {
         resumeAt.current = 0;
+        if (mine === chain.current) explainFigures(0, session);
       },
     });
   };
@@ -304,14 +328,15 @@ export default function Lesson({ navigation, route }) {
       playRef.current = false;
       setPlaying(false);
       setPara(0);
+      explainFigures(0, readSession.current);
       return;
     }
     setPara(i);
-    if (i + 1 < script.length) Speech.prepare(script[i + 1], { language: 'en-GB' });
     Speech.speak(script[i], {
       language: 'en-GB',
       rate: 0.92,
       session: readSession.current,
+      next: i + 1 < script.length ? script[i + 1] : figRefs.current[0]?.firstText(),
       onDone: () => playRef.current && speakFrom(i + 1),
       onError: () => {
         playRef.current = false;
@@ -320,6 +345,7 @@ export default function Lesson({ navigation, route }) {
     });
   };
   const toggle = () => {
+    chain.current += 1;
     if (playRef.current) {
       playRef.current = false;
       setPlaying(false);
@@ -329,6 +355,7 @@ export default function Lesson({ navigation, route }) {
       playRef.current = true;
       setPlaying(true);
       readSession.current = Speech.voiceSession();
+      figRefs.current[0]?.prime();
       speakFrom(para);
     }
   };
@@ -419,10 +446,18 @@ export default function Lesson({ navigation, route }) {
           </V>
 
           {!!figures.length && (
-            <V c="gap-space-xs">
-              {figures.map((id) => (
-                <V key={id} c="rounded-xl overflow-hidden bg-surface-container-lowest border border-surface-container p-space-sm">
-                  <Diagram id={id} maxHeight={360} explain subject={unit.subject} />
+            <V c="gap-space-xs" onLayout={(e) => (layoutY.current.figures = e.nativeEvent.layout.y)}>
+              {figures.map((id, k) => (
+                <V
+                  key={id}
+                  c="rounded-xl overflow-hidden bg-surface-container-lowest border border-surface-container p-space-sm"
+                  onLayout={(e) => (layoutY.current.figure[k] = e.nativeEvent.layout.y)}
+                >
+                  <Diagram
+                    ref={(r) => {
+                      figRefs.current[k] = r;
+                    }}
+                    id={id} maxHeight={360} explain subject={unit.subject} />
                 </V>
               ))}
             </V>

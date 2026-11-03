@@ -317,15 +317,19 @@ export function forSpeech(input, lang = 'en') {
 // The first piece is short (about ten seconds of speech), so a voice made on
 // demand starts soon while the rest is made; a long first sentence is still
 // kept whole unless it is half as long again.
-export function speechChunks(text, max = 360, first = 160) {
+// With `ramp`, each piece may hold only a little more than twice the one before
+// (less the server's fixed cost per piece), so the next piece is made while the
+// one before it plays and a short first piece does not leave a gap after it.
+export function speechChunks(text, max = 360, first = 160, ramp = false) {
   const sentences = String(text || '').match(/[^.!?;:]+[.!?;:]*\s*/g) || [];
   const out = [];
   let cur = '';
   // What the piece being built may hold, and the length at which one sentence is cut.
-  const room = () => (out.length ? max : first);
-  const cutAt = () => (out.length ? max : Math.round(first * 1.5));
-  for (const raw of sentences) {
-    let sent = raw.trim();
+  const room = () => (!out.length ? first : ramp ? Math.min(max, Math.max(90, 2 * out[out.length - 1].length - 85)) : max);
+  const cutAt = () => (!out.length ? Math.round(first * 1.5) : ramp ? Math.min(max, Math.round(room() * 1.5)) : max);
+  const todo = sentences.map((x) => x.trim());
+  while (todo.length) {
+    let sent = todo.shift();
     while (sent.length > cutAt()) {
       if (cur) {
         out.push(cur);
@@ -339,6 +343,20 @@ export function speechChunks(text, max = 360, first = 160) {
       sent = sent.slice(at).trim();
     }
     if (!sent) continue;
+    // With `ramp`, a piece far shorter than its room takes the start of the
+    // next sentence (up to a comma, or for the first piece a space), so the
+    // first piece is not just "Good morning."
+    if (ramp && cur && cur.length + sent.length + 1 > room() && cur.length < room() * 0.7) {
+      const lim = room() - cur.length - 1;
+      const comma = sent.lastIndexOf(',', lim);
+      const cut = comma > lim / 3 ? comma + 1 : !out.length ? sent.lastIndexOf(' ', lim) : -1;
+      if (cut > 0) {
+        out.push(`${cur} ${sent.slice(0, cut).trim()}`);
+        cur = '';
+        todo.unshift(sent.slice(cut).trim()); // measured again against the next room
+        continue;
+      }
+    }
     if (cur && cur.length + sent.length + 1 > room()) {
       out.push(cur);
       cur = sent;

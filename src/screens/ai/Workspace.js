@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { prepare, speak, stop as stopVoice, voiceSession } from '../../lib/voice';
+import { speak, stop as stopVoice, voiceSession } from '../../lib/voice';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader } from '../../ui/chrome';
 import { post } from '../../api/client';
@@ -146,7 +146,6 @@ export default function Workspace({ navigation, route }) {
       }
       const say = s.steps[i].say;
       if (voice && say) {
-        if (i + 1 < n) prepare(s.steps[i + 1].say, { lang });
         // Moves on once, when the voice finishes, fails, or (if the phone's speech
         // never reports back) after a generous time for the text.
         let moved = false;
@@ -157,7 +156,8 @@ export default function Workspace({ navigation, route }) {
           later(() => go(i + 1), ms);
         };
         const watch = setTimeout(() => mine === run.current && move(0), Math.max(15000, say.length * 120));
-        speak(say, { lang, session, onDone: () => move(450), onError: () => move(readTime(say)) });
+        const next = i + 1 < n ? s.steps[i + 1].say : null;
+        speak(say, { lang, session, quick: !session.heard, next, onDone: () => move(450), onError: () => move(readTime(say)) });
       } else {
         later(() => go(i + 1), readTime(say || s.steps[i].board));
       }
