@@ -1,11 +1,11 @@
 import { useCallback, useEffect } from 'react';
-import { Animated, View } from 'react-native';
 import { createNavigationContainerRef, NavigationContainer, DefaultTheme } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import TabBar from '../ui/TabBar';
 import { C } from '../ui/tw';
 import { useApp } from '../state/store';
+import { calmMotion, noSlide } from '../lib/device';
 
 import Splash from '../screens/onboarding/Splash';
 import Welcome from '../screens/onboarding/Welcome';
@@ -57,54 +57,24 @@ import ExamMenu from '../screens/exams/ExamMenu';
 
 export const navRef = createNavigationContainerRef();
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
 
-// Motion spec: spring (stiffness 300, damping 30); the leaving screen slides
-// back by 20% and fades to 0.8.
-const SPRING = { animation: 'spring', config: { stiffness: 300, damping: 30, mass: 1, overshootClamping: true, restDisplacementThreshold: 0.01, restSpeedThreshold: 0.01 } };
-
-function slide({ current, next, layouts }) {
-  const w = layouts.screen.width;
-  return {
-    cardStyle: {
-      opacity: next ? next.progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.8] }) : 1,
-      transform: [
-        {
-          translateX: Animated.add(
-            current.progress.interpolate({ inputRange: [0, 1], outputRange: [w, 0], extrapolate: 'clamp' }),
-            next ? next.progress.interpolate({ inputRange: [0, 1], outputRange: [0, -w * 0.2], extrapolate: 'clamp' }) : 0
-          ),
-        },
-      ],
-    },
-  };
-}
-
-// Paywall and Offline manager slide up over a dimmed backdrop.
-function slideUp({ current, layouts }) {
-  return {
-    cardStyle: { transform: [{ translateY: current.progress.interpolate({ inputRange: [0, 1], outputRange: [layouts.screen.height, 0], extrapolate: 'clamp' }) }] },
-    overlayStyle: { opacity: current.progress.interpolate({ inputRange: [0, 1], outputRange: [0, 1], extrapolate: 'clamp' }) },
-  };
-}
-
-const stackOptions = {
+// Screens change with the phone's own transitions, drawn outside JavaScript, so
+// they stay smooth on entry-level phones; screens left behind are frozen and do
+// not redraw until they are shown again. Anyone who asked their phone to
+// reduce motion gets no sliding.
+// Functions, so the reduce-motion setting is read each time a screen opens.
+const stackOptions = () => ({
   headerShown: false,
   gestureEnabled: true,
-  cardStyle: { backgroundColor: C['surface-container-lowest'], flex: 1 },
-  cardStyleInterpolator: slide,
-  transitionSpec: { open: SPRING, close: SPRING },
-};
+  animation: noSlide() ? 'none' : 'slide_from_right',
+  contentStyle: { backgroundColor: C['surface-container-lowest'] },
+  freezeOnBlur: true,
+});
 
-const modalOptions = {
-  presentation: 'transparentModal',
-  gestureDirection: 'vertical',
-  cardOverlayEnabled: true,
-  cardOverlay: () => <View style={{ flex: 1, backgroundColor: 'rgba(15,23,42,0.45)' }} />,
-  cardStyleInterpolator: slideUp,
-  transitionSpec: { open: SPRING, close: SPRING },
-};
+// The platform charges and the Offline manager come up from the bottom.
+const modalOptions = () => ({ animation: noSlide() ? 'none' : 'slide_from_bottom', gestureDirection: 'vertical' });
 
 function MainTabs() {
   return (
@@ -112,9 +82,11 @@ function MainTabs() {
       tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        animation: 'fade',
+        // A short fade between tabs, left out on entry-level phones.
+        animation: calmMotion() ? 'none' : 'fade',
         transitionSpec: { animation: 'timing', config: { duration: 150 } },
         sceneStyle: { backgroundColor: C['surface-container-lowest'] },
+        freezeOnBlur: true,
       }}
     >
       <Tabs.Screen name="Home" component={Home} />

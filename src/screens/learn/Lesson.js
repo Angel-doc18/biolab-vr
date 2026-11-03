@@ -13,6 +13,7 @@ import { unitById } from '../../data/units';
 import { lessonLocked } from '../../data/plan';
 import { lessonQuiz } from '../../lib/lessonQuiz';
 import { useNarrator } from '../../lib/narrator';
+import { calmMotion } from '../../lib/device';
 import { fetchExplanation, segmentsOf } from '../../lib/explain';
 import { lessonTeaching } from '../../lib/teach';
 
@@ -75,6 +76,7 @@ function Paragraph({ text }) {
 function PointerMark() {
   const [nudge] = useState(() => new Animated.Value(0));
   useEffect(() => {
+    if (calmMotion()) return undefined; // the arrow stays still on entry-level phones
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(nudge, { toValue: 1, duration: 450, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),

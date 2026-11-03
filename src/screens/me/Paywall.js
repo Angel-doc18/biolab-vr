@@ -168,7 +168,9 @@ export default function Paywall({ navigation, route }) {
   const now = Date.now();
   const paidUntil = user?.proUntil && user.proUntil > now ? user.proUntil : null;
   const trialUntil = user?.trialUntil && user.trialUntil > now ? user.trialUntil : null;
-  const intro = !paywall && pro
+  const intro = user?.isAdmin
+    ? L('Admin accounts do not pay platform charges.', 'Les comptes administrateurs ne paient pas de frais de plateforme.')
+    : !paywall && pro
     ? L('Everything is open while Klass8 is being tested, so you do not need to pay yet.', 'Tout est ouvert pendant les tests de Klass8, vous n’avez donc pas encore besoin de payer.')
     : paidUntil
     ? `${L('Klass8 is open on your account until', 'Klass8 est ouvert sur votre compte jusqu’au')} ${longDate(paidUntil)}. ${L('Paying again adds the days to this date.', 'Un nouveau paiement ajoute ses jours à cette date.')}`

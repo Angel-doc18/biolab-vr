@@ -7,16 +7,20 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { LOGO_MARK } from './logoPath';
 import glyphMap from '../glyphmap.json';
 import tw, { C, color } from './tw';
+import { LOW_END } from '../lib/device';
 
 const SymbolOutline = createIconSet(glyphMap, 'MaterialSymbols', require('../../assets/fonts/MaterialSymbols-fill0.ttf'));
 const SymbolFilled = createIconSet(glyphMap, 'MaterialSymbolsFill', require('../../assets/fonts/MaterialSymbols-fill1.ttf'));
 
+// On entry-level phones cards are drawn flat: shadows (Android elevation) are
+// slow to draw there, and every card keeps its tint or border.
+const SHADOW = /(^|\s)shadow(-(sm|md|lg|xl|2xl))?(?=\s|$)/g;
 const cache = new Map();
 export function s(c) {
   if (!c) return null;
   let v = cache.get(c);
   if (!v) {
-    v = tw.style(c);
+    v = tw.style(LOW_END ? c.replace(SHADOW, ' ') : c);
     cache.set(c, v);
   }
   return v;
@@ -40,11 +44,19 @@ function resolveFont(style) {
 
 const BASE_TEXT = { fontFamily: 'Inter', fontSize: 14, lineHeight: 20, color: C['on-surface'] };
 
+// Text styles are worked out once per class list (most text has no extra
+// style), so long screens do not redo it for every line on every render.
+const textCache = new Map();
 export function T({ c, style, children, ...rest }) {
-  const flat = StyleSheet.flatten([BASE_TEXT, s(c), style]);
-  if (flat.fontSize && !flat.lineHeight) flat.lineHeight = Math.round(flat.fontSize * 1.4);
+  let st = style ? null : textCache.get(c || '');
+  if (!st) {
+    const flat = StyleSheet.flatten([BASE_TEXT, s(c), style]);
+    if (flat.fontSize && !flat.lineHeight) flat.lineHeight = Math.round(flat.fontSize * 1.4);
+    st = resolveFont(flat);
+    if (!style) textCache.set(c || '', st);
+  }
   return (
-    <Text {...rest} style={resolveFont(flat)}>
+    <Text {...rest} style={st}>
       {children}
     </Text>
   );
@@ -68,14 +80,26 @@ export function Ic({ n, s: size = 24, c = 'on-surface-variant', fill, style }) {
 // plain View; the visual box (and the press scale) stays on the inner view.
 const OUTER = ['flex', 'flexGrow', 'flexShrink', 'flexBasis', 'alignSelf', 'width', 'minWidth', 'maxWidth', 'position', 'top', 'left', 'right', 'bottom', 'zIndex', 'margin', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'marginHorizontal', 'marginVertical'];
 
-export function P({ c, style, children, onPress, disabled, scale = 0.98, hitSlop, accessibilityLabel, ...rest }) {
-  const v = useRef(new Animated.Value(1)).current;
-  const to = (x) => Animated.spring(v, { toValue: x, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
+// The split of a class list into the Pressable's layout and the inner box,
+// worked out once per class list when there is no extra style.
+const pressCache = new Map();
+function pressStyles(c, style) {
+  const hit = style ? null : pressCache.get(c || '');
+  if (hit) return hit;
   const flat = StyleSheet.flatten([s(c), style]) || {};
   const outer = {};
   const inner = {};
   for (const [k, val] of Object.entries(flat)) (OUTER.includes(k) ? outer : inner)[k] = val;
   if (outer.width != null || outer.flex != null || outer.flexGrow != null || outer.alignSelf === 'stretch') inner.width = '100%';
+  const out = { outer, inner };
+  if (!style) pressCache.set(c || '', out);
+  return out;
+}
+
+export function P({ c, style, children, onPress, disabled, scale = 0.98, hitSlop, accessibilityLabel, ...rest }) {
+  const v = useRef(new Animated.Value(1)).current;
+  const to = (x) => Animated.spring(v, { toValue: x, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
+  const { outer, inner } = pressStyles(c, style);
   return (
     <Pressable
       onPress={onPress}

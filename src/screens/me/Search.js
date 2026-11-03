@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { ScrollView } from 'react-native';
 import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Screen, StackHeader } from '../../ui/chrome';
@@ -13,8 +13,15 @@ import { Section } from '../tabs/Home';
 
 const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-function score(text, terms) {
-  const t = norm(text);
+// The searchable text of each lesson, topic, question or practical, worked out
+// the first time it is searched and kept, so typing stays quick on any phone.
+const hay = new WeakMap();
+function score(item, build, terms) {
+  let t = hay.get(item);
+  if (t === undefined) {
+    t = norm(build(item));
+    hay.set(item, t);
+  }
   return terms.every((w) => t.includes(w)) ? terms.reduce((a, w) => a + (t.split(w).length - 1), 0) : 0;
 }
 
@@ -44,7 +51,9 @@ export default function Search({ navigation }) {
   const lang = useLang();
   const [q, setQ] = useState('');
   const [scope, setScope] = useState('all');
-  const terms = norm(q).split(/\s+/).filter((w) => w.length > 1);
+  // The results follow the typing a moment behind, so the keyboard never waits.
+  const typed = useDeferredValue(q);
+  const terms = norm(typed).split(/\s+/).filter((w) => w.length > 1);
 
   const results = useMemo(() => {
     if (!terms.length) return { lessons: [], topics: [], models: [], questions: [], labs: [] };
@@ -60,23 +69,23 @@ export default function Search({ navigation }) {
     return {
       lessons: rank(
         LESSONS.filter((l) => lessonUnit.has(l.id)),
-        (l) => score(`${l.title} ${l.title} ${plain(l.body.join(' '))} ${l.terms.map((t) => t.join(' ')).join(' ')}`, terms)
+        (l) => score(l, () => `${l.title} ${l.title} ${plain(l.body.join(' '))} ${l.terms.map((t) => t.join(' ')).join(' ')}`, terms)
       )
         .slice(0, 12)
         .map((l) => ({ l, u: lessonUnit.get(l.id) })),
-      topics: rank(mine, (u) => score(`${u.short} ${u.title} ${u.focus || ''}`, terms)).slice(0, 12),
+      topics: rank(mine, (u) => score(u, () => `${u.short} ${u.title} ${u.focus || ''}`, terms)).slice(0, 12),
       // one entry per model, even when several topics share it
-      models: rank(mine.filter((u, i, all) => u.vr && all.findIndex((x) => x.vr && modelOf(x.id) === modelOf(u.id)) === i), (u) => score(`${u.vr.title} ${u.vr.subtitle || ''} ${u.vr.parts.map((p) => `${p.name} ${p.title} ${p.fr?.name || ''}`).join(' ')}`, terms)).slice(0, 8),
+      models: rank(mine.filter((u, i, all) => u.vr && all.findIndex((x) => x.vr && modelOf(x.id) === modelOf(u.id)) === i), (u) => score(u.vr, () => `${u.vr.title} ${u.vr.subtitle || ''} ${u.vr.parts.map((p) => `${p.name} ${p.title} ${p.fr?.name || ''}`).join(' ')}`, terms)).slice(0, 8),
       questions: rank(
         BANK.filter((b) => subjects.includes(b.subject)),
-        (b) => score(`${b.q} ${b.a[0]} ${b.why}`, terms)
+        (b) => score(b, () => `${b.q} ${b.a[0]} ${b.why}`, terms)
       ).slice(0, 12),
       labs: rank(
         LABS.filter((l) => subjects.includes(l.subject)),
-        (l) => score(`${l.title} ${l.desc} ${l.short}`, terms)
+        (l) => score(l, () => `${l.title} ${l.desc} ${l.short}`, terms)
       ),
     };
-  }, [q, subjects]);
+  }, [typed, subjects]);
 
   const counts = { lessons: results.lessons.length, topics: results.topics.length, models: results.models.length, questions: results.questions.length, labs: results.labs.length };
   const total = Object.values(counts).reduce((a, b) => a + b, 0);

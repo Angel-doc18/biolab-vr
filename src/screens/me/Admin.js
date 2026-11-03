@@ -44,10 +44,16 @@ function Line({ label, value, strong }) {
   );
 }
 
-function Chip({ on, label, onPress }) {
+// grow: one of a row of equal tabs that fills the width, so four fit on a phone.
+function Chip({ on, label, onPress, grow }) {
   return (
-    <P c={`h-9 px-3.5 rounded-full items-center justify-center ${on ? 'bg-primary' : 'bg-surface-container-low'}`} onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }}>
-      <T c={`font-label-md text-label-md ${on ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '600' }}>
+    <P
+      c={`h-9 rounded-full items-center justify-center ${grow ? 'flex-1 px-1' : 'px-3.5'} ${on ? 'bg-primary' : 'bg-surface-container-low'}`}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: on }}
+    >
+      <T c={`font-label-md text-label-md ${on ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '600' }} numberOfLines={1}>
         {label}
       </T>
     </P>
@@ -369,9 +375,9 @@ export default function Admin() {
           <T c="font-body-md text-body-md text-on-surface-variant pt-space-lg">{L('This account is not an admin.', 'Ce compte n’est pas administrateur.')}</T>
         ) : (
           <V c="pt-space-md pb-space-xl gap-space-md">
-            <V c="flex-row flex-wrap gap-2">
+            <V c="flex-row gap-1.5">
               {TABS.map(([id, en, fr]) => (
-                <Chip key={id} on={tab === id} label={L(en, fr)} onPress={() => setTab(id)} />
+                <Chip key={id} grow on={tab === id} label={L(en, fr)} onPress={() => setTab(id)} />
               ))}
             </V>
             <V key={`${tab}-${key}`}>

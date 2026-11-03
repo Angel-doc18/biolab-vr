@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Avatar, C, Ic, Logo, P, T, V } from './kit';
 import { useApp } from '../state/store';
 import { useL, useLang } from '../i18n';
+import { calmMotion } from '../lib/device';
 import { LEVELS, subjectById, subjectName } from '../data/subjects';
 
 const HEADER_SHADOW = { shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 1 }, elevation: 2 };
@@ -258,6 +259,7 @@ export function Spinner({ c = 'py-10' }) {
 export function Pulse({ c = 'w-2 h-2 rounded-full bg-secondary' }) {
   const o = useRef(new Animated.Value(1)).current;
   useEffect(() => {
+    if (calmMotion()) return undefined; // a steady dot on entry-level phones
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(o, { toValue: 0.35, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
