@@ -48,7 +48,9 @@ echo "own payment page, which always works."
 if ask_yes "Direct Pay switched on" no; then DIRECT=on; else DIRECT=off; fi
 
 echo
-if ask_yes "Charge for the full course from now on (students without a pass get the free part only)" yes; then PAYWALL=on; else PAYWALL=off; fi
+echo "Start the platform charges now? Each student's first month stays free; after it,"
+echo "they pay 350 FCFA a month or 3,500 FCFA a year to keep using Klass8."
+if ask_yes "Start the platform charges" yes; then PAYWALL=on; else PAYWALL=off; fi
 
 umask 077
 sed -i "/^FAPSHI_API_USER=/d;/^FAPSHI_API_KEY=/d;/^FAPSHI_WEBHOOK_SECRET=/d;/^FAPSHI_ENV=/d;/^FAPSHI_DIRECT_PAY=/d;/^PAYWALL=/d" "$ENV_FILE"
