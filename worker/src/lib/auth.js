@@ -81,7 +81,7 @@ export const UPDATE_MESSAGE = 'This version of Klass8 is out of date. Install th
 export const outdatedApp = (request, env) => paywallOn(env) && !(Number(request.headers.get('x-klass8-client')) >= CLIENT_LEVEL);
 
 // Public shape of a user. Never includes hashes or internal flags.
-export function publicUser(u) {
+export function publicUser(u, env) {
   return {
     id: u.id,
     role: u.role,
@@ -106,7 +106,7 @@ export function publicUser(u) {
     avatarAt: u.avatar_at || null,
     subjects: userSubjects(u),
     proUntil: u.pro_until || null,
-    trialUntil: trialUntil(u),
+    trialUntil: paywallOn(env) ? trialUntil(u) : null, // the free month, once charges apply
     createdAt: u.created_at,
   };
 }

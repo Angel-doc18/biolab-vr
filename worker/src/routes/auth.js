@@ -41,7 +41,7 @@ export async function register(request, env) {
     .run();
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
   const session = await issueSession(env, user);
-  return created({ user: publicUser(user), ...session, otpAvailable: messagingConfigured(env) });
+  return created({ user: publicUser(user, env), ...session, otpAvailable: messagingConfigured(env) });
 }
 
 export async function login(request, env) {
@@ -65,7 +65,7 @@ export async function login(request, env) {
   const valid = await verifyPassword(pw, user?.password_hash || DUMMY.hash, user?.password_salt || DUMMY.salt);
   if (!user || !valid) throw new HttpError(401, GENERIC_LOGIN_ERROR, 'invalid_credentials');
   const session = await issueSession(env, user);
-  return ok({ user: publicUser(user), ...session });
+  return ok({ user: publicUser(user, env), ...session });
 }
 
 export async function refresh(request, env) {

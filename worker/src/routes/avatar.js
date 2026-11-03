@@ -23,7 +23,7 @@ export async function putAvatar(request, env) {
     env.DB.prepare('INSERT INTO avatars (user_id, mime, data, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET mime = excluded.mime, data = excluded.data, updated_at = excluded.updated_at').bind(user.id, mime, data, t),
     env.DB.prepare('UPDATE users SET avatar_at = ?, updated_at = ? WHERE id = ?').bind(t, t, user.id),
   ]);
-  return ok({ user: publicUser({ ...user, avatar_at: t }) });
+  return ok({ user: publicUser({ ...user, avatar_at: t }, env) });
 }
 
 // GET /v1/me/avatar -> { mediaType, base64, at } or 404
@@ -42,5 +42,5 @@ export async function deleteAvatar(request, env) {
     env.DB.prepare('DELETE FROM avatars WHERE user_id = ?').bind(user.id),
     env.DB.prepare('UPDATE users SET avatar_at = NULL, updated_at = ? WHERE id = ?').bind(t, user.id),
   ]);
-  return ok({ user: publicUser({ ...user, avatar_at: null }) });
+  return ok({ user: publicUser({ ...user, avatar_at: null }, env) });
 }

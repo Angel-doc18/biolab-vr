@@ -133,7 +133,7 @@ export async function getPayment(request, env, id) {
   const status = await refresh(env, payment);
   const { reference } = await env.DB.prepare('SELECT reference FROM payments WHERE id = ?').bind(id).first(); // found by a look-up
   const fresh = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(user.id).first();
-  return ok({ payment: { id: payment.id, reference, plan: payment.plan, amount: payment.amount, status }, user: publicUser(fresh), pro: isPro(fresh, env) });
+  return ok({ payment: { id: payment.id, reference, plan: payment.plan, amount: payment.amount, status }, user: publicUser(fresh, env), pro: isPro(fresh, env) });
 }
 
 // Fapshi sends each webhook once and never again, so payments still open are
@@ -225,7 +225,7 @@ export async function redeemVoucher(request, env) {
   ]);
   await notify(env, user.id, 'payment', 'Code redeemed', `${v.label || 'School licence'}: Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`);
   const fresh = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(user.id).first();
-  return ok({ user: publicUser(fresh), pro: true, label: v.label });
+  return ok({ user: publicUser(fresh, env), pro: true, label: v.label });
 }
 
 export async function licenceRequest(request, env) {
