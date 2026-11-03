@@ -1,5 +1,5 @@
 import { HttpError, created, limit, now, ok, readJson } from '../lib/http.js';
-import { accessEnd, isPro, paywallOn, publicUser, requireUser } from '../lib/auth.js';
+import { accessEnd, isPro, paywallOn, publicUser, requireUser, trialUntil } from '../lib/auth.js';
 import { sha256, uuid } from '../lib/crypto.js';
 import { int, oneOf, phone, str } from '../lib/validate.js';
 import { directPay, payLink, paymentStatus, paymentsConfigured, paymentsOf, verifyFapshiWebhook } from '../lib/providers.js';
@@ -65,6 +65,19 @@ export async function initiatePayment(request, env) {
   });
 }
 
+// When a payment's time ends. A year paid while the student is still in the
+// free month counts from the day they joined, so the free month is the year's
+// first month. Anything else is added to the end of the access they have (or
+// to today, once it has run out), so a month paid in the free month starts
+// when the free month ends.
+function paidUntil(user, planId) {
+  const length = PLANS[planId].days * 86_400_000;
+  const freeEnd = user ? trialUntil(user) : null;
+  const inFreeMonth = freeEnd && now() < freeEnd && !(user.pro_until > freeEnd);
+  if (planId === 'year' && inFreeMonth) return user.created_at + length;
+  return Math.max(now(), user ? accessEnd(user) : 0) + length;
+}
+
 // Grants access exactly once per successful payment, after the provider confirms
 // the amount and that the payment is this one. Called from polling, the webhook
 // and reconcilePayments.
@@ -83,8 +96,7 @@ async function settle(env, payment, providerData) {
       .run();
     if (claim.meta.changes === 1) {
       const user = await env.DB.prepare('SELECT role, created_at, pro_until FROM users WHERE id = ?').bind(payment.user_id).first();
-      const base = Math.max(now(), user ? accessEnd(user) : 0);
-      const until = base + PLANS[payment.plan].days * 86_400_000;
+      const until = paidUntil(user, payment.plan);
       await env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until, now(), payment.user_id).run();
       await notify(env, payment.user_id, 'payment', 'Payment received', `${PLANS[payment.plan].label}: ${payment.amount} FCFA. Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`, { reference: payment.reference });
     }
