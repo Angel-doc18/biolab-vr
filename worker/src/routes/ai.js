@@ -1,5 +1,5 @@
 import { HttpError, limit, now, ok, readJson } from '../lib/http.js';
-import { isPro, requireUser } from '../lib/auth.js';
+import { isPro, requireAccess, requireUser } from '../lib/auth.js';
 import { int, oneOf, str } from '../lib/validate.js';
 import { sha256, uuid } from '../lib/crypto.js';
 import { explainItems, markAnswer, solveQuestion, tutorReply } from '../lib/ai.js';
@@ -41,6 +41,7 @@ export async function aiQuota(request, env) {
 
 export async function ask(request, env) {
   const user = await requireUser(request, env);
+  requireAccess(user, env);
   await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are sending questions too quickly. Wait a moment.');
   const tier = isPro(user, env) ? 'pro' : 'free';
   const used = await usage(env, user.id);
@@ -76,6 +77,7 @@ function lessonOf(v) {
 // solution does not use the student's daily questions.
 export async function solve(request, env) {
   const user = await requireUser(request, env);
+  requireAccess(user, env);
   const b = await readJson(request, 64 * 1024);
   const subject = subjectOr(b.subject);
   const lang = oneOf(b.lang ?? user.lang ?? 'en', 'Language', ['en', 'fr']);
@@ -101,7 +103,7 @@ const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export async function mark(request, env) {
   const user = await requireUser(request, env);
-  if (!isPro(user, env)) throw new HttpError(402, 'Mark my answer is part of Premium.', 'premium_required');
+  requireAccess(user, env);
   await limit(env.AI_LIMITER, `ai:${user.id}`, 'Please wait a moment before marking another answer.');
   const used = await usage(env, user.id);
   const b = await readJson(request, 6 * 1024 * 1024);
@@ -161,6 +163,7 @@ export async function report(request, env) {
 const TEACHING_VERSION = 3; // bump when the teaching prompts change
 export async function explain(request, env) {
   const user = await requireUser(request, env);
+  requireAccess(user, env);
   const b = await readJson(request, 48 * 1024);
   const kind = oneOf(b.kind, 'Kind', ['diagram', 'practical', 'result', 'lesson']);
   const long = kind === 'lesson';

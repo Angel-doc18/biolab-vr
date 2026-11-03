@@ -1,14 +1,15 @@
 import { HttpError, created, limit, now, ok, readJson } from '../lib/http.js';
-import { isPro, paywallOn, publicUser, requireUser } from '../lib/auth.js';
+import { accessEnd, isPro, paywallOn, publicUser, requireUser } from '../lib/auth.js';
 import { sha256, uuid } from '../lib/crypto.js';
 import { int, oneOf, phone, str } from '../lib/validate.js';
 import { directPay, payLink, paymentStatus, paymentsConfigured, paymentsOf, verifyFapshiWebhook } from '../lib/providers.js';
 import { notify } from '../lib/notify.js';
 
-// Prices are decided here, never by the client.
+// The platform charges. Prices are decided here, never by the client. A year
+// costs ten months: two months free.
 export const PLANS = {
-  term: { amount: 1500, days: 120, label: 'Term Pass' },
-  year: { amount: 3500, days: 365, label: 'Academic Year Pass' },
+  month: { amount: 350, days: 30, label: 'Platform charges, 1 month' },
+  year: { amount: 3500, days: 365, label: 'Platform charges, 1 year' },
 };
 
 // How students pay: 'prompt' (Fapshi Direct Pay, a request appears on the
@@ -81,11 +82,11 @@ async function settle(env, payment, providerData) {
       .bind(now(), payment.id)
       .run();
     if (claim.meta.changes === 1) {
-      const user = await env.DB.prepare('SELECT pro_until FROM users WHERE id = ?').bind(payment.user_id).first();
-      const base = Math.max(now(), user?.pro_until || 0);
+      const user = await env.DB.prepare('SELECT role, created_at, pro_until FROM users WHERE id = ?').bind(payment.user_id).first();
+      const base = Math.max(now(), user ? accessEnd(user) : 0);
       const until = base + PLANS[payment.plan].days * 86_400_000;
       await env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until, now(), payment.user_id).run();
-      await notify(env, payment.user_id, 'payment', 'Payment received', `${PLANS[payment.plan].label}: ${payment.amount} FCFA. Premium is active until ${new Date(until).toLocaleDateString('en-GB')}.`, { reference: payment.reference });
+      await notify(env, payment.user_id, 'payment', 'Payment received', `${PLANS[payment.plan].label}: ${payment.amount} FCFA. Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`, { reference: payment.reference });
     }
     return 'SUCCESSFUL';
   }
@@ -216,13 +217,13 @@ export async function redeemVoucher(request, env) {
   if (already) throw new HttpError(409, 'You have already used this code.', 'exists');
   const claim = await env.DB.prepare('UPDATE vouchers SET uses = uses + 1 WHERE code_hash = ? AND uses < max_uses').bind(hash).run();
   if (claim.meta.changes !== 1) throw new HttpError(404, 'This code has been used up.', 'not_found');
-  const base = Math.max(now(), user.pro_until || 0);
+  const base = Math.max(now(), accessEnd(user));
   const until = base + v.days * 86_400_000;
   await env.DB.batch([
     env.DB.prepare('INSERT INTO voucher_redemptions (code_hash, user_id, redeemed_at) VALUES (?, ?, ?)').bind(hash, user.id, now()),
     env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until, now(), user.id),
   ]);
-  await notify(env, user.id, 'payment', 'Code redeemed', `${v.label || 'School licence'}: premium is active until ${new Date(until).toLocaleDateString('en-GB')}.`);
+  await notify(env, user.id, 'payment', 'Code redeemed', `${v.label || 'School licence'}: Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`);
   const fresh = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(user.id).first();
   return ok({ user: publicUser(fresh), pro: true, label: v.label });
 }

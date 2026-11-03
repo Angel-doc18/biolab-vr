@@ -4,7 +4,7 @@
 // is only ever spoken once. The other engines need Cloudflare Workers AI (env.AI)
 // or a voice service's key, and keep clips in KV (VOICE_CACHE) when it exists.
 import { HttpError, limit, readJson } from '../lib/http.js';
-import { requireUser } from '../lib/auth.js';
+import { requireAccess, requireUser } from '../lib/auth.js';
 import { oneOf, str } from '../lib/validate.js';
 import { sha256 } from '../lib/crypto.js';
 import { today } from '../lib/notify.js';
@@ -170,6 +170,7 @@ const audio = (bytes, cache) =>
 // POST /v1/voice { text, lang, voice?, keep? }  ->  audio/mpeg (English) or audio/wav (French)
 export async function speak(request, env) {
   const user = await requireUser(request, env);
+  requireAccess(user, env);
   if (!env.AI && voiceEngine(env) !== 'kokoro') throw new HttpError(503, 'The natural voice is not available.', 'voice_off');
   const body = await readJson(request, 8 * 1024);
   const lang = oneOf(body.lang || 'en', 'Language', ['en', 'fr']);

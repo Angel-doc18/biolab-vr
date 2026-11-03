@@ -57,11 +57,21 @@ export async function requireUser(request, env, roles) {
   return user;
 }
 
-// Until the paywall is switched on (PAYWALL=on, set with
-// /opt/klass8-api/set-fapshi-keys.sh once payments work) every account gets the
-// full course. The app takes its answer from `pro`, so no new build is needed.
+// Platform charges. Until the paywall is switched on (PAYWALL=on, set with
+// /opt/klass8-api/set-fapshi-keys.sh once payments work) every account has the
+// whole app. After that a student's first month is free, then the app is open
+// while a payment (or a school code) lasts. Parents and teachers do not pay.
+// The app takes its answer from `pro`, so no new build is needed to switch.
 export const paywallOn = (env) => env?.PAYWALL === 'on';
-export const isPro = (user, env) => !paywallOn(env) || Boolean(user.pro_until && user.pro_until > now());
+export const TRIAL_DAYS = 30;
+export const trialUntil = (u) => (u.role === 'student' ? (u.created_at || 0) + TRIAL_DAYS * 86_400_000 : null);
+// When the student's access ends (the later of the free month and what was
+// paid); a payment or code adds its days after it.
+export const accessEnd = (u) => Math.max(u.pro_until || 0, trialUntil(u) || 0);
+export const isPro = (user, env) => !paywallOn(env) || user.role !== 'student' || accessEnd(user) > now();
+export function requireAccess(user, env) {
+  if (!isPro(user, env)) throw new HttpError(402, 'Your free month has ended. Pay the platform charges to keep using Klass8.', 'payment_required');
+}
 
 // Builds from before the paywall open the whole course on the phone whatever
 // the server says, so once it is on they must update. Newer builds send
@@ -96,6 +106,7 @@ export function publicUser(u) {
     avatarAt: u.avatar_at || null,
     subjects: userSubjects(u),
     proUntil: u.pro_until || null,
+    trialUntil: trialUntil(u),
     createdAt: u.created_at,
   };
 }
