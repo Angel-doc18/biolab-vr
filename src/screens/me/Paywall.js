@@ -173,7 +173,7 @@ export default function Paywall({ navigation, route }) {
     : paidUntil
     ? `${L('Klass8 is open on your account until', 'Klass8 est ouvert sur votre compte jusqu’au')} ${longDate(paidUntil)}. ${L('Paying again adds the days to this date.', 'Un nouveau paiement ajoute ses jours à cette date.')}`
     : trialUntil
-    ? `${L('Your free month runs until', 'Votre mois gratuit court jusqu’au')} ${longDate(trialUntil)}. ${L('If you pay now, the time you pay for starts when it ends.', 'Si vous payez maintenant, la durée payée commence à sa fin.')}`
+    ? `${L('Your free month runs until', 'Votre mois gratuit court jusqu’au')} ${longDate(trialUntil)}. ${L('A year paid now counts from the day you joined, with the free month as its first month, so it runs until', 'Une année payée maintenant compte depuis votre inscription, le mois gratuit étant son premier mois : elle court jusqu’au')} ${longDate(user.createdAt + 365 * 86_400_000)}. ${L('A month paid now starts when the free month ends.', 'Un mois payé maintenant commence à la fin du mois gratuit.')}`
     : gate
     ? L('Pay the platform charges to keep using Klass8. Everything you have done so far is kept.', 'Payez les frais de plateforme pour continuer à utiliser Klass8. Tout ce que vous avez fait est conservé.')
     : L('Your free month has ended. Pay the platform charges to keep using Klass8.', 'Votre mois gratuit est terminé. Payez les frais de plateforme pour continuer à utiliser Klass8.');
