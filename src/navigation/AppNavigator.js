@@ -42,6 +42,7 @@ import Tutor from '../screens/ai/Tutor';
 import MarkAnswer from '../screens/ai/MarkAnswer';
 import Workspace from '../screens/ai/Workspace';
 import Paywall from '../screens/me/Paywall';
+import Admin from '../screens/me/Admin';
 import Offline from '../screens/me/Offline';
 import ParentReport from '../screens/me/ParentReport';
 import Notifications from '../screens/me/Notifications';
@@ -193,6 +194,7 @@ export default function AppNavigator() {
         <Stack.Screen name="JoinClass" component={JoinClass} />
         <Stack.Screen name="Legal" component={Legal} />
         <Stack.Screen name="Paywall" component={Paywall} options={modalOptions} />
+        <Stack.Screen name="Admin" component={Admin} />
         <Stack.Screen name="Offline" component={Offline} options={modalOptions} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -189,6 +189,12 @@ export default function Me({ navigation }) {
           </Section>
         )}
 
+        {user?.isAdmin && (
+          <V c="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+            <MenuRow first title={L('Admin', 'Admin')} sub={L('Accounts, payments and school codes', 'Comptes, paiements et codes d’école')} onPress={() => navigation.navigate('Admin')} />
+          </V>
+        )}
+
         <V c="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
           {student && (
             <MenuRow
@@ -202,7 +208,7 @@ export default function Me({ navigation }) {
           {student && <MenuRow title={L('Join a class', 'Rejoindre une classe')} sub={L('With the code from your teacher', 'Avec le code de votre enseignant')} onPress={() => navigation.navigate('JoinClass')} />}
           {user?.role === 'parent' && <MenuRow first title={L('Link a child', 'Lier un enfant')} sub={L('With the code shown in your child’s app', 'Avec le code affiché dans l’application de l’enfant')} onPress={() => navigation.navigate('LinkChild', { fromHome: true })} />}
           {user?.role === 'teacher' && <MenuRow first title={L('My classes', 'Mes classes')} sub={L('Codes, students and work set', 'Codes, élèves et travaux')} onPress={() => navigation.navigate('Main', { screen: 'Home' })} />}
-          <MenuRow title={pro ? L('Subscription and payments', 'Abonnement et paiements') : L('Full course and prices', 'Cours complet et prix')} sub={pro && until ? `${L('Active until', 'Actif jusqu’au')} ${until}` : null} onPress={() => navigation.navigate('Paywall')} />
+          {student && <MenuRow title={L('Platform charges', 'Frais de plateforme')} sub={until ? `${L('Paid until', 'Payé jusqu’au')} ${until}` : null} onPress={() => navigation.navigate('Paywall')} />}
           {student && <MenuRow title={L('Downloads and storage', 'Téléchargements et stockage')} sub={L('3D models and data kept on this phone', '3D et données gardées sur ce téléphone')} onPress={() => navigation.navigate('Offline')} />}
           <MenuRow title={L('Language', 'Langue')} sub={prefs.lang === 'fr' ? 'Français' : 'English'} onPress={() => navigation.navigate('Language', { fromSettings: true })} />
           {voiceChoice && prefs.lang !== 'fr' && <MenuRow title={L('Tutor voice', 'Voix du tuteur')} sub={`${(VOICES.en.find((v) => v.id === prefs.voice) || VOICES.en[0])[prefs.lang === 'fr' ? 'fr' : 'en']}. ${L('Tap to hear the other voice', 'Touchez pour entendre l’autre voix')}`} onPress={changeVoice} />}
