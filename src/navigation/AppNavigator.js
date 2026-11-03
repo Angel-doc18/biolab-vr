@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Animated, View } from 'react-native';
 import { createNavigationContainerRef, NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -126,11 +126,22 @@ function MainTabs() {
 }
 
 const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Forgot', 'Reset', 'Legal'];
+// What a student whose free month has ended (and who has not paid) can still
+// open: signing in and out, setting up the account, the platform charges and
+// settings. Anything else leads to the platform charges.
+const OPEN_WHEN_LOCKED = [...PUBLIC, 'Role', 'ExamClass', 'School', 'Goals', 'SetupDone', 'Paywall', 'Settings', 'Offline'];
 
 const theme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: C['surface-container-lowest'], primary: C['primary-container'] } };
 
 export default function AppNavigator() {
-  const { auth } = useApp();
+  const { auth, pro } = useApp();
+  const locked = auth.status === 'authed' && auth.user?.role === 'student' && !pro;
+  const enforce = useCallback(() => {
+    if (!locked || !navRef.isReady()) return;
+    const route = navRef.getCurrentRoute();
+    if (route && !OPEN_WHEN_LOCKED.includes(route.name)) navRef.reset({ index: 0, routes: [{ name: 'Paywall', params: { gate: true } }] });
+  }, [locked]);
+  useEffect(enforce, [enforce]);
 
   // If the session ends (sign out, revoked, expired), return to sign in.
   useEffect(() => {
@@ -140,7 +151,7 @@ export default function AppNavigator() {
   }, [auth.status]);
 
   return (
-    <NavigationContainer ref={navRef} theme={theme}>
+    <NavigationContainer ref={navRef} theme={theme} onReady={enforce} onStateChange={enforce}>
       <Stack.Navigator initialRouteName="Splash" screenOptions={stackOptions}>
         <Stack.Screen name="Splash" component={Splash} options={{ gestureEnabled: false }} />
         <Stack.Screen name="Welcome" component={Welcome} />

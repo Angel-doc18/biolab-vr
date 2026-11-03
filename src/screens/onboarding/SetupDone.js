@@ -49,7 +49,7 @@ export default function SetupDone({ navigation, route }) {
           <Cta variant="dark" icon={null} label={role === 'student' ? L('Start learning', 'Commencer') : L('Continue', 'Continuer')} loading={busy} onPress={() => finish()} />
           {role === 'student' && (
             <P c="items-center py-2" onPress={() => finish('Paywall')} hitSlop={8}>
-              <T c="font-label-md text-label-md text-primary-container">{L('See the full course prices', 'Voir les prix du cours complet')}</T>
+              <T c="font-label-md text-label-md text-primary-container">{L('Your first month is free. See the platform charges', 'Votre premier mois est gratuit. Voir les frais de plateforme')}</T>
             </P>
           )}
         </V>

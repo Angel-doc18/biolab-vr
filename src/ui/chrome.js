@@ -87,7 +87,8 @@ export function TabHeader({ title = 'Klass8', subtitle, switcher }) {
 }
 
 // Stack screens: back arrow, optional logo, title + subtitle, right slot.
-export function StackHeader({ title, subtitle, subtitleColor = 'primary', logo = false, right, onBack, close, avatar = true, transparent }) {
+// noBack: no back button, for a screen the user cannot leave (the payment gate).
+export function StackHeader({ title, subtitle, subtitleColor = 'primary', logo = false, right, onBack, close, noBack = false, avatar = true, transparent }) {
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
   const back = onBack || (() => (nav.canGoBack() ? nav.goBack() : nav.navigate('Main')));
@@ -95,9 +96,11 @@ export function StackHeader({ title, subtitle, subtitleColor = 'primary', logo =
     <View style={[{ paddingTop: insets.top, backgroundColor: transparent ? 'transparent' : 'rgba(255,255,255,0.96)', zIndex: 50 }, !transparent && HEADER_SHADOW]}>
       <V c="h-16 px-margin flex-row items-center justify-between gap-space-sm">
         <V c="flex-row items-center gap-space-sm flex-1 min-w-0">
-          <P c="w-11 h-11 -ml-1.5 items-center justify-center rounded-xl" onPress={back} accessibilityLabel="Go back">
-            <Ic n={close ? 'close' : 'arrow_back'} s={24} c="on-surface" />
-          </P>
+          {!noBack && (
+            <P c="w-11 h-11 -ml-1.5 items-center justify-center rounded-xl" onPress={back} accessibilityLabel="Go back">
+              <Ic n={close ? 'close' : 'arrow_back'} s={24} c="on-surface" />
+            </P>
+          )}
           {logo && <Logo size={30} />}
           <V c="flex-1 min-w-0">
             <T c="font-headline-sm text-headline-sm text-on-surface" style={{ lineHeight: 20 }} numberOfLines={1}>

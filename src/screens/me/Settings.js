@@ -162,7 +162,7 @@ export default function Settings({ navigation }) {
                   <V key={p.id} c="flex-row items-center justify-between bg-surface-container-low rounded-lg p-2.5">
                     <V>
                       <T c="font-label-md text-label-md text-on-surface">
-                        {p.plan === 'year' ? L('Academic Year Pass', 'Pass année') : L('Term Pass', 'Pass trimestre')} · {p.amount} FCFA
+                        {p.plan === 'year' ? L('Platform charges, 1 year', 'Frais de plateforme, 1 an') : p.plan === 'month' ? L('Platform charges, 1 month', 'Frais de plateforme, 1 mois') : L('Pass', 'Pass')} · {p.amount} FCFA
                       </T>
                       <T c="font-body-sm text-body-sm text-on-surface-variant">
                         {new Date(p.createdAt).toLocaleDateString('en-GB')} · {p.reference}
@@ -258,7 +258,7 @@ function DeleteSheet({ L, onClose }) {
           </V>
           <T c="font-headline-md text-headline-md text-on-surface">{L('Delete your account?', 'Supprimer votre compte ?')}</T>
           <T c="font-body-md text-body-md text-on-surface-variant">
-            {L('Your progress, notifications, class memberships and parent links will be removed from our servers. This cannot be undone. Premium time is not refunded.', 'Votre progression, vos notifications, classes et liens parent seront supprimés. Action irréversible.')}
+            {L('Your progress, notifications, class memberships and parent links will be removed from our servers. This cannot be undone. Platform charges already paid are not refunded.', 'Votre progression, vos notifications, classes et liens parent seront supprimés. Action irréversible.')}
           </T>
           <Input c="h-12 px-3 rounded-lg bg-surface-container-low text-body-md" placeholder={L('Enter your password to confirm', 'Mot de passe pour confirmer')} secureTextEntry value={pw} onChangeText={setPw} autoCapitalize="none" />
           <ErrorNote error={error} />

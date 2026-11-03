@@ -6,13 +6,13 @@ import { useL } from '../../i18n';
 import { SUPPORT_EMAIL, SUPPORT_WHATSAPP } from '../../data/plan';
 import { ANATOMY_CREDIT } from '../../three/anatomy';
 
-const UPDATED = '2 October 2026';
+const UPDATED = '3 November 2026';
 
 const TERMS = [
   ['Using Klass8', 'Klass8 is a learning and revision app for Cameroon secondary school students, following the MINESEC programmes and the GCE syllabuses. You may use it for your own study. Give accurate details when you register and keep your password private.'],
   ['Content', 'Lessons, diagrams, questions, mark schemes and practicals were written for this app to follow the GCE syllabuses. They are not official GCE Board papers, and grades shown in the app are practice estimates, not exam results. The 3D anatomy models are based on BodyParts3D (credit below); the molecule, apparatus and other models are drawn for this app.'],
   ['AI tutor and marking', 'The tutor and answer marking are produced by an AI system. They can contain mistakes. Check important facts against your lessons and your teacher, and use "Report" on any answer that is wrong or inappropriate. Do not include other people’s personal information in questions or photos.'],
-  ['Full course and payments', 'The full course is a one-off pass for a fixed number of days, paid by MTN Mobile Money or Orange Money through our payment provider, Fapshi. Passes do not renew automatically. If a payment fails, no days are added. Contact support within 14 days if you were charged but the course did not open.'],
+  ['Platform charges and payments', 'A new student account gets its first month free. After that, using Klass8 needs the platform charges: 350 FCFA for one month or 3,500 FCFA for one year, paid by MTN Mobile Money or Orange Money through our payment provider, Fapshi. Charges do not renew automatically. Paying again adds the days to your current end date, and a payment made during the free month starts when it ends. If a payment fails, no days are added. Contact support within 14 days if you were charged but Klass8 did not open. Parent and teacher accounts do not pay platform charges.'],
   ['School codes and vouchers', 'Class codes and licence vouchers are issued by schools and teachers. A voucher can be used once per account and cannot be exchanged for money.'],
   ['Fair use', 'Do not copy the app, interfere with our servers, share accounts, or use automated tools against the service. Daily limits on tutor questions and marking apply. We may suspend accounts that break these terms.'],
   ['Changes', 'We may update the app and these terms. Important changes are shown in the app.'],

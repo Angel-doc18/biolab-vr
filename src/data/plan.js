@@ -18,8 +18,8 @@ export const FREE_MOCKS_PER_WEEK = 1;
 // worker/src/lib/auth.js): `pro` from the server is true for everyone until then.
 
 export const PLANS = {
-  term: { amount: 1500, days: 120, en: 'Term Pass', fr: 'Pass trimestre' },
-  year: { amount: 3500, days: 365, en: 'Academic Year Pass', fr: 'Pass année scolaire' },
+  month: { amount: 350, days: 30, en: 'Platform charges, 1 month', fr: 'Frais de plateforme, 1 mois' },
+  year: { amount: 3500, days: 365, en: 'Platform charges, 1 year', fr: 'Frais de plateforme, 1 an' },
 };
 
 export const unitLocked = (unitId, pro) => !pro && !FREE_UNITS.includes(unitId);

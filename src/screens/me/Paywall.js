@@ -24,24 +24,24 @@ export function operatorFor(d) {
   return null;
 }
 
-function Compare({ title, free, full }) {
+function Included({ text }) {
   return (
-    <V c="flex-row gap-space-sm py-2 border-t border-surface-container">
-      <T c="font-body-sm text-body-sm text-on-surface flex-1" style={{ fontWeight: '600' }}>
-        {title}
-      </T>
-      <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ width: '28%' }}>
-        {free}
-      </T>
-      <T c="font-body-sm text-body-sm text-on-surface" style={{ width: '28%' }}>
-        {full}
+    <V c="flex-row items-start gap-space-sm py-1.5">
+      <Ic n="check_circle" s={18} c="primary-container" />
+      <T c="font-body-sm text-body-sm text-on-surface flex-1" style={{ lineHeight: 20 }}>
+        {text}
       </T>
     </V>
   );
 }
 
+const longDate = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+// The platform charges. With route.params.gate it is the only screen a student
+// whose free month has ended can use (see AppNavigator), so it has no way back.
 export default function Paywall({ navigation, route }) {
-  const { user, pro, refreshMe, refreshQuota } = useApp();
+  const { user, pro, refreshMe, refreshQuota, logout } = useApp();
+  const gate = !!route.params?.gate;
   const L = useL();
   const [plans, setPlans] = useState(null);
   const [open, setOpen] = useState(true);
@@ -76,7 +76,6 @@ export default function Paywall({ navigation, route }) {
 
   const P_ = plans || Object.fromEntries(Object.entries(LOCAL_PLANS).map(([k, v]) => [k, { amount: v.amount, days: v.days }]));
   const amount = P_[plan]?.amount;
-  const reason = route.params?.reason;
   const prov = PROVIDERS.find((p) => p.id === provider);
 
   const check = async (id, tries = 0) => {
@@ -158,7 +157,7 @@ export default function Paywall({ navigation, route }) {
       await refreshMe();
       refreshQuota();
       setVoucher('');
-      showToast(`${r.label || L('Voucher', 'Code')} ${L('applied. The full course is unlocked.', 'appliqué. Le cours complet est débloqué.')}`);
+      showToast(`${r.label || L('Code', 'Code')} ${L('applied. Klass8 is open.', 'appliqué. Klass8 est ouvert.')}`);
     } catch (e) {
       setError(e);
     } finally {
@@ -166,54 +165,49 @@ export default function Paywall({ navigation, route }) {
     }
   };
 
-  const until = user?.proUntil ? new Date(user.proUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
-  const intro = pro && until
-    ? `${L('Your full course runs until', 'Votre cours complet court jusqu’au')} ${until}. ${L('Another pass adds its days to this date.', 'Un autre pass ajoute ses jours à cette date.')}`
-    : pro && !paywall
-    ? L('Everything is open while Klass8 is being tested, so you do not need a pass yet.', 'Tout est ouvert pendant les tests de Klass8, vous n’avez donc pas encore besoin d’un pass.')
-    : reason === 'mocks'
-    ? L('You have used this week’s free Paper 1. The full course has no weekly limit.', 'Vous avez utilisé l’épreuve 1 gratuite de la semaine. Le cours complet n’a pas de limite.')
-    : reason === 'mark' || reason === 'ai'
-    ? L('Answer marking and more tutor questions each day come with the full course.', 'La correction des réponses et plus de questions au tuteur viennent avec le cours complet.')
-    : L('Every unit and practical in every subject you take, unlimited papers and answer marking. One pass covers all your subjects.', 'Toutes les unités et tous les TP dans toutes vos matières, des épreuves illimitées et la correction des réponses. Un seul pass couvre toutes vos matières.');
+  const now = Date.now();
+  const paidUntil = user?.proUntil && user.proUntil > now ? user.proUntil : null;
+  const trialUntil = user?.trialUntil && user.trialUntil > now ? user.trialUntil : null;
+  const intro = !paywall && pro
+    ? L('Everything is open while Klass8 is being tested, so you do not need to pay yet.', 'Tout est ouvert pendant les tests de Klass8, vous n’avez donc pas encore besoin de payer.')
+    : paidUntil
+    ? `${L('Klass8 is open on your account until', 'Klass8 est ouvert sur votre compte jusqu’au')} ${longDate(paidUntil)}. ${L('Paying again adds the days to this date.', 'Un nouveau paiement ajoute ses jours à cette date.')}`
+    : trialUntil
+    ? `${L('Your free month runs until', 'Votre mois gratuit court jusqu’au')} ${longDate(trialUntil)}. ${L('If you pay now, the time you pay for starts when it ends.', 'Si vous payez maintenant, la durée payée commence à sa fin.')}`
+    : gate
+    ? L('Pay the platform charges to keep using Klass8. Everything you have done so far is kept.', 'Payez les frais de plateforme pour continuer à utiliser Klass8. Tout ce que vous avez fait est conservé.')
+    : L('Your free month has ended. Pay the platform charges to keep using Klass8.', 'Votre mois gratuit est terminé. Payez les frais de plateforme pour continuer à utiliser Klass8.');
 
   return (
     <V c="flex-1">
-      <Screen bg="bg-surface" keyboard header={<StackHeader close title={L('Full course', 'Cours complet')} avatar={false} />}>
+      <Screen bg="bg-surface" keyboard header={<StackHeader close noBack={gate && !pro} title={L('Platform charges', 'Frais de plateforme')} avatar={false} />}>
         <V c="pb-space-xl gap-space-lg pt-space-md">
           <V c="gap-space-xs">
-            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{pro ? L('You have the full course', 'Vous avez le cours complet') : L('The full Klass8 course', 'Le cours complet Klass8')}</T>
+            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{gate ? L('Your free month has ended', 'Votre mois gratuit est terminé') : L('Platform charges', 'Frais de plateforme')}</T>
             <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
               {intro}
             </T>
           </V>
 
-          <V c="bg-surface-container-lowest rounded-xl px-space-md pb-space-xs pt-space-sm shadow-sm">
-            <V c="flex-row gap-space-sm pb-2">
-              <V c="flex-1" />
-              <T c="font-label-md text-label-md text-on-surface-variant" style={{ width: '28%' }}>
-                {L('Free', 'Gratuit')}
-              </T>
-              <T c="font-label-md text-label-md text-on-surface" style={{ width: '28%', fontWeight: '700' }}>
-                {L('Full course', 'Complet')}
-              </T>
-            </V>
-            <Compare title={L('Units', 'Unités')} free={L('1 to 3 in each subject, and first lessons', '1 à 3 par matière, et premières leçons')} full={L('All, in every subject', 'Toutes, dans chaque matière')} />
-            <Compare title={L('Practicals', 'TP')} free={L('2 in each subject', '2 par matière')} full={L('All', 'Tous')} />
-            <Compare title={L('Paper 1', 'Épreuve 1')} free={L('1 a week in each subject', '1 par semaine et par matière')} full={L('Unlimited', 'Illimitée')} />
-            <Compare title={L('Paper 2 marking', 'Correction épreuve 2')} free={L('Yourself', 'Vous-même')} full={L('By the app', 'Par l’application')} />
-            <Compare title={L('Tutor questions', 'Questions au tuteur')} free={L('5 a day', '5 par jour')} full={L('30 a day', '30 par jour')} />
-            <Compare title={L('Answer marking', 'Correction de réponses')} free="-" full={L('30 typed and 6 photos a day', '30 tapées et 6 photos par jour')} />
+          <V c="bg-surface-container-lowest rounded-xl px-space-md py-space-sm shadow-sm">
+            <T c="font-label-lg text-label-lg text-on-surface pb-1" style={{ fontWeight: '700' }}>
+              {L('The platform charges open everything in Klass8', 'Les frais de plateforme ouvrent tout Klass8')}
+            </T>
+            <Included text={L('Every subject you take, from Form 1 to Upper Sixth', 'Toutes vos matières, de la Form 1 à l’Upper Sixth')} />
+            <Included text={L('Every lesson, with its labelled diagrams and the teacher’s explanations', 'Toutes les leçons, avec leurs schémas et les explications du professeur')} />
+            <Included text={L('Every practical and 3D model', 'Tous les TP et modèles 3D')} />
+            <Included text={L('Papers 1, 2 and 3 as often as you like, with marking', 'Les épreuves 1, 2 et 3 sans limite, avec correction')} />
+            <Included text={L('The tutor (30 questions a day) and answer marking (30 typed and 6 photos a day)', 'Le tuteur (30 questions par jour) et la correction (30 tapées et 6 photos par jour)')} />
           </V>
 
           {!STORE_BUILD && paywall && (
             <V c="gap-space-sm">
               <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
-                {L('Choose a pass', 'Choisissez un pass')}
+                {L('Choose how long', 'Choisissez la durée')}
               </T>
               {[
-                ['year', L('School year pass', 'Pass année scolaire'), L('Until your exam season', 'Jusqu’à la session d’examen')],
-                ['term', L('Term pass', 'Pass trimestre'), L('About one school term', 'Environ un trimestre')],
+                ['year', L('One year', 'Un an'), L('Two months free compared with paying each month', 'Deux mois offerts par rapport au paiement mensuel')],
+                ['month', L('One month', 'Un mois'), L('Pay again each month', 'À payer chaque mois')],
               ].map(([id, name, sub]) => {
                 const on = plan === id;
                 const p = P_[id];
@@ -224,7 +218,7 @@ export default function Paywall({ navigation, route }) {
                         {name}
                       </T>
                       <T c="font-body-sm text-body-sm text-on-surface-variant">
-                        {sub}, {p?.days} {L('days', 'jours')}. {L('Paid once, no automatic renewal.', 'Payé une fois, sans renouvellement.')}
+                        {p?.days} {L('days', 'jours')}. {sub}. {L('No automatic renewal.', 'Sans renouvellement automatique.')}
                       </T>
                     </V>
                     <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
@@ -309,6 +303,17 @@ export default function Paywall({ navigation, route }) {
           </V>
           )}
 
+          {gate && (
+            <V c="flex-row gap-space-md">
+              <P c="py-space-xs" onPress={() => navigation.navigate('Settings')} hitSlop={8}>
+                <T c="font-label-md text-label-md text-primary-container">{L('Settings', 'Paramètres')}</T>
+              </P>
+              <P c="py-space-xs" onPress={logout} hitSlop={8}>
+                <T c="font-label-md text-label-md text-primary-container">{L('Sign out', 'Se déconnecter')}</T>
+              </P>
+            </V>
+          )}
+
           <P c="flex-row items-center justify-between gap-space-sm py-space-xs" onPress={() => setLicence(true)}>
             <V c="flex-1 gap-0.5">
               <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
@@ -329,8 +334,13 @@ export default function Paywall({ navigation, route }) {
                 <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
                   {L('Payment received', 'Paiement reçu')}
                 </T>
-                <T c="font-body-md text-body-md text-on-surface-variant">{L('The full course is now open on your account, on any phone you log in to.', 'Le cours complet est ouvert sur votre compte, sur tout téléphone où vous vous connectez.')}</T>
-                <Cta variant="dark" icon={null} label={L('Continue', 'Continuer')} onPress={() => (setPayment(null), navigation.goBack())} />
+                <T c="font-body-md text-body-md text-on-surface-variant">{L('Klass8 is now open on your account, on any phone you log in to.', 'Klass8 est maintenant ouvert sur votre compte, sur tout téléphone où vous vous connectez.')}</T>
+                <Cta
+                  variant="dark"
+                  icon={null}
+                  label={L('Continue', 'Continuer')}
+                  onPress={() => (setPayment(null), gate || !navigation.canGoBack() ? navigation.reset({ index: 0, routes: [{ name: 'Main' }] }) : navigation.goBack())}
+                />
               </>
             ) : payment?.status === 'PENDING' && payment.link ? (
               <>

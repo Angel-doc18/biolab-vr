@@ -124,7 +124,7 @@ export default function School({ navigation, route }) {
       if (isVoucher(c)) {
         const r = await post('/v1/billing/redeem', { code: c });
         await refreshMe().catch(() => {});
-        setCodeState({ ok: `${r.label || L('School licence', 'Licence')} ${L('applied. The full course is unlocked.', 'appliquée. Le cours complet est débloqué.')}` });
+        setCodeState({ ok: `${r.label || L('School licence', 'Licence')} ${L('applied. Klass8 is open.', 'appliquée. Klass8 est ouvert.')}` });
       } else {
         const r = await post('/v1/classes/join', { code: c });
         await refreshMe().catch(() => {});
