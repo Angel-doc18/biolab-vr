@@ -19,6 +19,7 @@ case "${1:-}" in
         mkdir -p /opt/klass8-api/data/backups && chown -R 1000:1000 /opt/klass8-api/data
         rm -rf /opt/klass8-api/build && mkdir /opt/klass8-api/build && tar xzf - -C /opt/klass8-api/build
         install -m 700 /opt/klass8-api/build/server/set-fapshi-keys.sh /opt/klass8-api/set-fapshi-keys.sh
+        install -m 700 /opt/klass8-api/build/server/make-admin.sh /opt/klass8-api/make-admin.sh
         cd /opt/klass8-api/build && docker build -q -t klass8-api . >/dev/null
         docker network inspect klass8 >/dev/null 2>&1 || docker network create klass8 >/dev/null
         docker rm -f klass8-api >/dev/null 2>&1 || true

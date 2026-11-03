@@ -68,7 +68,7 @@ export const trialUntil = (u) => (u.role === 'student' ? (u.created_at || 0) + T
 // When the student's access ends (the later of the free month and what was
 // paid); a payment or code adds its days after it.
 export const accessEnd = (u) => Math.max(u.pro_until || 0, trialUntil(u) || 0);
-export const isPro = (user, env) => !paywallOn(env) || user.role !== 'student' || accessEnd(user) > now();
+export const isPro = (user, env) => !paywallOn(env) || user.role !== 'student' || Boolean(user.is_admin) || accessEnd(user) > now();
 export function requireAccess(user, env) {
   if (!isPro(user, env)) throw new HttpError(402, 'Your free month has ended. Pay the platform charges to keep using Klass8.', 'payment_required');
 }
@@ -106,7 +106,8 @@ export function publicUser(u, env) {
     avatarAt: u.avatar_at || null,
     subjects: userSubjects(u),
     proUntil: u.pro_until || null,
-    trialUntil: paywallOn(env) ? trialUntil(u) : null, // the free month, once charges apply
+    trialUntil: paywallOn(env) && !u.is_admin ? trialUntil(u) : null, // the free month, once charges apply
+    isAdmin: Boolean(u.is_admin),
     createdAt: u.created_at,
   };
 }
