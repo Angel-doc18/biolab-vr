@@ -82,9 +82,11 @@ def speak(text, lang, voice, speed):
     voice = voice or DEFAULT_VOICE[lang]
     with torch.inference_mode():
         parts = [audio for _, _, audio in pipe(lang_code(lang, voice))(text, voice=voice, speed=speed)]
-    if not parts:
-        raise ValueError('no audio')
     gap = np.zeros(int(24000 * 0.12), dtype=np.float32)
+    # Nothing to say (a piece that is only a closing quote, for example): a
+    # moment of silence, so the phone plays it and goes on instead of failing.
+    if not parts:
+        parts = [gap]
     wav = np.concatenate([np.concatenate([p.numpy() if hasattr(p, 'numpy') else p, gap]) for p in parts])
     buf = io.BytesIO()
     sf.write(buf, wav, 24000, format='MP3')
