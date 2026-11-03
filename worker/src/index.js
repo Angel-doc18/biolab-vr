@@ -60,6 +60,7 @@ const routes = [
   ['GET', '/v1/billing/payments', billing.listPayments],
   ['GET', `/v1/billing/payments/${ID}`, billing.getPayment],
   ['POST', '/v1/billing/fapshi-webhook', billing.fapshiWebhook],
+  ['GET', '/v1/billing/return', billing.returnPage],
   ['POST', '/v1/billing/redeem', billing.redeemVoucher],
   ['POST', '/v1/billing/licence-request', billing.licenceRequest],
   ['GET', '/v1/ai/quota', ai.aiQuota],
@@ -79,7 +80,7 @@ function corsHeaders(request, env) {
   if (!origin || !allowed.includes(origin)) return null;
   return {
     'access-control-allow-origin': origin,
-    'access-control-allow-headers': 'authorization, content-type',
+    'access-control-allow-headers': 'authorization, content-type, x-klass8-client',
     'access-control-allow-methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     'access-control-max-age': '600',
     vary: 'Origin',
@@ -99,6 +100,8 @@ async function handle(request, env) {
 // Daily at 17:00 UTC (18:00 in Cameroon).
 async function scheduled(env) {
   const day = 86_400_000;
+  // Klass8's own server also checks open payments every few minutes (server/main.js).
+  await billing.reconcilePayments(env).catch((e) => console.error('reconcile', e?.message));
   // Inactivity alerts to the parent number the student gave, on day 3 and day 7 of a break.
   if (channels(env).length) {
     const { results } = await env.DB.prepare(

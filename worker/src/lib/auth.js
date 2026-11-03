@@ -17,7 +17,7 @@ export async function issueSession(env, user) {
     .run();
   const accessToken = await signJwt({ sub: user.id, role: user.role }, env.JWT_SECRET, ACCESS_TTL);
   // `pro` lets the app open the full course straight after signing in.
-  return { accessToken, refreshToken: refresh, expiresIn: ACCESS_TTL, pro: isPro(user) };
+  return { accessToken, refreshToken: refresh, expiresIn: ACCESS_TTL, pro: isPro(user, env) };
 }
 
 export async function rotateRefresh(env, refreshToken) {
@@ -45,6 +45,8 @@ export async function revokeRefresh(env, refreshToken) {
 }
 
 export async function requireUser(request, env, roles) {
+  // An app from before the paywall is signed out (401), then asked to update.
+  if (outdatedApp(request, env)) throw new HttpError(401, UPDATE_MESSAGE, 'update_required');
   const header = request.headers.get('authorization') || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   const claims = await verifyJwt(token, env.JWT_SECRET);
@@ -55,10 +57,18 @@ export async function requireUser(request, env, roles) {
   return user;
 }
 
-// While Klass8 is being tested every account gets the full course. Set this to
-// false (and OPEN_FOR_TESTING in src/data/plan.js) to bring back the paywall.
-export const FREE_FOR_TESTING = true;
-export const isPro = (user) => FREE_FOR_TESTING || Boolean(user.pro_until && user.pro_until > now());
+// Until the paywall is switched on (PAYWALL=on, set with
+// /opt/klass8-api/set-fapshi-keys.sh once payments work) every account gets the
+// full course. The app takes its answer from `pro`, so no new build is needed.
+export const paywallOn = (env) => env?.PAYWALL === 'on';
+export const isPro = (user, env) => !paywallOn(env) || Boolean(user.pro_until && user.pro_until > now());
+
+// Builds from before the paywall open the whole course on the phone whatever
+// the server says, so once it is on they must update. Newer builds send
+// x-klass8-client with their level.
+const CLIENT_LEVEL = 2;
+export const UPDATE_MESSAGE = 'This version of Klass8 is out of date. Install the new one from klass8.ebenesaid.com/download to continue.';
+export const outdatedApp = (request, env) => paywallOn(env) && !(Number(request.headers.get('x-klass8-client')) >= CLIENT_LEVEL);
 
 // Public shape of a user. Never includes hashes or internal flags.
 export function publicUser(u) {

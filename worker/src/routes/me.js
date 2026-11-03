@@ -6,7 +6,7 @@ import { MAX_SUBJECTS, cleanSubjects, isSubjectId, userSubjects } from '../lib/s
 
 export async function getMe(request, env) {
   const user = await requireUser(request, env);
-  return ok({ user: publicUser(user), pro: isPro(user) });
+  return ok({ user: publicUser(user), pro: isPro(user, env) });
 }
 
 // Only these profile fields can be changed by the user. Billing fields never can.
@@ -55,7 +55,7 @@ export async function patchMe(request, env) {
       .run();
   }
   const fresh = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(user.id).first();
-  return ok({ user: publicUser(fresh), pro: isPro(fresh) });
+  return ok({ user: publicUser(fresh), pro: isPro(fresh, env) });
 }
 
 // Account deletion: requires the password, removes personal data.

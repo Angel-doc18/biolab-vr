@@ -13,6 +13,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import worker from '../src/index.js';
+import { reconcilePayments } from '../src/routes/billing.js';
 import { D1 } from './d1.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -145,6 +146,9 @@ function daily(hh, mm, name, fn) {
 }
 daily(17, 0, 'scheduled', () => worker.scheduled({ cron: '0 17 * * *', scheduledTime: Date.now() }, env, ctx));
 daily(2, 30, 'backup', backup);
+// Fapshi sends each payment's webhook only once: open payments are checked
+// every 3 minutes as well, so a missed webhook never leaves a paid pass shut.
+setInterval(() => reconcilePayments(env).catch((e) => console.error('reconcile', e?.message)), 3 * 60_000);
 
 server.listen(PORT, () => console.log(`Klass8 API on port ${PORT}, data in ${DATA}`));
 const stop = () => server.close(() => process.exit(0));

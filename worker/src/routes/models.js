@@ -26,7 +26,7 @@ export async function modelLink(request, env, name) {
   const user = await requireUser(request, env);
   const unit = MODEL_UNIT[name];
   if (!unit) throw new HttpError(404, 'Model not found.', 'not_found');
-  if (!FREE_MODELS.includes(name) && !isPro(user)) throw new HttpError(402, 'This 3D model is part of the full course.', 'premium_required');
+  if (!FREE_MODELS.includes(name) && !isPro(user, env)) throw new HttpError(402, 'This 3D model is part of the full course.', 'premium_required');
   const exp = Math.floor(now() / 1000) + TTL;
   const sig = await hmac(secret(env), `${name}:${exp}`);
   return json({ url: `${base(request, env)}/v1/models/${name}.glb?e=${exp}&s=${sig}`, expires: exp * 1000 });

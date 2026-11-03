@@ -1,6 +1,6 @@
 import { HttpError, clientIp, created, limit, now, ok, readJson } from '../lib/http.js';
 import { hashPassword, randomDigits, sha256, uuid, verifyPassword, safeEqual } from '../lib/crypto.js';
-import { issueSession, publicUser, requireUser, revokeRefresh, rotateRefresh } from '../lib/auth.js';
+import { UPDATE_MESSAGE, issueSession, outdatedApp, publicUser, requireUser, revokeRefresh, rotateRefresh } from '../lib/auth.js';
 import { email, oneOf, password, phone, str } from '../lib/validate.js';
 import { channels, messagingConfigured, sendCode } from '../lib/messaging.js';
 
@@ -10,7 +10,12 @@ const OTP_TTL = 10 * 60 * 1000;
 // A precomputed hash so failed logins for unknown users cost the same time.
 const DUMMY = { hash: '0'.repeat(64), salt: '00112233445566778899aabbccddeeff' };
 
+const currentApp = (request, env) => {
+  if (outdatedApp(request, env)) throw new HttpError(426, UPDATE_MESSAGE, 'update_required');
+};
+
 export async function register(request, env) {
+  currentApp(request, env);
   await limit(env.AUTH_LIMITER, `reg:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
   const body = await readJson(request);
   const name = str(body.name, 'Full name', { min: 2, max: 80 });
@@ -40,6 +45,7 @@ export async function register(request, env) {
 }
 
 export async function login(request, env) {
+  currentApp(request, env);
   await limit(env.AUTH_LIMITER, `login:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
   const body = await readJson(request);
   const identifier = str(body.identifier, 'Phone number or email', { max: 254 });
@@ -63,6 +69,8 @@ export async function login(request, env) {
 }
 
 export async function refresh(request, env) {
+  // 401, so an outdated app drops its session and shows the login screen.
+  if (outdatedApp(request, env)) throw new HttpError(401, UPDATE_MESSAGE, 'update_required');
   await limit(env.AUTH_LIMITER, `refresh:${clientIp(request)}`);
   const body = await readJson(request);
   return ok(await rotateRefresh(env, body.refreshToken));

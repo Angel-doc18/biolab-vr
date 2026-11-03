@@ -28,7 +28,7 @@ async function consume(env, userId, column) {
 
 export async function aiQuota(request, env) {
   const user = await requireUser(request, env);
-  const tier = isPro(user) ? 'pro' : 'free';
+  const tier = isPro(user, env) ? 'pro' : 'free';
   const used = await usage(env, user.id);
   return ok({
     tier,
@@ -42,7 +42,7 @@ export async function aiQuota(request, env) {
 export async function ask(request, env) {
   const user = await requireUser(request, env);
   await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are sending questions too quickly. Wait a moment.');
-  const tier = isPro(user) ? 'pro' : 'free';
+  const tier = isPro(user, env) ? 'pro' : 'free';
   const used = await usage(env, user.id);
   if (used.asks >= AI_LIMITS[tier].asks) {
     throw new HttpError(402, tier === 'pro' ? 'You have reached today\'s question limit.' : 'You have used today\'s free questions.', 'quota');
@@ -84,7 +84,7 @@ export async function solve(request, env) {
   const className = user.class_name || '';
   const key = await sha256(JSON.stringify(['solve', subject, lang, className, question.replace(/\s+/g, ' ').trim().toLowerCase(), lesson?.title || '']));
   const hit = await env.DB.prepare('SELECT body FROM ai_explanations WHERE key = ?').bind(key).first();
-  const tier = isPro(user) ? 'pro' : 'free';
+  const tier = isPro(user, env) ? 'pro' : 'free';
   const used = await usage(env, user.id);
   if (hit) return ok({ solution: JSON.parse(hit.body), cached: true, asksLeft: Math.max(0, AI_LIMITS[tier].asks - used.asks) });
   await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are sending questions too quickly. Wait a moment.');
@@ -101,7 +101,7 @@ const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export async function mark(request, env) {
   const user = await requireUser(request, env);
-  if (!isPro(user)) throw new HttpError(402, 'Mark my answer is part of Premium.', 'premium_required');
+  if (!isPro(user, env)) throw new HttpError(402, 'Mark my answer is part of Premium.', 'premium_required');
   await limit(env.AI_LIMITER, `ai:${user.id}`, 'Please wait a moment before marking another answer.');
   const used = await usage(env, user.id);
   const b = await readJson(request, 6 * 1024 * 1024);
