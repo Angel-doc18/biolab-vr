@@ -5,7 +5,6 @@ import { EMPTY, examSubject, merge, minutesThisWeek, streak, syllabusMastery, to
 import { units, unitsShown } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
 import { OPEN_IDS, chosenSubjects } from '../data/subjects';
-import { OPEN_FOR_TESTING } from '../data/plan';
 import { setVoice } from '../lib/voice';
 
 const PREFS = 'bs:prefs';
@@ -367,7 +366,8 @@ export function AppProvider({ children }) {
       savePrefs,
       auth,
       user,
-      pro: OPEN_FOR_TESTING || auth.pro,
+      // The server decides: everyone while the paywall is off, then pass holders.
+      pro: auth.pro,
       subjects,
       subject,
       setSubject,

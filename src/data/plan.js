@@ -14,9 +14,8 @@ export const FREE_LABS = Object.values(
 ).flatMap((ids) => ids.slice(0, 2));
 export const FREE_MOCKS_PER_WEEK = 1;
 
-// While Klass8 is being tested every account gets the full course. Set this to
-// false (and FREE_FOR_TESTING in worker/src/lib/auth.js) to bring back the paywall.
-export const OPEN_FOR_TESTING = true;
+// Whether the full course is charged for is decided on the server (PAYWALL in
+// worker/src/lib/auth.js): `pro` from the server is true for everyone until then.
 
 export const PLANS = {
   term: { amount: 1500, days: 120, en: 'Term Pass', fr: 'Pass trimestre' },

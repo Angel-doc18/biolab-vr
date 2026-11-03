@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Modal } from 'react-native';
+import { ActivityIndicator, AppState, Linking, Modal, Platform } from 'react-native';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
 import { get, post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-import { OPEN_FOR_TESTING, PLANS as LOCAL_PLANS, fcfa } from '../../data/plan';
+import { PLANS as LOCAL_PLANS, fcfa } from '../../data/plan';
 import { NeedsInternet } from '../../ui/Offline';
 
 // Builds published on Google Play sell nothing inside the app (Play's payments
@@ -45,13 +45,17 @@ export default function Paywall({ navigation, route }) {
   const L = useL();
   const [plans, setPlans] = useState(null);
   const [open, setOpen] = useState(true);
+  // From the server: whether the course is charged for yet, and how Fapshi
+  // takes the money ('prompt' on the phone, or 'link' to its payment page).
+  const [paywall, setPaywall] = useState(!pro);
+  const [checkout, setCheckout] = useState('link');
   const [plan, setPlan] = useState('year');
   const [provider, setProvider] = useState('mobile money');
   const [phone, setPhone] = useState(user?.phone ? user.phone.replace(/^237/, '') : '');
   const [voucher, setVoucher] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
-  const [payment, setPayment] = useState(null); // { id, status, amount }
+  const [payment, setPayment] = useState(null); // { id, status, amount, link }
   const [licence, setLicence] = useState(false);
   const [toast, showToast] = useToast();
   const poll = useRef(null);
@@ -61,6 +65,8 @@ export default function Paywall({ navigation, route }) {
       .then((r) => {
         setPlans(r.plans);
         setOpen(r.paymentsOpen);
+        setPaywall(r.paywall !== false);
+        setCheckout(r.checkout === 'prompt' ? 'prompt' : 'link');
       })
       .catch(() => setPlans(null));
     const op = operatorFor(phone);
@@ -89,23 +95,54 @@ export default function Paywall({ navigation, route }) {
         return;
       }
     }
-    if (tries < 40) poll.current = setTimeout(() => check(id, tries + 1), 6000);
+    // About 4 minutes for a request on the phone, 15 on the payment page.
+    if (tries < (checkout === 'link' ? 150 : 40)) poll.current = setTimeout(() => check(id, tries + 1), 6000);
     else setPayment((p) => ({ ...p, status: 'TIMEOUT' }));
   };
 
+  // Back from Fapshi's payment page (or from approving on the phone): look at
+  // once instead of waiting for the next check.
+  const pendingId = payment?.status === 'PENDING' ? payment.id : null;
+  const latestCheck = useRef(check);
+  useEffect(() => {
+    latestCheck.current = check;
+  });
+  useEffect(() => {
+    if (!pendingId) return undefined;
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s !== 'active') return;
+      clearTimeout(poll.current);
+      latestCheck.current(pendingId);
+    });
+    return () => sub.remove();
+  }, [pendingId]);
+
+  const openPage = (link) => Linking.openURL(link).catch(() => setError(L('The payment page could not be opened. Try again.', 'La page de paiement n’a pas pu s’ouvrir. Réessayez.')));
+
   const pay = async () => {
     const d = phone.replace(/\D/g, '');
-    if (!/^6\d{8}$/.test(d)) return setError(L('Enter your 9 digit mobile money number.', 'Entrez votre numéro mobile money (9 chiffres).'));
-    const op = operatorFor(d);
-    if (op && op !== provider) return setError(L('This number belongs to the other network. Choose the matching one.', 'Ce numéro appartient à l’autre réseau. Choisissez le bon.'));
+    if (checkout === 'prompt') {
+      if (!/^6\d{8}$/.test(d)) return setError(L('Enter your 9 digit mobile money number.', 'Entrez votre numéro mobile money (9 chiffres).'));
+      const op = operatorFor(d);
+      if (op && op !== provider) return setError(L('This number belongs to the other network. Choose the matching one.', 'Ce numéro appartient à l’autre réseau. Choisissez le bon.'));
+    }
     setBusy(true);
     setError(null);
     try {
-      const r = await post('/v1/billing/pay', { plan, phone: `237${d}`, medium: provider });
-      setPayment({ id: r.payment.id, status: 'PENDING', amount: r.payment.amount });
+      const body = checkout === 'prompt' ? { plan, phone: `237${d}`, medium: provider } : { plan };
+      const r = await post('/v1/billing/pay', body);
+      const link = r.payment.link || null;
+      setPayment({ id: r.payment.id, status: 'PENDING', amount: r.payment.amount, link });
+      // A browser only opens a new tab straight from a tap, so on the web the
+      // student taps "Open the payment page" in the next sheet.
+      if (link && Platform.OS !== 'web') openPage(link);
       poll.current = setTimeout(() => check(r.payment.id), 8000);
     } catch (e) {
-      setError(e);
+      setError(
+        e.code === 'payment_timeout'
+          ? L('The payment service did not answer. If a payment request appears on your phone, approve it: the course opens by itself once it is confirmed.', 'Le service de paiement n’a pas répondu. Si une demande apparaît sur votre téléphone, validez-la : le cours s’ouvrira dès sa confirmation.')
+          : e
+      );
     } finally {
       setBusy(false);
     }
@@ -132,13 +169,13 @@ export default function Paywall({ navigation, route }) {
   const until = user?.proUntil ? new Date(user.proUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
   const intro = pro && until
     ? `${L('Your full course runs until', 'Votre cours complet court jusqu’au')} ${until}. ${L('Another pass adds its days to this date.', 'Un autre pass ajoute ses jours à cette date.')}`
-    : pro
+    : pro && !paywall
     ? L('Everything is open while Klass8 is being tested, so you do not need a pass yet.', 'Tout est ouvert pendant les tests de Klass8, vous n’avez donc pas encore besoin d’un pass.')
     : reason === 'mocks'
     ? L('You have used this week’s free Paper 1. The full course has no weekly limit.', 'Vous avez utilisé l’épreuve 1 gratuite de la semaine. Le cours complet n’a pas de limite.')
     : reason === 'mark' || reason === 'ai'
     ? L('Answer marking and more tutor questions each day come with the full course.', 'La correction des réponses et plus de questions au tuteur viennent avec le cours complet.')
-    : L('Every unit and practical in Biology, Chemistry, Physics and Human Biology, unlimited papers and answer marking. One pass covers all four.', 'Toutes les unités et tous les TP en biologie, chimie, physique et biologie humaine, des épreuves illimitées et la correction des réponses. Un seul pass couvre les quatre.');
+    : L('Every unit and practical in every subject you take, unlimited papers and answer marking. One pass covers all your subjects.', 'Toutes les unités et tous les TP dans toutes vos matières, des épreuves illimitées et la correction des réponses. Un seul pass couvre toutes vos matières.');
 
   return (
     <V c="flex-1">
@@ -161,7 +198,7 @@ export default function Paywall({ navigation, route }) {
                 {L('Full course', 'Complet')}
               </T>
             </V>
-            <Compare title={L('Units', 'Unités')} free={L('1 to 3 in each subject, and first lessons', '1 à 3 par matière, et premières leçons')} full={L('All, in all four subjects', 'Toutes, dans les quatre matières')} />
+            <Compare title={L('Units', 'Unités')} free={L('1 to 3 in each subject, and first lessons', '1 à 3 par matière, et premières leçons')} full={L('All, in every subject', 'Toutes, dans chaque matière')} />
             <Compare title={L('Practicals', 'TP')} free={L('2 in each subject', '2 par matière')} full={L('All', 'Tous')} />
             <Compare title={L('Paper 1', 'Épreuve 1')} free={L('1 a week in each subject', '1 par semaine et par matière')} full={L('Unlimited', 'Illimitée')} />
             <Compare title={L('Paper 2 marking', 'Correction épreuve 2')} free={L('Yourself', 'Vous-même')} full={L('By the app', 'Par l’application')} />
@@ -169,7 +206,7 @@ export default function Paywall({ navigation, route }) {
             <Compare title={L('Answer marking', 'Correction de réponses')} free="-" full={L('30 typed and 6 photos a day', '30 tapées et 6 photos par jour')} />
           </V>
 
-          {!STORE_BUILD && !OPEN_FOR_TESTING && (
+          {!STORE_BUILD && paywall && (
             <V c="gap-space-sm">
               <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
                 {L('Choose a pass', 'Choisissez un pass')}
@@ -200,6 +237,12 @@ export default function Paywall({ navigation, route }) {
               <T c="font-label-lg text-label-lg text-on-surface pt-space-sm" style={{ fontWeight: '700' }}>
                 {L('Pay with mobile money', 'Payer par mobile money')}
               </T>
+              {checkout === 'link' ? (
+                <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
+                  {L('You pay on the payment page of Fapshi, Klass8’s payment service, with MTN MoMo or Orange Money. Approve the payment on your phone with your PIN; never type your PIN in this app.', 'Vous payez sur la page de paiement de Fapshi, le service de paiement de Klass8, avec MTN MoMo ou Orange Money. Validez le paiement sur votre téléphone avec votre code PIN ; ne tapez jamais votre PIN dans l’application.')}
+                </T>
+              ) : (
+              <>
               <V c="flex-row gap-space-xs">
                 {PROVIDERS.map((p) => {
                   const on = provider === p.id;
@@ -235,6 +278,8 @@ export default function Paywall({ navigation, route }) {
               <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
                 {L('A payment request appears on this phone. Approve it there with your PIN; never type your PIN in this app. Payments are handled by Fapshi.', 'Une demande de paiement apparaît sur ce téléphone. Validez-la avec votre code PIN ; ne tapez jamais votre PIN dans l’application. Paiements traités par Fapshi.')}
               </T>
+              </>
+              )}
               {!open && <T c="font-body-sm text-body-sm text-error">{L('Mobile money payments are not open yet. A school voucher works now.', 'Les paiements mobile money ne sont pas encore ouverts. Un code d’école fonctionne déjà.')}</T>}
               <NeedsInternet what={{ en: 'pay', fr: 'payer' }} />
               <ErrorNote error={error} />
@@ -242,7 +287,7 @@ export default function Paywall({ navigation, route }) {
             </V>
           )}
 
-          {!OPEN_FOR_TESTING && (
+          {paywall && (
           <V c="gap-space-sm">
             <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
               {L('Voucher from your school', 'Code de votre école')}
@@ -276,7 +321,7 @@ export default function Paywall({ navigation, route }) {
         </V>
       </Screen>
 
-      <Modal visible={!!payment} transparent animationType="slide" onRequestClose={() => payment?.status !== 'PENDING' && setPayment(null)}>
+      <Modal visible={!!payment} transparent animationType="slide" onRequestClose={() => (payment?.status !== 'PENDING' || payment?.link) && setPayment(null)}>
         <V c="flex-1 justify-end" style={{ backgroundColor: 'rgba(15,23,42,0.45)' }}>
           <V c="bg-surface-container-lowest rounded-t-xl p-space-lg gap-space-md">
             {payment?.status === 'SUCCESSFUL' ? (
@@ -286,6 +331,23 @@ export default function Paywall({ navigation, route }) {
                 </T>
                 <T c="font-body-md text-body-md text-on-surface-variant">{L('The full course is now open on your account, on any phone you log in to.', 'Le cours complet est ouvert sur votre compte, sur tout téléphone où vous vous connectez.')}</T>
                 <Cta variant="dark" icon={null} label={L('Continue', 'Continuer')} onPress={() => (setPayment(null), navigation.goBack())} />
+              </>
+            ) : payment?.status === 'PENDING' && payment.link ? (
+              <>
+                <ActivityIndicator size="large" color={C['primary-container']} />
+                <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('Pay on the Fapshi page', 'Payez sur la page Fapshi')}
+                </T>
+                <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
+                  {L('Choose MTN MoMo or Orange Money there, enter your number and approve the request for', 'Choisissez MTN MoMo ou Orange Money, entrez votre numéro et validez la demande de')} {fcfa(payment.amount)} {L('on your phone. Then come back here: this screen updates by itself.', 'sur votre téléphone. Revenez ensuite ici : cet écran se met à jour seul.')}
+                </T>
+                <Cta variant="dark" icon={null} label={L('Open the payment page', 'Ouvrir la page de paiement')} onPress={() => openPage(payment.link)} />
+                <Cta
+                  variant="soft"
+                  icon={null}
+                  label={L('Close: the course opens by itself once paid', 'Fermer : le cours s’ouvre seul une fois payé')}
+                  onPress={() => (clearTimeout(poll.current), setPayment(null))}
+                />
               </>
             ) : payment?.status === 'PENDING' ? (
               <>

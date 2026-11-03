@@ -78,6 +78,8 @@ async function raw(path, { method = 'GET', body, token, timeout = 20000, binary 
       signal: ctrl.signal,
       headers: {
         Accept: 'application/json',
+        // This build follows the server's paywall (see worker/src/lib/auth.js).
+        'x-klass8-client': '2',
         ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
