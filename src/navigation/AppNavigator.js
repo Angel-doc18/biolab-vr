@@ -75,6 +75,8 @@ const stackOptions = () => ({
 
 // The platform charges and the Offline manager come up from the bottom.
 const modalOptions = () => ({ animation: noSlide() ? 'none' : 'slide_from_bottom', gestureDirection: 'vertical' });
+// The first screens after the opening logo fade in over its white.
+const fadeIn = () => ({ animation: noSlide() ? 'none' : 'fade' });
 
 function MainTabs() {
   return (
@@ -127,10 +129,10 @@ export default function AppNavigator() {
     <NavigationContainer ref={navRef} theme={theme} onReady={enforce} onStateChange={enforce}>
       <Stack.Navigator initialRouteName="Splash" screenOptions={stackOptions}>
         <Stack.Screen name="Splash" component={Splash} options={{ gestureEnabled: false }} />
-        <Stack.Screen name="Welcome" component={Welcome} />
+        <Stack.Screen name="Welcome" component={Welcome} options={fadeIn} />
         <Stack.Screen name="Language" component={Language} />
         <Stack.Screen name="Register" component={Register} />
-        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Login" component={Login} options={fadeIn} />
         <Stack.Screen name="Otp" component={Otp} />
         <Stack.Screen name="Forgot" component={Forgot} />
         <Stack.Screen name="Reset" component={Reset} />
@@ -142,7 +144,7 @@ export default function AppNavigator() {
         <Stack.Screen name="LinkChild" component={LinkChild} />
         <Stack.Screen name="CreateClass" component={CreateClass} />
 
-        <Stack.Screen name="Main" component={MainTabs} options={{ gestureEnabled: false }} />
+        <Stack.Screen name="Main" component={MainTabs} options={() => ({ ...fadeIn(), gestureEnabled: false })} />
         <Stack.Screen name="Topics" component={Topics} />
         <Stack.Screen name="Models" component={Models} />
         <Stack.Screen name="LabList" component={LabList} />

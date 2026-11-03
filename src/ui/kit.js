@@ -3,8 +3,8 @@
 import { useRef } from 'react';
 import { Animated, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { createIconSet } from '@expo/vector-icons';
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { LOGO_MARK } from './logoPath';
+import Svg, { Circle, Path } from 'react-native-svg';
+import { MARK } from './brand';
 import glyphMap from '../glyphmap.json';
 import tw, { C, color } from './tw';
 import { LOW_END } from '../lib/device';
@@ -187,11 +187,16 @@ export function Avatar({ name = '', size = 32, c = '', ring, uri }) {
 }
 
 // The Klass8 mark: a white K on a rounded brand-blue tile (white K alone when mono).
+// The K8 mark (src/ui/brand.js), `size` wide; mono draws it in one colour (e.g. on dark).
+const [MX0, MY0, MX1, MY1] = MARK.box;
+const MARK_VIEW = `${MX0 - 4} ${MY0 - 4} ${MX1 - MX0 + 8} ${MY1 - MY0 + 8}`;
+const MARK_RATIO = (MY1 - MY0 + 8) / (MX1 - MX0 + 8);
 export function Logo({ size = 32, mono }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 100 100">
-      {!mono && <Rect x={0} y={0} width={100} height={100} rx={22} fill="#0369A1" />}
-      <Path d={LOGO_MARK} fill="#FFFFFF" />
+    <Svg width={size} height={Math.round(size * MARK_RATIO)} viewBox={MARK_VIEW} accessibilityLabel="Klass8">
+      {MARK.parts.map((p) => (
+        <Path key={p.id} d={p.d} fill={mono || p.fill} fillRule="evenodd" />
+      ))}
     </Svg>
   );
 }

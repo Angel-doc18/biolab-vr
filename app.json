@@ -17,7 +17,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/img/adaptive-foreground.png",
-        "backgroundColor": "#0369a1"
+        "monochromeImage": "./assets/img/adaptive-monochrome.png",
+        "backgroundColor": "#ffffff"
       },
       "package": "com.sciaid.app",
       "permissions": [
@@ -32,7 +33,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/img/app-icon.png"
+      "favicon": "./assets/img/favicon.png"
     },
     "plugins": [
       "expo-font",
@@ -59,7 +60,7 @@
       [
         "expo-notifications",
         {
-          "color": "#0369a1"
+          "color": "#02287B"
         }
       ],
       [
