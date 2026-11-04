@@ -35,6 +35,7 @@ export const SUBJECT_LOOK = {
   'a-french': { icon: 'menu_book', tint: '#7a2e3b', bg: '#f3e1e4' },
   'a-literature': { icon: 'theater_comedy', tint: '#5d4037', bg: '#ede4df' },
   'a-history': { icon: 'history_edu', tint: '#4a5d23', bg: '#e8ecdc' },
+  'a-geography': { icon: 'public', tint: '#1f5f7a', bg: '#dfedf2' },
 };
 const look = (id) => SUBJECT_LOOK[id] || SUBJECT_LOOK.biology;
 

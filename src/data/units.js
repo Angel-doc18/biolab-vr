@@ -34,9 +34,10 @@ import * as aEnglish from './a-english/units';
 import * as aFrench from './a-french/units';
 import * as aLiterature from './a-literature/units';
 import * as aHistory from './a-history/units';
+import * as aGeography from './a-geography/units';
 import { CLASSES, classById, classLevel, subjectById } from './subjects';
 
-const MODULES = { biology, chemistry, physics, humanbio, 'a-biology': aBiology, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec, maths, english, french, literature, history, economics, commerce, citizenship, geology, logic, 'a-maths-mech': aMathsMech, 'a-maths-stat': aMathsStat, 'a-further-maths': aFurtherMaths, 'a-computer': aComputer, 'a-ict': aIct, 'a-english': aEnglish, 'a-french': aFrench, 'a-literature': aLiterature, 'a-history': aHistory };
+const MODULES = { biology, chemistry, physics, humanbio, 'a-biology': aBiology, 'a-chemistry': aChemistry, 'a-physics': aPhysics, computer, geography, homeec, maths, english, french, literature, history, economics, commerce, citizenship, geology, logic, 'a-maths-mech': aMathsMech, 'a-maths-stat': aMathsStat, 'a-further-maths': aFurtherMaths, 'a-computer': aComputer, 'a-ict': aIct, 'a-english': aEnglish, 'a-french': aFrench, 'a-literature': aLiterature, 'a-history': aHistory, 'a-geography': aGeography };
 
 export const units = Object.entries(MODULES).flatMap(([subject, m]) => m.units.map((u) => ({ ...u, subject })));
 
