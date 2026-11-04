@@ -21,7 +21,7 @@ const L = (id, unit, n, title, minutes, tags, body, figure, tip, check, terms, e
 
 export const LESSONS_1B = [
   // ---------- 16. Jobs ----------
-  L('en-whq-1', 'en-f1-jobs', '16.1', 'Wh- questions; the weak vowel /ə/', 10, ['Grammar', 'Speech work'], [
+  L('en-whq-1', 'en-f1-timetable', '7.3', 'Wh- questions; the weak vowel /ə/', 10, ['Grammar', 'Speech work'], [
     '**Wh- questions** ask for information, not just yes or no:\n- **who**: a person ("Who repairs shoes?" "A cobbler.")\n- **what**: a thing or action ("What does a mechanic do?")\n- **where**: a place; **when**: a time; **why**: a reason; **which**: a choice; **whose**: an owner; **how**: the way ("How do you become a pilot?"), and how much, how many, how old, how long.',
     'Word order: wh- word + auxiliary (do, does, is, can) + subject + verb: "Where **does** your mother **work**?" "What **are** you **doing**?" When "who" or "what" is the subject, there is no do: "Who **teaches** you English?"',
     'Speech work: **/ə/** (the "schwa") is a short, relaxed vowel heard in unstressed syllables: **a**bout, doct**or**, teach**er**, farm**er**, pol**i**ce, **a** banana /ə bəˈnɑːnə/. It can be written with any vowel letter. Saying it correctly makes English sound natural.',
@@ -32,7 +32,7 @@ export const LESSONS_1B = [
     { q: 'Write the questions for these answers: (a) "She works at the hospital." (b) "Because he likes children."', steps: ['(a) place → **"Where does she work?"**', '(b) reason → **"Why does he want to be a teacher?"** (or any question asking why)'] },
   ]),
 
-  L('en-jobs-1', 'en-f1-jobs', '16.2', 'Jobs and occupations: word formation, acronyms and abbreviations', 12, ['Vocabulary', 'Writing'], [
+  L('en-jobs-1', 'en-f1-professions', '12.2', 'Jobs and occupations: word formation, acronyms and abbreviations', 12, ['Vocabulary', 'Writing'], [
     'Many job nouns are formed by adding a **suffix** to a verb or noun:\n- **-er**: farm → farmer, teach → teacher, drive → driver, bake → baker\n- **-or**: act → actor, direct → director, inspect → inspector\n- **-ist**: piano → pianist, art → artist, journal → journalist, science → scientist\n- **-ian**: electric → electrician, music → musician, library → librarian\n- others: cook (a person who cooks), nurse, tailor, carpenter, mechanic, lawyer.',
     'An **abbreviation** is a short form of a word or phrase: Dr (Doctor), Mr, Mrs, St (Street), km, kg, etc. An **acronym** is a word made from first letters and said as a word, such as UNESCO; when we say each letter, as in GCE (General Certificate of Education) and CEO (Chief Executive Officer), it is called an initialism.',
     'Confusables: **work** is usually uncountable ("I have a lot of work"); **job** is countable ("She has a good job"). We say "go to work" and "look for a job". Writing about your **dream job**: name the job, what the person does, why you like it, and what you must do to get it (study, training, hard work).',
@@ -66,7 +66,7 @@ export const LESSONS_1B = [
   ]),
 
   // ---------- 18. Birthday ----------
-  L('en-past-1', 'en-f1-birthday', '18.1', 'The simple past tense', 12, ['Grammar'], [
+  L('en-past-1', 'en-f1-culture', '16.1', 'The simple past tense', 12, ['Grammar'], [
     'The **simple past** describes actions finished at a definite time in the past: "We **celebrated** my birthday last Saturday." Time words: yesterday, last week, two days ago, in 2025, when I was small.',
     '**Regular verbs** add -ed: invite → invited, play → played, carry → carried, stop → stopped. **Irregular verbs** change: buy → bought, bring → brought, eat → ate, give → gave, sing → sang, make → made, come → came, go → went, have → had, cut → cut.',
     'Questions and negatives use **did** + the base form: "Did they bring gifts?" "We did not (didn’t) dance." Never say "did brought" or "didn’t went".',
@@ -146,7 +146,7 @@ export const LESSONS_1B = [
     { q: 'Put the adjectives in the right order: "a (yellow, new) jersey", "a (red, big) flag".', steps: ['Age before colour: **a new yellow jersey**.', 'Size before colour: **a big red flag**.'] },
   ]),
 
-  L('en-sports-1', 'en-f1-sports', '21.2', 'Sport, fair play and holiday camps', 12, ['Vocabulary', 'Reading', 'Speaking'], [
+  L('en-sports-1', 'en-f1-sports', '18.2', 'Sport, fair play and holiday camps', 12, ['Vocabulary', 'Reading', 'Speaking'], [
     'Football words: pitch (field), goal, goalkeeper, defender, midfielder, striker, captain, coach, referee, linesman, whistle, penalty, corner kick, foul, red and yellow cards, jersey, boots, trophy, medal, fans, stadium, tournament. The **Africa Cup of Nations (AFCON)** brings together African national teams; Cameroon’s Indomitable Lions have won it five times.',
     '**Sportsmanship** and **fair play**: respect the rules, the referee and your opponents; do not cheat or fight; shake hands after the match, win or lose. Supporting the national team with joy is a sign of **patriotism**.',
     'A **holiday camp** is a place where young people spend part of the holidays doing sport, games, crafts, excursions and learning together. When you **describe a footballer** you admire, use adjectives of appearance and character: "My favourite footballer is tall and fast. He is humble, disciplined and generous to his community."',
@@ -260,7 +260,7 @@ export const LESSONS_1B = [
     { q: 'Form the opposites: kind, agree, patient, responsible, correct.', steps: ['kind → **unkind**', 'agree → **disagree**', 'patient → **impatient** (before p)', 'responsible → **irresponsible** (before r)', 'correct → **incorrect**'] },
   ]),
 
-  L('en-myths-1', 'en-f1-holiday', '26.2', 'Narrating an experience; local myths and legends', 12, ['Speaking', 'Reading', 'Writing'], [
+  L('en-myths-1', 'en-f1-culture', '16.3', 'Narrating an experience; local myths and legends', 12, ['Speaking', 'Reading', 'Writing'], [
     'To **narrate** an experience (such as a holiday in the village), tell what happened in **order** using the simple past and time words: first, then, next, after that, later, finally. Give details of who, where and when, what you saw and how you felt, and end with what you learnt.',
     'A **myth** is a traditional story that explains how something began: why the tortoise’s shell is cracked, where a people came from, or why a lake must not be fished. A **legend** is a story about a hero or event from the past that may be partly true. Myths and legends pass on a people’s beliefs and values, so we listen to them with respect, even when we do not believe every detail.',
     'Most narratives have a **beginning** (setting and characters), a **middle** (a problem or adventure) and an **end** (how it was solved). Cultural awareness means knowing and valuing the stories of our own people and those of others.',
@@ -328,7 +328,7 @@ export const LESSONS_1B = [
     { q: 'Form adjectives and use one in a sentence: colour, history, courage.', steps: ['colour → **colourful**; history → **historic**; courage → **courageous**', 'Sentence: "The dancers wore **colourful** costumes at the festival."'] },
   ]),
 
-  L('en-regalia-1', 'en-f1-customs', '29.2', 'Customs, regalia and women’s rights; writing a poem', 12, ['Vocabulary', 'Reading', 'Writing'], [
+  L('en-regalia-1', 'en-f1-culture', '16.2', 'Customs, regalia and women’s rights; writing a poem', 12, ['Vocabulary', 'Reading', 'Writing'], [
     '**Customs** are long-established ways of doing things: greetings, naming ceremonies, traditional weddings, funerals, harvest festivals. **Regalia** are the special clothes and objects worn or carried on important occasions: the embroidered **toghu** of the North-West, caps and beads of chiefs, staffs and fly whisks. Traditional dances and songs celebrate identity and keep cultural ties alive.',
     'Some customs are **questionable** because they treat people unequally. In some places, widows and daughters were denied the right to inherit land. Cameroonian law recognises that daughters inherit from their parents as sons do and protects widows’ rights. Cultural values should respect everyone’s dignity and rights.',
     'A **poem** is written in **lines** grouped in **stanzas**. Poets use vivid words, repetition, rhyme (words ending with the same sound: land – hand) and images to share feelings and ideas. To write a short poem: choose your subject, list strong words about it, write two or three stanzas, and read it aloud to hear its rhythm.',

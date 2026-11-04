@@ -7,7 +7,7 @@
 // sentence, vowels, habitats, phrasal verbs, a debate, tourist sites on a map
 // of Cameroon, prefixes, narratives, transitive verbs, cultural practices,
 // demonstratives, homophones, adjectives from nouns and writing a poem.
-import { Circle, G, Line, Path, Rect } from 'react-native-svg';
+import { Circle, G, Line, Path, Polygon, Rect } from 'react-native-svg';
 import { Head, Txt } from './Diagram';
 import { columnsSpec, flowSpec, treeSpec } from './charts';
 import { Outline, TOWNS, px, py } from './geography4';
@@ -619,6 +619,140 @@ function DemonstrativesArt() {
   );
 }
 
+
+// ---------- a school timetable ----------
+function TimetableArt() {
+  const days = ['Mon', 'Tue', 'Wed'];
+  const times = ['7.30', '8.30', '9.30', '10.30'];
+  const grid = [
+    ['English', 'Maths', 'French'],
+    ['Maths', 'History', 'Biology'],
+    ['Geography', 'English', 'Physics'],
+    ['break', 'break', 'break'],
+  ];
+  const X = (c) => 70 + c * 88;
+  const Y = (r) => 46 + r * 30;
+  return (
+    <G>
+      {days.map((d, c) => (
+        <G key={d}>
+          <Rect x={X(c)} y={14} width={84} height={26} fill="#dbe7f5" stroke={O} strokeWidth={1} />
+          <Txt x={X(c) + 42} y={31} size={9.5} weight="700">
+            {d}
+          </Txt>
+        </G>
+      ))}
+      {times.map((t, r) => (
+        <G key={t}>
+          <Txt x={62} y={Y(r) + 18} size={9} anchor="end" weight="700">
+            {t}
+          </Txt>
+          {grid[r].map((subj, c) => (
+            <G key={`${t}${c}`}>
+              <Rect x={X(c)} y={Y(r)} width={84} height={26} fill={subj === 'break' ? '#fbefd0' : '#ffffff'} stroke={O} strokeWidth={0.8} />
+              <Txt x={X(c) + 42} y={Y(r) + 17} size={9}>
+                {subj}
+              </Txt>
+            </G>
+          ))}
+        </G>
+      ))}
+      <Txt x={170} y={182} size={8.5} fill={MUTED}>
+        On Tuesday the second lesson is History, at half past eight.
+      </Txt>
+    </G>
+  );
+}
+
+// ---------- a meal plan on a budget ----------
+function MealBudgetArt() {
+  const rows = [
+    ['Lunch', 'rice, beans, palm oil', '1 500'],
+    ['Supper', 'plantains, eggs, vegetables', '1 400'],
+  ];
+  return (
+    <G>
+      <Rect x={14} y={12} width={312} height={168} rx={6} fill={PAPER} stroke={O} strokeWidth={1.1} />
+      <Txt x={30} y={36} size={9.5} anchor="start" weight="700">
+        Meal
+      </Txt>
+      <Txt x={96} y={36} size={9.5} anchor="start" weight="700">
+        Food (balanced)
+      </Txt>
+      <Txt x={310} y={36} size={9.5} anchor="end" weight="700">
+        FCFA
+      </Txt>
+      <Line x1={24} y1={44} x2={316} y2={44} stroke={O} strokeWidth={1} />
+      {rows.map(([m, f, c], i) => (
+        <G key={m}>
+          <Txt x={30} y={68 + i * 26} size={9.5} anchor="start">
+            {m}
+          </Txt>
+          <Txt x={96} y={68 + i * 26} size={9.5} anchor="start">
+            {f}
+          </Txt>
+          <Txt x={310} y={68 + i * 26} size={9.5} anchor="end">
+            {c}
+          </Txt>
+        </G>
+      ))}
+      <Line x1={24} y1={110} x2={316} y2={110} stroke={O} strokeWidth={1} />
+      <Txt x={30} y={130} size={10} anchor="start" weight="700">
+        Total
+      </Txt>
+      <Txt x={310} y={130} size={10} anchor="end" weight="700">
+        2 900
+      </Txt>
+      <Txt x={30} y={152} size={9.5} anchor="start" fill={MUTED}>
+        Budget
+      </Txt>
+      <Txt x={310} y={152} size={9.5} anchor="end" fill={MUTED}>
+        3 000
+      </Txt>
+      <Txt x={30} y={172} size={10} anchor="start" weight="700" fill={GREEN}>
+        Saved
+      </Txt>
+      <Txt x={310} y={172} size={10} anchor="end" weight="700" fill={GREEN}>
+        100
+      </Txt>
+    </G>
+  );
+}
+
+// ---------- the flag of Cameroon ----------
+function FlagArt() {
+  const cx = 170;
+  const cy = 80;
+  const R = 22;
+  const r = 9;
+  const star = Array.from({ length: 10 }, (_, k) => {
+    const a = -Math.PI / 2 + (k * Math.PI) / 5;
+    const d = k % 2 === 0 ? R : r;
+    return `${(cx + d * Math.cos(a)).toFixed(1)},${(cy + d * Math.sin(a)).toFixed(1)}`;
+  }).join(' ');
+  return (
+    <G>
+      <Rect x={50} y={20} width={80} height={120} fill="#007a5e" />
+      <Rect x={130} y={20} width={80} height={120} fill="#ce1126" />
+      <Rect x={210} y={20} width={80} height={120} fill="#fcd116" />
+      <Rect x={50} y={20} width={240} height={120} fill="none" stroke={O} strokeWidth={1.2} />
+      <Polygon points={star} fill="#fcd116" />
+      <Txt x={90} y={158} size={9} weight="700">
+        green
+      </Txt>
+      <Txt x={170} y={158} size={9} weight="700">
+        red, with a yellow star
+      </Txt>
+      <Txt x={250} y={158} size={9} weight="700">
+        yellow
+      </Txt>
+      <Txt x={170} y={182} size={10} weight="700">
+        Motto: Peace – Work – Fatherland
+      </Txt>
+    </G>
+  );
+}
+
 const drawn = (title, w, h, art, facts, points) => ({ title, w, h, art, labels: [], facts, ...(points ? { points } : {}) });
 
 export const ENGLISH_F1 = {
@@ -869,4 +1003,47 @@ export const ENGLISH_F1 = {
     { name: '-y', items: ['noisy', 'sunny', 'dusty'] },
   ], { colW: 96 }),
   'en1-poem': flowSpec('Writing a short poem', ['Choose your\nsubject', 'List strong\nwords', 'Write lines\nin stanzas', 'Add rhyme or\nrepetition', 'Read it aloud\nand improve'], { boxW: 104 }),
+  'en1-timetable': drawn('Reading a school timetable', 340, 192, TimetableArt, [
+    'The days are across the top and the times down the side.',
+    'On Monday the first lesson, at half past seven, is English.',
+    'On Tuesday the second lesson is History, at half past eight.',
+    'Break is at half past ten every day.',
+  ], [[202, 27], [112, 59], [200, 89], [200, 149]]),
+  'en1-weather': columnsSpec('The seasons of Cameroon', [
+    { head: 'South', items: ['rains: about March', 'to November', 'short dry spell', 'in July and August', 'humid all year'] },
+    { head: 'North', items: ['rains: about June', 'to September', 'long dry season', 'harmattan wind', 'hot days'] },
+  ], { colW: 150 }),
+  'en1-comparatives': columnsSpec('Comparing two things', [
+    { head: 'Short: -er than', items: ['tall, taller', 'big, bigger', 'heavy, heavier'] },
+    { head: 'Long: more … than', items: ['more dangerous', 'more beautiful'] },
+    { head: 'Irregular', items: ['good, better', 'bad, worse'] },
+  ], { colW: 120 }),
+  'en1-handwashing': flowSpec('Washing your hands', ['Wet your hands\nwith clean water', 'Apply\nsoap', 'Scrub for\n20 seconds', 'Rinse\nwell', 'Dry with a\nclean towel'], { boxW: 104 }),
+  'en1-meal-budget': drawn('Two balanced meals for 3 000 FCFA', 340, 190, MealBudgetArt, [
+    'Lunch of rice, beans and palm oil costs 1 500 FCFA.',
+    'Supper of plantains, eggs and vegetables costs 1 400 FCFA.',
+    'The total is 2 900 FCFA, so 100 FCFA of the 3 000 FCFA budget is saved.',
+  ], [[180, 68], [190, 94], [170, 152]]),
+  'en1-symbols': drawn('The flag and motto of Cameroon', 340, 192, FlagArt, [
+    'The flag has three vertical bands: green, red and yellow.',
+    'A five-pointed yellow star stands in the middle of the red band.',
+    'The motto is Peace, Work, Fatherland.',
+  ], [[170, 120], [170, 80], [170, 178]]),
+  'en1-manner': columnsSpec('Adjectives and adverbs of manner', [
+    { head: 'Adjective', items: ['careful', 'quick', 'gentle', 'easy', 'good', 'fast'] },
+    { head: 'Adverb (how?)', items: ['carefully', 'quickly', 'gently', 'easily', 'well', 'fast'] },
+  ], { colW: 130, arrow: true }),
+  'en1-ict': columnsSpec('Computers and safe browsing', [
+    { head: 'Hardware', items: ['monitor', 'keyboard, mouse', 'system unit, printer'] },
+    { head: 'Software', items: ['browser', 'word processor', 'games, apps'] },
+    { head: 'Stay safe', items: ['keep your password', 'never meet strangers', 'tell a trusted adult'] },
+  ], { colW: 122 }),
+  'en1-irregular-past': columnsSpec('Irregular verbs in the simple past', [
+    { head: 'Base form', items: ['go', 'see', 'win', 'run', 'catch', 'lose'] },
+    { head: 'Simple past', items: ['went', 'saw', 'won', 'ran', 'caught', 'lost'] },
+  ], { colW: 120, arrow: true }),
+  'en1-integration': columnsSpec('Integration tasks of the year', [
+    { head: 'Module', items: ['1 self and family', '2 the school', '3 health', '4 the market', '5 culture'] },
+    { head: 'Task', items: ['a family profile', 'class rules, a plan', 'a health poster', 'a 5 000 FCFA dialogue', 'a festival report'] },
+  ], { colW: 150 }),
 };

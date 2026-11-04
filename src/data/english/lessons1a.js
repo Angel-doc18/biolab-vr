@@ -22,7 +22,7 @@ const L = (id, unit, n, title, minutes, tags, body, figure, tip, check, terms, e
 
 export const LESSONS_1A = [
   // ---------- 1. Greetings ----------
-  L('en-greetings-1', 'en-f1-greetings', '1.1', 'Greetings, introductions and making acquaintances', 10, ['Speaking', 'Listening'], [
+  L('en-greetings-1', 'en-f1-introductions', '1.1', 'Greetings, introductions and making acquaintances', 10, ['Speaking', 'Listening'], [
     'We **greet** people to show respect and friendliness. The greeting depends on the time of day and on the person:\n- **formal** (to teachers, elders, officials): "Good morning, Sir." "Good afternoon, Madam." "Good evening, Doctor."\n- **informal** (to friends and classmates): "Hello!" "Hi, Brenda!" "How are you?"\nThe usual reply to "How are you?" is "I am fine, thank you. And you?" The formal greeting "How do you do?" is answered with the same words.',
     'To **introduce yourself**, give your name and something about you: "Good morning. My name is Ewane Paul. I am eleven years old and I am in Form 1 B." To **introduce someone else**: "Mum, this is my classmate, Aïcha. Aïcha, this is my mother." People then say "Nice to meet you" or "Pleased to meet you".',
     'A person you have met but do not know well is an **acquaintance**. Good manners when meeting people: look at the person, smile, speak clearly, use titles (Sir, Madam, Mr, Mrs, Miss, Dr) for adults, and **listen** to the other person without interrupting.',
@@ -33,7 +33,7 @@ export const LESSONS_1A = [
     { q: 'Write a short dialogue in which Kum introduces his new friend Fadimatou to his father.', steps: ['Kum: "Good evening, Papa. This is my new classmate, Fadimatou."', 'Father: "Good evening, Fadimatou. Pleased to meet you."', 'Fadimatou: "Good evening, Sir. Nice to meet you too."', 'Note the formal greeting to the father and the use of "Sir".'] },
   ]),
 
-  L('en-imperatives-1', 'en-f1-greetings', '1.2', 'Imperatives for requests; filling in an information sheet', 10, ['Grammar', 'Writing'], [
+  L('en-imperatives-1', 'en-f1-class-rules', '6.1', 'Imperatives for requests; filling in an information sheet', 10, ['Grammar', 'Writing'], [
     'An **imperative** sentence gives an order, an instruction or a request. It begins with the base form of the verb and has no subject: "Sit down." "Open your books." "Pass me the salt." The **negative imperative** begins with "Do not" or "Don’t": "Don’t run in the corridor."',
     'To make a **polite request**, add "please" or use a question: "Please lend me your ruler." "Could you open the window, please?" "Would you mind closing the door?" Politeness shows **courtesy**, an important attitude in daily life.',
     'An **information sheet** (or form) asks for details about you. Read each heading carefully and write clearly in capital letters when asked:\n- Surname (family name): NJI\n- First name(s): GRACE MBONE\n- Date of birth: 14/03/2014\n- Place of birth: BAMENDA\n- Sex: F\n- Class: FORM 1 A\n- Parent’s or guardian’s telephone number\n- Signature.',
@@ -45,7 +45,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 2. Family types ----------
-  L('en-present-1', 'en-f1-family-types', '2.1', 'The simple present tense', 12, ['Grammar'], [
+  L('en-present-1', 'en-f1-chores', '3.1', 'The simple present tense', 12, ['Grammar'], [
     'The **simple present tense** is used for:\n- **habits** and routines: "I wake up at 5.30 every morning."\n- **general facts** and truths: "Water boils at 100 °C." "Cameroon has ten regions."\n- **permanent situations**: "My family lives in Kumba."',
     'Form: use the **base form** of the verb with I, you, we and they ("They **play**"). With **he, she and it** (and a singular noun) add **-s**: "She **plays**", "My mother **cooks**". Spelling rules:\n- verbs ending in -s, -sh, -ch, -x, -o add **-es**: pass → passes, wash → washes, watch → watches, go → goes\n- a consonant + y becomes **-ies**: carry → carries, cry → cries (but play → plays)\n- "have" becomes **has**.',
     'Time words that often go with the simple present: every day, every Sunday, always, usually, often, sometimes, never, on Mondays.',
@@ -56,7 +56,7 @@ export const LESSONS_1A = [
     { q: 'Put the verbs in brackets in the simple present: "My father (wake) up early. He (wash) his face and (go) to the farm. My sisters (help) him."', steps: ['father = he: wake → **wakes**', 'he: wash → **washes** (ends in -sh)', 'he: go → **goes** (ends in -o)', 'sisters = they: help → **help**', '"My father **wakes** up early. He **washes** his face and **goes** to the farm. My sisters **help** him."'] },
   ]),
 
-  L('en-vowels-a-1', 'en-f1-family-types', '2.2', 'Family members, types of family and origins; the vowels /æ/ and /ɑː/', 12, ['Vocabulary', 'Speech work'], [
+  L('en-vowels-a-1', 'en-f1-family-tree', '2.3', 'Family members, types of family and origins; the vowels /æ/ and /ɑː/', 12, ['Vocabulary', 'Speech work'], [
     'A **family** is a group of people related by blood, marriage or adoption. Types of family:\n- **nuclear family**: father, mother and their children\n- **extended family**: the nuclear family plus grandparents, uncles, aunts, cousins, nephews and nieces\n- **single-parent family**: one parent with the children\n- **foster or adoptive family**: parents who care for a child who is not born to them.',
     'When we describe where a person comes from, we use words such as **region** (Cameroon has ten regions, for example the South-West and the Far North), **division**, **village**, **tribe** or ethnic group, and **nationality** ("I am Cameroonian"). We should speak of all tribes with respect.',
     'Speech work: the short vowel **/æ/**, as in "cat" /kæt/, is said with the mouth open and the tongue low at the front. The long vowel **/ɑː/**, as in "car" /kɑː/, is said further back in the mouth and held longer. Compare: hat – heart, cat – cart, pack – park, match – march. /ɑː/ is often written **ar** (father is an exception: "a" alone).',
@@ -68,7 +68,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 3. Classroom ----------
-  L('en-present2-1', 'en-f1-classroom', '3.1', 'More on the simple present: questions and negatives', 10, ['Grammar'], [
+  L('en-present2-1', 'en-f1-chores', '3.2', 'More on the simple present: questions and negatives', 10, ['Grammar'], [
     'To make a **question** in the simple present, use **do** or **does** before the subject, then the base form:\n- "Do you sit near the window?" "Yes, I do." / "No, I don’t."\n- "Does your teacher give homework every day?" "Yes, she does."\nWith "be" there is no do: "Is the classroom clean?" "Are the windows open?"',
     'To make the **negative**, use **do not (don’t)** or **does not (doesn’t)** + base form: "I don’t like noise." "Our class doesn’t have a fan." Never add -s after "does": say "She doesn’t write", not "She doesn’t writes".',
     'Wh- questions follow the same pattern: "Where do you keep your books?" "What time does the bell ring?"',
@@ -79,7 +79,7 @@ export const LESSONS_1A = [
     { q: 'Change into a question and a negative: "The prefect rings the bell at 7 a.m."', steps: ['Question: **"Does the prefect ring the bell at 7 a.m.?"**', 'Negative: **"The prefect does not (doesn’t) ring the bell at 7 a.m."**', '"Rings" loses its -s because "does" carries it.'] },
   ]),
 
-  L('en-classroom-1', 'en-f1-classroom', '3.2', 'Describing a classroom; the consonants /b/ and /d/', 12, ['Vocabulary', 'Writing', 'Speech work'], [
+  L('en-classroom-1', 'en-f1-school', '5.2', 'Describing a classroom; the consonants /b/ and /d/', 12, ['Vocabulary', 'Writing', 'Speech work'], [
     'Things found in a classroom: chalkboard (or blackboard, whiteboard), chalk, duster, teacher’s table and chair, desks, benches, cupboard, notice board, timetable, wall clock, map, windows, doors, ceiling fan, waste basket and, in some schools, a computer and projector.',
     'When you **describe** a classroom, move in an order (from the door to the front, or from the front to the back) and say what is there and where: "Our classroom is large and bright. As you enter, the teacher’s table is on the left, in front of the chalkboard. There are twenty desks in four rows. A map of Cameroon hangs on the back wall." Use the simple present and "there is / there are".',
     'Speech work: **/b/** and **/d/** are both voiced consonants that stop the air for a moment. For /b/ the lips close (bag, bench, book); for /d/ the tip of the tongue touches the ridge behind the top teeth (desk, door, duster). Compare: bad – dad, bare – dare, bye – die, bump – dump.',
@@ -114,7 +114,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 5. Shopping ----------
-  L('en-countable-1', 'en-f1-shopping', '5.1', 'Countable and uncountable nouns; a, an, some and any', 12, ['Grammar'], [
+  L('en-countable-1', 'en-f1-market', '13.1', 'Countable and uncountable nouns; a, an, some and any', 12, ['Grammar'], [
     '**Countable nouns** name things we can count. They have a singular and a plural: one mango, two mangoes; a bag, three bags. **Uncountable nouns** name things we cannot count one by one, such as substances and ideas: rice, sugar, water, oil, salt, money, bread, information, advice. They have no plural ("informations" is wrong).',
     'Words of quantity:\n- **a / an** + a singular countable noun: a tomato, an orange ("an" before a vowel sound)\n- **some** + plurals or uncountables in positive sentences: some eggs, some milk\n- **any** in questions and negatives: "Is there any oil?" "We don’t have any onions."\n- **many** + plurals, **much** + uncountables: many oranges, much salt\n- to count uncountables, use a measure: a bag of rice, a litre of oil, a loaf of bread, a bottle of water.',
     '**Plurals** of countable nouns usually add -s (book → books) or -es after s, sh, ch and x (bus → buses, dish → dishes, box → boxes).',
@@ -137,7 +137,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 6. Family tree ----------
-  L('en-adjectives-1', 'en-f1-family-tree', '6.1', 'Descriptive adjectives', 10, ['Grammar'], [
+  L('en-adjectives-1', 'en-f1-descriptions', '4.1', 'Descriptive adjectives', 10, ['Grammar'], [
     'An **adjective** describes a noun. **Descriptive adjectives** tell us what a person or thing is like:\n- size: tall, short, big, small\n- appearance: beautiful, handsome, slim, plump\n- character: kind, honest, generous, hard-working, patient, strict\n- age: young, old, elderly\n- colour: brown, black, grey.',
     'Position: an adjective usually comes **before** the noun ("a **generous** uncle") or **after a linking verb** such as be, look or seem ("My aunt is **generous**." "Grandpa looks **tired**."). Adjectives do not take -s: "two tall boys", not "two talls boys".',
     'When several adjectives come before a noun, opinion comes before facts: "a **kind old** woman", "a **beautiful long** dress".',
@@ -148,7 +148,7 @@ export const LESSONS_1A = [
     { q: 'Improve this description with adjectives: "My grandmother is a woman. She has hair and a smile."', steps: ['Add character: "My grandmother is a **kind, hard-working** woman."', 'Add appearance: "She has **short grey** hair and a **warm** smile."'] },
   ]),
 
-  L('en-familytree-1', 'en-f1-family-tree', '6.2', 'The family tree and family solidarity; the sounds /t/, /d/, /θ/ and /ð/', 12, ['Vocabulary', 'Writing', 'Speech work'], [
+  L('en-familytree-1', 'en-f1-family-tree', '2.2', 'The family tree and family solidarity; the sounds /t/, /d/, /θ/ and /ð/', 12, ['Vocabulary', 'Writing', 'Speech work'], [
     'A **family tree** is a diagram of a family across generations. The oldest generation (grandparents) is at the top; lines join married couples, and lines going down join parents to their children. Brothers and sisters (**siblings**) are drawn side by side. Useful words: generation, ancestor, descendant, sibling, cousin, in-law, late (dead): "my late grandfather".',
     '**Family solidarity** means members support each other, especially in hard times such as illness or the death of a loved one ("when sorrow strikes"): relatives visit, comfort the bereaved, help with money, food and work, and care for orphans. Values: kindness, sympathy, sharing and unity.',
     'Speech work: "th" has two sounds, made with the tongue between the teeth. **/θ/** is voiceless (think, three, mouth, birthday); **/ð/** is voiced (this, mother, brother, they). Do not replace them with /t/ and /d/: tin – thin, tree – three, den – then, dare – there.',
@@ -160,7 +160,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 7. Rules ----------
-  L('en-prep-time-1', 'en-f1-rules', '7.1', 'Prepositions of time: at, on and in', 10, ['Grammar'], [
+  L('en-prep-time-1', 'en-f1-timetable', '7.2', 'Prepositions of time: at, on and in', 10, ['Grammar'], [
     '**At** is used for exact times and some fixed expressions: at 7 o’clock, at noon, at midnight, at night, at the weekend, at break time.',
     '**On** is used for days and dates: on Monday, on Sunday morning, on 20th May, on my birthday, on Christmas Day.',
     '**In** is used for longer periods: in the morning, in the afternoon, in the evening, in May, in 2026, in the rainy season, in the first term. Note: we say "in the morning" but "at night", and "on Monday morning" (a particular day).',
@@ -171,7 +171,7 @@ export const LESSONS_1A = [
     { q: 'Complete the class rules: "Arrive ___ 7.15 a.m. Clean the classroom ___ Fridays. Do your homework ___ the evening."', steps: ['clock time → **at** 7.15 a.m.', 'days → **on** Fridays', 'part of the day → **in** the evening'] },
   ]),
 
-  L('en-rules-1', 'en-f1-rules', '7.2', 'Rules at home and at school', 10, ['Vocabulary', 'Writing'], [
+  L('en-rules-1', 'en-f1-class-rules', '6.2', 'Rules at home and at school', 10, ['Vocabulary', 'Writing'], [
     '**Rules** tell us what we must and must not do. They protect people and help a home or school to run smoothly. Words: rule, regulation, discipline, punishment, reward, obey, disobey, permission, responsibility, prudence (being careful), precaution.',
     'Rules are often written as **imperatives** or with **must / must not**:\n- Home: "Wash your plate after eating." "Do not open the door to strangers." "Be home before dark."\n- School: "Wear the correct uniform." "Raise your hand before you speak." "You must not cheat in tests."',
     'Writing rules: give the list a title, number the rules, keep each rule short, and begin each with a verb or "Do not". You may add the reason: "Switch off lights when you leave a room, to save electricity."',
@@ -183,7 +183,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 8. Furniture ----------
-  L('en-prep-place-1', 'en-f1-furniture', '8.1', 'Prepositions of place', 10, ['Grammar'], [
+  L('en-prep-place-1', 'en-f1-school', '5.1', 'Prepositions of place', 10, ['Grammar'], [
     '**Prepositions of place** tell us where something is: in (inside), on (touching the top or a surface), under (below), above or over (higher than, not touching), behind (at the back of), in front of, next to or beside, between (two things), among (more than two), opposite (facing), near.',
     'Examples in a home: "The clothes are **in** the wardrobe." "The clock is **on** the wall." "The cat is sleeping **under** the bed." "A fan hangs **above** the table." "The chair is **between** the bed and the cupboard."',
     'Be careful: **between** is for two things; **among** is for a group: "The house is among the trees." **On** a chair (a hard seat) but **in** an armchair (a deep, soft seat).',
@@ -206,7 +206,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 9. Appliances ----------
-  L('en-articles-1', 'en-f1-appliances', '9.1', 'Articles: a, an and the', 10, ['Grammar'], [
+  L('en-articles-1', 'en-f1-professions', '12.1', 'Articles: a, an and the', 10, ['Grammar'], [
     'The **indefinite articles** a and an are used with a singular countable noun mentioned for the first time, or when we mean any one: "We bought **a** fan." "She is **a** nurse." Use **an** before a vowel sound: an iron, an oven, an hour (h is silent); but **a** before a consonant sound: a university, a uniform (they begin with the sound /j/).',
     'The **definite article** the is used when the listener knows which one we mean: something already mentioned ("We bought a fan. **The** fan is very quiet."), the only one ("**the** sun", "**the** moon"), and with some names: the Wouri, the Atlantic Ocean, the Republic of Cameroon.',
     'No article is used with plural or uncountable nouns in general ("Fridges use electricity."), with most names of people, towns and countries ("Bertoua", "Cameroon"), and with meals and many places in fixed phrases ("at school", "after breakfast").',
@@ -307,7 +307,7 @@ export const LESSONS_1A = [
     { q: 'Write the plurals: potato, knife, baby, woman, box, key.', steps: ['potato → **potatoes**', 'knife → **knives**', 'baby → **babies**', 'woman → **women**', 'box → **boxes**', 'key → **keys** (vowel + y)'] },
   ]),
 
-  L('en-hygiene-1', 'en-f1-food', '13.2', 'Eating habits, drinking water and food hygiene; a questionnaire', 12, ['Vocabulary', 'Reading', 'Writing'], [
+  L('en-hygiene-1', 'en-f1-food-budget', '14.1', 'Eating habits, drinking water and food hygiene; a questionnaire', 12, ['Vocabulary', 'Reading', 'Writing'], [
     'Good **eating habits**: eat three meals a day and do not skip breakfast; eat a **balanced diet** (energy foods such as rice, cassava and plantains; body-building foods such as beans, fish, eggs and meat; protective foods such as fruit and vegetables); eat less sugar, salt and oily food; do not overeat.',
     '**Water**: the body needs plenty of clean water every day, more when it is hot or after sport; many health workers advise about six to eight glasses for a young person. Drink boiled, filtered or treated water.',
     '**Food hygiene**: wash hands with soap before cooking and eating; wash fruit and vegetables; cover food from flies and dust; cook meat and fish well; keep raw and cooked food apart; do not eat food that smells bad. A **questionnaire** is a list of questions; answer each one honestly and completely, ticking boxes or writing short answers.',
@@ -319,9 +319,9 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 14. Home accidents ----------
-  L('en-possessive-1', 'en-f1-accidents', '14.1', 'Possessive adjectives and possessive pronouns', 10, ['Grammar'], [
-    '**Possessive adjectives** come before a noun: my, your, his, her, its, our, their. "This is **my** bandage." **Possessive pronouns** stand alone, without a noun: mine, yours, his, hers, ours, theirs. "This bandage is **mine**."',
-    'With nouns we use **’s** for one owner (the nurse’s bag) and **s’** for plural owners ending in -s (the nurses’ room). Irregular plurals take ’s: the children’s ward.',
+  L('en-possessive-1', 'en-f1-family-tree', '2.1', 'Possessive adjectives and pronouns; plural nouns with -s', 10, ['Grammar'], [
+    '**Possessive adjectives** come before a noun: my, your, his, her, its, our, their. "This is **my** brother. **His** name is Ayuk." "Ngozi loves **her** grandmother." **Possessive pronouns** stand alone, without a noun: mine, yours, his, hers, ours, theirs. "This bag is **mine**; that one is **hers**."',
+    'With nouns we use **’s** for one owner (my father’s farm) and **s’** for plural owners ending in -s (my parents’ house). Irregular plurals take ’s: the children’s room. Most nouns form the **plural with -s**: brother → brothers, aunt → aunts, cousin → cousins, uncle → uncles; nouns ending in s, sh, ch or x add -es: box → boxes, church → churches.',
     'Common mistakes: "its" (belonging to it) has no apostrophe ("The bird hurt its wing"); "it’s" means "it is". "Theirs" and "yours" never take an apostrophe.',
   ], 'en1-possessives', 'If you can say "it is" instead, write "it’s"; otherwise write "its".',
   ['"Is this first-aid box ___?" (belongs to you)', ['yours', 'your', 'your’s', 'you'], 'A possessive pronoun, no apostrophe.'],
@@ -353,7 +353,7 @@ export const LESSONS_1A = [
     { q: 'Put the adverb in the right place: (a) "He is late for school." (never) (b) "We visit the dentist." (rarely)', steps: ['(a) after "is": **"He is never late for school."**', '(b) before the main verb: **"We rarely visit the dentist."**'] },
   ]),
 
-  L('en-doctor-1', 'en-f1-doctor', '15.2', 'At the doctor’s: ailments, medicines and hospital departments', 12, ['Vocabulary', 'Reading', 'Writing'], [
+  L('en-doctor-1', 'en-f1-illnesses', '11.2', 'At the doctor’s: ailments, medicines and hospital departments', 12, ['Vocabulary', 'Reading', 'Writing'], [
     'Common **ailments** (illnesses): headache, stomach ache, toothache, fever, cough, catarrh (a runny nose), malaria, typhoid, diarrhoea. At the doctor’s, the patient describes the **symptoms** ("I have a headache and a high temperature"), the doctor examines and may send the patient for a test at the **laboratory**, then writes a **prescription**, and the patient collects the medicine at the **pharmacy**.',
     '**Hospital departments**: outpatients (for patients who go home the same day), emergency or casualty, paediatrics (children), maternity (mothers and babies), surgery (operations), dentistry (teeth), ophthalmology (eyes), laboratory, pharmacy, radiology (X-rays).',
     'Modern medicine is tested and given in measured doses; some **traditional medicines** are useful, but doses are not measured. Medicines sold on the **roadside** may be fake, expired or spoilt by the sun: buy from a pharmacy. Writing: an **informal letter** to a friend about common health problems at school has your address and the date at the top right, a greeting ("Dear Nfor,"), paragraphs, and a friendly ending ("Your friend, Lum").',
