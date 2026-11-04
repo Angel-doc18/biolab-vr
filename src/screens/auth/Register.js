@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
-import { Check, Field, PhoneField, StrengthMeter, passwordValid, validPhone } from '../../ui/form';
+import { Check, Field, PhoneField, passwordValid, validPhone } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { NeedsInternet } from '../../ui/Offline';
@@ -23,7 +23,7 @@ export default function Register({ navigation }) {
     if (name.trim().length < 2) e.name = L('Enter your full name.', 'Entrez votre nom complet.');
     if (!validPhone(phone)) e.phone = L('Enter a 9 digit Cameroon number starting with 6.', 'Entrez un numéro de 9 chiffres commençant par 6.');
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) e.email = L('This email address is not valid.', 'Adresse e-mail invalide.');
-    if (!passwordValid(password)) e.password = L('Use 8+ characters with a capital letter, a small letter and a number.', 'Au moins 8 caractères avec majuscule, minuscule et chiffre.');
+    if (!passwordValid(password)) e.password = L('Enter a password.', 'Entrez un mot de passe.');
     if (!agree) e.agree = true;
     setErrors(e);
     if (Object.keys(e).length) {
@@ -93,11 +93,10 @@ export default function Register({ navigation }) {
               textContentType="newPassword"
               autoComplete="password-new"
               autoCapitalize="none"
-              hint={L('At least 8 characters, with a capital letter, a small letter and a number.', 'Au moins 8 caractères, avec une majuscule, une minuscule et un chiffre.')}
+              hint={L('Choose any password you will remember.', 'Choisissez un mot de passe facile à retenir.')}
               error={errors.password}
               maxLength={128}
             />
-            {!!password && <StrengthMeter password={password} L={L} />}
           </V>
           <Check on={agree} onPress={() => setAgree((a) => !a)}>
             <T c={`font-body-sm text-body-sm ${errors.agree ? 'text-error' : 'text-on-surface-variant'}`} style={{ lineHeight: 18 }}>

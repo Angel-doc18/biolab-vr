@@ -79,42 +79,8 @@ export function PhoneField({ label, right, value, onChangeText, hint, error, bg 
 
 export const validPhone = (d) => /^6\d{8}$/.test(String(d || ''));
 
-// Mirrors the server rule: 8+ characters with upper case, lower case and a digit.
-export function passwordChecks(pw = '') {
-  return {
-    length: pw.length >= 8,
-    number: /\d/.test(pw),
-    upper: /[A-Z]/.test(pw),
-    lower: /[a-z]/.test(pw),
-    symbol: /[^A-Za-z0-9]/.test(pw),
-  };
-}
-export function passwordScore(pw = '') {
-  const c = passwordChecks(pw);
-  let s = [c.length, c.number, c.upper && c.lower, c.symbol || pw.length >= 12].filter(Boolean).length;
-  if (!pw) s = 0;
-  return s; // 0..4
-}
-export const passwordValid = (pw) => {
-  const c = passwordChecks(pw);
-  return c.length && c.number && c.upper && c.lower;
-};
-
-export function StrengthMeter({ password, L, compact }) {
-  const score = passwordScore(password);
-  const labels = [L('Too short', 'Trop court'), L('Weak', 'Faible'), L('Fair', 'Moyen'), L('Strong', 'Fort'), L('Very strong', 'Très fort')];
-  const col = score >= 3 ? 'secondary' : score === 2 ? 'tertiary-container' : 'error';
-  return (
-    <V c={`mt-2 p-3 rounded-xl ${compact ? 'bg-surface-container-low' : 'bg-surface-container-lowest shadow-sm'} gap-2`}>
-      <V c="flex-row gap-1.5 w-full h-1.5">
-        {[0, 1, 2, 3].map((i) => (
-          <V key={i} c={`flex-1 h-full rounded-full ${i < score ? `bg-${col}` : 'bg-surface-container-high'}`} />
-        ))}
-      </V>
-      <T c={`font-label-sm text-label-sm text-${col}`}>{labels[score]}</T>
-    </V>
-  );
-}
+// Mirrors the server rule: any password that is not empty.
+export const passwordValid = (pw) => !!String(pw || '').trim() && String(pw).length <= 128;
 
 export function Check({ on, onPress, children }) {
   return (

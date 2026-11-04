@@ -69,10 +69,9 @@ export function email(value, field = 'Email', { optional = true } = {}) {
   return v.toLowerCase();
 }
 
+// Any password is accepted as long as it is not empty: students choose one
+// they can remember. Sign-in attempts stay rate limited per address.
 export function password(value) {
-  const v = str(value, 'Password', { min: 8, max: 128 });
-  if (!/[A-Z]/.test(v) || !/[a-z]/.test(v) || !/\d/.test(v)) {
-    fail('Password', 'must contain upper case, lower case and a number.');
-  }
-  return v;
+  if (typeof value === 'string' && !value.trim()) fail('Password', 'is required.');
+  return str(value, 'Password', { min: 1, max: 128 });
 }

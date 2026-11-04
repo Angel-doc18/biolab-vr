@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal } from 'react-native';
 import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
-import { Field, passwordValid, StrengthMeter, Toggle } from '../../ui/form';
+import { Field, passwordValid, Toggle } from '../../ui/form';
 import { TimePicker } from '../onboarding/Goals';
 import { del, get, post, setSession } from '../../api/client';
 import { useApp } from '../../state/store';
@@ -201,7 +201,7 @@ function PasswordSheet({ L, onClose, onDone }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const submit = async () => {
-    if (!passwordValid(next)) return setError(L('Use 8+ characters with a capital letter, a small letter and a number.', 'Au moins 8 caractères avec majuscule, minuscule et chiffre.'));
+    if (!passwordValid(next)) return setError(L('Enter a new password.', 'Entrez un nouveau mot de passe.'));
     setBusy(true);
     setError(null);
     try {
@@ -221,7 +221,6 @@ function PasswordSheet({ L, onClose, onDone }) {
           <T c="font-headline-md text-headline-md text-on-surface">{L('Change password', 'Changer le mot de passe')}</T>
           <Field label={L('Current password', 'Mot de passe actuel')} secure value={current} onChangeText={setCurrent} autoCapitalize="none" maxLength={128} />
           <Field label={L('New password', 'Nouveau mot de passe')} secure value={next} onChangeText={setNext} autoCapitalize="none" maxLength={128} />
-          {!!next && <StrengthMeter password={next} L={L} compact />}
           <ErrorNote error={error} />
           <Cta label={L('Change password', 'Changer')} icon="check" loading={busy} onPress={submit} />
           <P c="items-center py-2" onPress={onClose}>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Ic, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
-import { Field, passwordChecks, passwordValid } from '../../ui/form';
+import { Field, passwordValid } from '../../ui/form';
 import { post } from '../../api/client';
 import { useL } from '../../i18n';
 
@@ -23,10 +23,9 @@ export default function Reset({ navigation, route }) {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
-  const checks = passwordChecks(pw);
 
   const submit = async () => {
-    if (!passwordValid(pw)) return setError(L('Your password does not meet the rules below.', 'Le mot de passe ne respecte pas les règles.'));
+    if (!passwordValid(pw)) return setError(L('Enter a new password.', 'Entrez un nouveau mot de passe.'));
     if (pw !== confirm) return setError(L('The two passwords do not match.', 'Les deux mots de passe ne correspondent pas.'));
     setBusy(true);
     setError(null);
@@ -70,9 +69,6 @@ export default function Reset({ navigation, route }) {
           <Field label={L('New password', 'Nouveau mot de passe')} secure value={pw} onChangeText={setPw} autoCapitalize="none" textContentType="newPassword" maxLength={128} />
           <Field label={L('Type it again', 'Confirmez-le')} secure value={confirm} onChangeText={setConfirm} autoCapitalize="none" textContentType="newPassword" maxLength={128} />
           <V c="gap-1.5">
-            <Rule ok={checks.length}>{L('At least 8 characters', 'Au moins 8 caractères')}</Rule>
-            <Rule ok={checks.number}>{L('At least one number', 'Au moins un chiffre')}</Rule>
-            <Rule ok={checks.upper && checks.lower}>{L('Capital and small letters', 'Majuscules et minuscules')}</Rule>
             <Rule ok={!!confirm && pw === confirm}>{L('Both entries match', 'Les deux saisies correspondent')}</Rule>
           </V>
           <ErrorNote error={error} />
