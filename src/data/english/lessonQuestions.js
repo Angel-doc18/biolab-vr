@@ -2,12 +2,14 @@
 // The correct option is written first; options are shuffled when shown.
 
 import { QUESTIONS_1 } from './lessonQuestions1';
+import { QUESTIONS_2 } from './lessonQuestions2';
 import { QUESTIONS_3 } from './lessonQuestions3';
 
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
   ...QUESTIONS_1,
+  ...QUESTIONS_2,
   ...QUESTIONS_3,
   // ---------- Form 4, term 1 ----------
   'en-pronouns-4': [

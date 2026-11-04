@@ -5,8 +5,8 @@
 // probability and frequency, hospital departments, job suffixes, duration,
 // a party budget, directions, a postcard, the library, a football pitch, the
 // sentence, vowels, habitats, phrasal verbs, a debate, tourist sites on a map
-// of Cameroon, prefixes, narratives, transitive verbs, cultural practices,
-// demonstratives, homophones, adjectives from nouns and writing a poem.
+// of Cameroon, prefixes, narratives, demonstratives, homophones, adjectives
+// from nouns and writing a poem.
 import { Circle, G, Line, Path, Polygon, Rect } from 'react-native-svg';
 import { Head, Txt } from './Diagram';
 import { columnsSpec, flowSpec, treeSpec } from './charts';
@@ -935,10 +935,6 @@ export const ENGLISH_F1 = {
     'The address goes on the right, below the stamp.',
   ]),
   'en1-library': flowSpec('Borrowing a library book', ['Look it up in\nthe catalogue', 'Find it on\nthe shelf', 'The librarian\nrecords it', 'Read it with\ncare', 'Return it by\nthe due date'], { boxW: 104 }),
-  'en1-s-sounds': columnsSpec('The letter s: /s/ or /z/?', [
-    { head: '/s/', items: ['sport', 'sister', 'bus', 'basket', 'yes'] },
-    { head: '/z/', items: ['jersey', 'cousin', 'music', 'busy', 'goals'] },
-  ], { colW: 118 }),
   'en1-football-pitch': drawn('A football pitch and the players', 340, 214, FootballPitchArt, [
     'The goals are at each end, inside the penalty areas.',
     'The halfway line and the centre circle are in the middle.',
@@ -980,14 +976,6 @@ export const ENGLISH_F1 = {
     { name: 'wrongly', items: ['misbehave', 'misspell'] },
   ], { colW: 96 }),
   'en1-narrative': flowSpec('Telling a story in order', ['Beginning: who,\nwhere and when', 'A problem or\nan adventure', 'What happened\nnext', 'How it ended\n(finally)', 'What I\nlearnt'], { boxW: 108 }),
-  'en1-transitive': columnsSpec('Transitive and intransitive verbs', [
-    { head: 'Transitive\n(has an object)', items: ['The dancers wore masks.', 'The chief opened', 'the festival.'] },
-    { head: 'Intransitive\n(no object)', items: ['The guests arrived.', 'The baby slept.'] },
-  ], { colW: 156 }),
-  'en1-practices': columnsSpec('Cultural practices', [
-    { head: 'Good: keep them', items: ['respect for elders', 'solidarity', 'hospitality', 'dances and songs', 'local languages'] },
-    { head: 'Harmful: stop them', items: ['forced marriage', 'keeping girls from school', 'breast ironing', 'cruel widowhood rites', 'denying widows land'] },
-  ], { colW: 156 }),
   'en1-demonstratives': drawn('This, these, that and those', 340, 176, DemonstrativesArt, [
     'this: one thing near you; these: more than one near you.',
     'that: one thing far away; those: more than one far away.',

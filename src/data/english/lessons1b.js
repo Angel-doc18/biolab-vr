@@ -135,17 +135,6 @@ export const LESSONS_1B = [
   ]),
 
   // ---------- 21. Sport ----------
-  L('en-colour-1', 'en-f1-sports', '21.1', 'Adjectives of colour; the letter s said /s/ or /z/', 10, ['Grammar', 'Speech work'], [
-    '**Adjectives of colour**: red, green, yellow, blue, black, white, brown, grey, orange, purple, pink. Shades: light blue, dark green, bright red. Colour adjectives go before the noun ("a **green** jersey") or after be ("The ball is **white**"). In a list of adjectives, colour comes after size and age: "a big old red bus".',
-    'Our national colours are **green, red and yellow**: the flag has three vertical bands with a yellow star in the middle of the red band. The national football team wears these colours.',
-    'Speech work: the letter **s** can be said **/s/** (sport, sister, bus, yes, basket) or **/z/** (jersey, cousin, music, busy, his, was, does). At the end of a word after a vowel or voiced sound it is often /z/: goals, fans, eyes.',
-  ], 'en1-s-sounds', 'In a list of adjectives, put colour close to the noun.',
-  ['In which word is s said /z/?', ['music', 'sport', 'basket', 'sun'], '"Music" is said /ˈmjuːzɪk/.'],
-  [['Adjective of colour', 'An adjective that names a colour.'], ['Shade', 'A lighter or darker form of a colour.']],
-  [
-    { q: 'Put the adjectives in the right order: "a (yellow, new) jersey", "a (red, big) flag".', steps: ['Age before colour: **a new yellow jersey**.', 'Size before colour: **a big red flag**.'] },
-  ]),
-
   L('en-sports-1', 'en-f1-sports', '18.2', 'Sport, fair play and holiday camps', 12, ['Vocabulary', 'Reading', 'Speaking'], [
     'Football words: pitch (field), goal, goalkeeper, defender, midfielder, striker, captain, coach, referee, linesman, whistle, penalty, corner kick, foul, red and yellow cards, jersey, boots, trophy, medal, fans, stadium, tournament. The **Africa Cup of Nations (AFCON)** brings together African national teams; Cameroon’s Indomitable Lions have won it five times.',
     '**Sportsmanship** and **fair play**: respect the rules, the referee and your opponents; do not cheat or fight; shake hands after the match, win or lose. Supporting the national team with joy is a sign of **patriotism**.',
@@ -269,29 +258,6 @@ export const LESSONS_1B = [
   [['Narrate', 'To tell a story or describe events in order.'], ['Myth', 'A traditional story that explains the origin of something.'], ['Legend', 'A traditional story about a hero or past event that may be partly true.']],
   [
     { q: 'Write the beginning, middle and end of a short myth explaining why the tortoise’s shell is cracked.', steps: ['Beginning: "Long ago, Tortoise borrowed feathers from the birds to fly to a feast in the sky."', 'Middle: "He ate all the food, so the angry birds took back their feathers."', 'End: "Tortoise fell to the ground and his shell broke into pieces. **That is why its shell is cracked today.**"'] },
-  ]),
-
-  // ---------- 27. Culture and rights ----------
-  L('en-transitive-1', 'en-f1-culture', '27.1', 'Transitive and intransitive verbs', 10, ['Grammar'], [
-    'A **transitive** verb needs an **object** to complete its meaning: "The dancers **wore** masks." "The chief **opened** the festival." Ask "what?" or "whom?" after the verb: wore what? masks.',
-    'An **intransitive** verb has no object: "The guests **arrived**." "The baby **slept**." "The drummers **danced** all night." (all night tells us when, not what).',
-    'Some verbs can be both: "She **sang** a song" (transitive) / "She **sang** beautifully" (intransitive). Only transitive verbs can be made passive: "The festival was opened by the chief."',
-  ], 'en1-transitive', 'Ask "what?" after the verb: if there is an answer, the verb is transitive.',
-  ['Which verb is intransitive here: "The elders arrived early."', ['arrived', 'elders', 'early', 'the'], 'Arrived what? There is no answer, so no object.'],
-  [['Transitive verb', 'A verb that takes an object.'], ['Intransitive verb', 'A verb that does not take an object.']],
-  [
-    { q: 'Say whether each verb is transitive or intransitive: (a) "They built a hut." (b) "The fire died." (c) "We celebrated the harvest."', steps: ['(a) built what? a hut → **transitive**', '(b) died what? no answer → **intransitive**', '(c) celebrated what? the harvest → **transitive**'] },
-  ]),
-
-  L('en-practices-1', 'en-f1-culture', '27.2', 'Good and harmful cultural practices; a debate on cultures', 12, ['Vocabulary', 'Speaking', 'Writing'], [
-    '**Culture** is the way of life of a people: language, food, dress, music, dance, beliefs, festivals and customs. Words: tradition, custom, heritage, festival, ritual, chief, elders, masquerade, identity. Festivals such as the **Ngondo** of the Sawa people in Douala and the **Nguon** of the Bamoun people in Foumban celebrate culture and history.',
-    '**Good practices** to keep: respect for elders, solidarity, hospitality, traditional dances and songs, local languages and crafts. **Harmful practices** violate human rights and must be abandoned: forced and early marriage, denying girls education, breast ironing, female genital mutilation, cruel widowhood rites and denying daughters or widows their inheritance. Cameroon’s laws protect children and women against these practices.',
-    'In a **debate** on a motion such as "Foreign cultures are better than African cultures", show **tolerance**: every culture has good and bad sides. Give reasons, examples and respect for the other side. Be proud of your heritage while rejecting what harms people.',
-  ], 'en1-practices', 'Ask of any custom: does it respect everyone’s dignity and rights?',
-  ['Which practice violates the rights of the child?', ['Early forced marriage', 'Traditional dances', 'Respect for elders', 'Speaking a local language'], 'It denies the child education and free choice.'],
-  [['Culture', 'The way of life of a people.'], ['Heritage', 'Traditions and values passed down from earlier generations.'], ['Tolerance', 'Accepting that others have different ways and beliefs.']],
-  [
-    { q: 'Write two sentences about a harmful cultural practice and why it should stop.', steps: ['Name it: "**Early forced marriage** is still practised in some communities."', 'Why it should stop: "It **denies girls their right to education and to choose their husband**, and it endangers their health."'] },
   ]),
 
   // ---------- 28. Cultural events ----------

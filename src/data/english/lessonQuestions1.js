@@ -250,12 +250,6 @@ export const QUESTIONS_1 = {
     Q('The opposite of "careful" is:', ['careless', 'uncareful', 'discareful', 'carefree'], '-less means without.'),
   ],
   // ---------- Sequence 5 ----------
-  'en-colour-1': [
-    Q('The star on the Cameroon flag is:', ['yellow', 'red', 'green', 'white'], 'A yellow star on the red band.'),
-    Q('"a ___ jersey"', ['new green', 'green new', 'greens new', 'new greens'], 'Age before colour.'),
-    Q('In which word is s said /s/?', ['basket', 'busy', 'cousin', 'music'], '"Basket" has /s/.'),
-    Q('"Dark green" and "light blue" are:', ['shades of colour', 'nouns', 'verbs', 'prefixes'], 'Lighter or darker forms.'),
-  ],
   'en-sports-1': [
     Q('The person who trains a team is the:', ['coach', 'referee', 'linesman', 'fan'], 'The referee controls the match.'),
     Q('How many times has Cameroon won the Africa Cup of Nations?', ['five', 'two', 'ten', 'never'], '1984, 1988, 2000, 2002 and 2017.'),
@@ -322,18 +316,6 @@ export const QUESTIONS_1 = {
     Q('Which time word shows the last event in a narrative?', ['finally', 'first', 'next', 'then'], '"Finally" ends the story.'),
     Q('Most narratives have:', ['a beginning, a middle and an end', 'only an end', 'no characters', 'only dialogue'], 'Setting, problem and solution.'),
     Q('We should listen to the myths of other peoples:', ['with respect', 'with mockery', 'never', 'only to laugh'], 'They carry a people’s values.'),
-  ],
-  'en-transitive-1': [
-    Q('In "The guests arrived late", "arrived" is:', ['intransitive', 'transitive', 'passive', 'a noun'], 'No object.'),
-    Q('In "She sang a song", "sang" is:', ['transitive', 'intransitive', 'a linking verb', 'passive'], 'Object: a song.'),
-    Q('Which verb usually needs an object?', ['bring', 'sleep', 'arrive', 'laugh'], 'You bring something.'),
-    Q('To find the object, ask after the verb:', ['what? or whom?', 'when?', 'where?', 'why?'], '"Wore what? Masks."'),
-  ],
-  'en-practices-1': [
-    Q('The Nguon festival belongs to the:', ['Bamoun people of Foumban', 'Sawa people of Douala', 'Bakweri of Buea', 'Fulani of Garoua'], 'The Ngondo is the Sawa festival.'),
-    Q('Traditions passed down from earlier generations are our:', ['heritage', 'pollution', 'budget', 'itinerary'], 'Heritage gives identity.'),
-    Q('Accepting that others have different customs is:', ['tolerance', 'tribalism', 'discrimination', 'pride'], 'Tolerance builds peace.'),
-    Q('Which is a good cultural practice?', ['Hospitality to visitors', 'Breast ironing', 'Forced marriage', 'Denying widows their property'], 'The others violate human rights.'),
   ],
   'en-demonstratives-1': [
     Q('"___ shoes I am wearing are new."', ['These', 'Those', 'That', 'This'], 'Plural and near.'),
