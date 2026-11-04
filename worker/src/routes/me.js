@@ -34,6 +34,12 @@ export async function patchMe(request, env) {
       fields.school_name = school.name;
     }
   }
+  // School organisation: general or technical school, technical stream and
+  // specialty, and the Sixth Form series. Each may be cleared with null.
+  if ('schoolType' in b) fields.school_type = b.schoolType === null ? null : oneOf(b.schoolType, 'School type', ['general', 'technical']);
+  if ('stream' in b) fields.stream = b.stream === null ? null : oneOf(b.stream, 'Stream', ['industrial', 'commercial']);
+  if ('specialty' in b) fields.specialty = b.specialty === null ? null : oneOf(b.specialty, 'Specialty', ['BCO', 'ETO', 'MMO', 'WWO', 'FFO', 'ACO', 'BSO', 'SSA', 'HOT', 'TOU']);
+  if ('series' in b) fields.series = b.series === null ? null : oneOf(b.series, 'Series', ['A1', 'A2', 'A3', 'A4', 'A5', 'S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'other']);
   if ('targetGrade' in b) fields.target_grade = oneOf(b.targetGrade, 'Target grade', ['A', 'B', 'C']);
   if ('dailyMinutes' in b) fields.daily_minutes = int(b.dailyMinutes, 'Daily goal', { min: 5, max: 240 });
   if ('reminderTime' in b) fields.reminder_time = str(b.reminderTime, 'Reminder time', { pattern: /^([01]\d|2[0-3]):[0-5]\d$/ });

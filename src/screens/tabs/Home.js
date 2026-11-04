@@ -67,11 +67,13 @@ function StudentHome({ navigation }) {
   const continueList = recent.length ? recent : shown.slice(0, 2);
   // "A Level: Chemistry, Physics; O Level: Biology": a Sixth Former may still be
   // studying an Ordinary Level subject whose A Level course is being written.
+  // A technical student sits the ITC or ATC instead of the GCE O or A Level.
   const own = userLevel(user);
+  const technical = user?.schoolType === 'technical';
   const taking = [own, own === 'A' ? 'O' : 'A']
     .map((lv) => [lv, subjects.filter((id) => subjectById(id).level === lv)])
     .filter(([, ids]) => ids.length)
-    .map(([lv, ids]) => `${LEVELS[lv].short}: ${ids.map((id) => subjectName(id, lang)).join(', ')}`)
+    .map(([lv, ids], i) => `${technical ? (lv === 'A' ? 'ATC' : 'ITC') : i === 0 ? `GCE ${LEVELS[lv].short}` : LEVELS[lv].short}: ${ids.map((id) => subjectName(id, lang)).join(', ')}`)
     .join('; ');
   const subjectLine = subjectById(subject).level === own ? subjectName(subject, lang) : `${subjectName(subject, lang)} (${LEVELS[subjectById(subject).level].short})`;
   const days = daysToExam(user?.examYear);
@@ -93,7 +95,7 @@ function StudentHome({ navigation }) {
             {greeting(L)}, {firstName(user?.name)}
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant" numberOfLines={1}>
-            GCE {taking}
+            {taking}
           </T>
         </V>
 

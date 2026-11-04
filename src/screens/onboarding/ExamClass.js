@@ -4,7 +4,7 @@ import { Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { nextStep } from '../../navigation/routes';
-import { CLASSES, LEVELS, chosenSubjects, classById, classLevel, examYearFor, subjectsForClass, subjectsForLevel, subjectsInClass } from '../../data/subjects';
+import { CLASSES, LEVELS, SERIES, STREAMS, chosenSubjects, classById, classLevel, examYearFor, seriesLine, streamById, subjectsForClass, subjectsForLevel, subjectsInClass } from '../../data/subjects';
 import { OnbHeader, StepBar } from './Steps';
 
 // The exam year that follows from the class, and the two after it for students
@@ -30,6 +30,22 @@ function Choice({ on, label, sub, onPress }) {
   );
 }
 
+// A small toggle for lists of options (series, specialties).
+function Chip({ on, label, onPress }) {
+  return (
+    <P
+      c={`px-3 h-10 rounded-full items-center justify-center ${on ? 'bg-primary-container' : 'bg-surface-container-lowest border border-outline-variant'}`}
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: on }}
+    >
+      <T c={`font-label-md text-label-md ${on ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
+        {label}
+      </T>
+    </P>
+  );
+}
+
 export default function ExamClass({ navigation, route }) {
   const { user, updateMe } = useApp();
   const L = useL();
@@ -51,6 +67,27 @@ export default function ExamClass({ navigation, route }) {
     // Chemistry becomes A Level Chemistry on moving into the Sixth Form, and back.
     setSubjects((list) => subjectsInClass(list, k));
   };
+  // How the school organises studies: a technical school has a stream and a
+  // specialty; a general Sixth Form has a series of Advanced Level subjects.
+  const [schoolType, setSchoolType] = useState(user?.schoolType === 'technical' ? 'technical' : 'general');
+  const [stream, setStream] = useState(user?.stream || null);
+  const [specialty, setSpecialty] = useState(user?.specialty || null);
+  const [series, setSeries] = useState(user?.series || null);
+  const technical = schoolType === 'technical';
+  const examName = technical ? (level === 'A' ? 'ATC' : 'ITC') : `GCE ${levelName}`;
+  const allowed = (list) => list.filter((id) => choices.some((c) => c.id === id));
+  const pickSeries = (id) => {
+    setSeries(id);
+    const found = SERIES.find((x) => x.id === id);
+    if (found) setSubjects(allowed(found.subjects));
+  };
+  const pickStream = (id) => {
+    if (id === stream) return;
+    setStream(id);
+    setSpecialty(null);
+    const found = streamById(id);
+    if (found && level === 'O') setSubjects(allowed(found.subjects));
+  };
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const toggle = (id) => setSubjects((list) => (list.includes(id) ? list.filter((s) => s !== id) : [...list, id]));
@@ -58,10 +95,20 @@ export default function ExamClass({ navigation, route }) {
   const submit = async () => {
     const picked = subjects.filter((id) => choices.some((s) => s.id === id));
     if (!picked.length) return setError(L('Choose at least one subject.', 'Choisissez au moins une matière.'));
+    if (technical && !stream) return setError(L('Choose your stream.', 'Choisissez votre filière.'));
     setBusy(true);
     setError(null);
     try {
-      await updateMe({ level, examYear: year, className: cls, subjects: picked });
+      await updateMe({
+        level,
+        examYear: year,
+        className: cls,
+        subjects: picked,
+        schoolType,
+        stream: technical ? stream : null,
+        specialty: technical ? specialty : null,
+        series: !technical && level === 'A' ? series : null,
+      });
       if (route.params?.fromSettings) navigation.goBack();
       else navigation.navigate(nextStep('student', 'ExamClass'));
     } catch (e) {
@@ -89,6 +136,39 @@ export default function ExamClass({ navigation, route }) {
 
       <V c="gap-space-lg">
         <V c="gap-space-sm">
+          <T c="font-label-lg text-label-lg text-on-surface">{L('Your school', 'Votre établissement')}</T>
+          <V c="flex-row gap-space-xs" accessibilityRole="radiogroup">
+            <Choice on={!technical} label={L('General', 'Général')} sub={L('GCE O and A Level', 'GCE O et A Level')} onPress={() => setSchoolType('general')} />
+            <Choice on={technical} label={L('Technical', 'Technique')} sub={L('ITC and ATC', 'ITC et ATC')} onPress={() => setSchoolType('technical')} />
+          </V>
+          {technical && (
+            <V c="gap-space-sm pt-space-xs">
+              <T c="font-label-md text-label-md text-on-surface-variant">{L('Stream', 'Filière')}</T>
+              <V c="flex-row gap-space-xs" accessibilityRole="radiogroup">
+                {STREAMS.map((x) => (
+                  <Choice key={x.id} on={stream === x.id} label={lang === 'fr' ? x.fr : x.en} onPress={() => pickStream(x.id)} />
+                ))}
+              </V>
+              {!!stream && (
+                <V c="gap-space-xs">
+                  <T c="font-label-md text-label-md text-on-surface-variant">{L('Specialty', 'Spécialité')}</T>
+                  <V c="flex-row flex-wrap gap-space-xs" accessibilityRole="radiogroup">
+                    {streamById(stream).specialties.map((x) => (
+                      <Chip key={x.id} on={specialty === x.id} label={lang === 'fr' ? x.fr : x.en} onPress={() => setSpecialty(x.id)} />
+                    ))}
+                  </V>
+                </V>
+              )}
+              <T c="font-body-sm text-body-sm text-on-surface-variant">
+                {L(
+                  'Klass8 teaches your general and related subjects. The workshop subjects of your specialty are not in Klass8 yet.',
+                  'Klass8 enseigne vos matières générales et connexes. Les matières d’atelier de votre spécialité ne sont pas encore dans Klass8.'
+                )}
+              </T>
+            </V>
+          )}
+        </V>
+        <V c="gap-space-sm">
           <T c="font-label-lg text-label-lg text-on-surface">{L('Class this school year', 'Classe cette année')}</T>
           <V c="gap-space-xs" accessibilityRole="radiogroup">
             <V c="flex-row gap-space-xs">
@@ -104,13 +184,31 @@ export default function ExamClass({ navigation, route }) {
           </V>
         </V>
         <V c="gap-space-sm">
-          <T c="font-label-lg text-label-lg text-on-surface">{L(`GCE ${levelName} exam`, `Examen GCE ${levelName}`)}</T>
+          <T c="font-label-lg text-label-lg text-on-surface">{L(`${examName} exam`, `Examen ${examName}`)}</T>
           <V c="flex-row gap-space-xs" accessibilityRole="radiogroup">
             {years.map((y) => (
               <Choice key={y} on={year === y} label={`June ${y}`} onPress={() => setYear(y)} />
             ))}
           </V>
         </V>
+        {!technical && level === 'A' && (
+          <V c="gap-space-sm">
+            <T c="font-label-lg text-label-lg text-on-surface">{L('Your series', 'Votre série')}</T>
+            {['arts', 'science'].map((kind) => (
+              <V key={kind} c="flex-row flex-wrap gap-space-xs" accessibilityRole="radiogroup">
+                {SERIES.filter((x) => x.kind === kind).map((x) => (
+                  <Chip key={x.id} on={series === x.id} label={x.id} onPress={() => pickSeries(x.id)} />
+                ))}
+                {kind === 'science' && <Chip on={series === 'other'} label={L('Other', 'Autre')} onPress={() => setSeries('other')} />}
+              </V>
+            ))}
+            <T c="font-body-sm text-body-sm text-on-surface-variant">
+              {series && series !== 'other'
+                ? `${series}: ${seriesLine(series, lang)}. ${L('Combinations vary between schools: change the subjects below if yours differ.', 'Les combinaisons varient selon les établissements : modifiez les matières ci-dessous si besoin.')}`
+                : L('Choosing your series fills in its subjects; you can still change them below.', 'Le choix de la série remplit ses matières ; vous pouvez encore les modifier ci-dessous.')}
+            </T>
+          </V>
+        )}
         <V c="gap-space-sm">
           <T c="font-label-lg text-label-lg text-on-surface">
             {L('Subjects you are taking', 'Matières que vous présentez')}

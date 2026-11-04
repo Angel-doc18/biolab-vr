@@ -451,9 +451,75 @@ export const examYearFor = (classId, now) => firstExamYear(now) + (classById(cla
 
 // "GCE O Level, June 2027" for the student's own exam.
 export function examLabel(user, L) {
-  const level = LEVELS[userLevel(user)].short;
-  return user?.examYear ? `GCE ${level}, ${L('June', 'juin')} ${user.examYear}` : `GCE ${level}`;
+  const name = examName(user);
+  return user?.examYear ? `${name}, ${L('June', 'juin')} ${user.examYear}` : name;
 }
+
+// The certificate a student sits: the GCE O or A Level in a general school; in a
+// technical school, the Intermediate Technical Certificate (ITC) at the end of
+// Form 5 or the Advanced Technical Certificate (ATC) at the end of Upper Sixth,
+// both set by the GCE Board since 2018.
+export function examName(user) {
+  const level = userLevel(user);
+  if (user?.schoolType === 'technical') return level === 'A' ? 'ATC' : 'ITC';
+  return `GCE ${LEVELS[level].short}`;
+}
+
+// Sixth Form series of general schools: the combination of Advanced Level
+// subjects a student is admitted to. Choosing one fills in its subjects, which
+// the student can still change, since schools vary (S5 to S8 especially).
+export const SERIES = [
+  { id: 'A1', kind: 'arts', subjects: ['a-literature', 'a-history', 'a-french'] },
+  { id: 'A2', kind: 'arts', subjects: ['a-history', 'a-geography', 'a-economics'] },
+  { id: 'A3', kind: 'arts', subjects: ['a-history', 'a-economics', 'a-literature'] },
+  { id: 'A4', kind: 'arts', subjects: ['a-economics', 'a-geography', 'a-maths-stat'] },
+  { id: 'A5', kind: 'arts', subjects: ['a-literature', 'a-history', 'a-philosophy'] },
+  { id: 'S1', kind: 'science', subjects: ['a-maths-mech', 'a-physics', 'a-chemistry'] },
+  { id: 'S2', kind: 'science', subjects: ['a-physics', 'a-chemistry', 'a-biology'] },
+  { id: 'S3', kind: 'science', subjects: ['a-maths-stat', 'a-chemistry', 'a-biology'] },
+  { id: 'S4', kind: 'science', subjects: ['a-chemistry', 'a-biology', 'a-geology'] },
+  { id: 'S5', kind: 'science', subjects: ['a-chemistry', 'a-computer', 'a-maths-mech'] },
+  { id: 'S6', kind: 'science', subjects: ['a-maths-mech', 'a-physics', 'a-chemistry', 'a-further-maths'] },
+  { id: 'S7', kind: 'science', subjects: ['a-maths-mech', 'a-physics', 'a-chemistry', 'a-biology'] },
+  { id: 'S8', kind: 'science', subjects: ['a-maths-mech', 'a-physics', 'a-chemistry', 'a-biology', 'a-further-maths'] },
+];
+export const seriesById = (id) => SERIES.find((x) => x.id === id);
+// "Literature, History, French" for a series, in the student's language.
+export const seriesLine = (id, lang) => (seriesById(id)?.subjects || []).map((s) => subjectName(s, lang)).join(', ');
+
+// Technical schools: two streams, each with its specialties (trades). Klass8
+// teaches the general and related subjects; the specialty workshop subjects
+// are not in the app yet.
+export const STREAMS = [
+  {
+    id: 'industrial',
+    en: 'Industrial (STI)',
+    fr: 'Industriel (STI)',
+    specialties: [
+      { id: 'BCO', en: 'Building Construction (BCO)', fr: 'Bâtiment (BCO)' },
+      { id: 'ETO', en: 'Electrical Technology (ETO)', fr: 'Électrotechnique (ETO)' },
+      { id: 'MMO', en: 'Motor Mechanics (MMO)', fr: 'Mécanique automobile (MMO)' },
+      { id: 'WWO', en: 'Woodwork and Carpentry (WWO)', fr: 'Menuiserie (WWO)' },
+      { id: 'FFO', en: 'Fashion and Fabrics (FFO)', fr: 'Habillement (FFO)' },
+    ],
+    // General core plus the related subjects Klass8 teaches.
+    subjects: ['english', 'french', 'maths', 'physics', 'chemistry', 'history', 'geography', 'citizenship', 'computer'],
+  },
+  {
+    id: 'commercial',
+    en: 'Commercial (STT)',
+    fr: 'Tertiaire (STT)',
+    specialties: [
+      { id: 'ACO', en: 'Accounting (ACO)', fr: 'Comptabilité (ACO)' },
+      { id: 'BSO', en: 'Business Studies (BSO)', fr: 'Action commerciale (BSO)' },
+      { id: 'SSA', en: 'Secretarial Studies (SSA)', fr: 'Secrétariat (SSA)' },
+      { id: 'HOT', en: 'Hotel Management and Catering', fr: 'Hôtellerie et restauration' },
+      { id: 'TOU', en: 'Tourism', fr: 'Tourisme' },
+    ],
+    subjects: ['english', 'french', 'maths', 'history', 'geography', 'citizenship', 'commerce', 'economics', 'computer'],
+  },
+];
+export const streamById = (id) => STREAMS.find((x) => x.id === id);
 
 export const minutesLabel = (m, L) => {
   const h = Math.floor(m / 60);
