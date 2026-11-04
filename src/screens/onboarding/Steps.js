@@ -2,7 +2,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View } from 'react-native';
-import { Ic, Logo, P, T, V } from '../../ui/kit';
+import { BrandLogo, Ic, P, T, V } from '../../ui/kit';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { ONBOARDING } from '../../navigation/routes';
@@ -21,12 +21,7 @@ export function OnbHeader({ label, canBack = true }) {
           ) : (
             <V c="w-1" />
           )}
-          <V c="flex-row items-center gap-space-xs">
-            <Logo size={30} />
-            <T c="font-headline-sm text-headline-sm text-primary tracking-tight" style={{ fontWeight: '700' }}>
-              Klass8
-            </T>
-          </V>
+          <BrandLogo height={30} />
         </V>
         {!!label && <T c="font-label-md text-label-md text-on-surface-variant">{label}</T>}
       </V>

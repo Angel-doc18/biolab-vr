@@ -1,0 +1,38 @@
+// The recorded clips of the heart tour (heartTour.js), one per step, in the
+// app's own voice. Made with the voice server and kept in assets/audio/tour.
+export const TOUR_CLIPS = {
+  en: [
+    require('../../assets/audio/tour/en-00.mp3'),
+    require('../../assets/audio/tour/en-01.mp3'),
+    require('../../assets/audio/tour/en-02.mp3'),
+    require('../../assets/audio/tour/en-03.mp3'),
+    require('../../assets/audio/tour/en-04.mp3'),
+    require('../../assets/audio/tour/en-05.mp3'),
+    require('../../assets/audio/tour/en-06.mp3'),
+    require('../../assets/audio/tour/en-07.mp3'),
+    require('../../assets/audio/tour/en-08.mp3'),
+    require('../../assets/audio/tour/en-09.mp3'),
+    require('../../assets/audio/tour/en-10.mp3'),
+    require('../../assets/audio/tour/en-11.mp3'),
+    require('../../assets/audio/tour/en-12.mp3'),
+    require('../../assets/audio/tour/en-13.mp3'),
+    require('../../assets/audio/tour/en-14.mp3'),
+  ],
+  fr: [
+    require('../../assets/audio/tour/fr-00.mp3'),
+    require('../../assets/audio/tour/fr-01.mp3'),
+    require('../../assets/audio/tour/fr-02.mp3'),
+    require('../../assets/audio/tour/fr-03.mp3'),
+    require('../../assets/audio/tour/fr-04.mp3'),
+    require('../../assets/audio/tour/fr-05.mp3'),
+    require('../../assets/audio/tour/fr-06.mp3'),
+    require('../../assets/audio/tour/fr-07.mp3'),
+    require('../../assets/audio/tour/fr-08.mp3'),
+    require('../../assets/audio/tour/fr-09.mp3'),
+    require('../../assets/audio/tour/fr-10.mp3'),
+    require('../../assets/audio/tour/fr-11.mp3'),
+    require('../../assets/audio/tour/fr-12.mp3'),
+    require('../../assets/audio/tour/fr-13.mp3'),
+    require('../../assets/audio/tour/fr-14.mp3'),
+  ],
+};

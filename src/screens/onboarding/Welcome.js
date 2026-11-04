@@ -1,7 +1,8 @@
+import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ic, Logo, P, T, V } from '../../ui/kit';
+import { BrandLogo, Ic, P, T, V } from '../../ui/kit';
 import { Cta } from '../../ui/chrome';
-import { Diagram } from '../../diagrams';
+import HeartTour from '../../ui/HeartTour';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 
@@ -18,6 +19,7 @@ function Chip({ icon, label }) {
 
 export default function Welcome({ navigation }) {
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const { savePrefs } = useApp();
   const L = useL();
 
@@ -32,15 +34,13 @@ export default function Welcome({ navigation }) {
 
   return (
     <V c="flex-1 bg-surface-container-lowest" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 14 }}>
-      <V c="flex-row items-center justify-center gap-space-xs pt-space-sm">
-        <Logo size={30} />
-        <T c="font-headline-sm text-headline-sm text-on-surface tracking-tight">Klass8</T>
+      <V c="items-center pt-space-sm">
+        <BrandLogo height={34} />
       </V>
 
       <V c="flex-1 justify-center px-margin">
-        <V c="rounded-3xl bg-surface-container-low p-space-md">
-          <Diagram id="heart-section" caption={false} maxHeight={290} />
-        </V>
+        {/* the diagram shrinks on short screens so the buttons stay in view */}
+        <HeartTour maxHeight={Math.max(180, Math.min(290, height - insets.top - insets.bottom - 480))} />
         <V c="items-center gap-space-xs mt-space-lg">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight text-center">{L('Learn. Practise. Excel.', 'Apprendre. S’exercer. Exceller.')}</T>
           <V c="w-10 h-1 rounded-full bg-tertiary-container mb-space-xs" />

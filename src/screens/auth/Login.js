@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Logo, P, T, V } from '../../ui/kit';
+import { BrandLogo, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { Field, Label } from '../../ui/form';
 import { useApp } from '../../state/store';
@@ -49,11 +49,9 @@ export default function Login({ navigation }) {
   const create = () => navigation.navigate(navigation.getState().routeNames.includes('Language') ? 'Language' : 'Register');
 
   return (
-    <Screen keyboard header={<AuthHeader back onBack={toWelcome} />}>
-      <V c="items-center pt-space-xl pb-space-lg gap-space-sm">
-        <V c="w-20 h-20 rounded-3xl bg-surface-container-low items-center justify-center">
-          <Logo size={46} />
-        </V>
+    <Screen keyboard header={<AuthHeader back onBack={toWelcome} logo={false} />}>
+      <V c="items-center pt-space-md pb-space-lg gap-space-md">
+        <BrandLogo layout="stack" height={132} />
         <V c="items-center gap-1">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight text-center">{L('Welcome back', 'Bon retour')}</T>
           <V c="w-10 h-1 rounded-full bg-tertiary-container my-1" />

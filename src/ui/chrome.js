@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Avatar, C, Ic, Logo, P, T, V } from './kit';
+import { Avatar, BrandLogo, C, Ic, Logo, P, T, V } from './kit';
 import { useApp } from '../state/store';
 import { useL, useLang } from '../i18n';
 import { calmMotion } from '../lib/device';
@@ -66,17 +66,27 @@ export function TabHeader({ title = 'Klass8', subtitle, switcher }) {
   return (
     <View style={[{ paddingTop: insets.top, backgroundColor: 'rgba(255,255,255,0.96)', zIndex: 50 }, HEADER_SHADOW]}>
       <V c="h-14 px-margin flex-row items-center justify-between">
-        <V c="flex-row items-center gap-space-xs flex-1 min-w-0">
-          <Logo size={32} />
-          <V c="ml-1 flex-1 min-w-0">
-            <T c="font-headline-sm text-headline-sm text-primary-container tracking-tight" style={{ lineHeight: 18 }} numberOfLines={1}>
-              {title}
-            </T>
-            <T c="font-label-sm text-label-sm text-on-surface-variant mt-0.5" style={{ fontWeight: '400', lineHeight: 12 }} numberOfLines={1}>
+        {title === 'Klass8' ? (
+          // the home tabs: the logo itself carries the name
+          <V c="flex-1 min-w-0 gap-1">
+            <BrandLogo height={24} />
+            <T c="font-label-sm text-label-sm text-on-surface-variant" style={{ fontWeight: '400', lineHeight: 12 }} numberOfLines={1}>
               {sub}
             </T>
           </V>
-        </V>
+        ) : (
+          <V c="flex-row items-center gap-space-xs flex-1 min-w-0">
+            <Logo size={32} />
+            <V c="ml-1 flex-1 min-w-0">
+              <T c="font-headline-sm text-headline-sm text-primary-container tracking-tight" style={{ lineHeight: 18 }} numberOfLines={1}>
+                {title}
+              </T>
+              <T c="font-label-sm text-label-sm text-on-surface-variant mt-0.5" style={{ fontWeight: '400', lineHeight: 12 }} numberOfLines={1}>
+                {sub}
+              </T>
+            </V>
+          </V>
+        )}
         <V c="flex-row items-center gap-space-xs">
           <Bell />
           <Me />
@@ -124,7 +134,7 @@ export function StackHeader({ title, subtitle, subtitleColor = 'primary', logo =
 }
 
 // Auth and onboarding bar: back, logo and wordmark, step title.
-export function AuthHeader({ title, onBack, back = true, iosArrow }) {
+export function AuthHeader({ title, onBack, back = true, iosArrow, logo = true }) {
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
   return (
@@ -138,8 +148,7 @@ export function AuthHeader({ title, onBack, back = true, iosArrow }) {
           ) : (
             <V c="w-2" />
           )}
-          <Logo size={30} />
-          <T c="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">Klass8</T>
+          {logo && <BrandLogo height={30} />}
         </V>
         <V c="flex-1 px-space-xs items-end">
           {!!title && (
