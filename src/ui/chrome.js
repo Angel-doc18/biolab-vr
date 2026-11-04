@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Easing, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Animated, Easing, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Avatar, BrandLogo, C, Ic, Logo, P, T, V } from './kit';
@@ -61,7 +61,6 @@ export function TabHeader({ title = 'Klass8', subtitle, switcher }) {
   const insets = useSafeAreaInsets();
   const { subject } = useApp();
   const lang = useLang();
-  const L = useL();
   const sub = subtitle ?? `GCE ${LEVELS[subjectById(subject).level].en} ${subjectName(subject, lang)}`;
   return (
     <View style={[{ paddingTop: insets.top, backgroundColor: 'rgba(255,255,255,0.96)', zIndex: 50 }, HEADER_SHADOW]}>
@@ -69,7 +68,7 @@ export function TabHeader({ title = 'Klass8', subtitle, switcher }) {
         {title === 'Klass8' ? (
           // the home tabs: the logo itself carries the name
           <V c="flex-1 min-w-0 gap-1">
-            <BrandLogo height={24} />
+            <BrandLogo height={21} />
             <T c="font-label-sm text-label-sm text-on-surface-variant" style={{ fontWeight: '400', lineHeight: 12 }} numberOfLines={1}>
               {sub}
             </T>
@@ -133,22 +132,27 @@ export function StackHeader({ title, subtitle, subtitleColor = 'primary', logo =
   );
 }
 
-// Auth and onboarding bar: back, logo and wordmark, step title.
+// Auth bar: back on the left, the wordmark centred, an optional step title on
+// the right. A page that shows the full logo itself passes logo={false}.
 export function AuthHeader({ title, onBack, back = true, iosArrow, logo = true }) {
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
   return (
     <View style={[{ paddingTop: insets.top, backgroundColor: 'rgba(255,255,255,0.96)', zIndex: 50 }, HEADER_SHADOW]}>
       <V c="h-14 px-margin flex-row items-center justify-between">
-        <V c="flex-row items-center gap-space-sm">
+        {logo && (
+          <View pointerEvents="none" style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+            <BrandLogo height={19} />
+          </View>
+        )}
+        <V c="flex-row items-center">
           {back ? (
-            <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={onBack || (() => nav.canGoBack() && nav.goBack())} accessibilityLabel="Go back">
+            <P c="w-11 h-11 -ml-1.5 items-center justify-center rounded-xl" onPress={onBack || (() => nav.canGoBack() && nav.goBack())} accessibilityLabel="Go back">
               <Ic n={iosArrow ? 'arrow_back_ios_new' : 'arrow_back'} s={iosArrow ? 20 : 24} c="on-surface" />
             </P>
           ) : (
             <V c="w-2" />
           )}
-          {logo && <BrandLogo height={30} />}
         </V>
         <V c="flex-1 px-space-xs items-end">
           {!!title && (

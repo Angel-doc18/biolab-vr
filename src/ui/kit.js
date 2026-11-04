@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { Animated, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { createIconSet } from '@expo/vector-icons';
-import Svg, { Circle, G, Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { LOGO } from './brand';
 import glyphMap from '../glyphmap.json';
 import tw, { C, color } from './tw';
@@ -186,14 +186,17 @@ export function Avatar({ name = '', size = 32, c = '', ring, uri }) {
   );
 }
 
-// The Klass8 logo, the same artwork as the opening (src/ui/brand.js LOGO):
-//   <Logo size={30} />                 the K8 mark alone, `size` wide
-//   <BrandLogo height={28} />          the mark with the name beside it, for headers
-//   <BrandLogo layout="stack" ... />   the whole logo: mark, name and motto
-// mono draws it in one colour (for example white on a dark ground).
+// The Klass8 logo, the same artwork as the opening (src/ui/brand.js LOGO),
+// used the way a brand guide would:
+//   <BrandLogo height={22} />                  the wordmark "Klass8", for headers
+//   <BrandLogo layout="stack" height={100} />  the K8 mark above the name, for
+//                                             the welcome and sign-in pages
+//   <Logo size={28} />                         the K8 mark alone, beside page titles
+// The motto is set as text under the stacked logo where it is needed, so it
+// stays readable (inside the artwork it is too small below about 190 dp).
+// mono draws the logo in one colour (for example white on a dark ground).
 const MARK_IDS = ['cap', 'k', 'eight'];
 const NAME_IDS = ['wK', 'wl', 'wa', 'ws1', 'ws2', 'w8'];
-const MOTTO_IDS = ['learn', 'practise', 'excel'];
 const boxOf = (ids) => ids.map((id) => LOGO.parts[id].box).reduce((a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])]);
 const [MX0, MY0, MX1, MY1] = LOGO.markBox;
 const MARK_VIEW = `${MX0 - 4} ${MY0 - 4} ${MX1 - MX0 + 8} ${MY1 - MY0 + 8}`;
@@ -206,31 +209,17 @@ export function Logo({ size = 32, mono }) {
     </Svg>
   );
 }
-// The row lockup: the name is set to about the height of the 8 and centred on
-// the K8, a little to the right of the mark.
-const NB = boxOf(NAME_IDS);
-const EIGHT = LOGO.parts.eight.box;
-const ROW_F = (0.8 * (EIGHT[3] - EIGHT[1])) / (NB[3] - NB[1]);
-const ROW_GAP = 110;
-const ROW_W = MX1 - MX0 + ROW_GAP + (NB[2] - NB[0]) * ROW_F;
-const ROW_H = MY1 - MY0;
-const ROW_TY = (EIGHT[1] + EIGHT[3]) / 2 - MY0 - ((NB[3] - NB[1]) * ROW_F) / 2;
-const STACK_FULL = LOGO.box;
-const STACK_NAME = boxOf([...MARK_IDS, ...NAME_IDS]);
-export function BrandLogo({ height = 28, layout = 'row', motto = true, mono }) {
-  if (layout === 'stack') {
-    const [x0, y0, x1, y1] = motto ? STACK_FULL : STACK_NAME;
-    const ids = motto ? [...MARK_IDS, ...NAME_IDS, ...MOTTO_IDS] : [...MARK_IDS, ...NAME_IDS];
-    return (
-      <Svg width={(height * (x1 - x0 + 8)) / (y1 - y0 + 8)} height={height} viewBox={`${x0 - 4} ${y0 - 4} ${x1 - x0 + 8} ${y1 - y0 + 8}`} accessibilityLabel="Klass8. Learn. Practise. Excel.">
-        {pieces(ids, mono)}
-      </Svg>
-    );
-  }
+const NAME_BOX = boxOf(NAME_IDS);
+const STACK_BOX = boxOf([...MARK_IDS, ...NAME_IDS]);
+export function BrandLogo({ height = 22, layout = 'name', mono }) {
+  const ids = layout === 'stack' ? [...MARK_IDS, ...NAME_IDS] : NAME_IDS;
+  const [x0, y0, x1, y1] = layout === 'stack' ? STACK_BOX : NAME_BOX;
+  const pad = 4;
+  const w = x1 - x0 + 2 * pad;
+  const h = y1 - y0 + 2 * pad;
   return (
-    <Svg width={(height * (ROW_W + 8)) / (ROW_H + 8)} height={height} viewBox={`-4 -4 ${ROW_W + 8} ${ROW_H + 8}`} accessibilityLabel="Klass8">
-      <G transform={`translate(${-MX0} ${-MY0})`}>{pieces(MARK_IDS, mono)}</G>
-      <G transform={`translate(${MX1 - MX0 + ROW_GAP} ${ROW_TY}) scale(${ROW_F}) translate(${-NB[0]} ${-NB[1]})`}>{pieces(NAME_IDS, mono)}</G>
+    <Svg width={(height * w) / h} height={height} viewBox={`${x0 - pad} ${y0 - pad} ${w} ${h}`} accessibilityLabel="Klass8">
+      {pieces(ids, mono)}
     </Svg>
   );
 }

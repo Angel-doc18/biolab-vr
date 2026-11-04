@@ -20,6 +20,7 @@ function Chip({ icon, label }) {
 export default function Welcome({ navigation }) {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const short = height - insets.top - insets.bottom < 700;
   const { savePrefs } = useApp();
   const L = useL();
 
@@ -34,16 +35,17 @@ export default function Welcome({ navigation }) {
 
   return (
     <V c="flex-1 bg-surface-container-lowest" style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 14 }}>
-      <V c="items-center pt-space-sm">
-        <BrandLogo height={34} />
-      </V>
-
       <V c="flex-1 justify-center px-margin">
+        {/* the brand: the logo as designed, the motto set as text so it reads */}
+        <V c="items-center mb-space-lg">
+          <BrandLogo layout="stack" height={short ? 72 : 92} />
+          <T c="font-label-lg text-label-lg text-primary mt-space-sm" style={{ letterSpacing: 1.6, fontWeight: '600' }}>
+            {L('Learn. Practise. Excel.', 'Apprendre. S’exercer. Exceller.')}
+          </T>
+        </V>
         {/* the diagram shrinks on short screens so the buttons stay in view */}
-        <HeartTour maxHeight={Math.max(180, Math.min(290, height - insets.top - insets.bottom - 480))} />
-        <V c="items-center gap-space-xs mt-space-lg">
-          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight text-center">{L('Learn. Practise. Excel.', 'Apprendre. S’exercer. Exceller.')}</T>
-          <V c="w-10 h-1 rounded-full bg-tertiary-container mb-space-xs" />
+        <HeartTour maxHeight={Math.max(170, Math.min(270, height - insets.top - insets.bottom - 560))} />
+        <V c="items-center mt-space-md">
           <T c="font-body-md text-body-md text-on-surface-variant text-center" style={{ maxWidth: 320 }}>
             {L('Lessons, labelled diagrams and GCE practice, from Form 1 to Upper Sixth.', 'Cours, schémas annotés et entraînement au GCE, de la Form 1 à l’Upper Sixth.')}
           </T>

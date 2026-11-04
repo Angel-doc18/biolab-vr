@@ -50,8 +50,8 @@ export default function Login({ navigation }) {
 
   return (
     <Screen keyboard header={<AuthHeader back onBack={toWelcome} logo={false} />}>
-      <V c="items-center pt-space-md pb-space-lg gap-space-md">
-        <BrandLogo layout="stack" height={132} />
+      <V c="items-center pt-space-lg pb-space-lg gap-space-md">
+        <BrandLogo layout="stack" height={96} />
         <V c="items-center gap-1">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight text-center">{L('Welcome back', 'Bon retour')}</T>
           <V c="w-10 h-1 rounded-full bg-tertiary-container my-1" />

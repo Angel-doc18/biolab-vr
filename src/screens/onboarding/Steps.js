@@ -1,7 +1,7 @@
 // Shared pieces of the onboarding steps.
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { BrandLogo, Ic, P, T, V } from '../../ui/kit';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
@@ -12,16 +12,18 @@ export function OnbHeader({ label, canBack = true }) {
   const nav = useNavigation();
   return (
     <View style={{ paddingTop: insets.top, backgroundColor: 'rgba(255,255,255,0.96)', zIndex: 50, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 1 }, elevation: 2 }}>
-      <V c="h-16 px-margin flex-row items-center justify-between">
-        <V c="flex-row items-center gap-space-sm">
+      <V c="h-14 px-margin flex-row items-center justify-between">
+        <View pointerEvents="none" style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+          <BrandLogo height={19} />
+        </View>
+        <V c="flex-row items-center">
           {canBack && nav.canGoBack() ? (
-            <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={() => nav.goBack()} accessibilityLabel="Go back">
+            <P c="w-11 h-11 -ml-1.5 items-center justify-center rounded-xl" onPress={() => nav.goBack()} accessibilityLabel="Go back">
               <Ic n="arrow_back" s={24} c="on-surface" />
             </P>
           ) : (
             <V c="w-1" />
           )}
-          <BrandLogo height={30} />
         </V>
         {!!label && <T c="font-label-md text-label-md text-on-surface-variant">{label}</T>}
       </V>
