@@ -3,11 +3,13 @@
 // shown.
 
 import { QUESTIONS_1 } from './lessonQuestions1';
+import { QUESTIONS_2 } from './lessonQuestions2';
 
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
   ...QUESTIONS_1,
+  ...QUESTIONS_2,
   // ---------- Form 4, term 1 ----------
   'li-elements-4': [
     Q('"The rains failed because the village had broken its oath" turns a sequence into a plot by adding:', ['cause', 'a new character', 'a rhyme', 'a stage direction'], 'Plot links events by cause and effect.'),
