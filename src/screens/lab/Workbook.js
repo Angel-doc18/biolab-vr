@@ -84,7 +84,7 @@ export default function Workbook({ navigation }) {
           <p><b>${L('Observation', 'Observation')}:</b> ${esc(e.observation)}</p><p><b>${L('Conclusion', 'Conclusion')}:</b> ${esc(e.conclusion)}</p>${drawingSvg(e.drawing)}</div>`
         )
         .join('');
-      const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Helvetica,Arial;color:#001e31;margin:28px}h1{color:#0369a1;font-size:20px}.e{border-bottom:1px solid #e2efff;padding:12px 0;page-break-inside:avoid}h3{margin:0 0 4px;font-size:15px}.m{color:#707881;font-size:11px}p{font-size:12px;line-height:1.5}.sign{margin-top:36px;font-size:12px}</style></head><body>
+      const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Helvetica,Arial;color:#0d1b3a;margin:28px}h1{color:#043480;font-size:20px}.e{border-bottom:1px solid #e5ebf8;padding:12px 0;page-break-inside:avoid}h3{margin:0 0 4px;font-size:15px}.m{color:#707881;font-size:11px}p{font-size:12px;line-height:1.5}.sign{margin-top:36px;font-size:12px}</style></head><body>
       <h1>${L('Practical workbook', 'Cahier de travaux pratiques')}</h1><div class="m">${esc(user?.name)} · ${esc(user?.className || '')} · ${esc(user?.schoolName || '')}</div>${rows}
       <div class="sign">${L('Teacher signature', 'Signature de l’enseignant')}: ______________________ &nbsp; ${L('Date', 'Date')}: ____________</div></body></html>`;
       const { uri } = await Print.printToFileAsync({ html });

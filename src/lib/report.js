@@ -90,11 +90,11 @@ function reportHtml(r, lang) {
     })
     .join('');
   return `<!doctype html><html><head><meta charset="utf-8"><style>
-  body{font-family:Helvetica,Arial,sans-serif;color:#001e31;margin:32px}
-  h1{font-size:22px;margin:0;color:#0369a1} h2{font-size:14px;margin:22px 0 6px} .sub{color:#40474f;font-size:12px;margin-top:4px}
+  body{font-family:Helvetica,Arial,sans-serif;color:#0d1b3a;margin:32px}
+  h1{font-size:22px;margin:0;color:#043480} h2{font-size:14px;margin:22px 0 6px} .sub{color:#40474f;font-size:12px;margin-top:4px}
   p{font-size:12px;color:#40474f}
-  table{width:100%;border-collapse:collapse;font-size:12px} td{padding:6px 4px;border-bottom:1px solid #e2efff}
-  .bar{height:6px;background:#e2efff;border-radius:6px;overflow:hidden;width:160px}.bar div{height:6px;background:#006b5f}
+  table{width:100%;border-collapse:collapse;font-size:12px} td{padding:6px 4px;border-bottom:1px solid #e5ebf8}
+  .bar{height:6px;background:#e5ebf8;border-radius:6px;overflow:hidden;width:160px}.bar div{height:6px;background:#006b5f}
   .num{text-align:right;font-weight:bold} .foot{margin-top:24px;font-size:10px;color:#707881}
   </style></head><body>
   <h1>Klass8: ${fr ? 'rapport de progression' : 'progress report'}</h1>

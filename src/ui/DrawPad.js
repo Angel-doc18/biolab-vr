@@ -12,7 +12,7 @@ export function Drawing({ data, size = 140, grid }) {
   return (
     <Svg width={size} height={size} viewBox={`0 0 ${S} ${S}`}>
       <Rect width={S} height={S} fill="#ffffff" />
-      {grid && <Rect width={S} height={S} fill="none" stroke="#e2efff" strokeWidth={2} />}
+      {grid && <Rect width={S} height={S} fill="none" stroke="#e5ebf8" strokeWidth={2} />}
       {(data.strokes || []).map((d, i) => (
         <Path key={`s${i}`} d={d} stroke="#001e31" strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
       ))}
@@ -128,11 +128,11 @@ export default function DrawPad({ initial, onChange, L }) {
           {(data.strokes || []).map((d, i) => (
             <Path key={`s${i}`} d={d} stroke="#001e31" strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
           ))}
-          {live?.d && <Path d={live.d} stroke="#0369a1" strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />}
+          {live?.d && <Path d={live.d} stroke="#1c4ea3" strokeWidth={2.2} fill="none" strokeLinecap="round" strokeLinejoin="round" />}
           {(data.lines || []).map(([x1, y1, x2, y2], i) => (
             <Line key={`l${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#001e31" strokeWidth={1.4} />
           ))}
-          {live?.line && <Line x1={live.line[0]} y1={live.line[1]} x2={live.line[2]} y2={live.line[3]} stroke="#0369a1" strokeWidth={1.4} />}
+          {live?.line && <Line x1={live.line[0]} y1={live.line[1]} x2={live.line[2]} y2={live.line[3]} stroke="#1c4ea3" strokeWidth={1.4} />}
           {(data.labels || []).map((l, i) => (
             <SvgText key={`t${i}`} x={l.x} y={l.y} fontSize={13} fill="#001e31">
               {l.text}

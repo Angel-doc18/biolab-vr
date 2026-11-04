@@ -257,7 +257,7 @@ const Viewport = forwardRef(function Viewport(
           key={`${specKey}:${surface}`}
           frameloop="demand"
           camera={{ position: [0, 0, 4.4], fov: FOV, near: 0.05, far: 100 }}
-          onCreated={({ gl }) => gl.setClearColor('#ecf4ff', 1)}
+          onCreated={({ gl }) => gl.setClearColor('#eef2fc', 1)}
           style={StyleSheet.absoluteFill}
         >
           <Lights />
@@ -327,14 +327,14 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#ecf4ff',
+    backgroundColor: '#eef2fc',
   },
   pinAnchor: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 },
   pin: { position: 'absolute', top: -16, flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 32 },
   dotBox: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   dot: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 4 },
-  dotOn: { backgroundColor: '#00507d' },
+  dotOn: { backgroundColor: '#043480' },
   ping: { position: 'absolute', width: 32, height: 32, borderRadius: 16, borderWidth: 3, borderColor: '#4fdbc8' },
   label: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.92)', maxWidth: 150 },
-  labelOn: { backgroundColor: '#0369a1' },
+  labelOn: { backgroundColor: '#1c4ea3' },
 });

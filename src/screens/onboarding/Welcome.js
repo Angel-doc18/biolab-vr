@@ -10,7 +10,7 @@ import { useL } from '../../i18n';
 function Chip({ icon, label }) {
   return (
     <V c="flex-row items-center gap-1 px-space-sm py-1.5 rounded-full bg-surface-container-low">
-      <Ic n={icon} s={15} c="primary-container" />
+      <Ic n={icon} s={15} c="tertiary-container" />
       <T c="font-label-sm text-label-sm text-on-surface-variant">{label}</T>
     </V>
   );
@@ -43,6 +43,7 @@ export default function Welcome({ navigation }) {
         </V>
         <V c="items-center gap-space-xs mt-space-lg">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight text-center">{L('Learn. Practise. Excel.', 'Apprendre. S’exercer. Exceller.')}</T>
+          <V c="w-10 h-1 rounded-full bg-tertiary-container mb-space-xs" />
           <T c="font-body-md text-body-md text-on-surface-variant text-center" style={{ maxWidth: 320 }}>
             {L('Lessons, labelled diagrams and GCE practice, from Form 1 to Upper Sixth.', 'Cours, schémas annotés et entraînement au GCE, de la Form 1 à l’Upper Sixth.')}
           </T>

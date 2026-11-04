@@ -43,16 +43,20 @@ export default function Login({ navigation }) {
       setBusy(false);
     }
   };
+  // Back always leads somewhere: the previous page, or the welcome page when
+  // the app opened here (after signing out, or on a return visit).
+  const toWelcome = () => (navigation.canGoBack() ? navigation.goBack() : navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] }));
   const create = () => navigation.navigate(navigation.getState().routeNames.includes('Language') ? 'Language' : 'Register');
 
   return (
-    <Screen keyboard header={<AuthHeader back={navigation.canGoBack()} />}>
+    <Screen keyboard header={<AuthHeader back onBack={toWelcome} />}>
       <V c="items-center pt-space-xl pb-space-lg gap-space-sm">
         <V c="w-20 h-20 rounded-3xl bg-surface-container-low items-center justify-center">
           <Logo size={46} />
         </V>
         <V c="items-center gap-1">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight text-center">{L('Welcome back', 'Bon retour')}</T>
+          <V c="w-10 h-1 rounded-full bg-tertiary-container my-1" />
           <T c="font-body-md text-body-md text-on-surface-variant text-center">{L('Log in with your phone number or email.', 'Connectez-vous avec votre numéro ou votre e-mail.')}</T>
         </V>
       </V>

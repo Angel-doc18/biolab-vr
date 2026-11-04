@@ -206,7 +206,7 @@ export default function Paper1({ navigation, route }) {
             <V c="flex-row items-center justify-between pt-1">
               <P c="flex-row items-center gap-1.5 py-1 px-2.5 rounded-lg" onPress={() => set({ flags: { ...s.flags, [i]: !s.flags[i] } })}>
                 <Ic n="flag" s={18} c={s.flags[i] ? 'tertiary-container' : 'on-surface-variant'} fill={!!s.flags[i]} />
-                <T c={`font-label-md text-label-md ${s.flags[i] ? 'text-tertiary-container' : 'text-on-surface-variant'}`}>{s.flags[i] ? L('Flagged for review', 'Marquée') : L('Flag for review', 'Marquer')}</T>
+                <T c={`font-label-md text-label-md ${s.flags[i] ? 'text-tertiary' : 'text-on-surface-variant'}`}>{s.flags[i] ? L('Flagged for review', 'Marquée') : L('Flag for review', 'Marquer')}</T>
               </P>
               <P c={`w-8 h-8 rounded-lg items-center justify-center ${big ? 'bg-primary-container' : 'bg-surface-container'}`} onPress={() => setBig((b) => !b)} accessibilityLabel="Larger text">
                 <T c={`font-label-md text-label-md ${big ? 'text-on-primary' : 'text-on-surface'}`}>A+</T>
@@ -267,7 +267,7 @@ export default function Paper1({ navigation, route }) {
               {s.paper.map((_, k) => {
                 const cur = k === i;
                 const bg = cur ? 'bg-primary shadow-md' : s.flags[k] ? 'bg-tertiary-container' : s.answers[k] != null ? 'bg-secondary' : 'bg-surface-container';
-                const fg = cur || s.flags[k] || s.answers[k] != null ? 'text-on-primary' : 'text-on-surface-variant';
+                const fg = cur ? 'text-on-primary' : s.flags[k] ? 'text-on-tertiary-container' : s.answers[k] != null ? 'text-on-primary' : 'text-on-surface-variant';
                 return (
                   <P key={k} c={`w-8 h-8 rounded-lg items-center justify-center ${bg}`} style={cur ? { transform: [{ scale: 1.1 }] } : null} onPress={() => go(k)}>
                     <T c={`font-label-sm text-label-sm ${fg}`}>{k + 1}</T>

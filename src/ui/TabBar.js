@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -18,7 +18,7 @@ export function TabBarView({ activeIndex, onSelect }) {
   const insets = useSafeAreaInsets();
   const L = useL();
   const [w, setW] = useState(0);
-  const x = useRef(new Animated.Value(activeIndex)).current;
+  const [x] = useState(() => new Animated.Value(activeIndex));
   useEffect(() => {
     Animated.spring(x, { toValue: activeIndex, useNativeDriver: true, stiffness: 300, damping: 30, mass: 1 }).start();
   }, [activeIndex, x]);
@@ -46,7 +46,24 @@ export function TabBarView({ activeIndex, onSelect }) {
               width: 48,
               height: 28,
               borderRadius: 12,
-              backgroundColor: '#ecf4ff',
+              backgroundColor: '#e6ecfa',
+              transform: [{ translateX: Animated.multiply(x, slot) }],
+            }}
+          />
+        )}
+        {/* a small amber mark, the colour of the 8 in the logo, over the active tab */}
+        {w > 0 && activeIndex >= 0 && (
+          <Animated.View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 4 + slot / 2 - 10,
+              width: 20,
+              height: 3,
+              borderBottomLeftRadius: 3,
+              borderBottomRightRadius: 3,
+              backgroundColor: '#FFB409',
               transform: [{ translateX: Animated.multiply(x, slot) }],
             }}
           />

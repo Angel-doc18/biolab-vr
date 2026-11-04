@@ -6,7 +6,7 @@ import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-
 
 const INK = '#1f2933';
 const GRID = '#dfe5ea';
-export const SERIES_COLOURS = ['#0369a1', '#c8463d', '#2e7d32', '#7a4fb3', '#c27c0e'];
+export const SERIES_COLOURS = ['#1c4ea3', '#c8463d', '#2e7d32', '#7a4fb3', '#c27c0e'];
 
 // Least squares line y = m x + c, or y = m x when through the origin.
 export function fitLine(points, origin = false) {
