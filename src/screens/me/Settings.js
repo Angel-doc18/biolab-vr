@@ -8,6 +8,7 @@ import { del, get, post, setSession } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { cancelDailyReminder, scheduleDailyReminder } from '../../lib/reminders';
+import { STUDY_TIME_ROWS, nearestStudyTime, studyTimeLabel } from '../../lib/studyTime';
 
 function Section({ title, children }) {
   return (
@@ -23,7 +24,7 @@ export default function Settings({ navigation }) {
   const L = useL();
   const [name, setName] = useState(user?.name || '');
   const [time, setTime] = useState(user?.reminderTime || '18:30');
-  const [minutes, setMinutes] = useState(user?.dailyMinutes || 20);
+  const [minutes, setMinutes] = useState(() => nearestStudyTime(user?.dailyMinutes));
   const [reminder, setReminder] = useState(prefs.reminder !== false);
   const [pwOpen, setPwOpen] = useState(false);
   const [delOpen, setDelOpen] = useState(false);
@@ -98,7 +99,7 @@ export default function Settings({ navigation }) {
                 <V c="flex-1 pr-2">
                   <T c="font-label-lg text-label-lg text-on-surface">{L('Remind me to revise', 'Me rappeler de réviser')}</T>
                   <T c="font-body-sm text-body-sm text-on-surface-variant">
-                    {minutes} min {L('at', 'à')} {time}
+                    {studyTimeLabel(minutes)} {L('at', 'à')} {time}
                   </T>
                 </V>
                 <Toggle
@@ -116,11 +117,15 @@ export default function Settings({ navigation }) {
               {reminder && (
                 <>
                   <TimePicker value={time} onChange={setTime} L={L} />
-                  <V c="flex-row gap-space-xs">
-                    {[10, 20, 30, 45].map((m) => (
-                      <P key={m} c={`flex-1 py-space-sm rounded-xl items-center ${minutes === m ? 'bg-primary' : 'bg-surface-container-low'}`} onPress={() => setMinutes(m)}>
-                        <T c={`font-label-lg text-label-lg ${minutes === m ? 'text-on-primary' : 'text-on-surface'}`}>{m} min</T>
-                      </P>
+                  <V c="gap-space-xs" accessibilityRole="radiogroup">
+                    {STUDY_TIME_ROWS.map((row) => (
+                      <V key={row[0]} c="flex-row gap-space-xs">
+                        {row.map((m) => (
+                          <P key={m} c={`flex-1 py-space-sm rounded-xl items-center ${minutes === m ? 'bg-primary' : 'bg-surface-container-low'}`} onPress={() => setMinutes(m)} accessibilityRole="radio" accessibilityState={{ checked: minutes === m }}>
+                            <T c={`font-label-lg text-label-lg ${minutes === m ? 'text-on-primary' : 'text-on-surface'}`}>{studyTimeLabel(m)}</T>
+                          </P>
+                        ))}
+                      </V>
                     ))}
                   </V>
                 </>

@@ -5,19 +5,23 @@ import { Toggle } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { scheduleDailyReminder } from '../../lib/reminders';
+import { STUDY_TIME_ROWS, nearestStudyTime, studyTimeLabel } from '../../lib/studyTime';
 import { OnbHeader, StepBar } from './Steps';
 
 const pad = (n) => String(n).padStart(2, '0');
 const twelve = (h, m) => `${((h + 11) % 12) + 1}:${pad(m)} ${h < 12 ? 'AM' : 'PM'}`;
 
-export function TimePicker({ value, onChange }) {
-  const [h, m] = value.split(':').map(Number);
-  const set = (nh, nm) => onChange(`${pad((nh + 24) % 24)}:${pad((nm + 60) % 60)}`);
-  const Btn = ({ icon, onPress, label }) => (
+function Btn({ icon, onPress, label }) {
+  return (
     <P c="w-9 h-9 rounded-lg bg-surface-container-low items-center justify-center" onPress={onPress} accessibilityLabel={label}>
       <Ic n={icon} s={20} c="primary-container" />
     </P>
   );
+}
+
+export function TimePicker({ value, onChange }) {
+  const [h, m] = value.split(':').map(Number);
+  const set = (nh, nm) => onChange(`${pad((nh + 24) % 24)}:${pad((nm + 60) % 60)}`);
   return (
     <V c="flex-row items-center justify-center gap-space-md p-space-sm rounded-xl bg-surface-container-lowest border border-outline-variant">
       <V c="items-center gap-1">
@@ -55,7 +59,7 @@ export default function Goals({ navigation }) {
   const { user, updateMe, prefs } = useApp();
   const L = useL();
   const [grade, setGrade] = useState(user?.targetGrade || 'A');
-  const [minutes, setMinutes] = useState(user?.dailyMinutes || 20);
+  const [minutes, setMinutes] = useState(() => nearestStudyTime(user?.dailyMinutes));
   const [time, setTime] = useState(user?.reminderTime || '18:30');
   const [remind, setRemind] = useState(true);
   const [editTime, setEditTime] = useState(false);
@@ -117,9 +121,13 @@ export default function Goals({ navigation }) {
 
         <V c="gap-space-sm">
           <T c="font-label-lg text-label-lg text-on-surface">{L('Time each day', 'Temps par jour')}</T>
-          <V c="flex-row gap-space-xs" accessibilityRole="radiogroup">
-            {[10, 20, 30, 45].map((m) => (
-              <Choice key={m} on={minutes === m} label={`${m} min`} onPress={() => setMinutes(m)} />
+          <V c="gap-space-xs" accessibilityRole="radiogroup">
+            {STUDY_TIME_ROWS.map((row) => (
+              <V key={row[0]} c="flex-row gap-space-xs">
+                {row.map((m) => (
+                  <Choice key={m} on={minutes === m} label={studyTimeLabel(m)} onPress={() => setMinutes(m)} />
+                ))}
+              </V>
             ))}
           </V>
         </V>
