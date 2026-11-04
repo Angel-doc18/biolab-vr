@@ -1,4 +1,4 @@
-// Literature in English lessons for Form 1, sequences 1 to 3: introducing
+// Literature in English lessons for Form 1 (first file): introducing
 // literature, oral tales, proverbs and songs, and poetry on family, success,
 // faith, conflict, trade, poverty, nature, protest, patriotism and peace. Set
 // books change with the national booklist, so each lesson teaches a method.
@@ -91,7 +91,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 4. Family poems ----------
-  L('li-poem-1', 'li-f1-family', '4.1', 'Reading a poem: title, lines, stanzas, rhyme and the speaker', 12, ['Poetry'], [
+  L('li-poem-1', 'li-f1-family', '12.1', 'Reading a poem: title, lines, stanzas, rhyme and the speaker', 12, ['Poetry'], [
     'A **poem** is written in **lines** grouped into **stanzas**. It uses **rhythm** (a beat), often **rhyme** (words ending with the same sound) and **images** to express feelings and ideas in few words. The **speaker** (persona) is the voice in the poem; the **poet** is the writer. The **title** often gives the subject.',
     'How to read a poem:\n1. read the title and guess the subject\n2. read the poem twice, once aloud\n3. ask who is speaking, to whom, and about what\n4. note striking words, images and devices\n5. decide the mood (how it makes you feel) and the theme (what it teaches).',
     'The **rhyme scheme** is shown with letters: a poem whose lines end "night, sea, light, free" has the scheme **abab**.',
@@ -102,7 +102,7 @@ export const LESSONS_1A = [
     { q: 'Find the rhyme scheme and the speaker: "I wake before the cock can crow, / I fetch the water, sweep the floor; / Wherever Mama’s footsteps go, / I follow her from door to door."', steps: ['crow (a), floor (b), go (a), door (b) → **abab**', 'The speaker is **a child** ("I") who helps and follows the mother.'] },
   ]),
 
-  L('li-family-1', 'li-f1-family', '4.2', 'Poems about the family and a mother’s love; metaphor and allusion', 12, ['Poetry'], [
+  L('li-family-1', 'li-f1-family', '12.2', 'Poems about the family and a mother’s love; metaphor and allusion', 12, ['Poetry'], [
     'Poems about the **family** celebrate love, unity, care, prayer and the roles of parents, children and elders. Read this poem written for this lesson:\n"My mother is a shady tree,\nHer branches stretch to shelter me;\nWhen storms of hunger shake our home,\nHer arms become a mighty dome.\nLike Ruth, she never leaves our side,\nHer love is wide, her love is wide."',
     'Devices: **metaphor** ("My mother is a shady tree"; "her arms become a mighty dome") shows protection; "storms of hunger" is a metaphor for hard times; "Like Ruth" is a **simile** and a **biblical allusion** to Ruth, who stayed loyal to her family; the **repetition** "her love is wide" stresses the main feeling. The **mood** is warm and grateful; the **theme** is **a mother’s love protects the family in hard times.**',
     'Writing your own short poem about the family: choose one member, think of one picture (a metaphor) for that person, write two stanzas of four lines, and end with a line that sums up your feeling.',
@@ -114,7 +114,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 5. Success poems ----------
-  L('li-rhetorical-1', 'li-f1-success', '5.1', 'Rhetorical questions and allusion', 10, ['Literary devices'], [
+  L('li-rhetorical-1', 'li-f1-success', '13.1', 'Rhetorical questions and allusion', 10, ['Literary devices'], [
     'A **rhetorical question** is asked for effect, not for an answer. It makes readers think and agree: "Who reaps a harvest without sowing?" "Can a lazy child expect to pass?" The expected answer is obvious, so the question persuades.',
     'An **allusion** is a brief reference to a well-known person, place, event or text. **Biblical allusions** refer to the Bible ("as patient as Job", "a Good Samaritan"); **historical allusions** refer to history ("like the heroes of reunification"); others refer to famous stories or sayings. An allusion packs a whole story into a few words.',
   ], 'li1-allusion', 'If a question in a poem needs no answer, it is rhetorical: ask what it persuades you to believe.',
@@ -124,7 +124,7 @@ export const LESSONS_1A = [
     { q: 'Explain the allusion: "He was a Good Samaritan to the injured stranger."', steps: ['It refers to the Bible story of the Samaritan who helped a wounded stranger others ignored.', 'So the man is **kind and helpful to a stranger in need**.'] },
   ]),
 
-  L('li-success-1', 'li-f1-success', '5.2', 'Poems about growing up and the secret of success', 12, ['Poetry', 'Writing'], [
+  L('li-success-1', 'li-f1-success', '13.2', 'Poems about growing up and the secret of success', 12, ['Poetry', 'Writing'], [
     'Poems about **growing up** describe the stages of life, the challenges of competition and the values that lead to success: hard work, endurance, discipline, prayer and humility. A poem written for this lesson:\n"The farmer does not sleep at dawn,\nHe greets the hoe before the sun;\nWho ever ate a yam unsown?\nThe race is won by those who run."',
     'Devices: "greets the hoe" is **personification** showing eagerness; "Who ever ate a yam unsown?" is a **rhetorical question** meaning nothing comes without effort; the last line is like a **proverb**. Theme: **success comes from early, steady hard work.**',
     'Writing a poem titled "The secret of success": decide your message, choose two or three images (the farmer, the climber, the student), use a rhetorical question and a repeated line, and arrange your ideas in stanzas. Then **recite** it with expression, pausing at the ends of lines.',
@@ -136,7 +136,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 6. Faith poems ----------
-  L('li-personification-1', 'li-f1-faith', '6.1', 'Personification', 10, ['Literary devices'], [
+  L('li-personification-1', 'li-f1-faith', '14.1', 'Personification', 10, ['Literary devices'], [
     '**Personification** gives human qualities, feelings or actions to animals, objects, places or ideas: "The wind wept over the graves." "Hope knocked at the door." "The old church watched the village grow."',
     'Effects: it makes descriptions vivid, helps readers feel the mood, and makes abstract ideas (death, hope, faith) easier to picture. Explain it by saying what human action is given and what it suggests: "The wind wept" suggests sadness and mourning.',
   ], 'li1-personification', 'Look for verbs that only people do: smile, weep, whisper, watch, call.',
@@ -146,7 +146,7 @@ export const LESSONS_1A = [
     { q: 'Identify and explain: "The church bell called the faithful to prayer."', steps: ['Human action given: **calling** people.', 'It suggests the bell is like a person **inviting** the community, making the scene warm and religious.'] },
   ]),
 
-  L('li-faith-1', 'li-f1-faith', '6.2', 'Poems about mystery and faith; answering guided questions', 12, ['Poetry', 'Answering questions'], [
+  L('li-faith-1', 'li-f1-faith', '14.2', 'Poems about mystery and faith; answering guided questions', 12, ['Poetry', 'Answering questions'], [
     'Religious poems express **wonder** at the mystery of God and creation, **faith**, prayer, humility and obedience. Literature also teaches **respect** for people of every religion. A poem written for this lesson:\n"Who hung the stars above the hill?\nWho tells the restless sea, be still?\nI do not know, yet I believe:\nThe hand that gives can also grieve."',
     'Guided questions on a poem usually ask: what the poem is about (subject); who is speaking; what a line means; which device is used and its effect; the mood or tone; and the lesson (theme). Answer in full sentences and support each answer with words from the poem in quotation marks.',
     'For the poem above: subject: the wonders of creation and belief in God; device: rhetorical questions and personification of the sea ("restless"); mood: wonder and calm faith.',
@@ -158,7 +158,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 7. Conflict poems ----------
-  L('li-tone-1', 'li-f1-conflict', '7.1', 'Tone and humour', 10, ['Literary devices'], [
+  L('li-tone-1', 'li-f1-conflict', '15.1', 'Tone and humour', 10, ['Literary devices'], [
     '**Tone** is the poet’s attitude to the subject, shown by word choice: angry, bitter, sad, tender, joyful, mocking (sarcastic), serious (solemn), humorous. **Mood** is the feeling created in the reader. A poem can have a humorous tone but a serious message.',
     '**Humour** makes us laugh through funny situations, exaggeration and witty words. Poets use it to criticise bad behaviour gently: laughing at a quarrelsome neighbour can make readers see their own faults.',
   ], 'li1-tone', 'To name the tone, list three strong words from the poem and ask what attitude they share.',
@@ -168,7 +168,7 @@ export const LESSONS_1A = [
     { q: 'Name the tone: "Mr Big Mouth shouts all day, / His words like goats run every way; / He insults kings, he insults fowls, / Then hides indoors when thunder growls."', steps: ['Strong words: "Big Mouth", "like goats run every way", "hides indoors".', 'They make fun of a man who insults others but is a coward.', 'Tone: **mocking and humorous**, criticising loud, disrespectful people.'] },
   ]),
 
-  L('li-conflict-1', 'li-f1-conflict', '7.2', 'Poems about conflict and resolving it', 12, ['Poetry', 'Literary elements'], [
+  L('li-conflict-1', 'li-f1-conflict', '15.2', 'Poems about conflict and resolving it', 12, ['Poetry', 'Literary elements'], [
     '**Conflict** is a struggle. **External** conflict is between a character and another person, society or nature; **internal** conflict happens in a character’s mind. Poems about life’s challenges show quarrels, insults, abuse, and even the confusion of falling in love, and how people overcome them.',
     '**Conflict resolution** means settling disputes peacefully: listening, apologising, forgiving, compromising and seeking the help of elders or mediators. Literature often contrasts the harm of fighting with the peace that follows reconciliation. A poem written for this lesson:\n"We threw our words like stones at noon,\nBy dusk we sat beneath one moon;\nMy sister’s hand found mine again,\nAnd laughter fell like gentle rain."',
     'The **similes** "like stones" (insults hurt) and "like gentle rain" (laughter refreshes) contrast conflict and peace.',
@@ -180,7 +180,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 8. Trade poems ----------
-  L('li-contrast-1', 'li-f1-trade', '8.1', 'Contrast', 10, ['Literary devices'], [
+  L('li-contrast-1', 'li-f1-trade', '16.1', 'Contrast', 10, ['Literary devices'], [
     '**Contrast** places opposite ideas, images or characters side by side to make each stand out: rich and poor, heavy and light, the best and the worst teacher, the hard-working hawker and the idle youth.',
     'Effects: contrast sharpens the message, shows conflict and helps the reader judge. When you find a contrast, name the two opposites and say what the poet wants us to see.',
   ], 'li1-contrast', 'Look for opposite pairs of words: they often carry the poem’s message.',
@@ -190,7 +190,7 @@ export const LESSONS_1A = [
     { q: 'Explain the contrast: "The idle boy sleeps in the shade; / The hawker’s feet are never stayed."', steps: ['Opposites: the **idle** boy who **sleeps** and the **hawker** who never **stops**.', 'The contrast **praises the hawker’s hard work and criticises idleness**.'] },
   ]),
 
-  L('li-trade-1', 'li-f1-trade', '8.2', 'Poems about work, trade and business', 12, ['Poetry'], [
+  L('li-trade-1', 'li-f1-trade', '16.2', 'Poems about work, trade and business', 12, ['Poetry'], [
     'Poems about **trade** describe hawkers, market women, small shopkeepers and young people choosing their futures. They show the values of hard work, independence, **self-employment** and **entrepreneurship**, and sometimes the hardships: heat, dust, cheating customers and small profits. A poem written for this lesson:\n"Groundnuts, groundnuts! hot and sweet!\nShe sings her song from street to street;\nThe sun is hot, the road is long,\nBut school fees ride upon her song."',
     'Devices: the opening cry imitates a real hawker (**local colour**); **repetition** of "groundnuts"; a **contrast** between the hardship ("the sun is hot, the road is long") and the purpose; the **metaphor** "school fees ride upon her song" shows that her selling pays for education. Theme: **small trade, done with courage, builds a family’s future.**',
   ], 'li1-contrast', 'Ask what the worker’s effort is for: that is often the theme.',
@@ -201,7 +201,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 9. Poverty poems ----------
-  L('li-irony-1', 'li-f1-poverty', '9.1', 'Irony', 10, ['Literary devices'], [
+  L('li-irony-1', 'li-f1-poverty', '17.1', 'Irony', 10, ['Literary devices'], [
     '**Irony** is a contrast between what is said or expected and what really is:\n- **verbal irony**: saying the opposite of what you mean ("What a clever plan!" about a foolish one)\n- **situational irony**: the opposite of what we expect happens (the farmer who feeds the town goes hungry)\n- **dramatic irony**: the audience knows something a character does not.',
     'Irony makes readers think and often criticises injustice: it shows that the world is not as it should be.',
   ], 'lit-irony-types', 'Ask: is this the opposite of what we would expect? If yes, it is probably irony.',
@@ -211,7 +211,7 @@ export const LESSONS_1A = [
     { q: 'Explain the irony: "The farmer fills the city’s bowls, / And brings home empty calabash holes."', steps: ['Expected: the one who grows food should have food.', 'Reality: the farmer feeds the city but goes home with nothing.', 'This **situational irony** criticises the **injustice that leaves farmers poor**.'] },
   ]),
 
-  L('li-poverty-1', 'li-f1-poverty', '9.2', 'Poems about poverty and farming; summarising a poem', 12, ['Poetry', 'Writing'], [
+  L('li-poverty-1', 'li-f1-poverty', '17.2', 'Poems about poverty and farming; summarising a poem', 12, ['Poetry', 'Writing'], [
     'Poems about **poverty** show suffering, survival and the struggle to make a living, and often call for solutions: hard work, farming, sharing and fair treatment. Poems about **agriculture** praise farming as noble work that feeds the nation.',
     'A poem written for this lesson:\n"Our roof lets in the evening rain,\nOur pot is cold, our stomachs plain;\nYet Papa’s cutlass meets the morn,\nAnd in the valley grows our corn."\nSummary: **a poor family suffers from a leaking roof and hunger, but the father’s hard work on the farm brings hope.**',
     'How to **summarise** a poem: read it carefully; find the subject, what happens or is described, and the change or message; then write two or three sentences in your own words, without quoting the whole poem and without adding ideas that are not there.',
@@ -223,7 +223,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 10. Nature poems ----------
-  L('li-imagery-1', 'li-f1-nature', '10.1', 'Imagery: pictures in words', 10, ['Literary devices'], [
+  L('li-imagery-1', 'li-f1-nature', '18.1', 'Imagery: pictures in words', 10, ['Literary devices'], [
     '**Imagery** is language that creates pictures in the mind and appeals to the **senses**:\n- sight: "the golden sunset over the lake"\n- sound: "the thunder roared", "crickets chirping"\n- smell: "the smell of roasting corn"\n- taste: "the bitter kola"\n- touch: "the rough bark", "the cold river".',
     'Imagery helps readers experience a scene and feel its mood. When you comment on an image, name the sense it appeals to and say what feeling or idea it creates.',
   ], 'li1-imagery', 'Underline adjectives and verbs: they usually carry the images.',
@@ -233,7 +233,7 @@ export const LESSONS_1A = [
     { q: 'Identify the senses: "The forest hums with bees at noon, / The guava’s scent, the river’s tune."', steps: ['"hums with bees" → **sound**', '"the guava’s scent" → **smell**', '"the river’s tune" → **sound**', 'Together they create a **peaceful, living forest**.'] },
   ]),
 
-  L('li-nature-1', 'li-f1-nature', '10.2', 'Poems about nature and the dangers of drugs', 12, ['Poetry'], [
+  L('li-nature-1', 'li-f1-nature', '18.2', 'Poems about nature and the dangers of drugs', 12, ['Poetry'], [
     'Nature poems celebrate the **beauty** of forests, rivers, mountains and animals, and call for their **protection** and **preservation** against bush fires, deforestation and pollution. They often use personification ("the forest breathes") and imagery of colour and sound.',
     'Other poems warn young people against **drugs**, alcohol and **juvenile delinquency** (crime by young people), showing their effects: broken health, lost education, violence and prison. A poem written for this lesson:\n"He bought the smoke to feel a king,\nIt sold his voice, it sold his wing;\nNow in the dark his mother cries\nFor all the stars that left his eyes."',
     'The **irony** (buying smoke to feel powerful, but losing everything) and the **metaphors** ("sold his wing", "stars that left his eyes") show how drugs steal a young person’s freedom and dreams. The tone is **sad and warning**.',
@@ -245,7 +245,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 11. Protest poems ----------
-  L('li-message-1', 'li-f1-protest', '11.1', 'The poet’s message and point of view', 10, ['Poetry', 'Literary elements'], [
+  L('li-message-1', 'li-f1-protest', '19.1', 'The poet’s message and point of view', 10, ['Poetry', 'Literary elements'], [
     'The **message** is what the poet wants readers to understand, feel or do. The **point of view** is the position from which the poem is spoken:\n- **first person**: the speaker says "I" or "we" and shares personal experience\n- **third person**: the speaker describes others ("he", "she", "they") from outside.',
     'To find the poet’s attitude, look at word choice: words like "cruel", "shame" and "wicked" show disapproval; "brave", "pure" and "proud" show approval. A protest poem often speaks for a victim who cannot speak.',
   ], 'lit-point-of-view', 'Words of praise or blame reveal the poet’s side.',
@@ -255,7 +255,7 @@ export const LESSONS_1A = [
     { q: 'What is the point of view and the poet’s attitude in: "They burned the forest for a field, / And left the hills no shade, no shield"?', steps: ['"They" describes others → **third person**.', 'Word choice: "burned", "no shade, no shield" shows loss.', 'The poet **disapproves of destroying the forest**.'] },
   ]),
 
-  L('li-protest-1', 'li-f1-protest', '11.2', 'Poems that protest against abuse and pollution', 12, ['Poetry'], [
+  L('li-protest-1', 'li-f1-protest', '19.2', 'Poems that protest against abuse and pollution', 12, ['Poetry'], [
     '**Protest poems** speak out against injustice: harmful cultural practices (breast ironing, forced marriage, cruel widowhood rites), **human rights abuses** (torture, cruelty), and the neglect of the environment that brings **pollution** and diseases such as **cholera**. Some describe **civil disobedience**, peaceful refusal to obey unjust rules.',
     'A poem written for this lesson, in a girl’s voice:\n"Do not press my growing chest\nWith stones made hot by fear;\nMy body is not yours to test,\nMy future must be clear."\nThe **first-person** voice gives the victim a voice; the **imperative** "Do not press" is a strong protest; the theme is **a girl’s body and future must be respected.**',
     'Another poem might describe streets choked with rubbish where cholera spreads, calling for **hygiene**, care and responsible waste disposal.',
@@ -267,7 +267,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 12. Patriotic poems ----------
-  L('li-patriotic-1', 'li-f1-patriotism', '12.1', 'Patriotic poems and historical allusion', 10, ['Poetry', 'Literary devices'], [
+  L('li-patriotic-1', 'li-f1-patriotism', '20.1', 'Patriotic poems and historical allusion', 10, ['Poetry', 'Literary devices'], [
     '**Patriotic poems** express love for one’s country, its land, people, flag and history, and call citizens to unity, hard work and sacrifice. Cameroon’s motto, "**Peace – Work – Fatherland**", and its national colours (green, red and yellow) often appear in such poems.',
     'A **historical allusion** refers to a real event or person from history, such as independence, reunification or national heroes, and reminds readers of shared memories. Poems on **belonging** and **girl-child education** also express vision for the nation: "Educate a girl, and you build a nation."',
   ], 'li1-allusion', 'In patriotic poems, look for the land, the people, the flag and the call to action.',
@@ -277,7 +277,7 @@ export const LESSONS_1A = [
     { q: 'Explain the line: "Our flag is green like Kribi’s hills, / And red with blood that freedom spills."', steps: ['"green like Kribi’s hills" is a **simile** linking the flag to the beauty of the land.', '"red with blood that freedom spills" is a **historical allusion** to the sacrifices made for independence.', 'The lines express **pride and gratitude to those who fought for the country**.'] },
   ]),
 
-  L('li-celebrate-1', 'li-f1-patriotism', '12.2', 'Writing a poem that celebrates your country or village', 12, ['Writing', 'Poetry'], [
+  L('li-celebrate-1', 'li-f1-patriotism', '20.2', 'Writing a poem that celebrates your country or village', 12, ['Writing', 'Poetry'], [
     'Steps to write a celebration poem:\n1. choose the subject: your country, village, school or a leader you admire\n2. list images: hills, rivers, markets, festivals, foods, people at work\n3. choose one or two devices: a simile, a metaphor, a repeated line\n4. write two or three stanzas of four lines; rhyme is optional\n5. end with a line of hope, pride or a call to action.',
     'A model written for this lesson:\n"My village sleeps between two streams,\nIts drums awake the farmers’ dreams;\nIts kola shared, its elders wise,\nMy village wears the morning skies."\nIt uses **personification** ("sleeps", "wears"), **local colour** (drums, kola, elders) and **rhyme** (streams – dreams, wise – skies).',
   ], 'li1-write-poem', 'Write about what you know: real details make a poem come alive.',
@@ -288,7 +288,7 @@ export const LESSONS_1A = [
   ]),
 
   // ---------- 13. Peace poems ----------
-  L('li-theme-1', 'li-f1-peace', '13.1', 'Theme and moral', 10, ['Literary elements'], [
+  L('li-theme-1', 'li-f1-peace', '21.1', 'Theme and moral', 10, ['Literary elements'], [
     'The **theme** is the central idea a work explores, written as a full statement about life: "Corruption destroys trust in a community." The **moral** is a lesson about right behaviour: "Do not take bribes." Fables and folktales state morals clearly; poems and plays usually leave the reader to find the theme.',
     'To find the theme: ask what the work is about (topic: corruption), then what it says about it (idea: corruption brings suffering to the poor), and write that as one sentence.',
   ], 'li1-theme-moral', 'Topic in one word; theme in one sentence; moral as advice.',
@@ -298,7 +298,7 @@ export const LESSONS_1A = [
     { q: 'Give the topic, theme and moral of a poem about a corrupt official whose village road is never built.', steps: ['Topic: **corruption**.', 'Theme: **corruption robs communities of development.**', 'Moral: **leaders should be honest and serve the people.**'] },
   ]),
 
-  L('li-peace-1', 'li-f1-peace', '13.2', 'Poems about corruption, suffering and peace', 12, ['Poetry'], [
+  L('li-peace-1', 'li-f1-peace', '21.2', 'Poems about corruption, suffering and peace', 12, ['Poetry'], [
     'Many poems criticise **corruption** (bribery, embezzlement, favouritism), **inequality** and the **suffering** of the poor, and praise **peace**, honesty (**probity**) and living together. A poem written for this lesson:\n"The money for the bridge went where?\nInto a car, a house, a chair;\nThe children wade the river still;\nCan honour drown? It surely will."',
     'Devices: **rhetorical questions** ("went where?", "Can honour drown?") accuse the corrupt official; the **list** "a car, a house, a chair" shows the stolen money’s waste; the **contrast** between the official’s comfort and the children wading the river creates **pathos**. Theme: **corruption makes the innocent suffer.**',
   ], 'lit-theme-map', 'A list in a poem often shows excess or waste.',

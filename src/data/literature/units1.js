@@ -1,11 +1,12 @@
 // Literature in English for Form 1, following the MINESEC competency-based
 // curriculum for the observation sub-cycle (Form 1: oral African tales, oral
 // literature as moral and civic education, proverbs, riddles and songs, the
-// literary elements, and literature in other media) in the order of the Form 1
-// annual scheme of work: introduction and oral literature, then poetry, drama
-// and prose. Set books change with the national booklist, so lessons teach
-// methods with passages and poems written for this app. Terms follow the
-// sequences: 1 and 2 in term 1, 3 and 4 in term 2, 5 and 6 in term 3.
+// literary elements, and literature in other media), placed as the 2026/2027
+// harmonised Form 1 scheme places it: introduction and oral prose forms in
+// term 1 (sequences 1 and 2), written prose in term 2 (sequences 3 and 4),
+// poetry and drama in term 3 (sequences 5 and 6). Topic detail follows a Form
+// 1 annual scheme. Set books change with the national booklist, so lessons
+// teach methods with passages and poems written for this app.
 //
 // Quiz convention: the correct option is written first in `a`; options are
 // shuffled when shown.
@@ -55,7 +56,7 @@ export const UNITS_1 = [
       Q('"I have told you a million times!" is an example of:', ['hyperbole', 'simile', 'personification', 'irony'], 'Hyperbole is deliberate exaggeration.'),
       Q('A story about a foolish person whose greed or disobedience ruins them is a:', ['noodle-head (numbskull) story', 'praise song', 'myth of creation', 'lullaby'], 'Such tales warn against vices.'),
     ]),
-  unit('li-f1-oral-poetry', 3, 1, 1, 'oral', 'music_note', 'li1-oral-songs', 'Why do mothers sing lullabies?',
+  unit('li-f1-oral-poetry', 3, 1, 2, 'oral', 'music_note', 'li1-oral-songs', 'Why do mothers sing lullabies?',
     'Proverbs, Riddles and Songs', 'Proverbs and Songs', 'Proverbs, riddles, tongue twisters and tall tales; lullabies, dirges, praise songs (panegyrics), work songs and incantations; the griot and the praise singer; sound and rhythm in oral poetry',
     ['li-proverbs-1', 'li-songs-1'], [
       Q('A short traditional saying that gives advice or wisdom is a:', ['proverb', 'riddle', 'lullaby', 'chant'], '"One finger cannot pick up a grain" is a proverb about unity.'),
@@ -67,7 +68,7 @@ export const UNITS_1 = [
       Q('"She sells sea shells on the seashore" is a:', ['tongue twister', 'proverb', 'riddle', 'dirge'], 'It repeats similar sounds to test speech.'),
       Q('Words chanted to call on spirits or magic powers are:', ['incantations', 'lullabies', 'riddles', 'serenades'], 'Incantations are used in rituals.'),
     ]),
-  unit('li-f1-family', 4, 1, 1, 'poetry', 'family_restroom', 'li1-poem-family', 'How do I read a poem?',
+  unit('li-f1-family', 12, 3, 5, 'poetry', 'family_restroom', 'li1-poem-family', 'How do I read a poem?',
     'Poetry: The Family and a Mother’s Love', 'Poems on Family', 'What a poem is: title, lines, stanzas, rhyme, rhythm and the speaker; reading poems about the family, motherhood and prayer; metaphor and allusion; writing a short poem about the family',
     ['li-poem-1', 'li-family-1'], [
       Q('A group of lines in a poem is a:', ['stanza', 'paragraph', 'chapter', 'scene'], 'A stanza is like a paragraph.'),
@@ -81,7 +82,7 @@ export const UNITS_1 = [
     ]),
 
   // ============ Sequence 2: poetry, growing up to poverty ============
-  unit('li-f1-success', 5, 1, 2, 'poetry', 'emoji_events', 'li1-allusion', 'What is a rhetorical question?',
+  unit('li-f1-success', 13, 3, 5, 'poetry', 'emoji_events', 'li1-allusion', 'What is a rhetorical question?',
     'Poetry: Growing Up, Hard Work and Success', 'Poems on Success', 'Poems about growing up, competition, hard work and the secrets of success; rhetorical questions; biblical and historical allusion; reciting poems and writing a poem titled "The secret of success"',
     ['li-rhetorical-1', 'li-success-1'], [
       Q('A question asked for effect, not for an answer, is a:', ['rhetorical question', 'riddle', 'proverb', 'test question'], '"Who does not love their mother?"'),
@@ -93,7 +94,7 @@ export const UNITS_1 = [
       Q('In a poem, repetition of a key line usually:', ['stresses an important idea', 'is a mistake', 'shows the poet forgot', 'ends the poem'], 'Repetition gives emphasis.'),
       Q('Before writing a poem, you should first:', ['choose a subject and list strong words about it', 'count the pages', 'copy a famous poem', 'write the last line'], 'Plan, then write.'),
     ]),
-  unit('li-f1-faith', 6, 1, 2, 'poetry', 'church', 'li1-personification', 'How can a poet make a thing seem human?',
+  unit('li-f1-faith', 14, 3, 5, 'poetry', 'church', 'li1-personification', 'How can a poet make a thing seem human?',
     'Poetry: Mystery and Faith', 'Poems on Faith', 'Poems about the mystery of God and religion; personification; answering guided questions on a poem; respect and tolerance for different beliefs',
     ['li-personification-1', 'li-faith-1'], [
       Q('"The sun smiled on the village" is an example of:', ['personification', 'simile', 'rhyme', 'irony'], 'The sun is given a human action.'),
@@ -105,7 +106,7 @@ export const UNITS_1 = [
       Q('The mood of a prayer poem is usually:', ['calm and humble', 'angry and violent', 'comic and silly', 'bored'], 'Mood is the feeling created.'),
       Q('To answer "What is the poem about?" you give its:', ['subject matter', 'rhyme scheme', 'number of lines', 'author’s age'], 'Subject matter is what the poem is about.'),
     ]),
-  unit('li-f1-conflict', 7, 1, 2, 'poetry', 'sentiment_dissatisfied', 'li1-conflict-types', 'Why do poets write about quarrels?',
+  unit('li-f1-conflict', 15, 3, 5, 'poetry', 'sentiment_dissatisfied', 'li1-conflict-types', 'Why do poets write about quarrels?',
     'Poetry: Life’s Challenges and Conflict', 'Poems on Conflict', 'Poems about fights, insults, abuse and love; the kinds of conflict; tone and humour; peaceful conflict resolution',
     ['li-tone-1', 'li-conflict-1'], [
       Q('The attitude of the poet towards the subject is the:', ['tone', 'stanza', 'title', 'rhyme'], 'Tone can be angry, gentle, mocking or sad.'),
@@ -117,7 +118,7 @@ export const UNITS_1 = [
       Q('A poem that insults someone without reason shows:', ['disrespect', 'respect', 'love', 'tolerance'], 'Poets may criticise such behaviour.'),
       Q('In "a storm of insults", the insults are compared to:', ['a storm, heavy and violent', 'a song', 'a calm lake', 'a gift'], 'A metaphor showing many insults.'),
     ]),
-  unit('li-f1-trade', 8, 1, 2, 'poetry', 'storefront', 'li1-contrast', 'What is contrast in a poem?',
+  unit('li-f1-trade', 16, 3, 5, 'poetry', 'storefront', 'li1-contrast', 'What is contrast in a poem?',
     'Poetry: Work, Trade and Business', 'Poems on Trade', 'Poems about hawkers, petty traders and making choices; contrast; the value of self-employment, hard work and independence',
     ['li-contrast-1', 'li-trade-1'], [
       Q('Placing opposite ideas side by side for effect is:', ['contrast', 'simile', 'rhyme', 'repetition'], '"Rich and poor", "day and night".'),
@@ -129,7 +130,7 @@ export const UNITS_1 = [
       Q('In "the hawker’s heavy basket and light purse", the contrast shows:', ['hard work for little money', 'great wealth', 'laziness', 'a holiday'], 'Heavy and light are opposites.'),
       Q('Making a good choice between options shows:', ['wisdom', 'carelessness', 'greed', 'fear'], 'Poems often praise wise choices.'),
     ]),
-  unit('li-f1-poverty', 9, 1, 2, 'poetry', 'agriculture', 'lit-irony-types', 'What is irony?',
+  unit('li-f1-poverty', 17, 3, 5, 'poetry', 'agriculture', 'lit-irony-types', 'What is irony?',
     'Poetry: Poverty and Farming', 'Poems on Poverty', 'Poems about poverty, survival and agriculture; irony; summarising a poem in your own words',
     ['li-irony-1', 'li-poverty-1'], [
       Q('When the opposite of what is expected happens, it is:', ['irony', 'simile', 'rhyme', 'alliteration'], 'Situational irony.'),
@@ -143,7 +144,7 @@ export const UNITS_1 = [
     ]),
 
   // ============ Sequence 3: poetry on society ============
-  unit('li-f1-nature', 10, 2, 3, 'poetry', 'forest', 'li1-imagery', 'What is imagery?',
+  unit('li-f1-nature', 18, 3, 5, 'poetry', 'forest', 'li1-imagery', 'What is imagery?',
     'Poetry: Nature, Drugs and Delinquency', 'Poems on Nature', 'Imagery that appeals to the five senses; poems on the beauty of nature and the forest; poems warning against drugs and juvenile delinquency; caution and love for nature',
     ['li-imagery-1', 'li-nature-1'], [
       Q('Imagery is language that:', ['creates pictures and appeals to the senses', 'counts syllables', 'lists facts', 'has no meaning'], 'Sight, sound, smell, taste and touch.'),
@@ -155,7 +156,7 @@ export const UNITS_1 = [
       Q('"The forest breathes and the river sings" uses:', ['personification', 'simile', 'irony', 'a rhetorical question'], 'Human actions given to nature.'),
       Q('Which image appeals to touch?', ['the rough bark of the old tree', 'the green leaves', 'the singing birds', 'the bitter kola'], 'Rough is felt by touch.'),
     ]),
-  unit('li-f1-protest', 11, 2, 3, 'poetry', 'campaign', 'li1-protest', 'How does a poet protest against abuse?',
+  unit('li-f1-protest', 19, 3, 5, 'poetry', 'campaign', 'li1-protest', 'How does a poet protest against abuse?',
     'Poetry: Cultural Abuses, Pollution and Disease', 'Protest Poems', 'The poet’s message and point of view; poems that protest against cultural abuses, human rights abuse, pollution and disease such as cholera; prevention, hygiene and care',
     ['li-message-1', 'li-protest-1'], [
       Q('A poem that speaks out against injustice is a:', ['protest poem', 'lullaby', 'love poem', 'riddle'], 'It calls for change.'),
@@ -167,7 +168,7 @@ export const UNITS_1 = [
       Q('Refusing peacefully to obey an unjust law is:', ['civil disobedience', 'tourism', 'pollution', 'farming'], 'A form of protest.'),
       Q('To find the poet’s point of view, look at:', ['the words that show approval or disapproval', 'the page number', 'the title font', 'the publisher'], 'Word choice reveals attitude.'),
     ]),
-  unit('li-f1-patriotism', 12, 2, 3, 'poetry', 'flag', 'li1-allusion', 'What is a patriotic poem?',
+  unit('li-f1-patriotism', 20, 3, 5, 'poetry', 'flag', 'li1-allusion', 'What is a patriotic poem?',
     'Poetry: Love of Country and Girl-Child Education', 'Patriotic Poems', 'Poems on love for fellow men and for the country, belonging, vision and education of the girl child; historical allusion; writing a poem celebrating your country, village or leader',
     ['li-patriotic-1', 'li-celebrate-1'], [
       Q('Love for one’s country is:', ['patriotism', 'tribalism', 'selfishness', 'pessimism'], 'Patriotic poems celebrate the nation.'),
@@ -179,7 +180,7 @@ export const UNITS_1 = [
       Q('In "Our flag, green as our forests", the poet uses a:', ['simile', 'metaphor', 'hyperbole', 'oxymoron'], '"as" makes it a simile.'),
       Q('Determination means:', ['firmly deciding to reach a goal', 'giving up', 'being confused', 'being proud'], 'A value in poems of vision.'),
     ]),
-  unit('li-f1-peace', 13, 2, 3, 'poetry', 'handshake', 'li1-theme-moral', 'What is the difference between a theme and a moral?',
+  unit('li-f1-peace', 21, 3, 5, 'poetry', 'handshake', 'li1-theme-moral', 'What is the difference between a theme and a moral?',
     'Poetry: Corruption, Suffering and Peace', 'Poems on Peace', 'Theme and moral; poems about corruption, bribery, inequality, suffering and the benefits of peace; probity, honesty and living together',
     ['li-theme-1', 'li-peace-1'], [
       Q('The central idea a poem explores is its:', ['theme', 'rhyme', 'stanza', 'title'], 'Theme is an idea about life.'),
@@ -191,7 +192,7 @@ export const UNITS_1 = [
       Q('Unfair differences in wealth and chances between people are:', ['inequalities', 'equalities', 'rhymes', 'festivals'], 'A theme in poems about suffering.'),
       Q('A theme is best written as:', ['a sentence about life, such as "corruption destroys trust"', 'one word only', 'the name of the poet', 'a number'], 'A full idea.'),
     ]),
-  unit('li-f1-media', 14, 2, 3, 'basics', 'cell_tower', 'li1-media', 'Can a film be literature?',
+  unit('li-f1-media', 23, 3, 5, 'basics', 'cell_tower', 'li1-media', 'Can a film be literature?',
     'Literature in Print and Other Media', 'Literature and Media', 'Poems about the mobile phone, the radio and the newspaper; oxymoron; literature in print, on radio and television, in films and theatre performances; responding to a performance',
     ['li-oxymoron-1', 'li-media-1'], [
       Q('Joining two opposite words together, as in "deafening silence", is an:', ['oxymoron', 'simile', 'allusion', 'alliteration'], 'Opposites side by side in one phrase.'),
@@ -205,7 +206,7 @@ export const UNITS_1 = [
     ]),
 
   // ============ Sequence 4: culture and drama ============
-  unit('li-f1-culture', 15, 2, 4, 'poetry', 'diversity_3', 'li1-local-colour', 'What is local colour?',
+  unit('li-f1-culture', 22, 3, 5, 'poetry', 'diversity_3', 'li1-local-colour', 'What is local colour?',
     'Poetry: Culture and Heritage', 'Poems on Culture', 'Local colour; poems on culture, cultural objects such as kola, beliefs, music, marriage and cultural practices; writing short poems celebrating African tradition and values',
     ['li-localcolour-1', 'li-heritage-1'], [
       Q('Details of the customs, speech and dress of a particular place in a work are called:', ['local colour', 'rhyme scheme', 'point of view', 'climax'], 'They make the setting real.'),
@@ -217,7 +218,7 @@ export const UNITS_1 = [
       Q('Which detail gives local colour to a Grassfields poem?', ['the Fon’s embroidered toghu', 'a snowy street', 'a subway train', 'a skyscraper'], 'It belongs to the place.'),
       Q('A wise reader of culture poems should:', ['value good traditions and question harmful ones', 'reject all culture', 'accept every practice', 'ignore the poem'], 'Prudence and awareness.'),
     ]),
-  unit('li-f1-drama', 16, 2, 4, 'drama', 'theater_comedy', 'lit-play-parts', 'What makes a play different from a story?',
+  unit('li-f1-drama', 24, 3, 6, 'drama', 'theater_comedy', 'lit-play-parts', 'What makes a play different from a story?',
     'Drama: Its Features and the Opening Scene', 'Introducing Drama', 'The features of drama: playwright, cast, acts and scenes, dialogue, stage directions, conflict and suspense; the author and background of a play; reading an opening scene for setting and characters',
     ['li-drama-1', 'li-opening-1'], [
       Q('The writer of a play is a:', ['playwright', 'novelist', 'poet only', 'journalist'], 'Playwrights write drama.'),
@@ -229,7 +230,7 @@ export const UNITS_1 = [
       Q('The opening scene of a play usually introduces:', ['the setting, main characters and conflict', 'the ending', 'the critics’ reviews', 'the price of tickets'], 'This is the exposition.'),
       Q('A playwright’s background helps us understand:', ['why the play deals with certain issues', 'the colour of the cover', 'the number of pages', 'nothing'], 'Writers draw on their society.'),
     ]),
-  unit('li-f1-drama-culture', 17, 2, 4, 'drama', 'gavel', 'lit-characterization', 'How do I judge a character in a play?',
+  unit('li-f1-drama-culture', 25, 3, 6, 'drama', 'gavel', 'lit-characterization', 'How do I judge a character in a play?',
     'Drama: Questionable Culture and Gender Discrimination', 'Drama and Culture', 'Plays that question harmful cultural practices, gender discrimination and unjust inheritance customs; proverbs and pathos in drama; how characters are revealed; comparing characters',
     ['li-pathos-1', 'li-character-1'], [
       Q('The quality in a scene that makes the audience feel pity or sorrow is:', ['pathos', 'humour', 'suspense', 'irony'], 'A widow losing her land creates pathos.'),
@@ -241,8 +242,8 @@ export const UNITS_1 = [
       Q('To compare two characters, you show:', ['how they are alike and how they differ', 'only their names', 'only their ages', 'nothing'], 'Similarities and differences.'),
       Q('A custom that denies daughters their inheritance is:', ['unjust and discriminatory', 'fair', 'required by law', 'harmless'], 'The law protects equal rights.'),
     ]),
-  unit('li-f1-drama-plot', 18, 2, 4, 'drama', 'timeline', 'lit-plot-pyramid', 'What is the climax of a play?',
-    'Drama: Protest, Climax and Resolution', 'Plot in Drama', 'The plot structure: exposition, rising action, climax, falling action and resolution (denouement); protest and the rule of law; euphemism; dramatising a scene',
+  unit('li-f1-drama-plot', 26, 3, 6, 'drama', 'timeline', 'lit-plot-pyramid', 'What is the climax of a play?',
+    'Drama: Protest, Climax and Resolution', 'Plot in Drama', 'The plot structure: exposition, rising action, climax, falling action and resolution (denouement); protest and the rule of law; euphemism; dramatising a scene; revision of the year',
     ['li-plotstructure-1', 'li-dramatise-1'], [
       Q('The turning point and highest moment of tension in a plot is the:', ['climax', 'exposition', 'resolution', 'title'], 'Everything leads to it.'),
       Q('The part of the plot that introduces characters and setting is the:', ['exposition', 'climax', 'falling action', 'resolution'], 'It comes first.'),
@@ -255,7 +256,7 @@ export const UNITS_1 = [
     ]),
 
   // ============ Sequence 5: prose ============
-  unit('li-f1-prose', 19, 3, 5, 'prose', 'menu_book', 'li1-prose-types', 'What is the difference between fiction and biography?',
+  unit('li-f1-prose', 6, 2, 3, 'prose', 'menu_book', 'li1-prose-types', 'What is the difference between fiction and biography?',
     'Prose: Short Stories, Fables and Tall Tales', 'Introducing Prose', 'Kinds of prose: the short story, the novel, the fable, the tall tale, biography and fiction; the narrator and point of view; outlining the plot of a short story; obedience and respect',
     ['li-prosetypes-1', 'li-outline-1'], [
       Q('A true account of a person’s life written by someone else is a:', ['biography', 'autobiography', 'fable', 'poem'], 'An autobiography is written by the person themself.'),
@@ -267,7 +268,7 @@ export const UNITS_1 = [
       Q('A short story is usually:', ['shorter than a novel, with few characters and one main event', 'longer than a novel', 'always a poem', 'a play'], 'It can be read in one sitting.'),
       Q('Outlining a plot means:', ['listing the main events in order', 'describing the cover', 'naming the printer', 'copying the whole story'], 'Beginning, middle, end.'),
     ]),
-  unit('li-f1-pride', 20, 3, 5, 'prose', 'person_alert', 'li1-character-traits', 'How do writers show what a character is like?',
+  unit('li-f1-pride', 7, 2, 3, 'prose', 'person_alert', 'li1-character-traits', 'How do writers show what a character is like?',
     'Prose: Laziness, Pride and Humility', 'Stories on Pride', 'Characterisation: direct and indirect; stories about waywardness, laziness, arrogance and pride; humility, focus and steadfastness; writing a summary of a story',
     ['li-characterisation-1', 'li-pride-1'], [
       Q('When a writer tells us directly "Ngong was lazy", it is:', ['direct characterisation', 'indirect characterisation', 'a setting', 'a rhyme'], 'The narrator states the trait.'),
@@ -279,7 +280,7 @@ export const UNITS_1 = [
       Q('Steadfastness means:', ['staying firm and loyal to a purpose', 'changing your mind all the time', 'being lazy', 'running away'], 'A valued quality.'),
       Q('In a summary of a story, you should give:', ['the main events briefly, in your own words', 'every detail', 'your opinion only', 'the cover price'], 'Keep it short.'),
     ]),
-  unit('li-f1-teamwork', 21, 3, 5, 'prose', 'diversity_1', 'li1-fable', 'What lesson does the quarrel of the body parts teach?',
+  unit('li-f1-teamwork', 4, 1, 2, 'prose', 'diversity_1', 'li1-fable', 'What lesson does the quarrel of the body parts teach?',
     'Prose: Quarrels, War and Team Spirit', 'Stories on Unity', 'Fables in which animals or body parts speak and act; personification in prose; stories about quarrels, war and the quest for peace; collaboration and team spirit; writing a short narrative',
     ['li-fable-1', 'li-teamwork-1'], [
       Q('In a fable, animals usually:', ['speak and act like people to teach a lesson', 'stay silent', 'are only food', 'are described scientifically'], 'Personified animals.'),
@@ -291,7 +292,7 @@ export const UNITS_1 = [
       Q('Stories about war often end by showing:', ['the value of peace and the cost of fighting', 'that war is always fun', 'that peace is weak', 'nothing'], 'The quest for peace.'),
       Q('Making a body part speak is an example of:', ['personification', 'rhyme', 'alliteration', 'oxymoron'], 'Human qualities given to things.'),
     ]),
-  unit('li-f1-honesty', 22, 3, 5, 'prose', 'pets', 'li1-why-story', 'Why do cats live with people?',
+  unit('li-f1-honesty', 5, 1, 2, 'prose', 'pets', 'li1-why-story', 'Why do cats live with people?',
     'Prose: Why Stories and the Animal Kingdom', 'Animal Tales', 'Why stories that explain animal habits; stories about life in the wild, stealing, breaking bounds and family secrets; honesty and truth; tracing the plot of a tale',
     ['li-whystory-1', 'li-honesty-1'], [
       Q('A story that explains why the cat lives with people is a:', ['why story', 'biography', 'protest poem', 'report'], 'It explains an animal’s habit.'),
@@ -303,7 +304,7 @@ export const UNITS_1 = [
       Q('The animals and plants of the wild are its:', ['fauna and flora', 'cast and crew', 'stanzas and lines', 'acts and scenes'], 'Fauna = animals, flora = plants.'),
       Q('A character who always tells the truth shows:', ['honesty', 'cunning', 'greed', 'cruelty'], 'Truthfulness.'),
     ]),
-  unit('li-f1-responsibility', 23, 3, 5, 'prose', 'nightlife', 'li1-atmosphere', 'How does the setting create a mood?',
+  unit('li-f1-responsibility', 8, 2, 3, 'prose', 'nightlife', 'li1-atmosphere', 'How does the setting create a mood?',
     'Prose: Irresponsible Behaviour', 'Stories on Responsibility', 'Setting and atmosphere in prose; stories about drunkenness, alcoholism, domestic quarrels and irresponsibility; pathos and irony in stories; responsibility and caution',
     ['li-atmosphere-1', 'li-responsibility-1'], [
       Q('The mood or feeling created in a scene is its:', ['atmosphere', 'plot', 'cast', 'rhyme'], 'Setting details create atmosphere.'),
@@ -317,7 +318,7 @@ export const UNITS_1 = [
     ]),
 
   // ============ Sequence 6: prose on character ============
-  unit('li-f1-greed', 24, 3, 6, 'prose', 'savings', 'li1-conflict-types', 'Why does greed lead to trouble in stories?',
+  unit('li-f1-greed', 9, 2, 4, 'prose', 'savings', 'li1-conflict-types', 'Why does greed lead to trouble in stories?',
     'Prose: Jealousy, Greed and Gratitude', 'Stories on Greed', 'Conflict and its causes; stories about childlessness in marriage, jealousy, greed, selfishness and ingratitude; love, recognition and gratitude; recounting experiences',
     ['li-conflictcause-1', 'li-greed-1'], [
       Q('A strong wish for more than one needs is:', ['greed', 'gratitude', 'humility', 'generosity'], 'Greed often causes conflict in tales.'),
@@ -329,7 +330,7 @@ export const UNITS_1 = [
       Q('A wicked character’s downfall at the end of a tale shows:', ['that evil is punished', 'that evil always wins', 'nothing', 'that the plot is unfinished'], 'Poetic justice.'),
       Q('Thankfulness is:', ['gratitude', 'greed', 'grief', 'guilt'], 'A key value.'),
     ]),
-  unit('li-f1-humility', 25, 3, 6, 'prose', 'volunteer_activism', 'li1-theme-moral', 'What does a story about a slave boy who becomes a chief teach?',
+  unit('li-f1-humility', 10, 2, 4, 'prose', 'volunteer_activism', 'li1-theme-moral', 'What does a story about a slave boy who becomes a chief teach?',
     'Prose: Humility, Service and Fate', 'Stories on Humility', 'Theme and moral lesson in prose; stories about humility, service, kindness, ancestral beliefs, fate and power; contrasting characters; the consequences of excessive pride',
     ['li-moral-1', 'li-humility-1'], [
       Q('Doing useful work for others without seeking reward is:', ['service', 'pride', 'greed', 'revenge'], 'Service is valued in tales.'),
@@ -341,8 +342,8 @@ export const UNITS_1 = [
       Q('A kind character who shares food with strangers shows:', ['generosity and kindness', 'cruelty', 'greed', 'arrogance'], 'Positive traits.'),
       Q('A moral is usually:', ['a lesson for behaviour', 'a description of setting', 'a list of characters', 'a rhyme'], 'What we should or should not do.'),
     ]),
-  unit('li-f1-revenge', 26, 3, 6, 'prose', 'shield', 'li1-revenge', 'Does revenge ever solve a conflict?',
-    'Prose: Vengeance, War and Forgiveness', 'Stories on Revenge', 'Stories about vengeance, tribal war and their consequences; bravery and courage; forgiveness, peace and reconstruction; writing a literature answer with point, evidence and explanation; revision of the year',
+  unit('li-f1-revenge', 11, 2, 4, 'prose', 'shield', 'li1-revenge', 'Does revenge ever solve a conflict?',
+    'Prose: Vengeance, War and Forgiveness', 'Stories on Revenge', 'Stories about vengeance, tribal war and their consequences; bravery and courage; forgiveness, peace and reconstruction; writing a literature answer with point, evidence and explanation',
     ['li-answer-1', 'li-revenge-1'], [
       Q('Harming someone in return for a wrong they did is:', ['revenge (vengeance)', 'forgiveness', 'charity', 'service'], 'Revenge often starts a cycle of violence.'),
       Q('Choosing to stop being angry with someone who wronged you is:', ['forgiveness', 'revenge', 'jealousy', 'pride'], 'Forgiveness can end conflict.'),
