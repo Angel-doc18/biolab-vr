@@ -421,4 +421,49 @@ export const ENGLISH_F3 = {
     { name: 'ICT', items: ['hardware', 'software', 'network', 'password'] },
     { name: 'Engineering', items: ['design', 'bridge', 'circuit', 'machine'] },
   ], { colW: 112 }),
+  'en3-tense-contrast': columnsSpec('Three tenses compared', [
+    { head: 'Simple present', items: ['habits and facts', 'always, every day', '"She tells stories."'] },
+    { head: 'Present\ncontinuous', items: ['now, these days', 'am/is/are + -ing', '"They are learning."'] },
+    { head: 'Simple past', items: ['finished actions', 'yesterday, ago', '"He walked to school."'] },
+  ], { colW: 122 }),
+  'en3-personality': columnsSpec('Character and the generation gap', [
+    { head: 'Good qualities', items: ['kind, patient', 'honest, reliable', 'generous', 'open-minded'] },
+    { head: 'Faults', items: ['selfish', 'stubborn', 'arrogant', 'impatient'] },
+    { head: 'Bridging the gap', items: ['listen to each other', 'explain your ideas', 'show respect', 'learn from each other'] },
+  ], { colW: 122 }),
+  'en3-conditionals': columnsSpec('The zero and first conditionals', [
+    { head: 'Zero:\na general truth', items: ['If + present,', 'present', '"If you heat ice,', 'it melts."'] },
+    { head: 'First:\na real future', items: ['If + present,', 'will + base form', '"If it rains, the', 'drains will fill."'] },
+    { head: 'Unless', items: ['= if … not', '"Unless we act,', 'the stream will', 'dry up."'] },
+  ], { colW: 122 }),
+  'en3-cause-effect': columnsSpec('Linking cause and effect', [
+    { head: 'Cause + clause', items: ['because', 'since', 'as'] },
+    { head: 'Cause + noun', items: ['because of', 'due to', 'owing to'] },
+    { head: 'Effect', items: ['so', 'therefore,', 'as a result,', 'consequently,', 'so … that'] },
+  ], { colW: 118 }),
+  'en3-agreement': columnsSpec('Subject-verb agreement', [
+    { head: 'Singular verb', items: ['each, every', 'everyone, nobody', 'neither of the …', 'uncountable nouns'] },
+    { head: 'Plural verb', items: ['A and B', 'plural subjects', 'the leaders of …'] },
+    { head: 'Nearer subject', items: ['either … or', 'neither … nor', '"Either he or', 'they are…"'] },
+  ], { colW: 120 }),
+  'en3-digital-hygiene': columnsSpec('Digital hygiene', [
+    { head: 'Protect accounts', items: ['strong passwords', 'keep them secret', 'update your apps'] },
+    { head: 'Think first', items: ['check the facts', 'avoid unknown links', 'respect privacy'] },
+    { head: 'Stay healthy', items: ['limit screen time', 'switch off at night', 'report bullying'] },
+  ], { colW: 120 }),
+  'en3-living-together': treeSpec('Living together in Cameroon', 'Vivre-ensemble', [
+    { name: 'Respect the\nnational symbols', items: ['flag', 'anthem', 'coat of arms', 'seal, motto'] },
+    { name: 'Live the values', items: ['tolerance', 'bilingualism', 'multiculturalism'] },
+    { name: 'Refuse', items: ['tribalism', 'hate speech', 'discrimination'] },
+  ], { colW: 116 }),
+  'en3-revision-grammar': columnsSpec('Form 3 grammar to revise', [
+    { head: 'Verbs', items: ['tenses', 'will and going to', 'modals', 'conditionals 0, 1', 'active and passive'] },
+    { head: 'Sentences', items: ['reported speech', 'agreement', 'linking words', 'sentence patterns', 'question forms'] },
+    { head: 'Words', items: ['articles', 'pronouns', 'quantifiers', 'comparatives', 'affixes'] },
+  ], { colW: 120 }),
+  'en3-answering': columnsSpec('The four sections of the English paper', [
+    { head: 'Section', items: ['A listening, speaking', 'B reading', 'C grammar, vocabulary', 'D writing'] },
+    { head: 'Weight', items: ['20%', '30%', '30%', '20%'] },
+    { head: 'Tasks', items: ['dictation, dialogues', 'comprehension', 'cloze, transformation', 'letter, story, essay'] },
+  ], { colW: 124 }),
 };

@@ -1,4 +1,4 @@
-// English Language lessons for Form 3, sequences 1 to 3 (first part): family
+// English Language lessons for Form 3 (first part): family
 // and social life, the world of business, and health. Original text written
 // for this app. **double asterisks** mark key terms; `examples` are worked
 // examples. Phonetic symbols follow the International Phonetic Alphabet.
@@ -21,7 +21,7 @@ const L = (id, unit, n, title, minutes, tags, body, figure, tip, check, terms, e
 
 export const LESSONS_3A = [
   // ---------- 1. Discipline ----------
-  L('en-obligation-3', 'en-f3-discipline', '1.1', 'Modals of ability and obligation', 12, ['Grammar'], [
+  L('en-obligation-3', 'en-f3-discipline', '2.1', 'Modals of ability and obligation', 12, ['Grammar'], [
     '**Ability**: **can** (present), **could** (past), **be able to** (all tenses): "She can play the piano." "I could swim at six." "You will be able to drive when you are eighteen."',
     '**Obligation**:\n- **must**: strong obligation, often from the speaker or a rule: "You must respect your teachers."\n- **have to**: obligation from outside (a rule, a situation): "We have to wear uniforms." Past: **had to**; future: **will have to**\n- **should / ought to**: advice or a duty: "You should apologise."\n- **must not (mustn’t)**: it is forbidden: "You mustn’t cheat."\n- **don’t have to / needn’t**: it is not necessary: "You don’t have to come on Saturday."',
     'Do not confuse **mustn’t** (forbidden) with **don’t have to** (not necessary). Modals are followed by the base form, with no -s and no "to" (except have to and ought to).',
@@ -32,7 +32,7 @@ export const LESSONS_3A = [
     { q: 'Choose must, mustn’t or don’t have to: (a) "You ___ bring a calculator; the school provides one." (b) "Students ___ leave the campus without permission." (c) "You ___ obey the class rules."', steps: ['(a) not necessary → **don’t have to**', '(b) forbidden → **mustn’t**', '(c) a strong duty → **must**'] },
   ]),
 
-  L('en-spelling-3', 'en-f3-discipline', '1.2', 'Spelling rules, plural markers and the vowels /ɪ/ and /iː/; the informal letter', 12, ['Spelling', 'Speech work', 'Writing'], [
+  L('en-spelling-3', 'en-f3-discipline', '2.2', 'Spelling rules, plural markers and the vowels /ɪ/ and /iː/; the informal letter', 12, ['Spelling', 'Speech work', 'Writing'], [
     'Useful **spelling rules**:\n- "i before e except after c" when the sound is /iː/: believe, field, but receive, ceiling\n- drop the final silent e before a vowel suffix: hope → hoping, make → making (keep it before a consonant: hopeful)\n- double the final consonant of a short word after a short vowel: stop → stopped, run → running\n- y after a consonant becomes i: happy → happiness, carry → carried.',
     '**Plural markers**: -s (books), -es (churches, boxes), -ies (stories), -ves (knives), irregular forms (men, children, feet) and words that do not change (sheep). Numbers and words such as "many", "several" and "these" also mark the plural.',
     'Speech work: **/ɪ/** (short: sit, ship, live) and **/iː/** (long: seat, sheep, leave). **The informal letter**: your address at the top right with the date below; the greeting on the left ("Dear Mbah,"); an opening paragraph asking about the reader; the body in paragraphs; a closing paragraph; and a friendly ending ("Yours sincerely" or "Your friend") with your first name.',
@@ -44,7 +44,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 2. Study skills ----------
-  L('en-zero-article-3', 'en-f3-study', '2.1', 'The zero article', 10, ['Grammar'], [
+  L('en-zero-article-3', 'en-f3-study', '3.1', 'The zero article', 10, ['Grammar'], [
     'The **zero article** means using no article at all. We use it with:\n- **plural and uncountable nouns used in general**: "Books are useful." "Knowledge is power." "Hard work brings success."\n- **most names** of people, towns, countries and continents: Mbah, Buea, Cameroon, Africa\n- **meals, days, months and languages**: "after lunch", "on Monday", "in June", "She speaks French."\n- places used for their **main purpose**: go to school, go to church, be in hospital, go to bed ("She is in hospital" means she is a patient).',
     'Compare: "I go to **school** at 7 a.m." (to study) and "My father went to **the school** to see the principal" (to the building). "**Life** is short" (life in general) but "**the life** of a farmer" (a particular life).',
   ], 'en3-zero-article', 'General idea: no article. Particular one: "the".',
@@ -54,7 +54,7 @@ export const LESSONS_3A = [
     { q: 'Correct the articles: "The education is important. My brother is in the hospital as a patient and he goes to the church on Sundays."', steps: ['education in general → **Education** is important.', 'as a patient → **in hospital**', 'for worship → **to church**'] },
   ]),
 
-  L('en-paragraph-3', 'en-f3-study', '2.2', 'Study skills, school clubs and the good paragraph', 12, ['Reading', 'Writing'], [
+  L('en-paragraph-3', 'en-f3-study', '3.2', 'Study skills, school clubs and the good paragraph', 12, ['Reading', 'Writing'], [
     'Good **study skills**: plan a timetable; study in a quiet, bright place; read actively by underlining and making notes; use a dictionary; revise a little every day; ask questions; take short breaks; and sleep well before tests. **Co-curricular activities** (clubs such as debate, journalism, science, health and sports) build confidence, team spirit, creativity and research skills.',
     'A good **paragraph** has:\n- a **topic sentence** that states the main idea\n- **supporting sentences** with explanations, examples and details\n- a **concluding sentence** that rounds off the idea.\nIt has **unity** (one idea), **coherence** (ideas in a logical order joined with linking words) and **adequate development** (enough detail).',
     'A **word star** (or mind map) helps you plan: write the topic in the middle and draw lines to related words and ideas before you write.',
@@ -66,7 +66,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 3. Love and etiquette ----------
-  L('en-frequency-3', 'en-f3-love', '3.1', 'Adverbs of frequency; synonyms', 10, ['Grammar', 'Vocabulary'], [
+  L('en-frequency-3', 'en-f3-love', '4.1', 'Adverbs of frequency; synonyms', 10, ['Grammar', 'Vocabulary'], [
     '**Adverbs of frequency** say how often: always, usually, normally, often, sometimes, occasionally, seldom, rarely, hardly ever, never. They go **before the main verb** ("We always share our food"), **after "be"** ("He is seldom angry") and **after the first auxiliary** ("She has never missed a family meeting"). Phrases such as "every day", "once a week" and "twice a month" usually go at the end.',
     '**Synonyms** are words with similar meanings: love – affection, help – assist, kind – caring, quarrel – argue, support – back up. Synonyms help us avoid repetition, but they are not always exactly the same: "big" and "large" fit most contexts, but we say "a big brother", not "a large brother".',
   ], 'en3-frequency-synonyms', 'Choose the synonym that fits the context, not just the dictionary.',
@@ -76,7 +76,7 @@ export const LESSONS_3A = [
     { q: 'Put the adverb in the right place: (a) "My father is calm." (usually) (b) "We visit our grandmother." (once a month)', steps: ['(a) after "is": **"My father is usually calm."**', '(b) a phrase goes at the end: **"We visit our grandmother once a month."**'] },
   ]),
 
-  L('en-context-3', 'en-f3-love', '3.2', 'Meaning of words in context; love, support and table etiquette', 12, ['Reading', 'Vocabulary', 'Listening'], [
+  L('en-context-3', 'en-f3-love', '4.2', 'Meaning of words in context; love, support and table etiquette', 12, ['Reading', 'Vocabulary', 'Listening'], [
     'To find the **meaning of a word in context**, use clues in the passage: a **definition** given nearby ("an orphan, a child whose parents have died"), a **synonym** or **antonym** ("She was not timid but bold"), an **example**, or the general sense of the sentence. Then test your meaning by putting it in place of the word.',
     '**Love** in a family is shown by sharing, caring for the sick and elderly, encouraging one another, forgiving and spending time together. Support is practical (money, food, help with work) and emotional (listening, comforting).',
     '**Table etiquette**: wait to be served or for the eldest to begin; use cutlery properly; chew quietly with the mouth closed; do not talk with food in your mouth; ask for things to be passed; keep elbows off the table; and when you finish, place your knife and fork together on the plate and thank the cook.',
@@ -88,7 +88,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 4. Teenage problems ----------
-  L('en-compare-3', 'en-f3-teenage', '4.1', 'Comparatives and superlatives; compound words', 12, ['Grammar', 'Vocabulary'], [
+  L('en-compare-3', 'en-f3-teenage', '5.1', 'Comparatives and superlatives; compound words', 12, ['Grammar', 'Vocabulary'], [
     '**Comparatives** compare two things; **superlatives** compare three or more:\n- one-syllable adjectives add -er, -est: tall, taller, the tallest; big, bigger, the biggest\n- two-syllable adjectives ending in y: happy, happier, the happiest\n- longer adjectives use **more / most**: difficult, more difficult, the most difficult\n- irregular: good, better, best; bad, worse, worst; far, farther/further, farthest/furthest; little, less, least; much/many, more, most.',
     'Use **than** after comparatives ("She is older than her brother") and **the** before superlatives ("the most serious problem"). Never double them: "more taller" and "most tallest" are wrong. Equal comparison: "as … as" ("He is as tall as his father").',
     '**Compound words** join two words: classroom, football, homework, teenage, self-control, mother-in-law, peer pressure. They may be written as one word, with a hyphen, or as two words.',
@@ -99,7 +99,7 @@ export const LESSONS_3A = [
     { q: 'Correct: "Puberty is more harder for some teenagers than for others, and it is the most fastest period of growth."', steps: ['"more harder" → **harder**', '"the most fastest" → **the fastest**', '"Puberty is **harder** for some teenagers than for others, and it is **the fastest** period of growth."'] },
   ]),
 
-  L('en-puberty-3', 'en-f3-teenage', '4.2', 'Puberty and teenage problems; a debate and a four-paragraph essay', 12, ['Vocabulary', 'Speaking', 'Writing'], [
+  L('en-puberty-3', 'en-f3-teenage', '5.2', 'Puberty and teenage problems; a debate and a four-paragraph essay', 12, ['Vocabulary', 'Speaking', 'Writing'], [
     '**Puberty** is the stage when a child’s body becomes an adult’s, usually between about 8 and 14 years of age. Changes include growth spurts, the voice deepening in boys, the start of menstruation in girls, body hair, pimples and strong emotions. Common **teenage problems**: mood swings, peer pressure, conflicts with parents, drugs and alcohol, early relationships and pregnancy, and low self-esteem.',
     'Healthy responses: talk to parents, teachers or counsellors; choose good friends; practise **self-control** and **abstinence**; keep busy with studies, sports and clubs; and respect your body and others. Attitudes: awareness, prudence and respect.',
     'A **four-paragraph essay** on "Possible solutions to puberty crises": (1) **introduction**: define puberty and state the problem; (2) and (3) **body**: one main solution in each paragraph with explanation and examples; (4) **conclusion**: sum up and give advice. In a **debate**, the proposition argues for the motion and the opposition against it.',
@@ -111,7 +111,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 5. Violence ----------
-  L('en-suggest-3', 'en-f3-violence', '5.1', 'Making suggestions with modals; the sounds /ts/ and /s/', 10, ['Grammar', 'Speech work'], [
+  L('en-suggest-3', 'en-f3-violence', '6.1', 'Making suggestions with modals; the sounds /ts/ and /s/', 10, ['Grammar', 'Speech work'], [
     'Ways to **make suggestions**:\n- **should / could / might**: "We should report it." "You could talk to the counsellor."\n- **Let’s** + base form: "Let’s form a peace club."\n- **Why don’t we / you** + base form: "Why don’t we invite a police officer to speak?"\n- **How about / What about** + -ing: "How about organising a campaign?"\n- **Shall we** + base form?: "Shall we write to the principal?"',
     'Replies: "That’s a good idea." "I agree." "I’m not sure that will work, because …"',
     'Speech work: **/ts/** at the end of words (cats, gets, shirts, it’s) contrasts with **/s/** (kiss, bus, face). Compare: hits – hiss, mats – mass, lets – less. Pronounce the /t/ clearly before the /s/.',
@@ -122,7 +122,7 @@ export const LESSONS_3A = [
     { q: 'Make three suggestions to reduce violence in your school, using different structures.', steps: ['"**We should** create a peace club."', '"**Let’s** invite a police officer to talk to us."', '"**How about** organising sports competitions to bring students together?"'] },
   ]),
 
-  L('en-report-3', 'en-f3-violence', '5.2', 'Youth, violence and safety; writing a report', 12, ['Vocabulary', 'Reading', 'Writing'], [
+  L('en-report-3', 'en-f3-violence', '6.2', 'Youth, violence and safety; writing a report', 12, ['Vocabulary', 'Reading', 'Writing'], [
     'Words about **crime and violence**: crime, criminal, violence, assault, theft, robbery, weapon, gun, machete, gang, militia, victim, witness, suspect, police, arrest, court, chaos. Causes of youth violence include drugs, bad company, violent films and games, poverty, family problems and the easy availability of weapons.',
     'Prevention: guidance and counselling, clubs and sports, controlling weapons, good examples at home, and reporting threats to teachers, parents or the police. Attitudes: prudence, attention and sensitisation of the community.',
     'A **report** gives facts in an organised way: a **title** ("Report on violence in our school"); an **introduction** (who asked for it, why and when); **findings** (what happened, causes, effects), often under subheadings; **recommendations** (what should be done); and the writer’s **name, position and date**.',
@@ -134,7 +134,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 6. Business ----------
-  L('en-reported-3', 'en-f3-business', '6.1', 'Reported speech', 12, ['Grammar'], [
+  L('en-reported-3', 'en-f3-business', '10.1', 'Reported speech', 12, ['Grammar'], [
     '**Direct speech** gives the speaker’s exact words in quotation marks: "I am opening a shop," said Ayuk. **Reported (indirect) speech** reports them without quotation marks: Ayuk said that he was opening a shop.',
     'Changes when the reporting verb is in the past (said, told):\n- **tenses move back**: present → past (am → was), past → past perfect (sold → had sold), will → would, can → could\n- **pronouns** change to fit the speaker: I → he/she, we → they, my → his/her\n- **time and place words** change: now → then, today → that day, tomorrow → the next day, yesterday → the day before, here → there, this → that.',
     'Use **say** without an object ("She said that …") and **tell** with an object ("She told me that …").',
@@ -145,7 +145,7 @@ export const LESSONS_3A = [
     { q: 'Report: "We will open a bakery here next month," the women said.', steps: ['will → **would**; we → **they**', 'here → **there**; next month → **the following month**', '**The women said that they would open a bakery there the following month.**'] },
   ]),
 
-  L('en-narrative-3', 'en-f3-business', '6.2', 'Business and occupations; the vowels /ɒ/ and /ə/; the narrative essay', 12, ['Vocabulary', 'Speech work', 'Writing'], [
+  L('en-narrative-3', 'en-f3-business', '10.2', 'Business and occupations; the vowels /ɒ/ and /ə/; the narrative essay', 12, ['Vocabulary', 'Speech work', 'Writing'], [
     'Words about **business**: trade, commerce, industry, entrepreneur, enterprise, capital, profit, loss, customer, supplier, market, advertisement, partnership, business acumen (skill in business), hard work. Occupations: trader, banker, accountant, mechanic, tailor, engineer, doctor, lawyer, farmer.',
     'Speech work: **/ɒ/** is a short rounded vowel (shop, job, profit, office); **/ə/** is the weak schwa in unstressed syllables: about /əˈbaʊt/, account /əˈkaʊnt/, doctor /ˈdɒktə/, business /ˈbɪznəs/.',
     'The **writing process**: (1) plan: brainstorm and outline; (2) draft; (3) revise (improve ideas and order); (4) edit (grammar, spelling, punctuation); (5) write the final copy. A **narrative essay** tells a story: an introduction that sets the scene, a series of events in time order leading to a climax, and a conclusion, usually in the past tense with dialogue and description.',
@@ -157,7 +157,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 7. Banking ----------
-  L('en-passive-3', 'en-f3-banking', '7.1', 'The active and passive voice', 12, ['Grammar'], [
+  L('en-passive-3', 'en-f3-banking', '11.1', 'The active and passive voice', 12, ['Grammar'], [
     'In the **active voice** the subject does the action ("The bank **grants** loans"); in the **passive voice** the subject receives it ("Loans **are granted** by the bank"). The passive is formed with **be** in the tense of the active verb + the **past participle**.',
     'Tenses: simple present: is/are paid; present continuous: is being paid; simple past: was/were paid; present perfect: has/have been paid; future: will be paid; with modals: must be paid, can be paid.',
     'Use the passive when the doer is unknown, obvious or less important ("Taxes must be paid on time"), and in formal and scientific writing. With verbs that have two objects, either can become the subject: "The bank gave **him** a loan" → "**He** was given a loan."',
@@ -168,7 +168,7 @@ export const LESSONS_3A = [
     { q: 'Change into the passive: (a) "Customers deposit money every day." (b) "The manager will open a new branch."', steps: ['(a) present: **"Money is deposited by customers every day."**', '(b) future: **"A new branch will be opened by the manager."**'] },
   ]),
 
-  L('en-summary-3', 'en-f3-banking', '7.2', 'Banks, money and saving; writing a summary', 14, ['Vocabulary', 'Reading', 'Writing'], [
+  L('en-summary-3', 'en-f3-banking', '11.2', 'Banks, money and saving; writing a summary', 14, ['Vocabulary', 'Reading', 'Writing'], [
     'Words about **banking and money**: bank, account (savings account, current account), deposit, withdraw, loan, interest, cheque, ATM, mobile money, income, expenditure, budget, savings, debt, tax, tax evasion. Banks keep money safe, lend to businesses and families, and help people make payments. In Cameroon, mobile money services also let people send and save money by phone.',
     'Good money habits: make a **budget**, spend less than you earn, save a part of every income, avoid unnecessary debt, and keep your PIN secret.',
     'Writing a **summary** (for example in about 150 words): (1) read the passage carefully to understand it; (2) underline the main points and leave out examples, repetitions and details; (3) write the points in your own words, in full sentences joined with linking words; (4) count the words and check that the meaning has not changed. Do not add your own opinions.',
@@ -180,7 +180,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 8. Time management ----------
-  L('en-telltime-3', 'en-f3-time', '8.1', 'Telling the time and writing numbers', 10, ['Grammar', 'Vocabulary'], [
+  L('en-telltime-3', 'en-f3-time', '14.1', 'Telling the time and writing numbers', 10, ['Grammar', 'Vocabulary'], [
     '**Telling the time**: 7.00 seven o’clock; 7.05 five past seven; 7.15 a quarter past seven; 7.30 half past seven; 7.45 a quarter to eight; 7.50 ten to eight. We can also say the digits: "seven forty-five". For the 24-hour clock: 19.30 is "nineteen thirty" (7.30 p.m.). a.m. is before midday and p.m. after.',
     '**Numbers in words**: 21 twenty-one (hyphen); 105 one hundred and five; 1 250 one thousand two hundred and fifty; 2 000 000 two million. Ordinals: first, second, third, twenty-fifth. Ages: a teenager (13 to 19), a quadragenarian (40s), an octogenarian (80s), a centenarian (100 or more).',
   ], 'en3-time', 'Past the hour up to 30 minutes; to the next hour after 30.',
@@ -190,7 +190,7 @@ export const LESSONS_3A = [
     { q: 'Write in words: (a) 6.15 (b) 14.50 (c) 3 405', steps: ['(a) **a quarter past six**', '(b) **ten to three in the afternoon** (fourteen fifty)', '(c) **three thousand four hundred and five**'] },
   ]),
 
-  L('en-timemanage-3', 'en-f3-time', '8.2', 'Managing time; time bandits', 12, ['Reading', 'Writing'], [
+  L('en-timemanage-3', 'en-f3-time', '14.2', 'Managing time; time bandits', 12, ['Reading', 'Writing'], [
     '**Time management** means planning how to use time well. Steps: list your tasks; set **priorities** (do the most important and urgent first); make a **timetable** for study, rest and chores; break big tasks into small steps; avoid putting things off (**procrastination**); and review your plan each week.',
     '**Time bandits** are things that steal our time: endless chatting and social media, too much television, poor planning, untidiness (searching for lost things), and saying yes to everything. Being **punctual** (on time) and **assiduous** (steady and hard-working) shows duty consciousness and respect for others.',
     'Writing short paragraphs on the **advantages of effective time management**: less stress, better results, more free time, a good reputation, and meeting deadlines. Begin each paragraph with a clear topic sentence.',
@@ -202,7 +202,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 9. Agriculture ----------
-  L('en-continuous-3', 'en-f3-agriculture', '9.1', 'The present continuous tense; silent p and b', 10, ['Grammar', 'Speech work'], [
+  L('en-continuous-3', 'en-f3-agriculture', '15.1', 'The present continuous tense; silent p and b', 10, ['Grammar', 'Speech work'], [
     'The **present continuous** (am/is/are + verb-ing) describes actions happening **now** ("The farmers are harvesting cocoa"), temporary situations ("My uncle is working in Kumba this year") and fixed future plans ("We are planting maize next week"). Spelling: make → making, plant → planting, dig → digging, lie → lying.',
     'Verbs of state (know, like, love, want, believe, own, seem) are not usually used in the continuous: "I know the answer", not "I am knowing".',
     'Speech work: some letters are **silent**:\n- silent **b** after m and before t: climb, lamb, tomb, debt, doubt\n- silent **p** at the start before s, n or t: psychology, pneumonia, receipt (silent p in the middle).',
@@ -213,7 +213,7 @@ export const LESSONS_3A = [
     { q: 'Put the verbs in the correct tense: "At the moment my father (spray) the cocoa farm while my mother (dry) the beans."', steps: ['"At the moment" → present continuous.', 'spray → **is spraying**', 'dry → **is drying**'] },
   ]),
 
-  L('en-process-3', 'en-f3-agriculture', '9.2', 'Forms of agriculture; describing a process', 12, ['Vocabulary', 'Reading', 'Writing'], [
+  L('en-process-3', 'en-f3-agriculture', '15.2', 'Forms of agriculture; describing a process', 12, ['Vocabulary', 'Reading', 'Writing'], [
     'Forms of **agriculture**: crop farming (food crops such as maize, cassava and plantains; **cash crops** such as cocoa, coffee, cotton, rubber, tea and bananas); **pisciculture** (fish farming); **aviculture** (rearing birds such as poultry); **horticulture** (fruit, vegetables and flowers); apiculture (bee-keeping); and livestock rearing. Cameroon is one of Africa’s major cocoa producers.',
     '**Describing a process** (for example growing and marketing cocoa): give the stages in order with sequence words (first, next, then, after that, finally) and often the **passive voice**: "First, the seeds are planted in a nursery. After about six months, the seedlings are transplanted to the farm. The trees are weeded and sprayed. When the pods ripen, they are harvested, broken open, and the beans are fermented and dried before they are sold to buyers."',
     'Attitudes: hard work, effort and business acumen. A good farmer keeps records of costs and sales to know the profit.',
@@ -225,7 +225,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 10. Transport ----------
-  L('en-whq-3', 'en-f3-transport', '10.1', 'Wh- questions; the diphthongs /eɪ/ and /aɪ/; homophones', 10, ['Grammar', 'Speech work', 'Vocabulary'], [
+  L('en-whq-3', 'en-f3-transport', '16.1', 'Wh- questions; the diphthongs /eɪ/ and /aɪ/; homophones', 10, ['Grammar', 'Speech work', 'Vocabulary'], [
     '**Wh- questions** ask for information: what, which, who, whom, whose, where, when, why, how, how long, how far, how much, how many, how often. Order: wh- word + auxiliary + subject + verb ("How long does the journey take?"). If the wh- word is the subject, there is no auxiliary ("Who drives the bus?").',
     'Speech work: **/eɪ/** (train, plane, safe, day) and **/aɪ/** (bike, ride, flight, high). Compare: lane – line, plate – plight, wait – white.',
     '**Homophones** about travel: plane – plain, road – rode, fare (price of a journey) – fair, brake (to stop) – break, sail – sale, weight – wait.',
@@ -236,7 +236,7 @@ export const LESSONS_3A = [
     { q: 'Write wh- questions for the answers: (a) "By train." (b) "About four hours." (c) "Because the road is bad."', steps: ['(a) **How did you travel?**', '(b) **How long does the journey take?**', '(c) **Why did you not go by bus?**'] },
   ]),
 
-  L('en-transport-3', 'en-f3-transport', '10.2', 'Means of transport and road safety; the formal letter and editing', 14, ['Speaking', 'Reading', 'Writing'], [
+  L('en-transport-3', 'en-f3-transport', '16.2', 'Means of transport and road safety; the formal letter and editing', 14, ['Speaking', 'Reading', 'Writing'], [
     '**Means of transport**: road (cars, buses, taxis, motorbikes, lorries), rail (trains run by CAMRAIL between Douala, Yaoundé and Ngaoundéré), water (canoes, ferries, ships at the ports of Douala and Kribi) and air (aeroplanes at airports such as Douala and Yaoundé-Nsimalen). Each has advantages (speed, cost, capacity) and disadvantages (accidents, delays, pollution).',
     '**Road safety**: obey traffic lights and signs, use pedestrian crossings, wear helmets and seat belts, do not overload vehicles, never drink and drive, and keep vehicles in good condition. Attitudes: caution, diligence and prudence.',
     'A **formal letter** (for example to the Mayor about a dangerous road): your address and the date at the top right; the receiver’s title and address on the left; "Dear Sir," or "Dear Madam,"; an underlined subject line; the body in paragraphs (purpose, details, request); "Yours faithfully," with your signature and full name. **Edit** it before the final copy: check spelling, grammar, punctuation, paragraphing and politeness.',
@@ -248,7 +248,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 11. Health and hygiene ----------
-  L('en-demonstrative-3', 'en-f3-diseases', '11.1', 'Demonstrative pronouns', 10, ['Grammar'], [
+  L('en-demonstrative-3', 'en-f3-diseases', '19.1', 'Demonstrative pronouns', 10, ['Grammar'], [
     '**Demonstrative pronouns** point to things and stand alone: **this** (singular, near), **these** (plural, near), **that** (singular, far), **those** (plural, far). "**This** is my vaccination card." "**Those** are the new mosquito nets."',
     'When the same words come before a noun, they are **demonstrative adjectives**: "**This** card is mine." They agree in number with the noun: "this disease", "these diseases".',
     'We also use them for time: "**this** week" (now), "**that** year" (in the past), and to refer back to an idea: "Wash your hands often. **This** prevents many diseases."',
@@ -259,7 +259,7 @@ export const LESSONS_3A = [
     { q: 'Choose this, that, these or those: "(Pointing to tablets in your hand) ___ are for malaria. (Pointing to a poster across the room) ___ poster explains how HIV spreads."', steps: ['plural, near → **These**', 'singular, far → **That**'] },
   ]),
 
-  L('en-diseases-3', 'en-f3-diseases', '11.2', 'Hygiene, infectious diseases, immunisation and sex education', 14, ['Vocabulary', 'Listening', 'Reading', 'Writing'], [
+  L('en-diseases-3', 'en-f3-diseases', '19.2', 'Hygiene, infectious diseases, immunisation and sex education', 14, ['Vocabulary', 'Listening', 'Reading', 'Writing'], [
     '**Infectious diseases** spread from person to person or through water, food, air, insects or body fluids: malaria (mosquitoes), cholera and typhoid (dirty water and food), tuberculosis and whooping cough (coughing), polio and measles, and HIV. Many are prevented by **immunisation** (vaccination): Cameroon’s Expanded Programme on Immunisation protects children against diseases such as polio, measles, whooping cough, diphtheria and tetanus.',
     '**HIV** (the virus that causes AIDS) spreads through unprotected sex, infected blood and sharp objects, and from mother to child; it is **not** spread by shaking hands, sharing a classroom or mosquito bites. Prevention: abstinence, faithfulness, not sharing needles or blades, and testing. **Sex education** helps young people understand their bodies, delay sex, respect others and protect their health.',
     'Writing about a disease: give its **cause**, how it **spreads**, its **signs and symptoms** (fever, cough, diarrhoea, rash), its **treatment** and its **prevention**. Attitudes: awareness, prudence and safety.',
@@ -271,7 +271,7 @@ export const LESSONS_3A = [
   ]),
 
   // ---------- 12. Food and health ----------
-  L('en-relative-3', 'en-f3-nutrition', '12.1', 'Relative pronouns; the sounds /s/ and /z/', 10, ['Grammar', 'Speech work'], [
+  L('en-relative-3', 'en-f3-nutrition', '20.1', 'Relative pronouns; the sounds /s/ and /z/', 10, ['Grammar', 'Speech work'], [
     '**Relative pronouns** begin a clause that describes a noun: **who** (people, subject), **whom** (people, object, formal), **whose** (possession), **which** (things and animals), **that** (people or things in defining clauses), and **where** (places) and **when** (times) as relative adverbs.',
     'Examples: "The doctor **who** treated me is kind." "The nurse **whom** we thanked was smiling." "The girl **whose** mother is a dietician eats well." "Fruits, **which** contain vitamins, protect the body." "This is the market **where** we buy vegetables."',
     'Speech work: **/s/** (salt, rice, price) and **/z/** (zinc, nose, eggs). The letter s between vowels is often /z/: rose, choose, music. The noun "use" ends in /s/ but the verb "to use" ends in /z/.',
@@ -282,7 +282,7 @@ export const LESSONS_3A = [
     { q: 'Join with a relative pronoun: (a) "This is the hospital. I was born there." (b) "I met a boy. His father is a cook."', steps: ['(a) a place → **"This is the hospital where I was born."**', '(b) possession → **"I met a boy whose father is a cook."**'] },
   ]),
 
-  L('en-food-classes-3', 'en-f3-nutrition', '12.2', 'Classes of food and health; cognates; picture writing', 12, ['Vocabulary', 'Speaking', 'Writing'], [
+  L('en-food-classes-3', 'en-f3-nutrition', '20.2', 'Classes of food and health; cognates; picture writing', 12, ['Vocabulary', 'Speaking', 'Writing'], [
     'The **classes of food**: **carbohydrates** (rice, maize, cassava, yams, bread) give energy; **proteins** (beans, groundnuts, fish, eggs, meat, milk) build and repair the body; **fats and oils** (palm oil, butter, avocado) give energy and warmth; **vitamins** and **minerals** (fruits, vegetables, salt in small amounts) protect the body; **water** and **roughage** (fibre) help digestion. A **balanced diet** contains all of them in the right amounts.',
     'Poor diet causes **malnutrition**: kwashiorkor (lack of protein), obesity (too much food and fat), anaemia (lack of iron) and scurvy (lack of vitamin C).',
     '**Cognates** are words that look alike and mean the same in two languages, such as English and French: hospital – hôpital, banana – banane, protein – protéine, vitamin – vitamine. Beware of **false friends**: "library" is not "librairie" (a bookshop). In **picture writing**, describe what you see in an order (foreground, background), then say what the picture teaches.',

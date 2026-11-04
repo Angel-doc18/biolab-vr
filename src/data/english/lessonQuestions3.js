@@ -5,7 +5,6 @@
 const Q = (q, a, why) => ({ q, a, why });
 
 export const QUESTIONS_3 = {
-  // ---------- Sequence 1 ----------
   'en-obligation-3': [
     Q('"I ___ finish my homework yesterday before I could play."', ['had to', 'must', 'have to', 'musted'], 'The past of "must" is "had to".'),
     Q('"You ___ see a doctor about that cough." (advice)', ['should', 'mustn’t', 'don’t have to', 'can’t'], '"Should" gives advice.'),
@@ -66,7 +65,6 @@ export const QUESTIONS_3 = {
     Q('A report should be written in a:', ['factual and organised way', 'funny way', 'poetic way', 'secret code'], 'Facts, not imagination.'),
     Q('Which is a cause of youth violence?', ['drug abuse and bad company', 'reading books', 'sports clubs', 'good parenting'], 'Drugs and bad company lead to violence.'),
   ],
-  // ---------- Sequence 2 ----------
   'en-reported-3': [
     Q('"I can help you," he said. Reported:', ['He said that he could help me.', 'He said that I can help you.', 'He said he can helped me.', 'He told that he could help.'], 'can → could; pronouns change.'),
     Q('In reported speech, "here" becomes:', ['there', 'where', 'near', 'now'], '"This" becomes "that".'),
@@ -127,7 +125,6 @@ export const QUESTIONS_3 = {
     Q('Editing checks:', ['spelling, grammar and punctuation', 'only the colour of ink', 'the price of the paper', 'the envelope'], 'Edit carefully.'),
     Q('Pedestrians should cross the road:', ['at a pedestrian crossing, after looking both ways', 'anywhere while running', 'between parked cars', 'with headphones on'], 'Road safety.'),
   ],
-  // ---------- Sequence 3 ----------
   'en-demonstrative-3': [
     Q('"___ is my vaccination card." (in my hand)', ['This', 'Those', 'These', 'That there'], 'Singular and near.'),
     Q('"___ nets over there were given free."', ['Those', 'This', 'These', 'That'], 'Plural and far.'),
@@ -176,7 +173,6 @@ export const QUESTIONS_3 = {
     Q('A good poster has:', ['a bold heading, a simple picture and few words', 'a long essay in tiny letters', 'no title', 'only numbers'], 'It must be seen quickly.'),
     Q('Turning food waste into fertiliser is:', ['composting', 'burning', 'dumping', 'littering'], 'Compost enriches soil.'),
   ],
-  // ---------- Sequence 4 ----------
   'en-movement-3': [
     Q('"The children ran ___ the classroom when the bell rang." (leaving it)', ['out of', 'into', 'onto', 'along'], 'Leaving an inside space.'),
     Q('"The cat jumped ___ the table."', ['onto', 'into', 'through', 'across into'], 'Onto a surface.'),
@@ -225,7 +221,6 @@ export const QUESTIONS_3 = {
     Q('Which word has the short vowel /ʌ/?', ['trust', 'taught', 'tore', 'talk'], '"Trust" /trʌst/.'),
     Q('If a stranger offers you a job in a far city, you should:', ['tell your parents or a teacher first', 'go at once', 'keep it secret', 'pay the stranger'], 'Traffickers use such offers.'),
   ],
-  // ---------- Sequence 5 ----------
   'en-gerund-3': [
     Q('"She avoids ___ in the sun." (gerund)', ['sitting', 'to sit', 'sit', 'sat'], '"Avoid" + gerund.'),
     Q('"Thank you for ___ me."', ['helping', 'help', 'to help', 'helped'], 'After a preposition, the gerund.'),
@@ -274,7 +269,6 @@ export const QUESTIONS_3 = {
     Q('Finding something that already existed is a:', ['discovery', 'invention', 'patent', 'prototype'], 'An invention is new.'),
     Q('A first working model of a new device is a:', ['prototype', 'souvenir', 'patent', 'recipe'], 'It is tested and improved.'),
   ],
-  // ---------- Sequence 6 ----------
   'en-reportq-3': [
     Q('"Why are you late?" the teacher asked. Reported:', ['The teacher asked why I was late.', 'The teacher asked why was I late.', 'The teacher asked why are you late.', 'The teacher asked me why late.'], 'Statement word order; tense moved back.'),
     Q('Yes/no questions are reported with:', ['if or whether', 'that only', 'because', 'what'], '"She asked if …"'),
@@ -310,5 +304,95 @@ export const QUESTIONS_3 = {
     Q('A doctor for animals is a:', ['veterinarian', 'pharmacist', 'dentist', 'surgeon'], 'Also called a vet.'),
     Q('Which word belongs to the lexical field of health?', ['diagnosis', 'software', 'bridge', 'circuit'], 'Diagnosis means identifying an illness.'),
     Q('A good ICT technician shows:', ['skill, honesty and respect for clients', 'rudeness', 'dishonesty', 'laziness'], 'Integrity matters.'),
+  ],
+  // ---------- lessons added for the 2026/2027 scheme ----------
+  'en-tensecontrast-3': [
+    Q('"Water ___ at 100 °C at sea level."', ['boils', 'is boiling', 'boiled', 'boil'], 'A scientific fact: the simple present.'),
+    Q('"Please be quiet; the baby ___."', ['is sleeping', 'sleeps', 'slept', 'sleep'], 'An action happening now.'),
+    Q('"Two years ago my brother ___ his own tailoring shop."', ['opened', 'opens', 'is opening', 'has opened two years ago'], '"Ago" signals the simple past.'),
+    Q('Which sentence is correct?', ['I know the answer now.', 'I am knowing the answer now.', 'I knowing the answer now.', 'I am know the answer now.'], '"Know" is stative.'),
+    Q('"These days, more fathers ___ with the cooking at home."', ['are helping', 'helped', 'help yesterday', 'were help'], 'A changing situation now.'),
+    Q('"When my grandparents ___ young, there were no phones in the village."', ['were', 'are', 'are being', 'have been'], 'A past state.'),
+  ],
+  'en-generations-3': [
+    Q('A person who refuses to change their mind even when wrong is:', ['stubborn', 'open-minded', 'generous', 'sociable'], 'Stubborn means unwilling to change.'),
+    Q('Your husband’s or wife’s parents are your:', ['in-laws', 'ancestors', 'cousins', 'nephews'], 'Parents-in-law.'),
+    Q('The difference in ideas and habits between old and young people is the:', ['generation gap', 'gender gap', 'trade gap', 'extended family'], 'A gap between generations.'),
+    Q('Which shows gender equality at school?', ['girls and boys can both be class prefect', 'only boys may study science', 'only girls sweep the class', 'girls must leave school early'], 'The same chances for all.'),
+    Q('Which word has the vowel /e/?', ['bed', 'bad', 'bead', 'bird'], '"Bed" is said /bed/.'),
+    Q('Which pair shows /ɪ/ and /iː/?', ['live and leave', 'man and men', 'cat and cut', 'pot and port'], 'Short /ɪ/ in live, long /iː/ in leave.'),
+  ],
+  'en-willgoing-3': [
+    Q('"I promise I ___ pay you back on Friday."', ['will', 'am going', 'went to', 'have'], 'A promise: will.'),
+    Q('"She has bought flour and oil. She ___ make puff-puff to sell."', ['is going to', 'will be', 'goes to', 'went to'], 'A plan with evidence.'),
+    Q('"I think our football team ___ win the cup this year." (opinion)', ['will', 'is going', 'won', 'wins yesterday'], 'A prediction from opinion.'),
+    Q('The negative of "I will invest" is:', ['I won’t invest.', 'I willn’t invest.', 'I not will invest.', 'I will no invest.'], 'will not = won’t.'),
+    Q('"Is she going to ___ a stall at the fair?"', ['open', 'opened', 'opening', 'opens'], 'going to + base form.'),
+  ],
+  'en-entrepreneur-3': [
+    Q('Money borrowed that must be paid back with interest is a:', ['loan', 'profit', 'receipt', 'salary'], 'A loan is borrowed money.'),
+    Q('A paper given after you pay, to prove the payment, is a:', ['receipt', 'invoice', 'budget', 'loan'], 'Keep receipts as records.'),
+    Q('Asking possible customers what they want before starting a business is a:', ['market survey', 'loss', 'loan', 'receipt'], 'Study the market first.'),
+    Q('In a formal letter, the receiver’s address is written:', ['on the left, below your address and the date', 'at the bottom right', 'nowhere', 'on the back of the envelope only'], 'The usual formal layout.'),
+    Q('A subject line in an application letter tells the reader:', ['the post you are applying for', 'your favourite food', 'the weather', 'your age only'], 'For example: "Application for the post of sales assistant".'),
+    Q('When your expenses are greater than your income, you make a:', ['loss', 'profit', 'saving', 'capital'], 'Spending more than you earn.'),
+  ],
+  'en-conditionals-3': [
+    Q('"If the river ___ its banks, the farms will flood."', ['overflows', 'will overflow', 'overflowed', 'overflowing'], 'First conditional: if + present.'),
+    Q('"If plants get no sunlight, they ___ pale and weak."', ['grow', 'will grew', 'grew', 'growing'], 'Zero conditional: a general truth.'),
+    Q('"Unless you water the seedlings, they ___."', ['will die', 'die yesterday', 'died', 'dying'], 'First conditional with unless.'),
+    Q('Which conditional sentence is correct?', ['If we cover the bins, flies will stay away.', 'If we will cover the bins, flies will stay away.', 'If we covered the bins, flies stay away will.', 'If we cover the bins, flies stayed away.'], 'No will in the if-clause.'),
+    Q('"Unless you study, you will fail." means:', ['If you do not study, you will fail.', 'Because you study, you will fail.', 'When you study, you will fail.', 'You will fail so you study.'], 'unless = if … not.'),
+  ],
+  'en-causeeffect-3': [
+    Q('"___ the heavy rain, the school was closed."', ['Due to', 'Because', 'So', 'Therefore'], '"Due to" + noun phrase.'),
+    Q('"People cut the trees. ___, the hill became bare."', ['As a result', 'Because of', 'Owing to', 'Since'], 'An effect in a new sentence.'),
+    Q('"___ the stream was dirty, the villagers boiled their water."', ['As', 'Because of', 'Due to', 'Owing to'], '"As" is followed by a clause.'),
+    Q('"The rain was so heavy ___ the bridge collapsed."', ['that', 'because', 'as', 'since'], 'so … that shows the result.'),
+    Q('Which is a practical local solution to plastic waste?', ['placing bins and organising clean-up campaigns', 'burning plastic in the market', 'throwing it in the stream', 'burying it near a spring'], 'Collect and manage waste safely.'),
+  ],
+  'en-agreement-3': [
+    Q('"The bag of oranges ___ heavy."', ['is', 'are', 'were', 'have'], 'The subject is "bag".'),
+    Q('"Mbah and Enow ___ cleaning the toilets today."', ['are', 'is', 'was', 'has'], 'Two subjects joined by "and".'),
+    Q('"Nobody in the dormitory ___ sick today."', ['is', 'are', 'were', 'have'], '"Nobody" is singular.'),
+    Q('"The equipment in the clinic ___ new."', ['is', 'are', 'were', 'have been'], '"Equipment" is uncountable.'),
+    Q('"The members of the health club ___ in the hall."', ['are', 'is', 'was', 'has'], 'The subject is "members".'),
+    Q('"There ___ a nurse at the gate."', ['is', 'are', 'were', 'have'], 'Agrees with "a nurse".'),
+  ],
+  'en-digital-3': [
+    Q('A strong password is one that:', ['mixes letters, numbers and symbols and is kept secret', 'is your name', 'is 1234', 'is written on your desk'], 'Hard to guess, never shared.'),
+    Q('False news spread as if it were true is called:', ['fake news', 'a headline', 'an editorial', 'a bulletin'], 'Check before you share.'),
+    Q('Which is an advantage of social media?', ['spreading useful information quickly', 'spreading rumours', 'cyberbullying', 'loss of sleep'], 'Used well, it informs.'),
+    Q('Health rules are often written with:', ['must, should and the imperative', 'only the past tense', 'question tags', 'reported speech only'], '"Wash your hands." "You must…"'),
+    Q('Which is a good health rule for school?', ['Cover your mouth when you cough.', 'Share one cup with the whole class.', 'Throw rubbish behind the toilets.', 'Drink water from the gutter.'], 'It stops the spread of germs.'),
+  ],
+  'en-livingtogether-3': [
+    Q('The national flag of Cameroon has:', ['green, red and yellow vertical bands with a yellow star', 'blue and white stripes', 'a red cross', 'green and white bands'], 'The star is in the red band.'),
+    Q('The national symbols include the flag, the anthem, the motto, the seal and the:', ['coat of arms', 'football team', 'currency note', 'school badge'], 'All represent the nation.'),
+    Q('Speaking two languages is called:', ['bilingualism', 'tribalism', 'multiculturalism', 'regionalism'], 'English and French in Cameroon.'),
+    Q('Words that attack people because of their tribe or religion are:', ['hate speech', 'proverbs', 'greetings', 'compliments'], 'They damage living together.'),
+    Q('Which phrase disagrees politely in a discussion?', ['I respect your view, but…', 'You are stupid.', 'Shut up.', 'Nobody asked you.'], 'Disagree with the idea, not the person.'),
+  ],
+  'en-institutions-3': [
+    Q('The National Assembly and the Senate together form:', ['Parliament', 'the council', 'the judiciary', 'the police'], 'They make the laws.'),
+    Q('Local government in a town is run by:', ['the council and the mayor', 'the Senate', 'the courts', 'the national anthem'], 'Councils manage local affairs.'),
+    Q('A demand for a bribe before a public service is given is an example of:', ['a civic injustice', 'a civic duty', 'living together', 'bilingualism'], 'An unfair act against citizens.'),
+    Q('Passive of "Someone broke the water point":', ['The water point was broken.', 'The water point broke someone.', 'The water point is breaking.', 'Someone was broken.'], 'was + past participle.'),
+    Q('A complaint letter should be written in:', ['a calm, formal style', 'slang', 'capital letters and insults', 'pidgin only'], 'Facts stated calmly.'),
+  ],
+  'en-revision-3': [
+    Q('"They will build a new market." in the passive is:', ['A new market will be built.', 'A new market will build.', 'A new market is build.', 'A new market will been built.'], 'will be + past participle.'),
+    Q('"‘I am hungry,’ the boy said." in reported speech is:', ['The boy said that he was hungry.', 'The boy said that I am hungry.', 'The boy says he is hunger.', 'The boy said he hungry.'], 'am → was, I → he.'),
+    Q('"I went to the market ___ buy vegetables." (purpose)', ['to', 'although', 'because of', 'unless'], 'Purpose: to + base form.'),
+    Q('The superlative of "good" is:', ['the best', 'the goodest', 'the better', 'the most good'], 'Irregular: good, better, best.'),
+    Q('"She hurt ___ while cooking."', ['herself', 'her', 'hers', 'she'], 'A reflexive pronoun.'),
+    Q('"Swimming is good exercise." Here "swimming" is a:', ['gerund', 'past participle', 'adverb', 'preposition'], 'An -ing form used as a noun.'),
+  ],
+  'en-gcepractice-3': [
+    Q('Before answering comprehension questions you should:', ['read the passage at least twice', 'answer before reading', 'read only the title', 'copy the whole passage'], 'Understand it first.'),
+    Q('The meaning of a word "as used in the passage" depends on its:', ['context', 'spelling only', 'length', 'first letter'], 'Look at the words around it.'),
+    Q('A summary must be written:', ['in your own words, in full sentences, within the word limit', 'as a list of quotations', 'in more words than the passage', 'in note form with examples'], 'Brief and complete.'),
+    Q('In an argumentative composition, the conclusion should:', ['restate your position briefly', 'start a new argument', 'tell a story', 'repeat the question only'], 'Round off the argument.'),
+    Q('The best way to share your time in the examination is:', ['according to the marks of each section', 'all on the first question', 'equally on every line', 'without a plan'], 'More marks, more time.'),
   ],
 };

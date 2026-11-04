@@ -1,8 +1,11 @@
-// English Language for Form 3, following the competency-based annual scheme of
-// work for Form 3 (five modules over six sequences, one topic for each
-// teaching week). Each topic joins grammar, vocabulary, speech work, reading
-// and writing, as the scheme does. Terms follow the sequences: sequences 1
-// and 2 in term 1, 3 and 4 in term 2, 5 and 6 in term 3.
+// English Language for Form 3, in the order of the 2026/2027 national
+// harmonised scheme of work (four real-life-situation modules: family, social
+// life and national culture in term 1; economic life, then environment, health
+// and technology in term 2; citizenship, human rights and media, then the GCE
+// review, in term 3), with the detail of the school's annual scheme of work.
+// Each topic joins grammar, vocabulary, speech work, reading and writing.
+// Terms follow the sequences: 1 and 2 in term 1, 3 and 4 in term 2, 5 and 6 in
+// term 3.
 //
 // Quiz convention: the correct option is written first in `a`; options are
 // shuffled when shown.
@@ -27,8 +30,20 @@ const unit = (id, n, term, seq, group, icon, diagram, ask, title, short, focus, 
 });
 
 export const UNITS_3 = [
-  // ============ Sequence 1: family and social life ============
-  unit('en-f3-discipline', 1, 1, 1, 'family', 'gavel', 'en3-modals-obligation', 'What is the difference between "must" and "have to"?',
+  // ============ Term 1, module 1: family, social life and national culture (sequence 1) ============
+  unit('en-f3-generations', 1, 1, 1, 'family', 'family_restroom', 'en3-personality', 'How do I describe a person’s character?',
+    'Generations, Gender Equality and Character', 'Generations', 'The simple present, present continuous and simple past in contrast; personality adjectives, kinship and traditional values; bridging the generation gap and promoting gender equality; the vowels /e/ and /æ/, /ɪ/ and /iː/; word stress',
+    ['en-tensecontrast-3', 'en-generations-3'], [
+      Q('"Every Sunday my uncle ___ us to church."', ['takes', 'is taking', 'took yesterday', 'taking'], 'A habit: the simple present.'),
+      Q('"Look! The children ___ the elders with the harvest."', ['are helping', 'help', 'helped', 'helps'], '"Look!" shows an action happening now.'),
+      Q('"In 1995 my aunt ___ the first woman mayor of our town."', ['became', 'becomes', 'is becoming', 'has become in 1995'], 'A definite past time: the simple past.'),
+      Q('Which verb is stative and is not normally used with -ing?', ['belong', 'run', 'cook', 'dance'], '"This house belongs to my grandfather."'),
+      Q('A person who keeps a promise and can be trusted is:', ['reliable', 'selfish', 'arrogant', 'impatient'], 'Reliable means dependable.'),
+      Q('Sharing household chores equally between boys and girls promotes:', ['gender equality', 'the generation gap', 'tribalism', 'child labour'], 'Equal duties and equal chances.'),
+      Q('Which of these words is said with /æ/?', ['hand', 'head', 'heed', 'hood'], '"Hand" is said /hænd/.'),
+      Q('Where is the stress in "responsible"?', ['on the second syllable: reSPONsible', 'on the first: REsponsible', 'on the last: responsiBLE', 'on every syllable'], 're-SPON-si-ble.'),
+    ]),
+  unit('en-f3-discipline', 2, 1, 1, 'family', 'gavel', 'en3-modals-obligation', 'What is the difference between "must" and "have to"?',
     'Discipline at Home and at School', 'Discipline', 'Modals of ability and obligation; spelling rules and plural markers; the vowels /ɪ/ and /iː/; the layout of an informal letter',
     ['en-obligation-3', 'en-spelling-3'], [
       Q('"You ___ wear your uniform every day." (a school rule)', ['must', 'can', 'might', 'could'], '"Must" shows strong obligation.'),
@@ -40,7 +55,7 @@ export const UNITS_3 = [
       Q('Which word has the long vowel /iː/?', ['seat', 'sit', 'bit', 'pin'], '"Seat" is said /siːt/.'),
       Q('In a letter to a friend, where do you write your own address?', ['at the top right, with the date below it', 'at the bottom left', 'nowhere', 'in the middle of the page'], 'Then comes the greeting on the left.'),
     ]),
-  unit('en-f3-study', 2, 1, 1, 'family', 'menu_book', 'en3-paragraph', 'What makes a good paragraph?',
+  unit('en-f3-study', 3, 1, 1, 'family', 'menu_book', 'en3-paragraph', 'What makes a good paragraph?',
     'Study Skills and School Clubs', 'Study Skills', 'The zero article; words related to study; the elements of a good paragraph: topic sentence, supporting sentences and concluding sentence; the benefits of co-curricular activities',
     ['en-zero-article-3', 'en-paragraph-3'], [
       Q('Which needs no article? "___ hard work brings success."', ['no article', 'The', 'A', 'An'], 'Abstract nouns used in general take no article.'),
@@ -52,7 +67,7 @@ export const UNITS_3 = [
       Q('Activities outside the classroom such as clubs and sports are called:', ['co-curricular activities', 'punishments', 'examinations', 'holidays'], 'They build team spirit and skills.'),
       Q('Working well with others in a group shows:', ['team spirit', 'selfishness', 'laziness', 'rivalry'], 'Clubs teach team spirit.'),
     ]),
-  unit('en-f3-love', 3, 1, 1, 'family', 'favorite', 'en3-frequency-synonyms', 'How can I work out the meaning of a new word?',
+  unit('en-f3-love', 4, 1, 1, 'family', 'favorite', 'en3-frequency-synonyms', 'How can I work out the meaning of a new word?',
     'Love, Family Support and Table Etiquette', 'Love and Etiquette', 'Adverbs of frequency; synonyms and the meaning of words in context; love and support among family members; table etiquette',
     ['en-frequency-3', 'en-context-3'], [
       Q('"My parents ___ help us with our homework." (most of the time)', ['usually', 'never', 'rarely', 'seldom'], '"Usually" means most of the time.'),
@@ -64,7 +79,7 @@ export const UNITS_3 = [
       Q('Supporting a sick relative with care and visits shows:', ['love and responsibility', 'jealousy', 'pride', 'carelessness'], 'Love is shown in action.'),
       Q('The best way to find the meaning of a new word in a passage is first to:', ['look at the words and sentences around it', 'skip the whole passage', 'guess without reading', 'ask for a new passage'], 'Context clues often explain it.'),
     ]),
-  unit('en-f3-teenage', 4, 1, 1, 'family', 'psychology', 'en3-comparison', 'Is it "more taller" or "taller"?',
+  unit('en-f3-teenage', 5, 1, 1, 'family', 'psychology', 'en3-comparison', 'Is it "more taller" or "taller"?',
     'Teenage Problems and Puberty', 'Teenage Problems', 'Comparatives and superlatives of adjectives; compound words; the changes and challenges of puberty; a debate and a four-paragraph essay on solutions',
     ['en-compare-3', 'en-puberty-3'], [
       Q('The comparative of "tall" is:', ['taller', 'more tall', 'more taller', 'tallest'], 'Short adjectives add -er.'),
@@ -76,7 +91,8 @@ export const UNITS_3 = [
       Q('A teenager facing peer pressure to smoke should:', ['say no firmly and talk to a trusted adult', 'smoke to fit in', 'hide from everyone', 'drop out of school'], 'Self-control and good friends help.'),
       Q('"Ngozi is ___ than her brother." (old)', ['older', 'oldest', 'more old', 'most old'], 'Comparing two people: comparative.'),
     ]),
-  unit('en-f3-violence', 5, 1, 1, 'family', 'report', 'en3-suggestions', 'How do I make a suggestion politely?',
+  // ============ Term 1, module 1 continued (sequence 2) ============
+  unit('en-f3-violence', 6, 1, 2, 'family', 'report', 'en3-suggestions', 'How do I make a suggestion politely?',
     'Youth, Violence and Safety', 'Youth and Violence', 'Making suggestions with modals; the sounds /ts/ and /s/; words about crime and violence; writing a report on violence in society',
     ['en-suggest-3', 'en-report-3'], [
       Q('Which is a suggestion?', ['We should talk to the principal.', 'We talked to the principal.', 'Did we talk to the principal?', 'The principal talked.'], '"Should", "could" and "let’s" make suggestions.'),
@@ -89,8 +105,44 @@ export const UNITS_3 = [
       Q('If you see a weapon at school, you should:', ['tell a teacher or the principal at once', 'touch it', 'hide it in your bag', 'post it online'], 'Safety first.'),
     ]),
 
-  // ============ Sequence 2: the world of business ============
-  unit('en-f3-business', 6, 1, 2, 'economic', 'storefront', 'en3-reported-speech', 'How do I report what someone said?',
+  unit('en-f3-customs', 7, 1, 2, 'citizenship', 'diversity_3', 'en3-gerund', 'What is a gerund?',
+    'Customs, Cultural Practices and Abuses', 'Customs and Abuses', 'The gerund (-ing forms used as nouns); syllabification; words about tribal customs, early marriage and violence against women and girls; a letter to the police reporting child abuse',
+    ['en-gerund-3', 'en-abuse-3'], [
+      Q('In "Dancing is part of our culture", "dancing" is a:', ['gerund', 'present participle in a continuous tense', 'adjective', 'preposition'], 'A gerund is an -ing form used as a noun.'),
+      Q('"She enjoys ___ traditional songs."', ['singing', 'to sing', 'sing', 'sang'], '"Enjoy" is followed by a gerund.'),
+      Q('"He stopped ___ younger students." (no longer did it)', ['bullying', 'to bully', 'bully', 'bullied'], '"Stop + gerund" means no longer do it.'),
+      Q('The word "tradition" has how many syllables?', ['three: tra-di-tion', 'two', 'four', 'one'], 'tra / di / tion.'),
+      Q('The word "marriage" has how many syllables?', ['two: mar-riage', 'three', 'one', 'four'], 'mar / riage.'),
+      Q('Early marriage of girls is harmful because:', ['it ends their education and endangers their health', 'it makes them rich', 'it is required by law', 'it has no effect'], 'Cameroon’s law punishes forced marriage.'),
+      Q('To report a case of child abuse, you can write a:', ['formal letter to the police', 'song', 'birthday card', 'shopping list'], 'Give facts: who, what, where and when.'),
+      Q('Respecting every person’s worth and rights is respecting their:', ['dignity', 'property', 'tribe only', 'wealth'], 'Abuse violates human dignity.'),
+    ]),
+  unit('en-f3-festivals', 8, 1, 2, 'citizenship', 'festival', 'en3-festivals', 'What do people do at the Ngondo festival?',
+    'Cultural Festivals and Museums', 'Festivals', 'Modals for speculation (review); the consonant clusters /kr/ and /br/; words for cultural artefacts; festivals of Cameroon; a report on a visit to a museum or a chief’s palace',
+    ['en-speculation-3', 'en-festivals-3'], [
+      Q('"The drums are silent. The festival ___ have ended." (almost sure)', ['must', 'can’t', 'mustn’t', 'shouldn’t'], '"Must have" + past participle for a confident guess about the past.'),
+      Q('"He ___ have gone to the palace; I am not sure." (possible)', ['might', 'must', 'can’t', 'shouldn’t'], '"Might have" shows possibility.'),
+      Q('"She ___ have seen the masquerade; she was in Douala." (impossible)', ['can’t', 'must', 'might', 'may'], '"Can’t have" shows it is impossible.'),
+      Q('The Ngondo festival belongs to the:', ['Sawa people of the coast, in Douala', 'Bamoun of Foumban', 'Fulani of the north', 'Bakweri only'], 'The Nguon is the Bamoun festival.'),
+      Q('Which word begins with the cluster /kr/?', ['crowd', 'cow', 'brown', 'bread'], '"Crowd" begins /kr/.'),
+      Q('Which word begins with the cluster /br/?', ['bride', 'bead', 'ride', 'crab'], '"Bride" begins /br/.'),
+      Q('A traditional ruler in the North-West Region is usually called a:', ['Fon', 'Lamido', 'Sultan', 'Mayor'], 'In the north, a Lamido; in Foumban, the Sultan.'),
+      Q('A report on a museum visit should include:', ['when you went, what you saw and what you learnt', 'only jokes', 'the price of drinks only', 'nothing about the exhibits'], 'Factual and organised.'),
+    ]),
+  unit('en-f3-occasions', 9, 1, 2, 'citizenship', 'celebration', 'en3-affixes', 'How does "un-" or "-ness" change a word?',
+    'Planning and Celebrating Occasions', 'Celebrations', 'Pronouns; word formation by affixation (prefixes and suffixes); an installation ceremony; planning a birthday party',
+    ['en-pronouns-3', 'en-affixes-3'], [
+      Q('"Between you and ___, the plan is good."', ['me', 'I', 'mine', 'myself'], 'After a preposition, the object form.'),
+      Q('"The guests enjoyed ___." (reflexive)', ['themselves', 'theirselves', 'them', 'themself'], 'Reflexive: themselves.'),
+      Q('The noun formed from "happy" with a suffix is:', ['happiness', 'happyness', 'unhappy', 'happily'], 'y → i + -ness.'),
+      Q('The opposite of "able" with a prefix is:', ['unable', 'disable', 'inable', 'imable'], 'un- + able (to be not able).'),
+      Q('In "unforgettable", the prefix is:', ['un-', '-able', 'forget', '-ttable'], 'un- (not) + forget + -able.'),
+      Q('An installation ceremony is held when:', ['a new official or ruler takes up office', 'a building collapses', 'school ends', 'a market closes'], 'For example a new Regional Delegate or Fon.'),
+      Q('Adding -ment to "govern" gives:', ['government', 'governance only', 'governor', 'governed'], 'govern + -ment.'),
+      Q('When planning a party, the first thing to decide is:', ['the date, place and budget', 'the colour of the cake only', 'who washes plates', 'nothing'], 'Then invitations, menu and tasks.'),
+    ]),
+  // ============ Term 2, module 2: economic life, commerce and entrepreneurship (sequence 3) ============
+  unit('en-f3-business', 10, 2, 3, 'economic', 'storefront', 'en3-reported-speech', 'How do I report what someone said?',
     'Business and Occupations', 'Business', 'Reported speech and the changes that occur; the vowels /ɒ/ and /ə/; words about business, trade and professions; the stages of writing a narrative essay',
     ['en-reported-3', 'en-narrative-3'], [
       Q('"I am tired," she said. In reported speech:', ['She said that she was tired.', 'She said that I am tired.', 'She said she is tired yesterday.', 'She says she was tired tomorrow.'], 'The tense moves back and the pronoun changes.'),
@@ -102,7 +154,7 @@ export const UNITS_3 = [
       Q('The first stage of the writing process is:', ['planning (brainstorming and outlining)', 'publishing', 'editing', 'proofreading'], 'Plan, draft, revise, edit, write the final copy.'),
       Q('Buying and selling goods is called:', ['trade', 'farming', 'banking only', 'mining'], 'Trade can be local or international.'),
     ]),
-  unit('en-f3-banking', 7, 1, 2, 'economic', 'account_balance', 'en3-summary', 'How do I write a summary in 150 words?',
+  unit('en-f3-banking', 11, 2, 3, 'economic', 'account_balance', 'en3-summary', 'How do I write a summary in 150 words?',
     'Banks, Money and Saving', 'Banking', 'The active and passive voice; words about banking, income, saving, budgets and taxes; writing a summary of a passage',
     ['en-passive-3', 'en-summary-3'], [
       Q('The passive of "The bank gave him a loan" is:', ['He was given a loan by the bank.', 'He gave the bank a loan.', 'The bank was given him a loan.', 'A loan gives him the bank.'], 'The receiver becomes the subject.'),
@@ -114,7 +166,31 @@ export const UNITS_3 = [
       Q('When summarising, you should leave out:', ['examples and repetitions', 'the main points', 'the key facts', 'everything'], 'Keep the main ideas.'),
       Q('The money a person earns from work is:', ['income', 'expenditure', 'tax evasion', 'a loan'], 'Expenditure is money spent.'),
     ]),
-  unit('en-f3-time', 8, 1, 2, 'economic', 'schedule', 'en3-time', 'How do I say 6.45 in words?',
+  unit('en-f3-entrepreneur', 12, 2, 3, 'economic', 'savings', 'letter-application', 'Is it "I will" or "I am going to"?',
+    'Youth Entrepreneurship and Budgeting', 'Entrepreneurship', 'Will and going to; financial terms; youth entrepreneurship and keeping a personal budget; the letter of inquiry and the letter of application',
+    ['en-willgoing-3', 'en-entrepreneur-3'], [
+      Q('"It is too hot in here." "I ___ open the window."', ['will', 'am going to have', 'went to', 'opened'], 'A decision made at the moment of speaking.'),
+      Q('"We ___ sell fruit juice at the school fair; we have already bought the bottles."', ['are going to', 'will be to', 'went to', 'have gone'], 'A plan already decided.'),
+      Q('"Look at that queue! The shop ___ run out of bread."', ['is going to', 'went to', 'has gone to', 'goes'], 'A prediction from present evidence.'),
+      Q('The money a business earns after paying all its expenses is its:', ['profit', 'capital', 'loan', 'invoice'], 'Profit = income minus expenses.'),
+      Q('A document a supplier sends asking a customer to pay is:', ['an invoice', 'a receipt', 'a budget', 'a profit'], 'A receipt comes after payment.'),
+      Q('A letter asking a company for its prices and conditions is a letter of:', ['inquiry', 'complaint', 'apology', 'thanks'], 'It asks for information.'),
+      Q('A formal letter that begins "Dear Sir," ends with:', ['Yours faithfully,', 'Your friend,', 'Lots of love,', 'Bye for now,'], 'Use "Yours faithfully" when the name is not used.'),
+      Q('A personal budget helps a young person to:', ['spend no more than their income', 'borrow without limit', 'forget their expenses', 'avoid saving'], 'Plan spending against income.'),
+    ]),
+  unit('en-f3-professions', 13, 2, 3, 'economic', 'engineering', 'en3-quantifiers', 'Is it "much" or "many"?',
+    'Professions in Science and Technology', 'Science Professions', 'Quantifiers such as much, many, a few and a little; the sounds /j/ and /dʒ/; lexical fields; professions related to science and new technology; writing about a popular ICT job',
+    ['en-quantifiers-3', 'en-professions-3'], [
+      Q('"How ___ phones did he repair today?"', ['many', 'much', 'little', 'a little'], '"Many" with countable nouns.'),
+      Q('"There is ___ time left; hurry!" (not much)', ['little', 'few', 'many', 'a few'], '"Little" with uncountables, meaning not much.'),
+      Q('"I have ___ friends who are engineers." (some, a small number)', ['a few', 'a little', 'much', 'little'], '"A few" with countables, a positive idea.'),
+      Q('A group of words linked to one subject, such as doctor, nurse, ward and patient, is a:', ['lexical field', 'sentence pattern', 'homophone', 'prefix'], 'Words of the same field of meaning.'),
+      Q('Which word begins with /j/?', ['yes', 'jet', 'gem', 'ink'], '"Yes" begins /j/.'),
+      Q('Which word begins with /dʒ/?', ['job', 'yob', 'yellow', 'shop'], '"Job" begins /dʒ/.'),
+      Q('A person who designs and writes computer programs is a:', ['programmer', 'pharmacist', 'plumber', 'pilot'], 'Programmers write code.'),
+      Q('A mobile phone repairer needs:', ['technical skill, patience and honesty with customers', 'only a loud voice', 'no tools', 'no training'], 'ICT jobs need skills and integrity.'),
+    ]),
+  unit('en-f3-time', 14, 2, 3, 'economic', 'schedule', 'en3-time', 'How do I say 6.45 in words?',
     'Time Management', 'Time Management', 'Telling the time and writing numbers in words; words about time and assiduity; time wasters ("time bandits"); short paragraphs on managing time well',
     ['en-telltime-3', 'en-timemanage-3'], [
       Q('6.45 is said:', ['a quarter to seven', 'a quarter past six', 'half past six', 'six to a quarter'], '45 minutes past = 15 minutes to the next hour.'),
@@ -126,7 +202,7 @@ export const UNITS_3 = [
       Q('A good way to manage time is to:', ['make a timetable and do important tasks first', 'leave everything to the last minute', 'do many things at once badly', 'never plan'], 'Prioritise.'),
       Q('"I will meet you ___ 10 o’clock."', ['at', 'on', 'in', 'by the'], '"At" for clock times.'),
     ]),
-  unit('en-f3-agriculture', 9, 1, 2, 'economic', 'agriculture', 'en3-process', 'How do I describe the steps of a process?',
+  unit('en-f3-agriculture', 15, 2, 3, 'economic', 'agriculture', 'en3-process', 'How do I describe the steps of a process?',
     'Agriculture and Cash Crops', 'Agriculture', 'The present continuous tense; silent letters such as p and b; forms of agriculture: pisciculture, aviculture and horticulture; describing the stages of growing and marketing a crop',
     ['en-continuous-3', 'en-process-3'], [
       Q('"Look! The farmers ___ the cocoa now."', ['are harvesting', 'harvest', 'harvested', 'harvests'], 'The present continuous for actions happening now.'),
@@ -138,7 +214,7 @@ export const UNITS_3 = [
       Q('Cocoa and coffee in Cameroon are mainly:', ['cash crops', 'food crops only', 'weeds', 'fodder'], 'They are grown mainly for sale.'),
       Q('When describing a process, we often use:', ['sequence words such as first, next and finally', 'only the future tense', 'questions', 'no verbs'], 'And often the passive: "The seeds are planted."'),
     ]),
-  unit('en-f3-transport', 10, 1, 2, 'economic', 'directions_bus', 'letter-formal', 'Which means of transport is the safest?',
+  unit('en-f3-transport', 16, 2, 3, 'economic', 'directions_bus', 'letter-formal', 'Which means of transport is the safest?',
     'Means of Transport', 'Transport', 'Wh- questions; the diphthongs /eɪ/ and /aɪ/; homophones; words about transport and road safety; writing and editing a formal letter',
     ['en-whq-3', 'en-transport-3'], [
       Q('"___ did you travel to Garoua?" "By train and bus."', ['How', 'Who', 'Whose', 'Which one'], '"How" asks about the means.'),
@@ -151,8 +227,32 @@ export const UNITS_3 = [
       Q('A safe road user:', ['wears a helmet on a motorbike and a seat belt in a car', 'overtakes on bends', 'drives after drinking', 'overloads vehicles'], 'Road safety saves lives.'),
     ]),
 
-  // ============ Sequence 3: environmental well-being and health ============
-  unit('en-f3-diseases', 11, 2, 3, 'environment', 'vaccines', 'en3-diseases', 'Why should children be immunised?',
+  unit('en-f3-tourism', 17, 2, 3, 'economic', 'museum', 'en3-movement', 'Is it "across", "along" or "through"?',
+    'Tourism and Tourist Sites', 'Tourism', 'Prepositions of place and movement; silent letters such as t; punctuation; words about tourism, wildlife and artefacts; describing a historic building or monument',
+    ['en-movement-3', 'en-punctuation-3'], [
+      Q('"We walked ___ the beach." (from one end towards the other, beside the sea)', ['along', 'across', 'through', 'into'], '"Along" follows a line.'),
+      Q('"The ferry went ___ the river to the other bank."', ['across', 'along', 'under', 'onto'], '"Across" means from one side to the other.'),
+      Q('"The train went ___ the tunnel."', ['through', 'across', 'along', 'over'], '"Through" means from one end to the other inside.'),
+      Q('In which word is the t silent?', ['castle', 'water', 'tourist', 'site'], '"Castle" is said /ˈkɑːsl/.'),
+      Q('Objects made by people long ago, kept in museums, are:', ['artefacts', 'fauna', 'flora', 'souvenirs only'], 'For example old masks and stools.'),
+      Q('Which sentence is punctuated correctly?', ['"Welcome to Foumban," said the guide.', '"welcome to foumban" said the guide', 'Welcome to Foumban said, the guide.', '"Welcome to Foumban". said the guide'], 'Comma inside the quotation marks; capitals for names.'),
+      Q('The Sultan’s Palace and museum that tourists visit is in:', ['Foumban', 'Garoua', 'Limbe', 'Kribi'], 'The Bamoun Sultan’s palace is in Foumban.'),
+      Q('A friendly welcome given to visitors is:', ['hospitality', 'hostility', 'poverty', 'pollution'], 'Tourism depends on it.'),
+    ]),
+  // ============ Term 2, module 3: environment, health and technology (sequence 4) ============
+  unit('en-f3-conditionals', 18, 2, 4, 'environment', 'eco', 'en3-conditionals', 'What happens if we keep burning bushes?',
+    'Local Environmental Solutions', 'Environmental Solutions', 'The zero and first conditionals and unless; clauses of cause and effect; proposing solutions to local environmental problems',
+    ['en-conditionals-3', 'en-causeeffect-3'], [
+      Q('"If you mix blue and yellow paint, you ___ green."', ['get', 'will got', 'got', 'getting'], 'A general truth: zero conditional.'),
+      Q('"If we ___ the bins every day, the market will stay clean."', ['empty', 'will empty', 'emptied', 'are emptying will'], 'No will after "if".'),
+      Q('"___ we stop cutting trees, the stream will dry up."', ['Unless', 'If', 'Because', 'So'], '"Unless" means "if … not".'),
+      Q('"The borehole broke down ___ nobody maintained it."', ['because', 'because of', 'due to', 'so'], '"Because" is followed by a clause.'),
+      Q('"The farmers lost their crops owing to ___."', ['the drought', 'it did not rain', 'because the drought', 'so dry'], '"Owing to" takes a noun phrase.'),
+      Q('"The road was so muddy ___ the bus could not pass."', ['that', 'because', 'unless', 'if'], 'so … that shows the result.'),
+      Q('Which word introduces an effect?', ['consequently', 'because', 'since', 'owing to'], '"Consequently" means "as a result".'),
+      Q('A good proposal for a local environmental problem should give:', ['the problem, its causes, practical solutions and the expected results', 'only complaints', 'only the names of offenders', 'a poem'], 'Problem → causes → solutions → effects.'),
+    ]),
+  unit('en-f3-diseases', 19, 2, 4, 'environment', 'vaccines', 'en3-diseases', 'Why should children be immunised?',
     'Hygiene, Diseases and Sex Education', 'Health and Hygiene', 'Demonstrative pronouns; words about hygiene, infectious diseases and immunisation; HIV and AIDS; writing about signs and symptoms of diseases',
     ['en-demonstrative-3', 'en-diseases-3'], [
       Q('"___ are my books on the table over there."', ['Those', 'These', 'This', 'That'], 'Plural and far: those.'),
@@ -164,7 +264,7 @@ export const UNITS_3 = [
       Q('Good personal hygiene includes:', ['bathing daily and washing hands with soap', 'sharing toothbrushes', 'wearing dirty clothes', 'biting nails'], 'Cleanliness prevents disease.'),
       Q('Choosing to delay sex is called:', ['abstinence', 'infection', 'immunisation', 'treatment'], 'Abstinence is the surest way to avoid HIV and early pregnancy.'),
     ]),
-  unit('en-f3-nutrition', 12, 2, 3, 'environment', 'restaurant_menu', 'en3-classes-food', 'Which class of food builds the body?',
+  unit('en-f3-nutrition', 20, 2, 4, 'environment', 'restaurant_menu', 'en3-classes-food', 'Which class of food builds the body?',
     'Food, Health and Well-being', 'Food and Health', 'Relative pronouns; the sounds /s/ and /z/; cognates and synonyms; the classes of food and their role in health; picture writing',
     ['en-relative-3', 'en-food-classes-3'], [
       Q('"The girl ___ mother is a nurse won the prize."', ['whose', 'who', 'which', 'whom'], '"Whose" shows possession.'),
@@ -176,7 +276,19 @@ export const UNITS_3 = [
       Q('Cognates are words that:', ['look and mean the same in two languages', 'are opposites', 'rhyme', 'have no meaning'], 'For example "hospital" and "hôpital".'),
       Q('In which word is s said /z/?', ['nose', 'nurse', 'salt', 'sugar'], '"Nose" is said /nəʊz/.'),
     ]),
-  unit('en-f3-disasters', 13, 2, 3, 'environment', 'flood', 'en3-disasters', 'What causes landslides?',
+  unit('en-f3-agreement', 21, 2, 4, 'environment', 'health_and_safety', 'en3-agreement', 'Is it "the list of rules is" or "the list of rules are"?',
+    'Health Rules and Digital Hygiene', 'Digital Hygiene', 'Subject-verb agreement; health rules with must and should; digital hygiene and online safety; evaluating the impact of social media',
+    ['en-agreement-3', 'en-digital-3'], [
+      Q('"One of my classmates ___ a nurse’s child."', ['is', 'are', 'were', 'have been'], 'The subject is "one".'),
+      Q('"Neither of the taps ___ working."', ['is', 'are', 'were', 'have'], '"Neither" takes a singular verb.'),
+      Q('"Either the prefect or the teachers ___ the gate."', ['lock', 'locks', 'is locking', 'has locked'], 'The verb agrees with the nearer subject, "teachers".'),
+      Q('"There ___ many reasons to wash your hands."', ['are', 'is', 'was', 'has'], 'Agrees with "reasons" (plural).'),
+      Q('"Students ___ wash their hands before eating." (a health rule)', ['must', 'mustn’t', 'don’t have to', 'can’t'], 'A rule: must.'),
+      Q('Bullying someone through messages or posts is called:', ['cyberbullying', 'digital hygiene', 'browsing', 'blogging'], 'Bullying online.'),
+      Q('Before sharing a post, you should first:', ['check that it is true', 'add more rumours', 'share it with everyone at once', 'change the facts'], 'Verify before you share.'),
+      Q('One healthy screen habit is:', ['switching off the phone well before sleep', 'chatting all night', 'skipping meals to stay online', 'using the phone in class'], 'Sleep matters for health and study.'),
+    ]),
+  unit('en-f3-disasters', 22, 2, 4, 'environment', 'flood', 'en3-disasters', 'What causes landslides?',
     'Natural Disasters', 'Natural Disasters', 'The simple future with will and shall; words for natural disasters such as tornado, avalanche and blizzard; causes and consequences of landslides; describing an incident',
     ['en-future-3', 'en-disasters-3'], [
       Q('"I ___ be fifteen next year."', ['shall', 'am', 'was', 'have'], '"I shall / I will" for the future.'),
@@ -188,7 +300,7 @@ export const UNITS_3 = [
       Q('In 1986, a gas cloud released from a lake killed about 1 700 people in Cameroon. The lake is:', ['Lake Nyos', 'Lake Chad', 'Lake Barombi', 'Lake Awing'], 'Carbon dioxide from Lake Nyos suffocated people and animals.'),
       Q('Preparing in advance to reduce harm from disasters is:', ['prevention and preparedness', 'panic', 'neglect', 'pollution'], 'For example avoiding building on steep, bare slopes.'),
     ]),
-  unit('en-f3-waste', 14, 2, 3, 'environment', 'recycling', 'en3-poster', 'How do I write a good slogan?',
+  unit('en-f3-waste', 23, 2, 4, 'environment', 'recycling', 'en3-poster', 'How do I write a good slogan?',
     'Waste Management and the Environment', 'Waste Management', 'Phrasal verbs; imperative statements; the diphthongs /ʊə/ and /əʊ/; words about waste management such as toxic and organic; writing slogans and designing posters',
     ['en-phrasal-3', 'en-slogans-3'], [
       Q('"Please pick ___ the papers on the floor."', ['up', 'off', 'out', 'over'], '"Pick up" means lift from the ground.'),
@@ -201,20 +313,7 @@ export const UNITS_3 = [
       Q('Which word has the diphthong /əʊ/?', ['go', 'got', 'gun', 'girl'], '"Go" is said /gəʊ/.'),
     ]),
 
-  // ============ Sequence 4: tourism and citizenship ============
-  unit('en-f3-tourism', 15, 2, 4, 'economic', 'museum', 'en3-movement', 'Is it "across", "along" or "through"?',
-    'Tourism and Tourist Sites', 'Tourism', 'Prepositions of place and movement; silent letters such as t; punctuation; words about tourism, wildlife and artefacts; describing a historic building or monument',
-    ['en-movement-3', 'en-punctuation-3'], [
-      Q('"We walked ___ the beach." (from one end towards the other, beside the sea)', ['along', 'across', 'through', 'into'], '"Along" follows a line.'),
-      Q('"The ferry went ___ the river to the other bank."', ['across', 'along', 'under', 'onto'], '"Across" means from one side to the other.'),
-      Q('"The train went ___ the tunnel."', ['through', 'across', 'along', 'over'], '"Through" means from one end to the other inside.'),
-      Q('In which word is the t silent?', ['castle', 'water', 'tourist', 'site'], '"Castle" is said /ˈkɑːsl/.'),
-      Q('Objects made by people long ago, kept in museums, are:', ['artefacts', 'fauna', 'flora', 'souvenirs only'], 'For example old masks and stools.'),
-      Q('Which sentence is punctuated correctly?', ['"Welcome to Foumban," said the guide.', '"welcome to foumban" said the guide', 'Welcome to Foumban said, the guide.', '"Welcome to Foumban". said the guide'], 'Comma inside the quotation marks; capitals for names.'),
-      Q('The Sultan’s Palace and museum that tourists visit is in:', ['Foumban', 'Garoua', 'Limbe', 'Kribi'], 'The Bamoun Sultan’s palace is in Foumban.'),
-      Q('A friendly welcome given to visitors is:', ['hospitality', 'hostility', 'poverty', 'pollution'], 'Tourism depends on it.'),
-    ]),
-  unit('en-f3-parks', 16, 2, 4, 'environment', 'park', 'en3-parks', 'What is the difference between fauna and flora?',
+  unit('en-f3-parks', 24, 2, 4, 'environment', 'park', 'en3-parks', 'What is the difference between fauna and flora?',
     'Parks and Reserves of Cameroon and Africa', 'Parks and Reserves', 'More prepositions of place and movement; words about parks, reserves, fauna, flora and souvenirs; short paragraphs on Cameroon as a tourist destination',
     ['en-movement2-3', 'en-parks-3'], [
       Q('The animals of a region are its:', ['fauna', 'flora', 'relief', 'climate'], 'Flora are the plants.'),
@@ -226,69 +325,7 @@ export const UNITS_3 = [
       Q('A small object bought to remember a visit is a:', ['souvenir', 'safari', 'reserve', 'ticket'], 'Souvenirs support local craftspeople.'),
       Q('Illegal hunting in parks is called:', ['poaching', 'farming', 'grazing', 'fishing licence'], 'Poaching threatens elephants and gorillas.'),
     ]),
-  unit('en-f3-humanitarian', 17, 2, 4, 'citizenship', 'volunteer_activism', 'en3-linking', 'How do I show purpose and contrast in one sentence?',
-    'Volunteering and Humanitarian Action', 'Humanitarian Action', 'Linking words to express purpose and contrast; the sounds /ʃ/ and /ʒ/; words about humanitarian work, refugees and asylum; writing a report on humanitarian actions',
-    ['en-linking-3', 'en-humanitarian-3'], [
-      Q('"She saved money ___ she could help orphans." (purpose)', ['so that', 'although', 'but', 'because of'], '"So that" shows purpose.'),
-      Q('"___ he was tired, he kept helping the victims." (contrast)', ['Although', 'So that', 'In order to', 'Because'], '"Although" shows contrast.'),
-      Q('"They volunteered ___ help the flood victims."', ['in order to', 'although', 'despite', 'however'], '"In order to" + base form shows purpose.'),
-      Q('"___ the rain, the volunteers continued."', ['Despite', 'Although', 'So that', 'In order'], '"Despite" + noun shows contrast.'),
-      Q('A person forced to leave their country because of war or persecution is a:', ['refugee', 'tourist', 'migrant worker only', 'citizen'], 'Refugees seek safety abroad.'),
-      Q('Protection given by a country to a refugee is:', ['asylum', 'a visa only', 'a fine', 'a prison'], 'They apply for asylum.'),
-      Q('Which word has the sound /ʒ/?', ['measure', 'shoe', 'sure', 'nation'], '"Measure" has /ʒ/ in the middle.'),
-      Q('Working without pay to help others is:', ['volunteering', 'trading', 'stealing', 'employment'], 'Volunteers give time and effort.'),
-    ]),
-  unit('en-f3-trafficking', 18, 2, 4, 'citizenship', 'shield', 'en3-sentence-patterns', 'What are the patterns of English sentences?',
-    'Child Trafficking and Exploitation', 'Child Trafficking', 'Sentence patterns: SV, SVO, SVC, SVA, SVOO and SVOC; the vowels /ʌ/ and /ɔː/; using context clues; child trafficking, exploitation and safety measures',
-    ['en-patterns-3', 'en-trafficking-3'], [
-      Q('The pattern of "The child cried" is:', ['SV', 'SVO', 'SVC', 'SVOO'], 'Subject + verb only.'),
-      Q('The pattern of "The police arrested the trafficker" is:', ['SVO', 'SV', 'SVC', 'SVA'], 'Subject + verb + object.'),
-      Q('The pattern of "The girl became a nurse" is:', ['SVC', 'SVO', 'SV', 'SVOO'], '"A nurse" is a complement describing the subject.'),
-      Q('The pattern of "She gave the child food" is:', ['SVOO', 'SVO', 'SVC', 'SVA'], 'Two objects: the child (indirect) and food (direct).'),
-      Q('Child trafficking is:', ['moving children by force or deceit to exploit them', 'taking children to school', 'adopting a child legally', 'a sport'], 'It is a serious crime.'),
-      Q('A child being made to work long hours instead of going to school is a victim of:', ['exploitation (child labour)', 'education', 'protection', 'immunisation'], 'Children have the right to education.'),
-      Q('Which word has the long vowel /ɔː/?', ['caught', 'cut', 'cot', 'cart'], '"Caught" is said /kɔːt/.'),
-      Q('To stay safe from traffickers, a child should:', ['never follow strangers who promise jobs or money far away', 'accept every offer', 'travel alone at night', 'keep secrets from parents'], 'Tell a trusted adult.'),
-    ]),
-
-  // ============ Sequence 5: customs, festivals and science ============
-  unit('en-f3-customs', 19, 3, 5, 'citizenship', 'diversity_3', 'en3-gerund', 'What is a gerund?',
-    'Customs, Cultural Practices and Abuses', 'Customs and Abuses', 'The gerund (-ing forms used as nouns); syllabification; words about tribal customs, early marriage and violence against women and girls; a letter to the police reporting child abuse',
-    ['en-gerund-3', 'en-abuse-3'], [
-      Q('In "Dancing is part of our culture", "dancing" is a:', ['gerund', 'present participle in a continuous tense', 'adjective', 'preposition'], 'A gerund is an -ing form used as a noun.'),
-      Q('"She enjoys ___ traditional songs."', ['singing', 'to sing', 'sing', 'sang'], '"Enjoy" is followed by a gerund.'),
-      Q('"He stopped ___ younger students." (no longer did it)', ['bullying', 'to bully', 'bully', 'bullied'], '"Stop + gerund" means no longer do it.'),
-      Q('The word "tradition" has how many syllables?', ['three: tra-di-tion', 'two', 'four', 'one'], 'tra / di / tion.'),
-      Q('The word "marriage" has how many syllables?', ['two: mar-riage', 'three', 'one', 'four'], 'mar / riage.'),
-      Q('Early marriage of girls is harmful because:', ['it ends their education and endangers their health', 'it makes them rich', 'it is required by law', 'it has no effect'], 'Cameroon’s law punishes forced marriage.'),
-      Q('To report a case of child abuse, you can write a:', ['formal letter to the police', 'song', 'birthday card', 'shopping list'], 'Give facts: who, what, where and when.'),
-      Q('Respecting every person’s worth and rights is respecting their:', ['dignity', 'property', 'tribe only', 'wealth'], 'Abuse violates human dignity.'),
-    ]),
-  unit('en-f3-festivals', 20, 3, 5, 'citizenship', 'festival', 'en3-festivals', 'What do people do at the Ngondo festival?',
-    'Cultural Festivals and Museums', 'Festivals', 'Modals for speculation (review); the consonant clusters /kr/ and /br/; words for cultural artefacts; festivals of Cameroon; a report on a visit to a museum or a chief’s palace',
-    ['en-speculation-3', 'en-festivals-3'], [
-      Q('"The drums are silent. The festival ___ have ended." (almost sure)', ['must', 'can’t', 'mustn’t', 'shouldn’t'], '"Must have" + past participle for a confident guess about the past.'),
-      Q('"He ___ have gone to the palace; I am not sure." (possible)', ['might', 'must', 'can’t', 'shouldn’t'], '"Might have" shows possibility.'),
-      Q('"She ___ have seen the masquerade; she was in Douala." (impossible)', ['can’t', 'must', 'might', 'may'], '"Can’t have" shows it is impossible.'),
-      Q('The Ngondo festival belongs to the:', ['Sawa people of the coast, in Douala', 'Bamoun of Foumban', 'Fulani of the north', 'Bakweri only'], 'The Nguon is the Bamoun festival.'),
-      Q('Which word begins with the cluster /kr/?', ['crowd', 'cow', 'brown', 'bread'], '"Crowd" begins /kr/.'),
-      Q('Which word begins with the cluster /br/?', ['bride', 'bead', 'ride', 'crab'], '"Bride" begins /br/.'),
-      Q('A traditional ruler in the North-West Region is usually called a:', ['Fon', 'Lamido', 'Sultan', 'Mayor'], 'In the north, a Lamido; in Foumban, the Sultan.'),
-      Q('A report on a museum visit should include:', ['when you went, what you saw and what you learnt', 'only jokes', 'the price of drinks only', 'nothing about the exhibits'], 'Factual and organised.'),
-    ]),
-  unit('en-f3-occasions', 21, 3, 5, 'citizenship', 'celebration', 'en3-affixes', 'How does "un-" or "-ness" change a word?',
-    'Planning and Celebrating Occasions', 'Celebrations', 'Pronouns; word formation by affixation (prefixes and suffixes); an installation ceremony; planning a birthday party',
-    ['en-pronouns-3', 'en-affixes-3'], [
-      Q('"Between you and ___, the plan is good."', ['me', 'I', 'mine', 'myself'], 'After a preposition, the object form.'),
-      Q('"The guests enjoyed ___." (reflexive)', ['themselves', 'theirselves', 'them', 'themself'], 'Reflexive: themselves.'),
-      Q('The noun formed from "happy" with a suffix is:', ['happiness', 'happyness', 'unhappy', 'happily'], 'y → i + -ness.'),
-      Q('The opposite of "able" with a prefix is:', ['unable', 'disable', 'inable', 'imable'], 'un- + able (to be not able).'),
-      Q('In "unforgettable", the prefix is:', ['un-', '-able', 'forget', '-ttable'], 'un- (not) + forget + -able.'),
-      Q('An installation ceremony is held when:', ['a new official or ruler takes up office', 'a building collapses', 'school ends', 'a market closes'], 'For example a new Regional Delegate or Fon.'),
-      Q('Adding -ment to "govern" gives:', ['government', 'governance only', 'governor', 'governed'], 'govern + -ment.'),
-      Q('When planning a party, the first thing to decide is:', ['the date, place and budget', 'the colour of the cake only', 'who washes plates', 'nothing'], 'Then invitations, menu and tasks.'),
-    ]),
-  unit('en-f3-science', 22, 3, 5, 'media', 'science', 'en3-indefinite', 'Who invented the telephone?',
+  unit('en-f3-science', 25, 2, 4, 'media', 'science', 'en3-indefinite', 'Who invented the telephone?',
     'Science, Technology and Inventions', 'Science and Inventions', 'Indefinite pronouns such as some, any, every and no compounds; the weak vowel /ə/; words about science and technology; famous scientists and their inventions; imaginative writing about a new invention',
     ['en-indefinite-3', 'en-inventions-3'], [
       Q('Which word is an indefinite pronoun?', ['everybody', 'teacher', 'quickly', 'under'], 'Indefinite pronouns refer to people or things in general: somebody, anyone, nothing.'),
@@ -301,8 +338,45 @@ export const UNITS_3 = [
       Q('A new device or process created for the first time is an:', ['invention', 'imitation', 'accident', 'opinion'], 'The inventor creates it.'),
     ]),
 
-  // ============ Sequence 6: media, community and technology ============
-  unit('en-f3-ict', 23, 3, 6, 'media', 'computer', 'en3-reported-questions', 'How do I report a question?',
+  // ============ Term 3, module 4: citizenship, human rights and media (sequence 5) ============
+  unit('en-f3-symbols', 26, 3, 5, 'citizenship', 'flag', 'en3-living-together', 'What does "vivre-ensemble" mean?',
+    'National Symbols and Living Together', 'Living Together', 'Respecting the national symbols; living together, bilingualism and multiculturalism; public institutions; reporting a civic injustice in a formal letter with the passive voice',
+    ['en-livingtogether-3', 'en-institutions-3'], [
+      Q('Which motto is written on the coat of arms of Cameroon?', ['Peace – Work – Fatherland', 'Unity – Progress – Justice', 'Work – Family – Country', 'Freedom – Order – Peace'], 'It is written on the coat of arms.'),
+      Q('When the national anthem is played, citizens should:', ['stand still and show respect', 'keep chatting', 'walk away', 'sit and eat'], 'A sign of respect for the nation.'),
+      Q('Cameroon’s two official languages are:', ['English and French', 'English and Duala', 'French and Fulfulde', 'Pidgin and English'], 'Bilingualism is a national value.'),
+      Q('Rejecting tribalism and respecting other cultures promotes:', ['living together', 'hate speech', 'division', 'segregation'], 'Peaceful coexistence.'),
+      Q('A broken road in your town is best reported to:', ['the council', 'the court', 'a hospital', 'the national anthem committee'], 'Local government maintains town roads.'),
+      Q('Who judges cases in court?', ['a judge or magistrate', 'a mayor', 'a minister', 'a councillor'], 'The judiciary.'),
+      Q('Passive of "The council has repaired the bridge":', ['The bridge has been repaired by the council.', 'The bridge has repaired the council.', 'The bridge was repairing.', 'The council has been repaired.'], 'has been + past participle.'),
+      Q('A complaint about a civic injustice should contain:', ['the facts, the evidence and a polite request', 'insults and threats', 'rumours only', 'no date or place'], 'Calm, clear and factual.'),
+    ]),
+  unit('en-f3-humanitarian', 27, 3, 5, 'citizenship', 'volunteer_activism', 'en3-linking', 'How do I show purpose and contrast in one sentence?',
+    'Volunteering and Humanitarian Action', 'Humanitarian Action', 'Linking words to express purpose and contrast; the sounds /ʃ/ and /ʒ/; words about humanitarian work, refugees and asylum; writing a report on humanitarian actions',
+    ['en-linking-3', 'en-humanitarian-3'], [
+      Q('"She saved money ___ she could help orphans." (purpose)', ['so that', 'although', 'but', 'because of'], '"So that" shows purpose.'),
+      Q('"___ he was tired, he kept helping the victims." (contrast)', ['Although', 'So that', 'In order to', 'Because'], '"Although" shows contrast.'),
+      Q('"They volunteered ___ help the flood victims."', ['in order to', 'although', 'despite', 'however'], '"In order to" + base form shows purpose.'),
+      Q('"___ the rain, the volunteers continued."', ['Despite', 'Although', 'So that', 'In order'], '"Despite" + noun shows contrast.'),
+      Q('A person forced to leave their country because of war or persecution is a:', ['refugee', 'tourist', 'migrant worker only', 'citizen'], 'Refugees seek safety abroad.'),
+      Q('Protection given by a country to a refugee is:', ['asylum', 'a visa only', 'a fine', 'a prison'], 'They apply for asylum.'),
+      Q('Which word has the sound /ʒ/?', ['measure', 'shoe', 'sure', 'nation'], '"Measure" has /ʒ/ in the middle.'),
+      Q('Working without pay to help others is:', ['volunteering', 'trading', 'stealing', 'employment'], 'Volunteers give time and effort.'),
+    ]),
+  unit('en-f3-trafficking', 28, 3, 5, 'citizenship', 'shield', 'en3-sentence-patterns', 'What are the patterns of English sentences?',
+    'Child Trafficking and Exploitation', 'Child Trafficking', 'Sentence patterns: SV, SVO, SVC, SVA, SVOO and SVOC; the vowels /ʌ/ and /ɔː/; using context clues; child trafficking, exploitation and safety measures',
+    ['en-patterns-3', 'en-trafficking-3'], [
+      Q('The pattern of "The child cried" is:', ['SV', 'SVO', 'SVC', 'SVOO'], 'Subject + verb only.'),
+      Q('The pattern of "The police arrested the trafficker" is:', ['SVO', 'SV', 'SVC', 'SVA'], 'Subject + verb + object.'),
+      Q('The pattern of "The girl became a nurse" is:', ['SVC', 'SVO', 'SV', 'SVOO'], '"A nurse" is a complement describing the subject.'),
+      Q('The pattern of "She gave the child food" is:', ['SVOO', 'SVO', 'SVC', 'SVA'], 'Two objects: the child (indirect) and food (direct).'),
+      Q('Child trafficking is:', ['moving children by force or deceit to exploit them', 'taking children to school', 'adopting a child legally', 'a sport'], 'It is a serious crime.'),
+      Q('A child being made to work long hours instead of going to school is a victim of:', ['exploitation (child labour)', 'education', 'protection', 'immunisation'], 'Children have the right to education.'),
+      Q('Which word has the long vowel /ɔː/?', ['caught', 'cut', 'cot', 'cart'], '"Caught" is said /kɔːt/.'),
+      Q('To stay safe from traffickers, a child should:', ['never follow strangers who promise jobs or money far away', 'accept every offer', 'travel alone at night', 'keep secrets from parents'], 'Tell a trusted adult.'),
+    ]),
+
+  unit('en-f3-ict', 29, 3, 5, 'media', 'computer', 'en3-reported-questions', 'How do I report a question?',
     'ICT in Education', 'ICT', 'Reported questions; words about ICT such as e-chat, back up, access and e-commerce; the internet for study; an article or poem on the influence of the internet',
     ['en-reportq-3', 'en-ict-3'], [
       Q('"Where do you live?" he asked. Reported:', ['He asked where I lived.', 'He asked where did I live.', 'He asked where do you live.', 'He asked me where I live?'], 'No question mark and no "do"; the tense moves back.'),
@@ -314,7 +388,8 @@ export const UNITS_3 = [
       Q('An article in a school magazine should have:', ['a headline, an introduction, a body and a conclusion', 'only pictures', 'no title', 'one sentence'], 'And the writer’s name.'),
       Q('In reported questions, the word order is like:', ['a statement (subject before verb)', 'a question (verb before subject)', 'a command', 'a list'], '"He asked where I lived."'),
     ]),
-  unit('en-f3-media', 24, 3, 6, 'media', 'tv', 'en3-media', 'Can we believe everything we see on TV?',
+  // ============ Term 3: media, then the review and examination practice (sequence 6) ============
+  unit('en-f3-media', 30, 3, 6, 'media', 'tv', 'en3-media', 'Can we believe everything we see on TV?',
     'Television and the Media', 'The Media', 'Nouns, verbs and adjectives reviewed; silent h and l; synonyms and antonyms; words about the media such as data, surf and hacker; credibility and reliability of news; the school multimedia centre',
     ['en-wordclass-3', 'en-media-3'], [
       Q('In "The news was shocking", "shocking" is:', ['an adjective', 'a noun', 'a verb', 'a preposition'], 'It describes the news.'),
@@ -326,16 +401,16 @@ export const UNITS_3 = [
       Q('A credible news source is one that is:', ['believable and accurate', 'always funny', 'secret', 'very old'], 'Check who wrote it and whether others confirm it.'),
       Q('Someone who spends too much time watching TV and not moving is called a:', ['couch potato', 'busy bee', 'early bird', 'bookworm'], 'An idiom.'),
     ]),
-  unit('en-f3-professions', 25, 3, 6, 'media', 'engineering', 'en3-quantifiers', 'Is it "much" or "many"?',
-    'Professions in Science and Technology', 'Science Professions', 'Quantifiers such as much, many, a few and a little; the sounds /j/ and /dʒ/; lexical fields; professions related to science and new technology; writing about a popular ICT job',
-    ['en-quantifiers-3', 'en-professions-3'], [
-      Q('"How ___ phones did he repair today?"', ['many', 'much', 'little', 'a little'], '"Many" with countable nouns.'),
-      Q('"There is ___ time left; hurry!" (not much)', ['little', 'few', 'many', 'a few'], '"Little" with uncountables, meaning not much.'),
-      Q('"I have ___ friends who are engineers." (some, a small number)', ['a few', 'a little', 'much', 'little'], '"A few" with countables, a positive idea.'),
-      Q('A group of words linked to one subject, such as doctor, nurse, ward and patient, is a:', ['lexical field', 'sentence pattern', 'homophone', 'prefix'], 'Words of the same field of meaning.'),
-      Q('Which word begins with /j/?', ['yes', 'jet', 'gem', 'ink'], '"Yes" begins /j/.'),
-      Q('Which word begins with /dʒ/?', ['job', 'yob', 'yellow', 'shop'], '"Job" begins /dʒ/.'),
-      Q('A person who designs and writes computer programs is a:', ['programmer', 'pharmacist', 'plumber', 'pilot'], 'Programmers write code.'),
-      Q('A mobile phone repairer needs:', ['technical skill, patience and honesty with customers', 'only a loud voice', 'no tools', 'no training'], 'ICT jobs need skills and integrity.'),
+  unit('en-f3-gce', 31, 3, 6, 'exam', 'fact_check', 'en3-answering', 'How should I plan my time in the English examination?',
+    'Review and Examination Practice', 'Review', 'Revision of the year’s grammar; sentence transformations; answering comprehension, summary and composition tasks; the four sections of the paper (listening and speaking, reading, grammar and vocabulary, writing) and GCE Ordinary Level question types',
+    ['en-revision-3', 'en-gcepractice-3'], [
+      Q('Reported speech of "‘I will help you,’ he said":', ['He said that he would help me.', 'He said that I will help you.', 'He says he helps me.', 'He said I would help him.'], 'will → would, and the pronouns change.'),
+      Q('Passive of "People speak English in Bamenda":', ['English is spoken in Bamenda.', 'English speaks in Bamenda.', 'English was spoke in Bamenda.', 'People are spoken English.'], 'is + past participle.'),
+      Q('Which sentence shows correct agreement with "everybody"?', ['Everybody has finished the test.', 'Everybody have finished the test.', 'Everybody are finished the test.', 'Everybody finishing the test.'], '"Everybody" is singular.'),
+      Q('In a summary you should leave out:', ['examples and repetitions', 'the main points', 'full sentences', 'your own words'], 'Keep only the main points.'),
+      Q('A true/false question that asks you to justify needs:', ['the answer and evidence from the passage', 'the answer only', 'a new story', 'a drawing'], 'Prove your answer from the text.'),
+      Q('In the composition section, Form 3 pieces are usually about:', ['150 to 180 words', '20 words', '1 000 words', 'one sentence'], 'As in the evaluation grid.'),
+      Q('The best first step in a composition is to:', ['make a short plan', 'start writing at once without thinking', 'copy the question many times', 'write the conclusion only'], 'Planning gives order to ideas.'),
+      Q('"He is ___ honest man."', ['an', 'a', 'the most', 'no article'], '"Honest" begins with a vowel sound (silent h).'),
     ]),
 ];
