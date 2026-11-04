@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { P, T, V } from '../../ui/kit';
+import { Logo, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { Field, Label } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { routeAfterAuth } from '../../navigation/routes';
 import { NeedsInternet } from '../../ui/Offline';
+
+// Password reset needs codes sent by SMS or WhatsApp; it stays hidden until a
+// sender is set up on the server.
+const FORGOT_OPEN = false;
 
 // Accepts 6XXXXXXXX, +237 6XX..., or an email address.
 function normaliseIdentifier(v) {
@@ -39,18 +43,24 @@ export default function Login({ navigation }) {
       setBusy(false);
     }
   };
+  const create = () => navigation.navigate(navigation.getState().routeNames.includes('Language') ? 'Language' : 'Register');
 
   return (
     <Screen keyboard header={<AuthHeader back={navigation.canGoBack()} />}>
-      <V c="pt-space-lg pb-space-lg gap-space-xs">
-        <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Log in', 'Connexion')}</T>
-        <T c="font-body-md text-body-md text-on-surface-variant">
-          {L('Use the phone number or email you registered with.', 'Utilisez le numéro ou l’e-mail de votre inscription.')}
-        </T>
+      <V c="items-center pt-space-xl pb-space-lg gap-space-sm">
+        <V c="w-20 h-20 rounded-3xl bg-surface-container-low items-center justify-center">
+          <Logo size={46} />
+        </V>
+        <V c="items-center gap-1">
+          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight text-center">{L('Welcome back', 'Bon retour')}</T>
+          <T c="font-body-md text-body-md text-on-surface-variant text-center">{L('Log in with your phone number or email.', 'Connectez-vous avec votre numéro ou votre e-mail.')}</T>
+        </V>
       </V>
+
       <V c="gap-space-md">
         <Field
           label={L('Phone number or email', 'Téléphone ou e-mail')}
+          leftIcon="person"
           bg="bg-surface-container-lowest"
           placeholder={L('6XX XX XX XX or email', '6XX XX XX XX ou e-mail')}
           value={identifier}
@@ -59,19 +69,23 @@ export default function Login({ navigation }) {
           textContentType="username"
           autoComplete="username"
           keyboardType="email-address"
+          returnKeyType="next"
           maxLength={254}
         />
         <V c="gap-1.5">
           <Label
             right={
-              <P onPress={() => navigation.navigate('Forgot')} hitSlop={8}>
-                <T c="font-label-md text-label-md text-primary py-0.5">{L('Forgot password?', 'Mot de passe oublié ?')}</T>
-              </P>
+              FORGOT_OPEN ? (
+                <P onPress={() => navigation.navigate('Forgot')} hitSlop={8}>
+                  <T c="font-label-md text-label-md text-primary py-0.5">{L('Forgot password?', 'Mot de passe oublié ?')}</T>
+                </P>
+              ) : null
             }
           >
             {L('Password', 'Mot de passe')}
           </Label>
           <Field
+            leftIcon="lock"
             bg="bg-surface-container-lowest"
             secure
             placeholder={L('Your password', 'Votre mot de passe')}
@@ -89,16 +103,15 @@ export default function Login({ navigation }) {
         <ErrorNote error={error} />
         <Cta variant="dark" icon={null} label={L('Log in', 'Se connecter')} loading={busy} onPress={submit} c="mt-space-xs" />
       </V>
+
       <V c="mt-space-xl gap-space-md pb-space-lg">
-        <V c="flex-row items-center justify-center">
-          <T c="font-body-md text-body-md text-on-surface-variant">{L('No account yet?', 'Pas encore de compte ?')} </T>
-          <P onPress={() => navigation.navigate(navigation.getState().routeNames.includes('Language') ? 'Language' : 'Register')} hitSlop={8}>
-            <T c="font-label-lg text-label-lg text-primary ml-1" style={{ fontWeight: '700' }}>
-              {L('Create one', 'Créer un compte')}
-            </T>
-          </P>
+        <V c="flex-row items-center gap-space-sm">
+          <V c="flex-1 h-px bg-surface-container" />
+          <T c="font-label-md text-label-md text-on-surface-variant">{L('New to Klass8?', 'Nouveau sur Klass8 ?')}</T>
+          <V c="flex-1 h-px bg-surface-container" />
         </V>
-        <P c="items-center" onPress={() => navigation.navigate('Legal', { doc: 'help' })} hitSlop={8}>
+        <Cta variant="white" icon={null} label={L('Create an account', 'Créer un compte')} onPress={create} />
+        <P c="items-center pt-space-xs" onPress={() => navigation.navigate('Legal', { doc: 'help' })} hitSlop={8}>
           <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Help and contact', 'Aide et contact')}</T>
         </P>
       </V>

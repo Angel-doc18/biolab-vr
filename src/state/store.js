@@ -141,7 +141,7 @@ export function AppProvider({ children }) {
     }
     await setSession(null);
     await AsyncStorage.multiRemove([USER, AVATAR]).catch(() => {});
-    setAuth({ status: 'guest', user: null, pro: false });
+    setAuth({ status: 'guest', user: null, pro: false, reason: 'logout' });
     setAvatarUri(null);
     setQuota(null);
     setUnread(0);

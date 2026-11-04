@@ -118,12 +118,13 @@ export default function AppNavigator() {
   }, [locked]);
   useEffect(enforce, [enforce]);
 
-  // If the session ends (sign out, revoked, expired), return to sign in.
+  // If the session ends: after signing out, back to the welcome page; if it
+  // was revoked or expired, straight to sign in.
   useEffect(() => {
     if (auth.status !== 'guest' || !navRef.isReady()) return;
     const route = navRef.getCurrentRoute();
-    if (route && !PUBLIC.includes(route.name)) navRef.reset({ index: 0, routes: [{ name: 'Login' }] });
-  }, [auth.status]);
+    if (route && !PUBLIC.includes(route.name)) navRef.reset({ index: 0, routes: [{ name: auth.reason === 'logout' ? 'Welcome' : 'Login' }] });
+  }, [auth.status, auth.reason]);
 
   return (
     <NavigationContainer ref={navRef} theme={theme} onReady={enforce} onStateChange={enforce}>
