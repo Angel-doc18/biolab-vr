@@ -38,6 +38,7 @@ export const SUBJECT_LOOK = {
   'a-geography': { icon: 'public', tint: '#1f5f7a', bg: '#dfedf2' },
   'a-economics': { icon: 'stacked_line_chart', tint: '#0b5e74', bg: '#dceef3' },
   'a-geology': { icon: 'terrain', tint: '#6b4a2b', bg: '#efe4d8' },
+  'a-philosophy': { icon: 'psychology', tint: '#5a3d6b', bg: '#ece3f1' },
 };
 const look = (id) => SUBJECT_LOOK[id] || SUBJECT_LOOK.biology;
 

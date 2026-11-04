@@ -361,6 +361,15 @@ export const SUBJECTS = [
     fr: 'Géologie',
     p1: { count: 50, minutes: 90 },
   },
+  {
+    id: 'a-philosophy',
+    code: '0790',
+    level: 'A',
+    available: true,
+    en: 'Philosophy',
+    fr: 'Philosophie',
+    p1: { count: 50, minutes: 90 },
+  },
   { id: 'a-food', code: '0740', level: 'A', en: 'Food Science and Nutrition', fr: 'Science alimentaire et nutrition' },
 ];
 
@@ -382,7 +391,7 @@ export const subjectName = (id, lang) => {
 export const subjectsForLevel = (level) => SUBJECTS.filter((s) => s.level === level);
 
 // The Ordinary Level subject each Advanced Level course builds on.
-const BASE = { 'a-biology': 'biology', 'a-chemistry': 'chemistry', 'a-physics': 'physics', 'a-history': 'history', 'a-geography': 'geography', 'a-economics': 'economics', 'a-geology': 'geology' };
+const BASE = { 'a-biology': 'biology', 'a-chemistry': 'chemistry', 'a-physics': 'physics', 'a-history': 'history', 'a-geography': 'geography', 'a-economics': 'economics', 'a-geology': 'geology', 'a-philosophy': 'logic' };
 const advancedOf = (id) => Object.keys(BASE).find((a) => BASE[a] === id);
 
 // The subjects a class can take. Sixth Form students take the open Advanced
