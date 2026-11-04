@@ -1,0 +1,362 @@
+// Extra end-of-lesson questions for the Form 1 English Language lessons, by
+// lesson id. The correct option is written first; options are shuffled when
+// shown.
+
+const Q = (q, a, why) => ({ q, a, why });
+
+export const QUESTIONS_1 = {
+  // ---------- Sequence 1 ----------
+  'en-greetings-1': [
+    Q('The usual reply to "How are you?" is:', ['I am fine, thank you. And you?', 'How do you do?', 'Good night.', 'I am Paul.'], 'Answer, thank the person and return the question.'),
+    Q('When introduced to someone, you can say:', ['Pleased to meet you.', 'Go away.', 'Who asked you?', 'Good night.'], '"Nice to meet you" also works.'),
+    Q('"Good night" is said:', ['When leaving at night or going to bed', 'When you arrive in the morning', 'At midday', 'When you meet a friend at 2 p.m.'], 'In the evening we greet with "Good evening".'),
+    Q('Which title is used for a woman doctor?', ['Dr', 'Mr', 'Sir', 'Master'], '"Dr" is used for doctors, men or women.'),
+  ],
+  'en-imperatives-1': [
+    Q('Which instruction on a form is written as an imperative?', ['Write your name in capital letters.', 'She writes her name.', 'Did you write your name?', 'My name is written.'], 'It begins with the base form of the verb.'),
+    Q('Which request is the most polite?', ['Would you mind closing the door?', 'Close the door.', 'Door!', 'You, close it.'], '"Would you mind …?" is very polite.'),
+    Q('On a form, "Date of birth" for someone born on 5th June 2014 is written:', ['05/06/2014', '2014', 'June', '5 years'], 'Day, month and year.'),
+    Q('If a box on a form does not apply to you, write:', ['N/A', 'Nothing at all, leave it', 'Yes', 'A drawing'], 'N/A means not applicable.'),
+  ],
+  'en-present-1': [
+    Q('"The sun ___ in the east."', ['rises', 'rise', 'rising', 'is rise'], 'A general fact, with -s for "it".'),
+    Q('"My sister ___ her homework after supper."', ['does', 'do', 'doing', 'dos'], '"Do" becomes "does" with he, she and it.'),
+    Q('"Ngwa ___ to school by bus."', ['goes', 'go', 'gos', 'going'], '"Go" ends in -o, so add -es.'),
+    Q('Which sentence states a habit?', ['I read the Bible every evening.', 'I read the Bible yesterday.', 'I will read the Bible.', 'I have read it.'], '"Every evening" shows a habit.'),
+  ],
+  'en-vowels-a-1': [
+    Q('Grandparents, uncles, aunts and cousins together with parents and children form:', ['an extended family', 'a nuclear family', 'a single-parent family', 'a class'], 'The extended family includes other relatives.'),
+    Q('A family with one parent and the children is:', ['a single-parent family', 'a nuclear family', 'an extended family', 'a tribe'], 'Only one parent lives with the children.'),
+    Q('Which pair differs in /æ/ and /ɑː/?', ['hat – heart', 'hat – hot', 'cap – cup', 'man – men'], 'hat /hæt/, heart /hɑːt/.'),
+    Q('Which word has the vowel /æ/?', ['bag', 'bar', 'calm', 'far'], '"Bag" is said /bæg/.'),
+  ],
+  'en-present2-1': [
+    Q('"___ they live in Buea?"', ['Do', 'Does', 'Is', 'Are'], '"Do" with they.'),
+    Q('"I ___ like cold water."', ['don’t', 'doesn’t', 'isn’t', 'not'], '"Don’t" with I.'),
+    Q('"What time ___ the bell ring?"', ['does', 'do', 'is', 'are'], '"The bell" = it.'),
+    Q('The short answer to "Does your class have a fan?" (no) is:', ['No, it doesn’t.', 'No, it don’t.', 'No, it isn’t.', 'No, they don’t.'], '"Class" = it; use "doesn’t".'),
+  ],
+  'en-classroom-1': [
+    Q('The cloth or pad used to clean the chalkboard is a:', ['duster', 'mop', 'brush pen', 'ruler'], 'A duster wipes the board.'),
+    Q('"___ a map on the back wall."', ['There is', 'There are', 'They are', 'It have'], 'One map: "there is".'),
+    Q('Which word begins with /b/?', ['board', 'door', 'desk', 'duster'], 'The others begin with /d/.'),
+    Q('A good description of a room is organised:', ['In a clear order, for example from the door to the back', 'In no order at all', 'Only by colours', 'Backwards'], 'Order helps the reader picture it.'),
+  ],
+  'en-can-may-1': [
+    Q('"My grandfather ___ climb palm trees when he was young."', ['could', 'can', 'may', 'shall'], 'Past ability: could.'),
+    Q('"You may not use your phone in class" means:', ['It is not allowed', 'It is possible', 'You must use it', 'You are able to'], '"May not" refuses permission.'),
+    Q('Which is correct?', ['She can dance.', 'She cans dance.', 'She can dances.', 'She can to dance.'], 'Modal + base form, no -s.'),
+    Q('"It ___ rain later, so take an umbrella." (possibility)', ['may', 'can’t', 'must not', 'shall not'], '"May" shows possibility.'),
+  ],
+  'en-permission-1': [
+    Q('A polite way to give permission is:', ['Certainly, go ahead.', 'No!', 'Never ask me again.', 'Leave me alone.'], '"Certainly" and "Of course" give permission.'),
+    Q('In a written dialogue, the speaker’s name is followed by:', ['a colon', 'a question mark', 'a full stop only', 'quotation marks'], 'Name: words spoken.'),
+    Q('"I’m afraid not" is used to:', ['Refuse politely', 'Give permission', 'Greet someone', 'Say you are frightened'], 'It means "no" politely.'),
+    Q('When you ask for permission, it helps to:', ['Give a reason', 'Shout', 'Demand loudly', 'Walk out first'], '"May I go out? I need to see the nurse."'),
+  ],
+  'en-countable-1': [
+    Q('Which noun is countable?', ['banana', 'milk', 'salt', 'oil'], 'We can say one banana, two bananas.'),
+    Q('"We don’t have ___ onions left."', ['any', 'some', 'a', 'an'], '"Any" in negatives.'),
+    Q('"How ___ oranges did you buy?"', ['many', 'much', 'a', 'any'], '"Many" with countable plurals.'),
+    Q('To count bread, we can say:', ['a loaf of bread', 'a bread', 'two breads', 'many bread'], 'Use a measure word.'),
+  ],
+  'en-directions-1': [
+    Q('The opposite of "enter" is:', ['exit', 'push', 'open', 'arrive'], 'Antonyms.'),
+    Q('Which word has the sound /z/ at the end?', ['rise', 'rice', 'price', 'bus'], '"Rise" is said /raɪz/.'),
+    Q('"The pharmacy is ___ the church." (facing it)', ['opposite', 'behind', 'inside', 'under'], 'Opposite means facing.'),
+    Q('A building that helps you find your way is a:', ['landmark', 'antonym', 'junction', 'pavement'], 'For example a church or a petrol station.'),
+  ],
+  // ---------- Sequence 2 ----------
+  'en-adjectives-1': [
+    Q('Which word is a descriptive adjective of character?', ['honest', 'tall', 'grey', 'old'], 'Honesty is part of character.'),
+    Q('"Grandma ___ tired today."', ['looks', 'look', 'looking', 'is look'], '"Look" is a linking verb here.'),
+    Q('Which is correct?', ['two tall boys', 'two talls boys', 'two boys talls', 'tall two boys'], 'Adjectives never take -s.'),
+    Q('"a kind old woman": the opinion adjective is:', ['kind', 'old', 'woman', 'a'], 'Opinion comes before facts like age.'),
+  ],
+  'en-familytree-1': [
+    Q('Your grandparents’ parents and the people before them are your:', ['ancestors', 'descendants', 'siblings', 'cousins'], 'Descendants come after you.'),
+    Q('"My late uncle" means my uncle who:', ['has died', 'is always late', 'came late', 'is young'], '"Late" before a name means dead.'),
+    Q('Which word has the voiced sound /ð/?', ['mother', 'three', 'think', 'mouth'], '"Mother" is said /ˈmʌðə/.'),
+    Q('Comforting relatives after a death is an example of:', ['family solidarity', 'discrimination', 'pollution', 'competition'], 'Supporting one another.'),
+  ],
+  'en-prep-time-1': [
+    Q('"We go to church ___ Sundays."', ['on', 'in', 'at', 'by'], '"On" for days.'),
+    Q('"The holidays begin ___ June."', ['in', 'on', 'at', 'since'], '"In" for months.'),
+    Q('"I was born ___ 2014."', ['in', 'on', 'at', 'for'], '"In" for years.'),
+    Q('"Please come ___ noon."', ['at', 'in', 'on', 'during'], '"At noon", "at midnight".'),
+  ],
+  'en-rules-1': [
+    Q('To disobey a rule means to:', ['not do what the rule says', 'follow the rule', 'write a rule', 'change the rule'], 'Obey is the opposite.'),
+    Q('Which rule is written correctly?', ['Do not leave the tap running.', 'Leaving taps running were bad.', 'Tap running no.', 'Maybe the tap.'], 'A clear negative imperative.'),
+    Q('A precaution is something done:', ['in advance to prevent harm', 'after an accident', 'to punish someone', 'for fun'], '"Keep matches away from children" is a precaution.'),
+    Q('Rules help a home or school to:', ['run smoothly and safely', 'become noisy', 'waste time', 'stop learning'], 'They protect everyone.'),
+  ],
+  'en-prep-place-1': [
+    Q('"The house stands ___ the trees." (in the middle of many)', ['among', 'between', 'under', 'on'], '"Among" for more than two.'),
+    Q('"A fan hangs ___ the table." (higher, not touching)', ['above', 'on', 'under', 'in'], '"Above" means higher than.'),
+    Q('"She sat ___ the armchair."', ['in', 'on top', 'at', 'under'], 'We sit in a deep, soft armchair.'),
+    Q('"The clothes are ___ the wardrobe."', ['in', 'on', 'under', 'above'], 'Inside it.'),
+  ],
+  'en-furniture-1': [
+    Q('Which is NOT furniture?', ['a kettle', 'a sofa', 'a wardrobe', 'a stool'], 'A kettle is an appliance.'),
+    Q('Which is correct?', ['a piece of furniture', 'a furniture', 'two furnitures', 'many furnitures'], '"Furniture" is uncountable.'),
+    Q('Which word has the short vowel /e/?', ['bed', 'bait', 'day', 'pain'], '"Bed" is said /bed/.'),
+    Q('Which pair differs in /e/ and /eɪ/?', ['let – late', 'let – lit', 'bed – bad', 'pen – pan'], 'let /let/, late /leɪt/.'),
+  ],
+  'en-articles-1': [
+    Q('"She is ___ honest girl."', ['an', 'a', 'the', 'no article'], 'h is silent in "honest".'),
+    Q('"He studies at ___ university in Buea."', ['a', 'an', 'the', 'no article'], '"University" begins with the sound /j/.'),
+    Q('"___ Wouri flows into the sea at Douala."', ['The', 'A', 'An', 'No article'], 'Rivers take "the".'),
+    Q('"___ fridges use electricity." (in general)', ['No article', 'The', 'A', 'An'], 'General plurals take no article.'),
+  ],
+  'en-appliances-1': [
+    Q('A machine used to grind tomatoes and pepper is a:', ['blender', 'fridge', 'fan', 'iron'], 'Blenders mix and grind.'),
+    Q('Why must you never touch a switch with wet hands?', ['Water conducts electricity and you can get a shock', 'It makes the switch dirty', 'The light gets brighter', 'It wastes water'], 'Wet hands can cause electric shocks.'),
+    Q('After ironing, you should:', ['Switch off and unplug the iron', 'Leave it on the clothes', 'Put it in water', 'Leave it switched on'], 'A hot iron can start a fire.'),
+    Q('A kettle is used to:', ['boil water', 'freeze food', 'wash clothes', 'cool a room'], 'Kettles heat water.'),
+  ],
+  'en-relative-1': [
+    Q('"The man ___ sold us the fish is friendly."', ['who', 'which', 'whose', 'where'], 'A person: who.'),
+    Q('"The spoon ___ fell is dirty."', ['which', 'who', 'whom', 'whose'], 'A thing: which.'),
+    Q('Which sentence is correct?', ['The boy who broke the cup is sorry.', 'The boy who he broke the cup is sorry.', 'The boy which broke the cup is sorry.', 'The boy who broke he the cup.'], 'Do not repeat the pronoun.'),
+    Q('Which word can replace "which" in "the plate which is on the table"?', ['that', 'who', 'whose', 'what'], '"That" can replace who or which in defining clauses.'),
+  ],
+  'en-meals-1': [
+    Q('Plates, cups and bowls are called:', ['crockery', 'cutlery', 'furniture', 'appliances'], 'Cutlery is knives, forks and spoons.'),
+    Q('The meal eaten in the evening is:', ['supper', 'breakfast', 'lunch', 'brunch'], 'Also called dinner.'),
+    Q('The woman getting married is the:', ['bride', 'bridegroom', 'bridesmaid', 'best man'], 'The bridegroom is the man.'),
+    Q('"Please ___ the salt." (polite request at table)', ['pass', 'throw', 'grab', 'take away'], 'Ask instead of reaching across.'),
+  ],
+  // ---------- Sequence 3 ----------
+  'en-linking-1': [
+    Q('In "The water smells bad", "smells" is a:', ['linking verb', 'action verb', 'noun', 'pronoun'], 'You can replace it with "is".'),
+    Q('Which is an action verb?', ['collect', 'seem', 'become', 'appear (look)'], 'Collecting is something we do.'),
+    Q('The plural ending in "roses" is pronounced:', ['/ɪz/', '/s/', '/z/', 'silent'], 'After /z/, add /ɪz/.'),
+    Q('The plural ending in "books" is pronounced:', ['/s/', '/z/', '/ɪz/', 'silent'], 'After /k/, the ending is /s/.'),
+  ],
+  'en-waste-1': [
+    Q('Throwing rubbish on the street is called:', ['littering', 'recycling', 'sorting', 'composting'], 'It dirties the community.'),
+    Q('Making used plastic into new products is:', ['recycling', 'burning', 'dumping', 'littering'], 'Reduce, reuse, recycle.'),
+    Q('Rubbish in gutters can cause:', ['floods and diseases', 'clean water', 'better roads', 'more fish'], 'Blocked gutters flood.'),
+    Q('The title of a notice is often written in:', ['capital letters', 'tiny letters', 'pencil only', 'French only'], 'To catch the eye.'),
+  ],
+  'en-maymight-1': [
+    Q('Which modal shows that something is almost impossible?', ['can’t', 'must', 'may', 'might'], '"That can’t be true."'),
+    Q('"The water ___ contain germs; let us boil it." (possible)', ['might', 'can’t', 'mustn’t', 'shan’t'], 'Possibility.'),
+    Q('Which is correct?', ['It may rain.', 'It may rains.', 'It may to rain.', 'It mays rain.'], 'Modal + base form.'),
+    Q('"Everyone is coughing; the smoke ___ be harmful." (almost sure)', ['must', 'can’t', 'mustn’t', 'shall'], 'Strong evidence.'),
+  ],
+  'en-pollution-1': [
+    Q('Choose the verb: "It is hard to ___ in smoke."', ['breathe', 'breath', 'breaths', 'breathed'], 'After "to" we need the verb.'),
+    Q('"Cholera is a water-borne disease" means it is:', ['carried by water', 'born in water', 'cured by water', 'found only in the sea'], '"Borne" means carried.'),
+    Q('Which reduces air pollution?', ['Planting trees', 'Burning tyres', 'Burning plastic', 'Leaving engines running'], 'Trees clean the air.'),
+    Q('Drinking water should be:', ['boiled, filtered or treated', 'taken from any stream', 'left uncovered', 'mixed with sand'], 'To kill germs.'),
+  ],
+  'en-plurals-1': [
+    Q('The plural of "leaf" is:', ['leaves', 'leafs', 'leafes', 'leaf'], '-f to -ves.'),
+    Q('The plural of "day" is:', ['days', 'daies', 'dayes', 'dais'], 'Vowel + y: just add -s.'),
+    Q('The plural of "tooth" is:', ['teeth', 'tooths', 'toothes', 'teeths'], 'An irregular plural.'),
+    Q('The plural of "radio" is:', ['radios', 'radioes', 'radies', 'radio'], 'Some -o nouns just add -s.'),
+  ],
+  'en-hygiene-1': [
+    Q('Rice, cassava and plantains are mainly:', ['energy foods', 'body-building foods', 'protective foods', 'drinks'], 'They are rich in starch.'),
+    Q('Fruit and vegetables are mainly:', ['protective foods', 'energy foods only', 'fats', 'body-building foods only'], 'They give vitamins and minerals.'),
+    Q('A list of questions used to collect information is a:', ['questionnaire', 'recipe', 'notice', 'poem'], 'Answer every item honestly.'),
+    Q('Raw meat and cooked food should be kept:', ['apart', 'together on one plate', 'in the sun', 'uncovered'], 'To stop germs spreading.'),
+  ],
+  'en-possessive-1': [
+    Q('"The nurses’ room" means the room belonging to:', ['more than one nurse', 'one nurse', 'no nurse', 'the patients'], 's’ for plural owners.'),
+    Q('"This is the ___ ward." (belonging to children)', ['children’s', 'childrens’', 'childrens', 'children'], 'Irregular plurals take ’s.'),
+    Q('"___ raining heavily."', ['It’s', 'Its', 'Its’', 'It'], '"It’s" = it is.'),
+    Q('"Our house is big, but ___ is bigger." (belonging to them)', ['theirs', 'their', 'their’s', 'them'], 'A possessive pronoun stands alone.'),
+  ],
+  'en-accidents-1': [
+    Q('A burn caused by hot water or steam is a:', ['scald', 'cut', 'bruise', 'fracture'], 'Scalds are common in kitchens.'),
+    Q('Kerosene must never be kept in:', ['drink bottles', 'a labelled container', 'a locked cupboard', 'a safe place'], 'Children may drink it by mistake.'),
+    Q('For a small cut, first:', ['press on it with a clean cloth', 'put earth on it', 'leave it open in the dust', 'pour kerosene on it'], 'Pressure stops the bleeding.'),
+    Q('Before helping a person who got an electric shock, you must:', ['switch off the power', 'touch them quickly', 'pour water on them', 'pull the wire with wet hands'], 'Otherwise you may be shocked too.'),
+  ],
+  'en-frequency-1': [
+    Q('Which adverb means "not ever"?', ['never', 'always', 'usually', 'often'], 'Never = 0%.'),
+    Q('Which shows the order from most to least often?', ['always, usually, sometimes, never', 'never, always, sometimes, usually', 'sometimes, always, never, usually', 'usually, never, always, sometimes'], 'Always is 100%, never is 0%.'),
+    Q('"Why don’t you rest?" is a:', ['suggestion', 'greeting', 'command', 'promise'], 'It offers an idea.'),
+    Q('"How about ___ some water?"', ['drinking', 'drink', 'to drink', 'drank'], '"How about" + -ing.'),
+  ],
+  'en-doctor-1': [
+    Q('A doctor’s written order for medicine is a:', ['prescription', 'receipt', 'notice', 'symptom'], 'You take it to the pharmacy.'),
+    Q('Fever and headache are examples of:', ['symptoms', 'medicines', 'departments', 'doctors'], 'Signs of illness.'),
+    Q('X-ray pictures are taken in the:', ['radiology department', 'pharmacy', 'maternity', 'kitchen'], 'Radiology uses X-rays.'),
+    Q('An informal letter ends with something like:', ['Your friend, Lum', 'Yours faithfully, L. Ngu', 'Signed, the Mayor', 'Nothing'], 'A friendly closing and your first name.'),
+  ],
+  // ---------- Sequence 4 ----------
+  'en-whq-1': [
+    Q('"___ bag is this?" "It’s Ayuk’s."', ['Whose', 'Who', 'Which', 'What'], '"Whose" asks about the owner.'),
+    Q('"___ do you go to school?" "By bus."', ['How', 'Why', 'When', 'Who'], '"How" asks about the way.'),
+    Q('"___ teaches you English?" (no do)', ['Who', 'Who does', 'Whom do', 'What does'], 'When "who" is the subject, no "do".'),
+    Q('Which word has the schwa /ə/ in its last syllable?', ['doctor', 'cat', 'bed', 'see'], '"Doctor" is said /ˈdɒktə/.'),
+  ],
+  'en-jobs-1': [
+    Q('A person who plays music is a:', ['musician', 'musicer', 'musicist', 'musicor'], 'music + -ian.'),
+    Q('"Dr" is an example of:', ['an abbreviation', 'an acronym', 'a suffix', 'a verb'], 'It is short for Doctor.'),
+    Q('"I have a lot of ___ today."', ['work', 'job', 'jobs', 'a work'], '"Work" is usually uncountable.'),
+    Q('A person who drives a taxi is a:', ['driver', 'drivist', 'drivian', 'drivor'], 'drive + -r.'),
+  ],
+  'en-duration-1': [
+    Q('"We stayed at the cinema ___ midnight." (end point)', ['until', 'for', 'during', 'since'], '"Until" + end point.'),
+    Q('"It rained ___ the whole festival."', ['throughout', 'since', 'at', 'on'], '"Throughout" = all through.'),
+    Q('Which is wrong?', ['during two hours', 'for two hours', 'during the film', 'from 6 to 8'], 'Use "for" with a length of time.'),
+    Q('"During" answers the question:', ['When?', 'How long?', 'Why?', 'Who?'], '"For" answers "how long?".'),
+  ],
+  'en-seewatch-1': [
+    Q('"Please ___ the board." (turn your eyes to it)', ['look at', 'watch', 'see at', 'look'], '"Look at" something on purpose.'),
+    Q('The written words of a film are the:', ['script', 'cast', 'audience', 'trailer'], 'Actors learn the script.'),
+    Q('The people who watch a film or play are the:', ['audience', 'cast', 'crew', 'director'], 'The audience watches.'),
+    Q('The person who answers the questions in an interview is the:', ['interviewee', 'interviewer', 'reporter', 'director'], 'The interviewer asks.'),
+  ],
+  'en-past-1': [
+    Q('The past tense of "bring" is:', ['brought', 'bringed', 'brang', 'bought'], '"Bought" is the past of "buy".'),
+    Q('"We ___ not dance at the party."', ['did', 'do', 'were', 'have'], 'Negative: did not + base form.'),
+    Q('The past tense of "carry" is:', ['carried', 'carryed', 'carred', 'carries'], 'Consonant + y → -ied.'),
+    Q('The past tense of "cut" is:', ['cut', 'cutted', 'cuted', 'cot'], 'It does not change.'),
+  ],
+  'en-birthday-1': [
+    Q('The list of food served at a party is the:', ['menu', 'budget', 'receipt', 'invitation'], 'A menu lists dishes.'),
+    Q('The things needed to make a dish are its:', ['ingredients', 'guests', 'decorations', 'candles'], 'For example flour, eggs and sugar for a cake.'),
+    Q('A written request to come to a party is an:', ['invitation', 'apology', 'excuse', 'order'], 'Guests receive invitations.'),
+    Q('A good description of a party uses:', ['details of sight, sound, smell and taste', 'only numbers', 'only the date', 'no adjectives'], 'Sensory details paint a picture.'),
+  ],
+  'en-directions2-1': [
+    Q('Which indirect question is correct?', ['Could you tell me where the hospital is?', 'Could you tell me where is the hospital?', 'Could you tell me where the hospital is it?', 'Where the hospital is, tell me?'], 'Subject before verb.'),
+    Q('"Take the second ___ on the right."', ['turning', 'turn back', 'roundabout', 'opposite'], 'A turning is a side road.'),
+    Q('After someone gives you directions, you should:', ['thank them', 'walk away silently', 'laugh', 'argue'], 'Say "Thank you very much".'),
+    Q('"Go ___ the church and turn left."', ['past', 'passed', 'pass by it at', 'into'], '"Go past" = go beyond it.'),
+  ],
+  'en-postcard-1': [
+    Q('On a postcard, the message goes:', ['on the left', 'on the picture', 'under the stamp', 'on the envelope'], 'The address goes on the right.'),
+    Q('The National Museum in Yaoundé is in:', ['the former presidential palace', 'a football stadium', 'a hospital', 'a market'], 'It was once the presidential palace.'),
+    Q('Which word has the diphthong /aɪ/?', ['five', 'fit', 'feet', 'fate'], '"Five" is said /faɪv/.'),
+    Q('Which pair differs in /aɪ/ and /eɪ/?', ['my – may', 'my – me', 'may – me', 'bite – bit'], 'my /maɪ/, may /meɪ/.'),
+  ],
+  'en-future-1': [
+    Q('"___ I carry your bag?" (offer)', ['Shall', 'Will', 'Do', 'Am'], '"Shall I …?" offers help.'),
+    Q('"I promise I ___ return your book."', ['will', 'am going', 'went', 'shall to'], 'Promises take "will".'),
+    Q('The negative of "I will" is:', ['I won’t', 'I willn’t', 'I don’t will', 'I not will'], 'won’t = will not.'),
+    Q('"She ___ visit her aunt next week; she has bought the ticket."', ['is going to', 'goes', 'went', 'has gone'], 'A plan already made.'),
+  ],
+  'en-library-1': [
+    Q('Books are arranged in a library on:', ['shelves', 'beds', 'tables only', 'the floor'], 'By subject.'),
+    Q('The opposite of "lend" is:', ['borrow', 'give', 'sell', 'keep'], 'You borrow from someone who lends.'),
+    Q('A list of all the books in a library is the:', ['catalogue', 'due date', 'timetable', 'diary'], 'It shows where each book is.'),
+    Q('The opposite of "careful" is:', ['careless', 'uncareful', 'discareful', 'carefree'], '-less means without.'),
+  ],
+  // ---------- Sequence 5 ----------
+  'en-colour-1': [
+    Q('The star on the Cameroon flag is:', ['yellow', 'red', 'green', 'white'], 'A yellow star on the red band.'),
+    Q('"a ___ jersey"', ['new green', 'green new', 'greens new', 'new greens'], 'Age before colour.'),
+    Q('In which word is s said /s/?', ['basket', 'busy', 'cousin', 'music'], '"Basket" has /s/.'),
+    Q('"Dark green" and "light blue" are:', ['shades of colour', 'nouns', 'verbs', 'prefixes'], 'Lighter or darker forms.'),
+  ],
+  'en-sports-1': [
+    Q('The person who trains a team is the:', ['coach', 'referee', 'linesman', 'fan'], 'The referee controls the match.'),
+    Q('How many times has Cameroon won the Africa Cup of Nations?', ['five', 'two', 'ten', 'never'], '1984, 1988, 2000, 2002 and 2017.'),
+    Q('Shaking hands after a match, win or lose, shows:', ['sportsmanship', 'cheating', 'anger', 'pride'], 'Fair play.'),
+    Q('A holiday camp offers young people:', ['sport, games and learning during the holidays', 'only exams', 'hospital care', 'jobs for adults'], 'Camps teach and entertain.'),
+  ],
+  'en-sentence-1': [
+    Q('A sentence that asks something ends with:', ['a question mark', 'a full stop', 'a comma', 'a colon'], '? ends questions.'),
+    Q('In "The mayor opened the market", the subject is:', ['The mayor', 'opened', 'the market', 'none'], 'Who opened? The mayor.'),
+    Q('Which is a complete sentence?', ['The children planted trees.', 'The children.', 'Planted trees yesterday the.', 'Under the tree.'], 'It has a subject and a verb.'),
+    Q('Which word ends with /v/?', ['leave', 'leaf', 'laugh', 'safe'], '"Leave" ends in /v/.'),
+  ],
+  'en-request-letter-1': [
+    Q('In a formal letter, the receiver’s address is written:', ['on the left, below the date', 'at the top right', 'at the end', 'on the envelope only'], 'The writer’s address is at the top right.'),
+    Q('The subject line of a formal letter:', ['states what the letter is about', 'greets the reader', 'gives the date', 'signs the letter'], 'For example "Request for street lights".'),
+    Q('Which is formal language?', ['We humbly request your help.', 'Hey, help us!', 'Gimme light!', 'U must help.'], 'Formal letters are polite.'),
+    Q('A list of what a neighbourhood lacks is a:', ['needs assessment list', 'menu', 'recipe', 'family tree'], 'It shows what must be done first.'),
+  ],
+  'en-yesno-1': [
+    Q('"Can monkeys swim?" A short answer is:', ['Yes, they can.', 'Yes, they do.', 'Yes, it can.', 'Yes, can.'], 'Repeat the auxiliary.'),
+    Q('Which is a yes/no question?', ['Is the river clean?', 'Why is the river dirty?', 'Where is the river?', 'How deep is the river?'], 'It can be answered yes or no.'),
+    Q('The short vowel sound of the letter o, as in "hot", is:', ['/ɒ/', '/æ/', '/ʌ/', '/e/'], 'hot /hɒt/.'),
+    Q('The short vowel sound of the letter u, as in "sun", is:', ['/ʌ/', '/ʊ/', '/uː/', '/ɒ/'], 'sun /sʌn/.'),
+  ],
+  'en-nature-1': [
+    Q('Waza National Park is in the:', ['Far North Region', 'South-West Region', 'Littoral Region', 'East Region only'], 'It is famous for elephants and lions.'),
+    Q('A species in danger of disappearing is:', ['endangered', 'extinct', 'domestic', 'plentiful'], 'Extinct ones have already gone.'),
+    Q('A synonym of "begin" is:', ['start', 'end', 'stop', 'finish'], 'Same meaning.'),
+    Q('A short report ends with:', ['a recommendation', 'a joke', 'a song', 'a greeting'], 'What should be done.'),
+  ],
+  'en-phrasal-1': [
+    Q('"Please turn ___ the light; it is dark." (switch on)', ['on', 'off', 'up', 'out'], '"Turn on" = switch on.'),
+    Q('"I wake ___ at 5 a.m."', ['up', 'on', 'off', 'out'], '"Wake up" = stop sleeping.'),
+    Q('"What do you want to be when you grow ___?"', ['up', 'on', 'in', 'off'], '"Grow up" = become an adult.'),
+    Q('"Look up a word" means:', ['find it in a dictionary', 'look at the ceiling', 'forget it', 'shout it'], 'Phrasal verbs have their own meanings.'),
+  ],
+  'en-career-1': [
+    Q('The side that opposes the motion in a debate is the:', ['opposition', 'proposition', 'chairperson', 'audience'], 'The proposition supports it.'),
+    Q('Treating someone unfairly because of their sex is:', ['gender discrimination', 'gender equality', 'solidarity', 'hospitality'], 'It is unjust.'),
+    Q('A strong wish to achieve something is:', ['ambition', 'laziness', 'fear', 'anger'], 'Ambition drives success.'),
+    Q('If a young person feels sad and hopeless for a long time, they should:', ['talk to a trusted adult', 'keep it secret forever', 'stop eating', 'leave school'], 'Help is available.'),
+  ],
+  'en-passive-1': [
+    Q('The passive is formed with:', ['be + past participle', 'have + base form', 'do + -ing', 'will + -ed'], '"is visited", "was built".'),
+    Q('The passive of "Farmers grow cocoa" is:', ['Cocoa is grown by farmers.', 'Cocoa grows farmers.', 'Farmers are grown by cocoa.', 'Cocoa was grow by farmers.'], 'Present passive.'),
+    Q('Which word has the vowel /ʌ/?', ['money', 'many', 'moon', 'man'], '"Money" is said /ˈmʌni/.'),
+    Q('Only ___ verbs can be made passive.', ['transitive', 'intransitive', 'linking', 'modal'], 'They have an object to become the subject.'),
+  ],
+  'en-tourism-1': [
+    Q('Something bought to remember a place is a:', ['souvenir', 'itinerary', 'receipt', 'reservation'], 'Visitors buy souvenirs.'),
+    Q('The Dja Faunal Reserve is a:', ['UNESCO World Heritage Site', 'football stadium', 'shopping centre', 'mountain'], 'It protects the rainforest and its animals.'),
+    Q('Rhumsiki is famous for its landscapes in the:', ['Mandara Mountains', 'Atlantic Ocean', 'Lake Chad basin only', 'Bamenda grasslands'], 'In the Far North.'),
+    Q('Tourism brings a country:', ['jobs and money', 'only pollution', 'nothing', 'floods'], 'But sites must be protected.'),
+  ],
+  // ---------- Sequence 6 ----------
+  'en-prefix-1': [
+    Q('The opposite of "regular" is:', ['irregular', 'unregular', 'disregular', 'imregular'], 'ir- before r.'),
+    Q('"Misspell" means:', ['spell wrongly', 'spell again', 'not spell', 'spell before'], 'mis- means wrongly.'),
+    Q('"Prepare" contains the prefix pre-, which means:', ['before', 'again', 'not', 'wrongly'], 'pre- = before.'),
+    Q('"Tanyi and ___ sisters went to the village."', ['his', 'her', 'their', 'its'], 'The owner is Tanyi.'),
+  ],
+  'en-myths-1': [
+    Q('A story about a hero of the past that may be partly true is a:', ['legend', 'recipe', 'notice', 'report'], 'Myths explain origins.'),
+    Q('Which time word shows the last event in a narrative?', ['finally', 'first', 'next', 'then'], '"Finally" ends the story.'),
+    Q('Most narratives have:', ['a beginning, a middle and an end', 'only an end', 'no characters', 'only dialogue'], 'Setting, problem and solution.'),
+    Q('We should listen to the myths of other peoples:', ['with respect', 'with mockery', 'never', 'only to laugh'], 'They carry a people’s values.'),
+  ],
+  'en-transitive-1': [
+    Q('In "The guests arrived late", "arrived" is:', ['intransitive', 'transitive', 'passive', 'a noun'], 'No object.'),
+    Q('In "She sang a song", "sang" is:', ['transitive', 'intransitive', 'a linking verb', 'passive'], 'Object: a song.'),
+    Q('Which verb usually needs an object?', ['bring', 'sleep', 'arrive', 'laugh'], 'You bring something.'),
+    Q('To find the object, ask after the verb:', ['what? or whom?', 'when?', 'where?', 'why?'], '"Wore what? Masks."'),
+  ],
+  'en-practices-1': [
+    Q('The Nguon festival belongs to the:', ['Bamoun people of Foumban', 'Sawa people of Douala', 'Bakweri of Buea', 'Fulani of Garoua'], 'The Ngondo is the Sawa festival.'),
+    Q('Traditions passed down from earlier generations are our:', ['heritage', 'pollution', 'budget', 'itinerary'], 'Heritage gives identity.'),
+    Q('Accepting that others have different customs is:', ['tolerance', 'tribalism', 'discrimination', 'pride'], 'Tolerance builds peace.'),
+    Q('Which is a good cultural practice?', ['Hospitality to visitors', 'Breast ironing', 'Forced marriage', 'Denying widows their property'], 'The others violate human rights.'),
+  ],
+  'en-demonstratives-1': [
+    Q('"___ shoes I am wearing are new."', ['These', 'Those', 'That', 'This'], 'Plural and near.'),
+    Q('"___ guest received a gift."', ['Every', 'All', 'Both', 'Many'], '"Every" + singular noun.'),
+    Q('"Each of the dancers ___ a mask."', ['wears', 'wear', 'are wearing', 'have worn'], 'Distributives take a singular verb.'),
+    Q('"You can take ___ of the two bags." (one or the other)', ['either', 'neither', 'every', 'all'], 'Either = one or the other.'),
+  ],
+  'en-homophones-1': [
+    Q('Choose: "We bought ___ to bake a cake."', ['flour', 'flower', 'floor', 'flow'], 'Flour is ground grain.'),
+    Q('"Bank" (for money) and "bank" (of a river) are:', ['homonyms', 'homophones with different spellings', 'antonyms', 'prefixes'], 'Same spelling, different meanings.'),
+    Q('Choose: "I ___ the answer yesterday."', ['knew', 'new', 'now', 'know'], '"Knew" is the past of know.'),
+    Q('When planning an event, the list of costs is the:', ['budget', 'poem', 'notice', 'myth'], 'It shows how much each item costs.'),
+  ],
+  'en-noun-adj-1': [
+    Q('The adjective from "nation" is:', ['national', 'nationful', 'nationous', 'nationy'], 'nation + -al.'),
+    Q('The adjective from "noise" is:', ['noisy', 'noiseful', 'noisous', 'noiseal'], 'Drop the e and add -y.'),
+    Q('The adjective from "courage" is:', ['courageous', 'couragous', 'courageful', 'couragey'], 'Keep the e: courageous.'),
+    Q('The adjective from "hope" meaning "without hope" is:', ['hopeless', 'hopeful', 'unhope', 'hopy'], '-less means without.'),
+  ],
+  'en-regalia-1': [
+    Q('Special clothes and objects worn on important occasions are:', ['regalia', 'crockery', 'furniture', 'cutlery'], 'For example the toghu.'),
+    Q('Words that end with the same sound, like "land" and "hand", are said to:', ['rhyme', 'clash', 'contrast', 'repeat'], 'Rhyme gives music to a poem.'),
+    Q('A long-established way of doing things in a community is a:', ['custom', 'recipe', 'budget', 'notice'], 'Naming ceremonies are customs.'),
+    Q('The best way to check the rhythm of your poem is to:', ['read it aloud', 'count the letters', 'write it in capitals', 'remove all lines'], 'Hear how it sounds.'),
+  ],
+};

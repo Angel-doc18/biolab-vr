@@ -1,9 +1,12 @@
 // Extra end-of-lesson questions for the English Language lessons, by lesson id.
 // The correct option is written first; options are shuffled when shown.
 
+import { QUESTIONS_1 } from './lessonQuestions1';
+
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
+  ...QUESTIONS_1,
   // ---------- Form 4, term 1 ----------
   'en-pronouns-4': [
     Q('"Between you and ___, the decision was unfair."', ['me', 'I', 'mine', 'myself'], 'After a preposition, use the object form.'),
