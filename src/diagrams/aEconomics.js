@@ -15,26 +15,26 @@ import { Head, Txt } from './Diagram';
 import { columnsSpec, cycleSpec, flowSpec, treeSpec } from './charts';
 import { A_GEOGRAPHY } from './aGeography';
 
-const O = '#33414d';
-const MUTED = '#6b7a88';
-const BLUE = '#1f6fb2';
-const RED = '#b8433f';
-const GREEN = '#2f7d4f';
-const GOLD = '#9a6a12';
-const PURPLE = '#6a4c93';
-const TEAL = '#1f7a7a';
-const AMBER = '#fbefd0';
-const ROSE = '#f8e3df';
-const LEAF = '#e3f0da';
-const SKY = '#dcecf7';
-const LILAC = '#efe6f7';
-const GREY = '#e6e9ec';
-const DASH = '3 3';
+export const O = '#33414d';
+export const MUTED = '#6b7a88';
+export const BLUE = '#1f6fb2';
+export const RED = '#b8433f';
+export const GREEN = '#2f7d4f';
+export const GOLD = '#9a6a12';
+export const PURPLE = '#6a4c93';
+export const TEAL = '#1f7a7a';
+export const AMBER = '#fbefd0';
+export const ROSE = '#f8e3df';
+export const LEAF = '#e3f0da';
+export const SKY = '#dcecf7';
+export const LILAC = '#efe6f7';
+export const GREY = '#e6e9ec';
+export const DASH = '3 3';
 
 // ---------- plotting helpers ----------
 // A frame maps data values to drawing coordinates: (ox, oy) is the bottom-left
 // corner (at xmin, ymin), w and h the size of the plotting area.
-const fr = (ox, oy, w, h, xmax, ymax, ymin = 0) => ({
+export const fr = (ox, oy, w, h, xmax, ymax, ymin = 0) => ({
   ox,
   oy,
   w,
@@ -46,15 +46,15 @@ const fr = (ox, oy, w, h, xmax, ymax, ymin = 0) => ({
   Y: (y) => oy - ((y - ymin) * h) / (ymax - ymin),
 });
 const n1 = (v) => v.toFixed(1);
-const seg = (f, x1, y1, x2, y2) => `M${n1(f.X(x1))} ${n1(f.Y(y1))} L${n1(f.X(x2))} ${n1(f.Y(y2))}`;
-const fpath = (f, fn, a, b, n = 60) => {
+export const seg = (f, x1, y1, x2, y2) => `M${n1(f.X(x1))} ${n1(f.Y(y1))} L${n1(f.X(x2))} ${n1(f.Y(y2))}`;
+export const fpath = (f, fn, a, b, n = 60) => {
   const pts = Array.from({ length: n + 1 }, (_, i) => a + ((b - a) * i) / n);
   return `M${pts.map((x) => `${n1(f.X(x))} ${n1(f.Y(fn(x)))}`).join(' L')}`;
 };
 const poly = (f, pts) => `M${pts.map(([x, y]) => `${n1(f.X(x))} ${n1(f.Y(y))}`).join(' L')} Z`;
-const lines = (f, pts) => `M${pts.map(([x, y]) => `${n1(f.X(x))} ${n1(f.Y(y))}`).join(' L')}`;
+export const lines = (f, pts) => `M${pts.map(([x, y]) => `${n1(f.X(x))} ${n1(f.Y(y))}`).join(' L')}`;
 // A smooth curve through data points (Catmull-Rom as cubic Béziers).
-const smooth = (f, pts) => {
+export const smooth = (f, pts) => {
   const p = pts.map(([x, y]) => [f.X(x), f.Y(y)]);
   let d = `M${n1(p[0][0])} ${n1(p[0][1])}`;
   for (let i = 0; i < p.length - 1; i += 1) {
@@ -67,23 +67,23 @@ const smooth = (f, pts) => {
   return d;
 };
 
-function Cv({ d, c = O, w = 2, dash }) {
+export function Cv({ d, c = O, w = 2, dash }) {
   return <Path d={d} fill="none" stroke={c} strokeWidth={w} strokeDasharray={dash} />;
 }
-function Area({ f, pts, fill }) {
+export function Area({ f, pts, fill }) {
   return <Path d={poly(f, pts)} fill={fill} />;
 }
-function Dot({ f, x, y, c = O, r = 2.6 }) {
+export function Dot({ f, x, y, c = O, r = 2.6 }) {
   return <Path d={`M${n1(f.X(x) - r)} ${n1(f.Y(y))} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0`} fill={c} />;
 }
-function Lb({ f, x, y, t, c = O, dx = 0, dy = 0, anchor = 'start', size = 8.5, weight = '700' }) {
+export function Lb({ f, x, y, t, c = O, dx = 0, dy = 0, anchor = 'start', size = 8.5, weight = '700' }) {
   return (
     <Txt x={f.X(x) + dx} y={f.Y(y) + dy} size={size} anchor={anchor} weight={weight} fill={c}>
       {t}
     </Txt>
   );
 }
-function Arrow({ x1, y1, x2, y2, c = O, w = 1.3 }) {
+export function Arrow({ x1, y1, x2, y2, c = O, w = 1.3 }) {
   return (
     <G>
       <Line x1={x1} y1={y1} x2={x2} y2={y2} stroke={c} strokeWidth={w} />
@@ -93,7 +93,7 @@ function Arrow({ x1, y1, x2, y2, c = O, w = 1.3 }) {
 }
 // Axes with an arrow on each, value ticks [[value, label]], and the axis
 // titles: y at the top left, x at the bottom right.
-function Axes({ f, xlab, ylab, xt = [], yt = [], xlabUp, xlabY }) {
+export function Axes({ f, xlab, ylab, xt = [], yt = [], xlabUp, xlabY }) {
   const y0 = f.Y(Math.max(0, f.ymin));
   const top = f.oy - f.h - 8;
   return (
@@ -132,7 +132,7 @@ function Axes({ f, xlab, ylab, xt = [], yt = [], xlabUp, xlabY }) {
   );
 }
 // Dashed guides from a point to both axes, with optional value labels.
-function Guide({ f, x, y, xl, yl, toX = true, toY = true }) {
+export function Guide({ f, x, y, xl, yl, toX = true, toY = true }) {
   const y0 = f.Y(Math.max(0, f.ymin));
   return (
     <G>
@@ -151,7 +151,7 @@ function Guide({ f, x, y, xl, yl, toX = true, toY = true }) {
     </G>
   );
 }
-function Caption({ x, y, t }) {
+export function Caption({ x, y, t }) {
   return (
     <Txt x={x} y={y} size={9} weight="700" fill={O}>
       {t}

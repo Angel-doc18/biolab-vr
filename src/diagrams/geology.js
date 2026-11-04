@@ -13,7 +13,7 @@ const WATER = '#4a90c8';
 
 // Clip a polygon to an axis-aligned box (Sutherland-Hodgman); the polygon may
 // be concave, the box is convex.
-function clipBox(poly, x0, y0, x1, y1) {
+export function clipBox(poly, x0, y0, x1, y1) {
   const sides = [
     [(p) => p[0] >= x0, (a, b) => [x0, a[1] + ((b[1] - a[1]) * (x0 - a[0])) / (b[0] - a[0])]],
     [(p) => p[0] <= x1, (a, b) => [x1, a[1] + ((b[1] - a[1]) * (x1 - a[0])) / (b[0] - a[0])]],
@@ -35,15 +35,15 @@ function clipBox(poly, x0, y0, x1, y1) {
   }
   return out;
 }
-const pts = (poly) => poly.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+export const pts = (poly) => poly.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
 // The band between two curves y = top(x) and y = bottom(x), sampled from x0 to x1.
-function band(top, bottom, x0, x1, step = 5) {
+export function band(top, bottom, x0, x1, step = 5) {
   const xs = [];
   for (let x = x0; x < x1; x += step) xs.push(x);
   xs.push(x1);
   return [...xs.map((x) => [x, top(x)]), ...xs.reverse().map((x) => [x, bottom(x)])];
 }
-function Shape({ poly, fill, stroke = O, width = 0.9 }) {
+export function Shape({ poly, fill, stroke = O, width = 0.9 }) {
   return poly.length ? <Polygon points={pts(poly)} fill={fill} stroke={stroke} strokeWidth={width} /> : null;
 }
 function HalfArrow({ x1, y1, x2, y2 }) {
