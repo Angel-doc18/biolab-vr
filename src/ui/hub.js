@@ -34,6 +34,7 @@ export const SUBJECT_LOOK = {
   'a-english': { icon: 'history_edu', tint: '#3d3f86', bg: '#e3e4f4' },
   'a-french': { icon: 'menu_book', tint: '#7a2e3b', bg: '#f3e1e4' },
   'a-literature': { icon: 'theater_comedy', tint: '#5d4037', bg: '#ede4df' },
+  'a-history': { icon: 'history_edu', tint: '#4a5d23', bg: '#e8ecdc' },
 };
 const look = (id) => SUBJECT_LOOK[id] || SUBJECT_LOOK.biology;
 
