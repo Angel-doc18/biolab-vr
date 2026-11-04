@@ -27,8 +27,11 @@ export default function Results({ navigation, route }) {
   const minutes = exam?.minutes || p1For(subject).minutes;
   // An end-of-term class test is marked out of 20, like a school test; a Paper 1
   // gets a GCE-style grade estimate.
-  const isTerm = exam?.kind === 'term';
-  const paperEn = isTerm ? `term ${exam.term} test` : 'Paper 1';
+  const isSeq = exam?.kind === 'seq';
+  const isTerm = exam?.kind === 'term' || isSeq;
+  const testEn = isSeq ? `sequence ${exam.seq} test` : `term ${exam?.term} test`;
+  const testFr = isSeq ? `évaluation de la séquence ${exam.seq}` : `contrôle du trimestre ${exam?.term}`;
+  const paperEn = isTerm ? testEn : 'Paper 1';
   const mark20 = exam ? Math.round((exam.score / exam.total) * 200) / 10 : 0;
   const [filter, setFilter] = useState('incorrect');
   const [speaking, setSpeaking] = useState(null);
@@ -51,7 +54,7 @@ export default function Results({ navigation, route }) {
     .map(([u, [c, t]]) => ({ u, c, t, pct: Math.round((c / t) * 100) }))
     .sort((a, b) => unitById(a.u).n - unitById(b.u).n);
   const weakest = [...units].sort((a, b) => a.pct - b.pct)[0];
-  const previous = progress.exams.filter((e) => e.kind === exam.kind && (!isTerm || e.term === exam.term) && examSubject(e) === subject && e.at < (exam.at || Date.now()));
+  const previous = progress.exams.filter((e) => e.kind === exam.kind && (!isTerm || (isSeq ? e.seq === exam.seq : e.term === exam.term)) && examSubject(e) === subject && e.at < (exam.at || Date.now()));
   const prevBest = previous.length ? Math.max(...previous.map((e) => e.pct)) : null;
   const grade = gradeFor(exam.pct);
 
@@ -75,7 +78,7 @@ export default function Results({ navigation, route }) {
         )
         .join('');
       const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Helvetica,Arial;margin:28px;color:#0f1d2b}h1{font-size:20px}table{width:100%;border-collapse:collapse;font-size:11px}td{border-bottom:1px solid #d7e1e9;padding:6px;vertical-align:top}.k{color:#40474f;margin-top:4px}</style></head><body>
-      <h1>${esc(subjectName(subject, 'en'))} ${isTerm ? `${esc(exam.form || '')} term ${exam.term} test` : 'Paper 1 practice'}: ${exam.score}/${exam.total} (${exam.pct}%)${isTerm ? `, ${mark20}/20` : ''}</h1><div>${esc(user?.name)}, ${new Date(exam.at || Date.now()).toLocaleString('en-GB')}</div><br/><table>${rows}</table>
+      <h1>${esc(subjectName(subject, 'en'))} ${isTerm ? `${esc(exam.form || '')} ${testEn}` : 'Paper 1 practice'}: ${exam.score}/${exam.total} (${exam.pct}%)${isTerm ? `, ${mark20}/20` : ''}</h1><div>${esc(user?.name)}, ${new Date(exam.at || Date.now()).toLocaleString('en-GB')}</div><br/><table>${rows}</table>
       <p style="font-size:10px;color:#707881">${isTerm ? 'Class practice test by Klass8. Not a school report mark.' : 'Practice estimate by Klass8. Not an official GCE Board result.'}</p></body></html>`;
       const { uri } = await Print.printToFileAsync({ html });
       if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
@@ -90,14 +93,14 @@ export default function Results({ navigation, route }) {
         bg="bg-surface"
         header={
           <StackHeader
-            title={isTerm ? `${name}: ${L(`term ${exam.term} test result`, `résultat du contrôle du trimestre ${exam.term}`)}` : `${name} ${L('Paper 1 result', 'résultat de l’épreuve 1')}`}
+            title={isTerm ? `${name}: ${L(`${testEn} result`, `résultat : ${testFr}`)}` : `${name} ${L('Paper 1 result', 'résultat de l’épreuve 1')}`}
             subtitle={new Date(exam.at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
             subtitleColor="on-surface-variant"
             avatar={false}
             right={
               <P
                 c="w-11 h-11 items-center justify-center"
-                onPress={() => Share.share({ message: isTerm ? L(`I scored ${mark20}/20 in a ${name} ${paperEn} on Klass8.`, `J’ai obtenu ${mark20}/20 au contrôle du trimestre ${exam.term} de ${name} sur Klass8.`) : L(`I scored ${exam.score}/${exam.total} (${exam.pct}%) in a GCE ${name} Paper 1 practice paper on Klass8.`, `J’ai obtenu ${exam.score}/${exam.total} (${exam.pct} %) à une épreuve 1 d’entraînement de ${name} du GCE sur Klass8.`) })}
+                onPress={() => Share.share({ message: isTerm ? L(`I scored ${mark20}/20 in a ${name} ${paperEn} on Klass8.`, `J’ai obtenu ${mark20}/20 (${testFr}, ${name}) sur Klass8.`) : L(`I scored ${exam.score}/${exam.total} (${exam.pct}%) in a GCE ${name} Paper 1 practice paper on Klass8.`, `J’ai obtenu ${exam.score}/${exam.total} (${exam.pct} %) à une épreuve 1 d’entraînement de ${name} du GCE sur Klass8.`) })}
                 accessibilityLabel="Share result"
               >
                 <Ic n="ios_share" s={20} c="on-surface" />
@@ -117,7 +120,9 @@ export default function Results({ navigation, route }) {
             <T c="font-body-sm text-body-sm text-on-surface-variant">
               {prevBest == null
                 ? isTerm
-                  ? L('This is your first test for this term, so it becomes your starting point.', 'C’est votre premier contrôle de ce trimestre : il devient votre point de départ.')
+                  ? isSeq
+                    ? L('This is your first test for this sequence, so it becomes your starting point.', 'C’est votre première évaluation de cette séquence : elle devient votre point de départ.')
+                    : L('This is your first test for this term, so it becomes your starting point.', 'C’est votre premier contrôle de ce trimestre : il devient votre point de départ.')
                   : L('This is your first Paper 1, so it becomes your starting point.', 'C’est votre première épreuve 1 : elle devient votre point de départ.')
                 : exam.pct >= prevBest
                 ? `${L('Your best so far. Previous best', 'Votre meilleur résultat. Meilleur précédent')}: ${prevBest}%.`

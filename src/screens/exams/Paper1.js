@@ -5,7 +5,7 @@ import { Screen, Spinner, StackHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { subjectName } from '../../data/subjects';
-import { buildPaper, byKey, clearSession, loadSession, mockRef, paper1Plan, saveSession, score, termPlan, unitLabel } from '../../lib/exam';
+import { buildPaper, byKey, clearSession, loadSession, mockRef, paper1Plan, saveSession, score, seqPlan, termPlan, unitLabel } from '../../lib/exam';
 import { topicLabel, unitById } from '../../data/units';
 import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
 import { completeMatchingAssignment } from '../../lib/assignments';
@@ -77,12 +77,19 @@ export default function Paper1({ navigation, route }) {
   const { pro, progress, recordExam, subject: current, user } = useApp();
   const L = useL();
   const subject = route.params?.subject || current;
-  // A term number makes this an end-of-term class test on that term's topics.
+  // A term number makes this an end-of-term class test on that term's topics; a
+  // sequence number makes it the harmonised test of that sequence.
   const term = route.params?.term || null;
-  const slot = term ? `t${term}` : undefined;
-  const plan = term ? termPlan(subject, user?.className, term) : paper1Plan(subject, user?.className);
+  const seq = term ? null : route.params?.seq || null;
+  const classTest = !!(term || seq);
+  const slot = term ? `t${term}` : seq ? `s${seq}` : undefined;
+  const plan = term ? termPlan(subject, user?.className, term) : seq ? seqPlan(subject, user?.className, seq) : paper1Plan(subject, user?.className);
   const lang = useLang();
-  const title = term ? `${subjectName(subject, lang)}: ${L(`term ${term} test`, `contrôle du trimestre ${term}`)}` : `${subjectName(subject, lang)} ${L('Paper 1', 'épreuve 1')}`;
+  const title = term
+    ? `${subjectName(subject, lang)}: ${L(`term ${term} test`, `contrôle du trimestre ${term}`)}`
+    : seq
+      ? `${subjectName(subject, lang)}: ${L(`sequence ${seq} test`, `évaluation de la séquence ${seq}`)}`
+      : `${subjectName(subject, lang)} ${L('Paper 1', 'épreuve 1')}`;
   const [s, setS] = useState(null); // { startedAt, paper, answers, flags, struck, index }
   const [now, setNow] = useState(Date.now());
   const [big, setBig] = useState(false);
@@ -125,11 +132,11 @@ export default function Paper1({ navigation, route }) {
     done.current = true;
     const r = score(s.paper, s.answers, s.flags);
     const secs = Math.min(minutes * 60, Math.round((Date.now() - s.startedAt) / 1000));
-    const exam = { kind: term ? 'term' : 'p1', subject, ...(term ? { term, form: user?.className } : {}), score: r.correct, total: r.total, pct: r.pct, byUnit: r.byUnit, items: r.items, secs, minutes };
+    const exam = { kind: term ? 'term' : seq ? 'seq' : 'p1', at: Date.now(), subject, ...(term ? { term, form: user?.className } : seq ? { seq, form: user?.className } : {}), score: r.correct, total: r.total, pct: r.pct, byUnit: r.byUnit, items: r.items, secs, minutes };
     recordExam(exam);
     clearSession(subject, slot);
-    if (!term) completeMatchingAssignment('mock', mockRef(subject), r.pct);
-    navigation.replace('Results', { exam: { ...exam, at: Date.now() } });
+    if (!classTest) completeMatchingAssignment('mock', mockRef(subject), r.pct);
+    navigation.replace('Results', { exam });
   };
 
   useEffect(() => {
@@ -155,7 +162,7 @@ export default function Paper1({ navigation, route }) {
     <V c="flex-1">
       <Screen
         bg="bg-surface"
-        header={<StackHeader title={title} subtitle={term ? L('Multiple choice, class test', 'QCM, contrôle de classe') : L('Multiple choice, practice paper', 'QCM, épreuve d’entraînement')} logo onBack={() => setExit(true)} />}
+        header={<StackHeader title={title} subtitle={term ? L('Multiple choice, class test', 'QCM, contrôle de classe') : seq ? L('Multiple choice, sequence test', 'QCM, évaluation de séquence') : L('Multiple choice, practice paper', 'QCM, épreuve d’entraînement')} logo onBack={() => setExit(true)} />}
         footer={
           <V c="px-margin py-3 bg-surface-container-lowest flex-row items-center gap-space-sm" style={{ shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 16, elevation: 10 }}>
             <P c="h-12 px-space-md rounded-xl bg-surface-container flex-row items-center gap-1" onPress={() => go(i - 1)} disabled={i === 0}>
@@ -304,7 +311,7 @@ export default function Paper1({ navigation, route }) {
         visible={finish}
         icon="task_alt"
         iconBg="bg-secondary-container"
-        title={L('Submit Paper 1?', 'Rendre l’épreuve 1 ?')}
+        title={classTest ? L('Submit the test?', 'Rendre le contrôle ?') : L('Submit Paper 1?', 'Rendre l’épreuve 1 ?')}
         body={L(
           `You have answered ${answered} of ${s.paper.length} questions. ${s.paper.length - answered} are unanswered and will score zero.`,
           `Vous avez répondu à ${answered} questions sur ${s.paper.length}. Les questions sans réponse valent zéro.`

@@ -10,7 +10,7 @@ import { useL, useLang } from '../../i18n';
 import { examSubject } from '../../state/progress';
 import { accuracyByUnit, gradeFor, weakestUnit } from '../../state/selectors';
 import { FREE_MOCKS_PER_WEEK, mocksThisWeek } from '../../data/plan';
-import { paper1Plan, reachesExam, termPlan, termsFor } from '../../lib/exam';
+import { paper1Plan, reachesExam, seqPlan, seqsFor, termPlan, termsFor } from '../../lib/exam';
 import { paper2Config, paper2Covers } from '../../data/paper2';
 import { labsFor } from '../../data/labs';
 import { formsLabel, formsShown, unitsShown } from '../../data/units';
@@ -41,6 +41,43 @@ function TermTests({ terms, subject, className, tint, onPick, L }) {
             <P key={t} c="flex-1 rounded-lg bg-surface-container-low items-center justify-center py-2" onPress={() => onPick(t)} accessibilityRole="button" accessibilityLabel={`Term ${t} test`}>
               <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
                 {L(`Term ${t}`, `Trimestre ${t}`)}
+              </T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant">
+                {plan.count} {L('questions', 'questions')}, {plan.minutes} min
+              </T>
+            </P>
+          );
+        })}
+      </V>
+    </V>
+  );
+}
+
+// Harmonised sequence tests: one button per sequence of the student's class
+// (the sixth, the end-of-year promotion examination, covers the whole year).
+function SequenceTests({ seqs, subject, className, tint, onPick, L }) {
+  return (
+    <V c="bg-surface-container-lowest rounded-xl p-space-md gap-space-sm shadow-sm border border-surface-container">
+      <V c="flex-row items-center gap-space-sm">
+        <V c="w-12 h-12 rounded-xl items-center justify-center" style={{ backgroundColor: `${tint}1f` }}>
+          <Ic n="fact_check" s={26} c={tint} fill />
+        </V>
+        <V c="flex-1 gap-0.5">
+          <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+            {L(`${className} sequence tests`, `Évaluations de séquence, ${className}`)}
+          </T>
+          <T c="font-body-sm text-body-sm text-on-surface-variant">
+            {L('The harmonised test at the end of each sequence, on the topics of that sequence, marked out of 20.', 'L’évaluation harmonisée de fin de séquence, sur les thèmes de la séquence, notée sur 20.')}
+          </T>
+        </V>
+      </V>
+      <V c="flex-row flex-wrap gap-space-xs">
+        {seqs.map((n) => {
+          const plan = seqPlan(subject, className, n);
+          return (
+            <P key={n} c="rounded-lg bg-surface-container-low items-center justify-center py-2" style={{ flexBasis: '31%', flexGrow: 1 }} onPress={() => onPick(n)} accessibilityRole="button" accessibilityLabel={`Sequence ${n} test`}>
+              <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+                {L(`Sequence ${n}`, `Séquence ${n}`)}
               </T>
               <T c="font-body-sm text-body-sm text-on-surface-variant">
                 {plan.count} {L('questions', 'questions')}, {plan.minutes} min
@@ -86,6 +123,7 @@ export default function ExamMenu({ navigation, route }) {
   const shown = formsShown(subject, user?.className);
   const P2 = paper2Config(subject);
   const terms = termsFor(subject, user?.className);
+  const seqs = seqsFor(subject, user?.className);
   const examClass = subjectById(subject).level === 'A' ? 'Upper Sixth' : 'Form 5';
   // Practicals of the topics the student sees.
   const seen = new Set(unitsShown(subject, user?.className).map((u) => u.id));
@@ -129,6 +167,7 @@ export default function ExamMenu({ navigation, route }) {
               onPress={() => navigation.navigate(usedFree ? 'Paywall' : 'Paper1', usedFree ? { reason: 'mocks' } : { subject })}
             />
             {terms.length > 0 && <TermTests terms={terms} subject={subject} className={user?.className} tint={tint} L={L} onPick={(t) => navigation.navigate('Paper1', { subject, term: t })} />}
+            {seqs.length > 0 && <SequenceTests seqs={seqs} subject={subject} className={user?.className} tint={tint} L={L} onPick={(n) => navigation.navigate('Paper1', { subject, seq: n })} />}
             {P2 && (
               <Choice
                 icon="edit_note"
@@ -213,10 +252,10 @@ export default function ExamMenu({ navigation, route }) {
                   <P key={e.id || i} c={`p-space-md flex-row items-center gap-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => (e.kind === 'p2' ? navigation.navigate('Paper2', { subject }) : navigation.navigate('Results', { exam: e }))} scale={0.99}>
                     <V c="flex-1 gap-0.5">
                       <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-                        {e.kind === 'term' ? L(`Term ${e.term} test`, `Contrôle du trimestre ${e.term}`) : e.kind === 'p1' ? L('Paper 1', 'Épreuve 1') : L('Paper 2', 'Épreuve 2')}, {e.score} / {e.total}
+                        {e.kind === 'term' ? L(`Term ${e.term} test`, `Contrôle du trimestre ${e.term}`) : e.kind === 'seq' ? L(`Sequence ${e.seq} test`, `Séquence ${e.seq}`) : e.kind === 'p1' ? L('Paper 1', 'Épreuve 1') : L('Paper 2', 'Épreuve 2')}, {e.score} / {e.total}
                       </T>
                       <T c="font-body-sm text-body-sm text-on-surface-variant">
-                        {new Date(e.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}, {e.kind === 'term' ? `${L('mark', 'note')} ${Math.round((e.score / e.total) * 200) / 10}/20` : `${L('grade', 'note')} ${gradeFor(e.pct)}`}
+                        {new Date(e.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}, {e.kind === 'term' || e.kind === 'seq' ? `${L('mark', 'note')} ${Math.round((e.score / e.total) * 200) / 10}/20` : `${L('grade', 'note')} ${gradeFor(e.pct)}`}
                       </T>
                     </V>
                     <Ic n="chevron_right" s={20} c="outline" />

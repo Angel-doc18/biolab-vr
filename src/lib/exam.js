@@ -48,6 +48,27 @@ export function termPlan(subject, className, term) {
   return { count, minutes: Math.max(10, Math.round((P1.minutes * count) / P1.count / 5) * 5), unitIds: list.map((u) => u.id), forms: [className], term };
 }
 
+// Sequence tests. Cameroonian schools sit a harmonised test at the end of each of
+// the six sequences of the year (two per term). Topics written from a scheme of
+// work carry the sequence in which they are taught and tested; a sequence test
+// sets questions on that sequence's topics, and the sixth sequence (the
+// end-of-year promotion examination) covers the whole year. Offered only when
+// every topic of the class has its sequence.
+const SEQ_QUESTIONS = 20;
+export function seqsFor(subject, className) {
+  const mine = unitsFor(subject).filter((u) => inClass(u, className));
+  if (!mine.length || mine.some((u) => !placeIn(u, className).seq)) return [];
+  return [...new Set(mine.map((u) => placeIn(u, className).seq))].sort((a, b) => a - b);
+}
+export function seqPlan(subject, className, seq) {
+  const P1 = p1For(subject);
+  const mine = unitsFor(subject).filter((u) => inClass(u, className));
+  const list = seq === 6 ? mine : mine.filter((u) => placeIn(u, className).seq === seq);
+  const pool = list.reduce((a, u) => a + u.quiz.length, 0);
+  const count = Math.min(seq === 6 ? TERM_QUESTIONS : SEQ_QUESTIONS, pool);
+  return { count, minutes: Math.max(10, Math.round((P1.minutes * count) / P1.count / 5) * 5), unitIds: list.map((u) => u.id), forms: [className], seq };
+}
+
 // Biology keeps its original key so an unfinished paper survives the update. A
 // term test keeps its own session (slot "t1", "t2" or "t3").
 const sessionKey = (subject, slot) => `${subject === 'biology' ? 'bs:p1:session' : `bs:p1:session:${subject}`}${slot ? `:${slot}` : ''}`;

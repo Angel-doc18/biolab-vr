@@ -323,7 +323,7 @@ export function AppProvider({ children }) {
         setProgress((p) => {
           const id = `${exam.kind}-${Date.now()}`;
           return touchDay(
-            { ...p, exams: [...p.exams, { ...exam, id, at: Date.now() }].slice(-100), xp: p.xp + Math.round((exam.pct || 0) / 2) },
+            { ...p, exams: [...p.exams, { ...exam, id, at: exam.at || Date.now() }].slice(-100), xp: p.xp + Math.round((exam.pct || 0) / 2) },
             Math.round((exam.secs || 0) / 60)
           );
         }),
