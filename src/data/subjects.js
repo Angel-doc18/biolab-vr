@@ -49,6 +49,8 @@ export const SUBJECTS = [
     code: '0565',
     level: 'O',
     available: true,
+    // Taught from Form 3; nothing is written for Forms 1 and 2.
+    classes: ['Form 3', 'Form 4', 'Form 5'],
     en: 'Human Biology',
     fr: 'Biologie humaine',
     p1: { count: 50, minutes: 90 },
