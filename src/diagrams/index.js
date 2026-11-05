@@ -33,6 +33,7 @@ import { ENGLISH_F2 } from './englishF2';
 import { ENGLISH_F3 } from './englishF3';
 import { LITERATURE_F1 } from './literatureF1';
 import { LITERATURE_F2 } from './literatureF2';
+import { LITERATURE_F3 } from './literatureF3';
 import { FRENCH } from './french';
 import { FRENCH_2 } from './french2';
 import { LITERATURE } from './literature';
@@ -91,7 +92,7 @@ import { PHYSICS_A } from './physicsA';
 import { FACTS } from './facts';
 import { POINTS } from './points';
 
-const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...MATHS_3, ...ENGLISH, ...ENGLISH_2, ...ENGLISH_F1, ...ENGLISH_F2, ...ENGLISH_F3, ...LITERATURE_F1, ...LITERATURE_F2, ...FRENCH, ...FRENCH_2, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...LOGIC_2, ...A_BIOLOGY, ...A_BIOLOGY_2, ...CHEMISTRY_L6, ...CHEMISTRY_L6B, ...CHEMISTRY_U6, ...CHEMISTRY_U6B, ...PHYSICS_L6, ...PHYSICS_U6, ...A_MATHS, ...A_MATHS_2, ...A_MATHS_3, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER, ...A_FURTHER_MECH, ...A_COMPUTER, ...A_COMPUTER_2, ...A_COMPUTER_3, ...A_ICT, ...A_ICT_2, ...A_ENGLISH, ...A_FRENCH, ...A_LITERATURE, ...A_HISTORY, ...A_GEOGRAPHY, ...A_ECONOMICS, ...A_GEOLOGY, ...A_PHILOSOPHY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
+const ALL = { ...BIOLOGY, ...BIOLOGY_MORE, ...BIOLOGY_3, ...BIOLOGY_4, ...APPARATUS_BIO, ...HUMANBIO, ...CHEMISTRY, ...CHEMISTRY_MORE, ...CHEMISTRY_3, ...CHEMISTRY_A, ...APPARATUS_CHEM, ...PHYSICS, ...PHYSICS_MORE, ...PHYSICS_3, ...PHYSICS_A, ...APPARATUS_PHYS, ...MATHS, ...MATHS_2, ...MATHS_3, ...ENGLISH, ...ENGLISH_2, ...ENGLISH_F1, ...ENGLISH_F2, ...ENGLISH_F3, ...LITERATURE_F1, ...LITERATURE_F2, ...LITERATURE_F3, ...FRENCH, ...FRENCH_2, ...LITERATURE, ...HISTORY, ...ECONOMICS, ...COMMERCE, ...CITIZENSHIP, ...GEOLOGY, ...LOGIC, ...LOGIC_2, ...A_BIOLOGY, ...A_BIOLOGY_2, ...CHEMISTRY_L6, ...CHEMISTRY_L6B, ...CHEMISTRY_U6, ...CHEMISTRY_U6B, ...PHYSICS_L6, ...PHYSICS_U6, ...A_MATHS, ...A_MATHS_2, ...A_MATHS_3, ...A_MATHS_MECH, ...A_MATHS_STAT, ...A_FURTHER, ...A_FURTHER_MECH, ...A_COMPUTER, ...A_COMPUTER_2, ...A_COMPUTER_3, ...A_ICT, ...A_ICT_2, ...A_ENGLISH, ...A_FRENCH, ...A_LITERATURE, ...A_HISTORY, ...A_GEOGRAPHY, ...A_ECONOMICS, ...A_GEOLOGY, ...A_PHILOSOPHY, ...COMPUTER, ...GEOGRAPHY, ...HOMEEC, ...FLOWS, ...SCIENCE_2, ...COMPUTER_2, ...GEOGRAPHY_2, ...BIOLOGY_5, ...BIOLOGY_6, ...CHEMISTRY_4, ...CHEMISTRY_5, ...PHYSICS_4, ...COMPUTER_3, ...COMPUTER_4, ...GEOGRAPHY_3, ...GEOGRAPHY_4 };
 // Each fact gets the spot the teacher's pointer rests on while it is explained:
 // worked out exactly by the chart builders, and for drawn figures from the
 // generated table in points.js (made by tools/diagram-points.js).

@@ -91,7 +91,7 @@ export const SUBJECTS = [
     code: '0535',
     level: 'O',
     available: true,
-    classes: ['Form 1', 'Form 2', 'Form 4', 'Form 5'],
+    classes: ['Form 1', 'Form 2', 'Form 3', 'Form 4', 'Form 5'],
     en: 'Literature in English',
     fr: 'Littérature anglaise',
     p1: { count: 50, minutes: 90 },
