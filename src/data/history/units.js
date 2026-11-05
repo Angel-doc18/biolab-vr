@@ -5,6 +5,7 @@
 // the term and sequence in which it is taught.
 import { UNITS_1 } from './units1';
 import { UNITS_2 } from './units2';
+import { UNITS_3 } from './units3';
 import { UNITS_4 } from './units4';
 import { UNITS_5 } from './units5';
 
@@ -16,4 +17,4 @@ export const GROUPS = [
   { id: 'exam', en: 'Examination practice', fr: 'Préparation aux examens' },
 ];
 
-export const units = [...UNITS_1, ...UNITS_2, ...UNITS_4, ...UNITS_5];
+export const units = [...UNITS_1, ...UNITS_2, ...UNITS_3, ...UNITS_4, ...UNITS_5];
