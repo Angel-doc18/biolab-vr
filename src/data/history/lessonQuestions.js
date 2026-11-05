@@ -2,11 +2,13 @@
 // correct option is written first; options are shuffled when shown.
 
 import { QUESTIONS_1 } from './lessonQuestions1';
+import { QUESTIONS_2 } from './lessonQuestions2';
 
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
   ...QUESTIONS_1,
+  ...QUESTIONS_2,
   // ---------- Form 4, term 1 ----------
   'hi-lamidats-4': [
     Q('The region named after Modibo Adama is:', ['Adamawa', 'Bamenda', 'Sanaga', 'Littoral'], 'Adama’s emirate, Fombina, became Adamawa.'),
