@@ -24,12 +24,23 @@ case "$MODE" in live) BASE=https://live.fapshi.com ;; sandbox) BASE=https://sand
 
 read -rp "Fapshi API user (from your service in the Fapshi dashboard): " API_USER
 read -rsp "Fapshi API key (it is not shown as you paste it): " API_KEY; echo
-case "$API_USER$API_KEY" in *[[:space:]]* | "") echo "The API user or key is empty or has spaces in it. Nothing changed."; exit 1 ;; esac
+# A paste can bring spaces or line breaks with it; the keys never contain any.
+API_USER=$(printf '%s' "$API_USER" | tr -d '[:space:]')
+API_KEY=$(printf '%s' "$API_KEY" | tr -d '[:space:]')
+if [ -z "$API_USER" ] || [ -z "$API_KEY" ]; then echo "The API user or the API key is empty. Nothing changed."; exit 1; fi
+echo "Received: API user of ${#API_USER} characters, API key of ${#API_KEY} characters."
 
 echo "Checking the keys with Fapshi..."
 CODE=$(curl -s -o /tmp/fapshi-check.json -w "%{http_code}" -m 20 -H "apiuser: $API_USER" -H "apikey: $API_KEY" "$BASE/balance" || true)
 if [ "$CODE" != "200" ]; then
-  echo "Fapshi did not accept these keys for $MODE (answer $CODE). Check that you copied the $MODE API user and key of the right service. Nothing changed."
+  SAID=$(python3 -c 'import json;print(json.load(open("/tmp/fapshi-check.json")).get("message",""))' 2>/dev/null || true)
+  echo "Fapshi did not accept these keys for $MODE (answer $CODE${SAID:+: $SAID})."
+  case "$SAID" in
+    *apiuser*) echo "The API user is not right: copy it again from the $MODE side of the service." ;;
+    *apikey*) echo "The API key is not right: copy it again from the $MODE side of the service." ;;
+    *) echo "Check that you copied the $MODE API user and key of the right service." ;;
+  esac
+  echo "Nothing changed."
   rm -f /tmp/fapshi-check.json
   exit 1
 fi
