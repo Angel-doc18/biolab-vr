@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, AppState, Linking, Modal, Platform } from 'react-native';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
@@ -60,7 +61,10 @@ export default function Paywall({ navigation, route }) {
   const [toast, showToast] = useToast();
   const poll = useRef(null);
 
-  useEffect(() => {
+  // How payments work comes from the server, and can change while the app is
+  // open (Direct Pay switched on, payments opened): asked again each time this
+  // screen is shown and when the app comes back to the front.
+  const loadPlans = useCallback(() => {
     get('/v1/billing/plans', { auth: false })
       .then((r) => {
         setPlans(r.plans);
@@ -68,7 +72,14 @@ export default function Paywall({ navigation, route }) {
         setPaywall(r.paywall !== false);
         setCheckout(r.checkout === 'prompt' ? 'prompt' : 'link');
       })
-      .catch(() => setPlans(null));
+      .catch(() => {});
+  }, []);
+  useFocusEffect(loadPlans);
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (s) => s === 'active' && loadPlans());
+    return () => sub.remove();
+  }, [loadPlans]);
+  useEffect(() => {
     const op = operatorFor(phone);
     if (op) setProvider(op);
     return () => clearTimeout(poll.current);
