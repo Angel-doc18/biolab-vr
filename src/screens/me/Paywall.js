@@ -74,6 +74,12 @@ export default function Paywall({ navigation, route }) {
     return () => clearTimeout(poll.current);
   }, []);
 
+  // On the "payment due" screen, once the account is open (paid here, on
+  // another phone, or given days by an admin), go straight into the app.
+  useEffect(() => {
+    if (gate && pro && !payment) navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+  }, [gate, pro, payment, navigation]);
+
   const P_ = plans || Object.fromEntries(Object.entries(LOCAL_PLANS).map(([k, v]) => [k, { amount: v.amount, days: v.days }]));
   const amount = P_[plan]?.amount;
   const prov = PROVIDERS.find((p) => p.id === provider);
