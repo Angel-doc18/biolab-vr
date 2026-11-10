@@ -49,3 +49,4 @@ server/.env
 worker/.wrangler
 worker/.dev.vars
 worker/.data
+worker/.fapshi-sandbox.env
