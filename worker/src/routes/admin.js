@@ -3,7 +3,7 @@
 import { HttpError, clientIp, created, limit, now, ok, readJson } from '../lib/http.js';
 import { randomCode, safeEqual, sha256, uuid } from '../lib/crypto.js';
 import { int, oneOf, str } from '../lib/validate.js';
-import { accessEnd, isPro, paywallOn, requireUser } from '../lib/auth.js';
+import { accessEnd, freeDays, isPro, paywallOn, requireUser } from '../lib/auth.js';
 import { paymentsConfigured } from '../lib/providers.js';
 import { notify } from '../lib/notify.js';
 
@@ -40,7 +40,7 @@ export async function overview(request, env) {
        SUM(CASE WHEN (pro_until IS NULL OR pro_until <= ?) AND created_at <= ? THEN 1 ELSE 0 END) AS ended
      FROM users WHERE role = 'student' AND deleted_at IS NULL AND is_admin = 0`
   )
-    .bind(t, t, t - 30 * DAY, t, t - 30 * DAY)
+    .bind(t, t, t - freeDays() * DAY, t, t - freeDays() * DAY)
     .first();
   const money = await env.DB.prepare(
     `SELECT
