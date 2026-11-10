@@ -66,6 +66,14 @@ export function onSessionLost(fn) {
   return () => listeners.delete(fn);
 }
 
+// Fired when the server answers that the platform charges are due, so the app
+// locks at once instead of at its next start.
+const paymentListeners = new Set();
+export function onPaymentRequired(fn) {
+  paymentListeners.add(fn);
+  return () => paymentListeners.delete(fn);
+}
+
 async function raw(path, { method = 'GET', body, token, timeout = 20000, binary = false } = {}) {
   // Known to be offline: say so at once instead of waiting for a time-out.
   if (knownOffline()) throw new ApiError('You are offline. Connect to the internet to do this.', { code: 'offline' });
@@ -107,6 +115,7 @@ async function raw(path, { method = 'GET', body, token, timeout = 20000, binary 
     data = null;
   }
   if (!res.ok) {
+    if (res.status === 402 && data?.code === 'payment_required') paymentListeners.forEach((fn) => fn());
     throw new ApiError(data?.error || 'Something went wrong. Please try again.', { status: res.status, code: data?.code || 'error', details: data });
   }
   return data;

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { del, get, loadSession, onSessionLost, patch as apiPatch, post, put, setSession } from '../api/client';
+import { AppState } from 'react-native';
+import { del, get, loadSession, onPaymentRequired, onSessionLost, patch as apiPatch, post, put, setSession } from '../api/client';
 import { EMPTY, examSubject, merge, minutesThisWeek, streak, syllabusMastery, touchDay, unitMastery, bestExam } from './progress';
 import { units, unitsShown } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
@@ -94,6 +95,31 @@ export function AppProvider({ children }) {
     await applyUser(r.user, r.pro);
     return r;
   }, [applyUser]);
+
+  // Whether the account is paid follows the server while the app stays open:
+  // checked again when the app comes back to the screen, every 5 minutes, and
+  // at once when the server answers that the charges are due.
+  const authed = auth.status === 'authed';
+  useEffect(() => {
+    if (!authed) return undefined;
+    let last = 0;
+    const check = () => {
+      if (Date.now() - last < 30_000) return;
+      last = Date.now();
+      refreshMe().catch(() => {});
+    };
+    const sub = AppState.addEventListener('change', (s) => s === 'active' && check());
+    const timer = setInterval(() => AppState.currentState === 'active' && check(), 5 * 60_000);
+    const off = onPaymentRequired(() => {
+      last = 0;
+      check();
+    });
+    return () => {
+      sub.remove();
+      clearInterval(timer);
+      off();
+    };
+  }, [authed, refreshMe]);
 
   // Pulls the server copy once per sign-in and merges it with offline work.
   const pullProgress = useCallback(async (user) => {
