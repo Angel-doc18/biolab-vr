@@ -131,7 +131,7 @@ export const SUBJECTS = [
     code: '0562',
     level: 'O',
     available: true,
-    classes: ['Form 4', 'Form 5'],
+    classes: ['Form 1', 'Form 4', 'Form 5'],
     en: 'Citizenship Education',
     fr: 'Éducation à la citoyenneté',
     p1: { count: 50, minutes: 90 },
