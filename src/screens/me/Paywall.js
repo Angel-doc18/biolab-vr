@@ -168,6 +168,8 @@ export default function Paywall({ navigation, route }) {
   const now = Date.now();
   const paidUntil = user?.proUntil && user.proUntil > now ? user.proUntil : null;
   const trialUntil = user?.trialUntil && user.trialUntil > now ? user.trialUntil : null;
+  // The server can start the charges at sign-up, with no free month.
+  const hadFree = !!user?.trialUntil && user.trialUntil - (user.createdAt || 0) >= 86_400_000;
   const intro = user?.isAdmin
     ? L('Admin accounts do not pay platform charges.', 'Les comptes administrateurs ne paient pas de frais de plateforme.')
     : !paywall && pro
@@ -178,14 +180,16 @@ export default function Paywall({ navigation, route }) {
     ? `${L('Your free month runs until', 'Votre mois gratuit court jusqu’au')} ${longDate(trialUntil)}. ${L('A year paid now counts from the day you joined, with the free month as its first month, so it runs until', 'Une année payée maintenant compte depuis votre inscription, le mois gratuit étant son premier mois : elle court jusqu’au')} ${longDate(user.createdAt + 365 * 86_400_000)}. ${L('A month paid now starts when the free month ends.', 'Un mois payé maintenant commence à la fin du mois gratuit.')}`
     : gate
     ? L('Pay the platform charges to keep using Klass8. Everything you have done so far is kept.', 'Payez les frais de plateforme pour continuer à utiliser Klass8. Tout ce que vous avez fait est conservé.')
-    : L('Your free month has ended. Pay the platform charges to keep using Klass8.', 'Votre mois gratuit est terminé. Payez les frais de plateforme pour continuer à utiliser Klass8.');
+    : hadFree
+    ? L('Your free month has ended. Pay the platform charges to keep using Klass8.', 'Votre mois gratuit est terminé. Payez les frais de plateforme pour continuer à utiliser Klass8.')
+    : L('Pay the platform charges to use Klass8.', 'Payez les frais de plateforme pour utiliser Klass8.');
 
   return (
     <V c="flex-1">
       <Screen bg="bg-surface" keyboard header={<StackHeader close noBack={gate && !pro} title={L('Platform charges', 'Frais de plateforme')} avatar={false} />}>
         <V c="pb-space-xl gap-space-lg pt-space-md">
           <V c="gap-space-xs">
-            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{gate ? L('Your free month has ended', 'Votre mois gratuit est terminé') : L('Platform charges', 'Frais de plateforme')}</T>
+            <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{gate ? (hadFree ? L('Your free month has ended', 'Votre mois gratuit est terminé') : L('Payment due', 'Paiement à faire')) : L('Platform charges', 'Frais de plateforme')}</T>
             <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
               {intro}
             </T>

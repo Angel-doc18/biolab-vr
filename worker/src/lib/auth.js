@@ -63,14 +63,23 @@ export async function requireUser(request, env, roles) {
 // while a payment (or a school code) lasts. Parents and teachers do not pay.
 // The app takes its answer from `pro`, so no new build is needed to switch.
 export const paywallOn = (env) => env?.PAYWALL === 'on';
-export const TRIAL_DAYS = 30;
-export const trialUntil = (u) => (u.role === 'student' ? (u.created_at || 0) + TRIAL_DAYS * 86_400_000 : null);
+// FREE_DAYS on the server sets the free first period (default 30 days; 0 means
+// the charges apply from sign-up). Read from the server's environment.
+export function freeDays() {
+  const raw = globalThis.process?.env?.FREE_DAYS;
+  const n = raw == null || String(raw).trim() === '' ? NaN : Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : 30;
+}
+export const trialUntil = (u) => (u.role === 'student' ? (u.created_at || 0) + freeDays() * 86_400_000 : null);
 // When the student's access ends (the later of the free month and what was
 // paid); a payment or code adds its days after it.
 export const accessEnd = (u) => Math.max(u.pro_until || 0, trialUntil(u) || 0);
 export const isPro = (user, env) => !paywallOn(env) || user.role !== 'student' || Boolean(user.is_admin) || accessEnd(user) > now();
 export function requireAccess(user, env) {
-  if (!isPro(user, env)) throw new HttpError(402, 'Your free month has ended. Pay the platform charges to keep using Klass8.', 'payment_required');
+  if (!isPro(user, env)) {
+    const msg = freeDays() > 0 ? 'Your free month has ended. Pay the platform charges to keep using Klass8.' : 'Pay the platform charges to use Klass8.';
+    throw new HttpError(402, msg, 'payment_required');
+  }
 }
 
 // Builds from before the paywall open the whole course on the phone whatever

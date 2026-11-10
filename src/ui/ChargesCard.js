@@ -42,12 +42,16 @@ export default function ChargesCard({ user, onPress }) {
   }
 
   const left = user.trialUntil > now ? daysBetween(now, user.trialUntil) : 0;
+  // The server can start the charges at sign-up (no free period).
+  const hadFree = user.trialUntil - (user.createdAt || 0) >= 86_400_000;
   const title =
     left > 1
       ? `${L('Free month', 'Mois gratuit')}: ${left} ${L('days left', 'jours restants')}`
       : left === 1
       ? L('Your free month ends tomorrow', 'Votre mois gratuit se termine demain')
-      : L('Your free month has ended', 'Votre mois gratuit est terminé');
+      : hadFree
+      ? L('Your free month has ended', 'Votre mois gratuit est terminé')
+      : L('Payment due', 'Paiement à faire');
   const body = STORE_BUILD
     ? L('Ask your school for a voucher to keep every subject, lesson and paper open.', 'Demandez un code à votre école pour garder toutes les matières, leçons et épreuves ouvertes.')
     : `${L('Pay', 'Payez')} ${fcfa(PLANS.month.amount)} ${L('a month or', 'par mois ou')} ${fcfa(PLANS.year.amount)} ${L('a year with MTN MoMo or Orange Money to keep every subject, lesson and paper open.', 'par an avec MTN MoMo ou Orange Money pour garder toutes les matières, leçons et épreuves ouvertes.')}`;
