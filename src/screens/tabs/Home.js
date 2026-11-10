@@ -15,6 +15,7 @@ import { paper2Config } from '../../data/paper2';
 import { LEVELS, examLabel, subjectById, subjectName, userLevel } from '../../data/subjects';
 import { SubjectGrid, TileGrid } from '../../ui/hub';
 import { useSubjectCards } from '../subjectCards';
+import ChargesCard from '../../ui/ChargesCard';
 import ParentHome from './ParentHome';
 import TeacherHome from './TeacherHome';
 
@@ -80,9 +81,6 @@ function StudentHome({ navigation }) {
   const due = assignments[0];
   const reviewed = !!progress.lessons[lesson?.id];
   const cards = useSubjectCards('learn');
-  // The last week of the free month, while nothing has been paid after it.
-  const daysLeft = user?.trialUntil && !(user.proUntil > user.trialUntil) ? daysUntil(user.trialUntil) : null;
-  const trialEnding = daysLeft != null && daysLeft >= 1 && daysLeft <= 7;
 
   return (
     <Screen
@@ -99,24 +97,7 @@ function StudentHome({ navigation }) {
           </T>
         </V>
 
-        {trialEnding && (
-          <P
-            c="p-space-md rounded-xl bg-surface-container-low border border-outline-variant flex-row items-center gap-space-sm"
-            onPress={() => navigation.navigate('Paywall')}
-            accessibilityRole="button"
-          >
-            <Ic n="schedule" s={22} c="primary-container" />
-            <V c="flex-1 gap-0.5">
-              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-                {daysLeft === 1 ? L('Your free month ends tomorrow', 'Votre mois gratuit se termine demain') : `${L('Your free month ends in', 'Votre mois gratuit se termine dans')} ${daysLeft} ${L('days', 'jours')}`}
-              </T>
-              <T c="font-body-sm text-body-sm text-on-surface-variant">
-                {L('350 FCFA a month or 3,500 FCFA a year keeps everything open.', '350 FCFA par mois ou 3 500 FCFA par an gardent tout ouvert.')}
-              </T>
-            </V>
-            <Ic n="chevron_right" s={20} c="outline" />
-          </P>
-        )}
+        <ChargesCard user={user} onPress={() => navigation.navigate('Paywall')} />
 
         <V c="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container">
           <P c="p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('ExamClass', { fromSettings: true })} accessibilityRole="button" accessibilityLabel={L('Change your class', 'Changer de classe')}>
@@ -309,7 +290,6 @@ function StudentHome({ navigation }) {
 }
 
 // Whole days from now until a time (1 means it ends within the next day).
-const daysUntil = (t) => Math.ceil((t - Date.now()) / 86_400_000);
 
 export default function Home(props) {
   const { user } = useApp();
