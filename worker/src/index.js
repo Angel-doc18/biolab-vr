@@ -11,6 +11,7 @@ import { channels, sendNotice } from './lib/messaging.js';
 import * as avatar from './routes/avatar.js';
 import * as models from './routes/models.js';
 import * as voice from './routes/voice.js';
+import { reportAppError } from './routes/appErrors.js';
 import { notify } from './lib/notify.js';
 import { aiProvider } from './lib/ai.js';
 
@@ -18,6 +19,7 @@ const ID = '([A-Za-z0-9-]{8,64})';
 const routes = [
   ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), messaging: channels(env), payments: paymentsConfigured(env), voices: voice.voiceChoices(env), voice: voice.voiceTag(env) })],
   ['POST', '/v1/voice', voice.speak],
+  ['POST', '/v1/app/errors', reportAppError],
   ['POST', '/v1/ai/report', ai.report],
   ['GET', '/v1/models/([a-z]{3,20})/link', models.modelLink],
   ['GET', '/v1/models/([a-z]{3,20})\\.glb', models.modelFile],
@@ -75,6 +77,7 @@ const routes = [
   ['GET', '/v1/admin/vouchers', admin.listVouchers],
   ['POST', '/v1/admin/vouchers', admin.createVouchers],
   ['GET', '/v1/admin/licence-requests', admin.listLicenceRequests],
+  ['GET', '/v1/admin/app-errors', admin.listAppErrors],
 ].map(([method, path, handler]) => [method, new RegExp(`^${path}$`), handler]);
 
 // Browsers are only allowed from the origins listed in ALLOWED_ORIGINS (the web

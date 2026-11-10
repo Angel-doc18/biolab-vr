@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, PanResponder, StatusBar, StyleSheet, View } from 'react-native';
 import { Canvas, useFrame, useThree } from './r3f';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { DeviceMotion } from 'expo-sensors';
 import * as THREE from 'three';
 import Specimen, { Centered, Lights } from './Specimen';
-import { useModelSpec } from './Viewport';
+import { GLBoundary, useModelSpec } from './Viewport';
+import { GLFail, guardRender } from './glFail';
+import { reportError } from '../lib/crashReport';
 import { Ic, P, T } from '../ui/kit';
 
 // Device-orientation → camera quaternion (same maths as three's DeviceOrientationControls).
@@ -77,6 +79,18 @@ export default function VRView({ unitId, onClose }) {
   const { spec, geos } = useModelSpec(unitId);
   const motion = useRef(null);
   const drag = useRef({ x: 0, y: 0 });
+  // A 3D error in VR is reported once and VR closes, back to the normal viewer.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+  const failedRef = useRef(false);
+  const fail = useCallback((error) => {
+    if (failedRef.current) return;
+    failedRef.current = true;
+    reportError(error, '3d-vr');
+    onCloseRef.current?.();
+  }, []);
 
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(() => {});
@@ -114,10 +128,21 @@ export default function VRView({ unitId, onClose }) {
     <Modal visible animationType="fade" supportedOrientations={['landscape', 'portrait']} onRequestClose={onClose}>
       <StatusBar hidden />
       <View style={{ flex: 1, backgroundColor: '#000' }}>
-        <Canvas camera={{ position: [0, 0, 0], fov: 80, near: 0.05 }} onCreated={({ gl }) => gl.setClearColor('#0b1a24', 1)} style={StyleSheet.absoluteFill}>
-          <Lights />
-          <StereoRig key={spec.real || "diagram"} spec={spec} geos={geos} motion={motion} drag={drag} />
-        </Canvas>
+        <GLBoundary onFail={fail}>
+          <GLFail.Provider value={fail}>
+            <Canvas
+              camera={{ position: [0, 0, 0], fov: 80, near: 0.05 }}
+              onCreated={({ gl }) => {
+                gl.setClearColor('#0b1a24', 1);
+                guardRender(gl, fail);
+              }}
+              style={StyleSheet.absoluteFill}
+            >
+              <Lights />
+              <StereoRig key={spec.real || 'diagram'} spec={spec} geos={geos} motion={motion} drag={drag} />
+            </Canvas>
+          </GLFail.Provider>
+        </GLBoundary>
         <View style={StyleSheet.absoluteFill} {...pan.panHandlers} />
         <View pointerEvents="none" style={styles.divider} />
         <P onPress={onClose} accessibilityLabel="Exit VR" style={styles.close}>

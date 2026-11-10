@@ -1,4 +1,4 @@
-import { Component, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { Component, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Animated, AppState, Easing, PanResponder, Pressable, StyleSheet, View } from 'react-native';
 import { Canvas, useFrame, useThree } from './r3f';
 import * as THREE from 'three';
@@ -7,6 +7,8 @@ import { modelOf } from '../data/units';
 import { useAnatomy } from './anatomy';
 import Specimen, { Centered, Lights, fitDistance } from './Specimen';
 import { T } from '../ui/kit';
+import { GLFail, guardRender } from './glFail';
+import { reportError } from '../lib/crashReport';
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const FOV = 40;
@@ -119,7 +121,7 @@ function Rig({ spec, geos, ctrl, active, xray, explodeRef, motionRef, pinXY, pin
 
 // If the phone cannot draw 3D (no GL context, a driver fault), the screen is
 // told and shows the labelled diagram instead of a blank or a crash.
-class GLBoundary extends Component {
+export class GLBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = { failed: false };
@@ -159,6 +161,19 @@ const Viewport = forwardRef(function Viewport(
 ) {
   const { spec, geos } = model;
   const keys = Object.keys(spec.parts);
+  // Every 3D error (a frame, the drawing, a part failing to build) ends here:
+  // it is reported once and the screen shows the labelled diagram instead.
+  const onFailRef = useRef(onFail);
+  useEffect(() => {
+    onFailRef.current = onFail;
+  });
+  const failedRef = useRef(false);
+  const fail = useCallback((error) => {
+    if (failedRef.current) return;
+    failedRef.current = true;
+    reportError(error, '3d-viewer');
+    onFailRef.current?.(error);
+  }, []);
   const ctrl = useRef(null);
   if (!ctrl.current) ctrl.current = { rx: spec.rot[0], ry: spec.rot[1], trx: spec.rot[0], try: spec.rot[1], z: 4.4, zoom: 1, fit: 0 };
   const explodeRef = useRef(0);
@@ -252,12 +267,16 @@ const Viewport = forwardRef(function Viewport(
 
   return (
     <View style={[styles.frame, { aspectRatio: aspect }]}>
-      <GLBoundary onFail={onFail}>
+      <GLBoundary onFail={fail}>
+        <GLFail.Provider value={fail}>
         <Canvas
           key={`${specKey}:${surface}`}
           frameloop="demand"
           camera={{ position: [0, 0, 4.4], fov: FOV, near: 0.05, far: 100 }}
-          onCreated={({ gl }) => gl.setClearColor('#eef2fc', 1)}
+          onCreated={({ gl }) => {
+            gl.setClearColor('#eef2fc', 1);
+            guardRender(gl, fail);
+          }}
           style={StyleSheet.absoluteFill}
         >
           <Lights />
@@ -278,6 +297,7 @@ const Viewport = forwardRef(function Viewport(
             fitKey={`${specKey}:${surface}`}
           />
         </Canvas>
+        </GLFail.Provider>
       </GLBoundary>
       <View style={StyleSheet.absoluteFill} {...pan.panHandlers} />
       {keys.map((k, i) => {

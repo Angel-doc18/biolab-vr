@@ -169,3 +169,13 @@ export async function listLicenceRequests(request, env) {
   ).all();
   return ok({ items: results });
 }
+
+// The newest error reports from the app, to find what breaks on phones.
+export async function listAppErrors(request, env) {
+  await requireAdmin(request, env);
+  const { results } = await env.DB.prepare(
+    `SELECT created_at AS createdAt, place, fatal, late, platform, os, build, message, stack
+     FROM app_errors ORDER BY created_at DESC LIMIT 100`
+  ).all();
+  return ok({ items: results });
+}
