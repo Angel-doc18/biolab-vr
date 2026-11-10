@@ -11,6 +11,7 @@ WEBHOOK_URL=https://klass8.ebenesaid.com/v1/billing/fapshi-webhook
 ask_yes() { # question, default (yes|no)
   local a
   read -rp "$1 [$2]: " a
+  a=$(printf '%s' "$a" | tr -d '[:space:]')
   a=${a:-$2}
   case "$a" in y | Y | yes | YES | Yes) return 0 ;; *) return 1 ;; esac
 }
@@ -19,6 +20,7 @@ echo "Klass8 payments with Fapshi"
 echo
 echo "Are these keys for real money (live) or for testing (sandbox)?"
 read -rp "Type live or sandbox [live]: " MODE
+MODE=$(printf '%s' "$MODE" | tr -d '[:space:]')
 MODE=${MODE:-live}
 case "$MODE" in live) BASE=https://live.fapshi.com ;; sandbox) BASE=https://sandbox.fapshi.com ;; *) echo "Type live or sandbox. Nothing changed."; exit 1 ;; esac
 
