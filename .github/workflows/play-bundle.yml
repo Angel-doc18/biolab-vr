@@ -1,0 +1,91 @@
+name: Google Play bundle
+
+# Builds the Google Play version (an .aab) when started by hand from the
+# Actions tab. It is the store build: EXPO_PUBLIC_STORE=play, so nothing is
+# sold inside the app (Play's payments policy); students unlock with a voucher.
+#
+# It is signed with the upload key kept in the repository secrets (made and
+# added by the owner, never stored in the code):
+#   KLASS8_UPLOAD_KEYSTORE        the keystore file, base64-encoded
+#   KLASS8_UPLOAD_STORE_PASSWORD  the keystore password
+#   KLASS8_UPLOAD_KEY_ALIAS       the key alias
+#   KLASS8_UPLOAD_KEY_PASSWORD    the key password
+# The bundle is kept as a workflow artifact (not a public release) for upload
+# in the Play Console.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    name: Build signed Play bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the signing secrets are set
+        env:
+          KS: ${{ secrets.KLASS8_UPLOAD_KEYSTORE }}
+          SP: ${{ secrets.KLASS8_UPLOAD_STORE_PASSWORD }}
+          KA: ${{ secrets.KLASS8_UPLOAD_KEY_ALIAS }}
+          KP: ${{ secrets.KLASS8_UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KS" ] || [ -z "$SP" ] || [ -z "$KA" ] || [ -z "$KP" ]; then
+            echo "::error::Add the four KLASS8_UPLOAD_* secrets (Settings > Secrets and variables > Actions) first."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Generate native Android project
+        env:
+          EXPO_PUBLIC_STORE: play
+        run: npx expo prebuild --platform android --no-install --clean
+
+      - name: Set the version code
+        # Every upload to Play needs a higher version code than the last one.
+        run: |
+          CODE=$((100 + ${{ github.run_number }}))
+          sed -i -E "s/versionCode [0-9]+/versionCode $CODE/" android/app/build.gradle
+          grep -n "versionCode\|versionName" android/app/build.gradle
+
+      - name: Build signed bundle
+        working-directory: android
+        env:
+          EXPO_PUBLIC_STORE: play
+          EXPO_PUBLIC_BUILD: play-${{ github.run_number }}
+          KS: ${{ secrets.KLASS8_UPLOAD_KEYSTORE }}
+          SP: ${{ secrets.KLASS8_UPLOAD_STORE_PASSWORD }}
+          KA: ${{ secrets.KLASS8_UPLOAD_KEY_ALIAS }}
+          KP: ${{ secrets.KLASS8_UPLOAD_KEY_PASSWORD }}
+        run: |
+          echo "$KS" | base64 -d > "$RUNNER_TEMP/upload.keystore"
+          chmod +x ./gradlew
+          ./gradlew bundleRelease --no-daemon \
+            -PreactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64 \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/upload.keystore" \
+            -Pandroid.injected.signing.store.password="$SP" \
+            -Pandroid.injected.signing.key.alias="$KA" \
+            -Pandroid.injected.signing.key.password="$KP"
+          rm -f "$RUNNER_TEMP/upload.keystore"
+
+      - name: Keep the bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: klass8-play-bundle-${{ github.run_number }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
