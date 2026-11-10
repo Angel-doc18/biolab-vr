@@ -42,6 +42,8 @@ import Tutor from '../screens/ai/Tutor';
 import MarkAnswer from '../screens/ai/MarkAnswer';
 import Workspace from '../screens/ai/Workspace';
 import Paywall from '../screens/me/Paywall';
+import Pay from '../screens/me/Pay';
+import Voucher from '../screens/me/Voucher';
 import Admin from '../screens/me/Admin';
 import Offline from '../screens/me/Offline';
 import ParentReport from '../screens/me/ParentReport';
@@ -104,7 +106,7 @@ const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Fo
 // What a student whose free month has ended (and who has not paid) can still
 // open: signing in and out, setting up the account, the platform charges and
 // settings. Anything else leads to the platform charges.
-const OPEN_WHEN_LOCKED = [...PUBLIC, 'Role', 'ExamClass', 'School', 'Goals', 'SetupDone', 'Paywall', 'Settings', 'Offline'];
+const OPEN_WHEN_LOCKED = [...PUBLIC, 'Role', 'ExamClass', 'School', 'Goals', 'SetupDone', 'Paywall', 'Pay', 'Voucher', 'Settings', 'Offline'];
 
 const theme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: C['surface-container-lowest'], primary: C['primary-container'] } };
 
@@ -169,6 +171,8 @@ export default function AppNavigator() {
         <Stack.Screen name="JoinClass" component={JoinClass} />
         <Stack.Screen name="Legal" component={Legal} />
         <Stack.Screen name="Paywall" component={Paywall} options={modalOptions} />
+        <Stack.Screen name="Pay" component={Pay} />
+        <Stack.Screen name="Voucher" component={Voucher} />
         <Stack.Screen name="Admin" component={Admin} />
         <Stack.Screen name="Offline" component={Offline} options={modalOptions} />
       </Stack.Navigator>

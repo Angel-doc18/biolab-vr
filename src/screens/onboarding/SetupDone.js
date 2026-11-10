@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { P, T, V } from '../../ui/kit';
+import { T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
@@ -21,7 +21,9 @@ export default function SetupDone({ navigation, route }) {
     setError(null);
     try {
       if (!user?.onboarded) await updateMe({ onboarded: true });
-      navigation.reset({ index: to ? 1 : 0, routes: [{ name: 'Main' }, ...(to ? [{ name: to }] : [])] });
+      // A student chooses how to start next: the free month, or a paid plan.
+      if (to === 'Plans') navigation.reset({ index: 0, routes: [{ name: 'Paywall', params: { start: true } }] });
+      else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } catch (e) {
       setError(e);
     } finally {
@@ -46,12 +48,7 @@ export default function SetupDone({ navigation, route }) {
       footer={
         <V c="px-margin pt-space-sm gap-space-xs" style={{ paddingBottom: 12 }}>
           <ErrorNote error={error} c="mb-space-sm" />
-          <Cta variant="dark" icon={null} label={role === 'student' ? L('Start learning', 'Commencer') : L('Continue', 'Continuer')} loading={busy} onPress={() => finish()} />
-          {role === 'student' && (
-            <P c="items-center py-2" onPress={() => finish('Paywall')} hitSlop={8}>
-              <T c="font-label-md text-label-md text-primary-container">{L('Your first month is free. See the platform charges', 'Votre premier mois est gratuit. Voir les frais de plateforme')}</T>
-            </P>
-          )}
+          <Cta variant="dark" icon={null} label={L('Continue', 'Continuer')} loading={busy} onPress={() => finish(role === 'student' ? 'Plans' : null)} />
         </V>
       }
     >
