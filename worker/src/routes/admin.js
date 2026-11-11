@@ -179,3 +179,12 @@ export async function listAppErrors(request, env) {
   ).all();
   return ok({ items: results });
 }
+
+// Messages sent from the website's contact form, newest first.
+export async function listContactMessages(request, env) {
+  await requireAdmin(request, env);
+  const { results } = await env.DB.prepare(
+    'SELECT id, created_at AS createdAt, name, contact, topic, message FROM contact_messages ORDER BY created_at DESC LIMIT 200'
+  ).all();
+  return ok({ items: results });
+}

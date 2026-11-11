@@ -2,10 +2,9 @@
 //
 //   node website/build.js
 //
-// Every lesson, diagram, question and topic shown on the site is taken from the
-// app's own data, so the site always shows what the app really contains. The
-// spoken examples are listed in dist/voice.json; website/voice.py makes each
-// clip once with the tutor's voice on the voice server (see website/deploy.sh).
+// The counts, subjects and the heart diagram come from the app's own data, so
+// the site always shows what the app really contains. The policy pages and the
+// shared header and footer are in pages.js; the business details in business.js.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -51,194 +50,123 @@ Module._load = function (request, parent, isMain) {
 };
 
 const { LESSONS } = require(path.join(ROOT, 'src/data/lessons.js'));
-const { units, unitById, unitsFor, formsFor, unitsForForm, placeIn, byPlace } = require(path.join(ROOT, 'src/data/units.js'));
-const { SUBJECTS, CLASSES } = require(path.join(ROOT, 'src/data/subjects.js'));
-const { forSpeech } = require(path.join(ROOT, 'src/lib/pronounce.js'));
+const { units } = require(path.join(ROOT, 'src/data/units.js'));
+const { SUBJECTS } = require(path.join(ROOT, 'src/data/subjects.js'));
 const { DiagramView } = require(path.join(ROOT, 'src/diagrams/Diagram.js'));
 const { DIAGRAMS } = require(path.join(ROOT, 'src/diagrams/index.js'));
-const { LOGO_MARK } = require(path.join(ROOT, 'src/ui/logoPath.js'));
 const ANATOMY = require(path.join(ROOT, 'src/three/anatomy.json'));
-const { reportText } = require(path.join(ROOT, 'src/lib/report.js'));
-const { BOARDS, HEART_PARTS, HEART_INTRO, READERS, QUIZ, REPORT } = require('./content.js');
 const { TERMS, PRIVACY } = require(path.join(ROOT, 'src/screens/me/Legal.js'));
 const { PLANS, fcfa } = require(path.join(ROOT, 'src/data/plan.js'));
 const { MARK } = require(path.join(ROOT, 'src/ui/brand.js'));
 const BUSINESS = require('./business.js');
 const PAGES = require('./pages.js');
 
-// Who sells Klass8: required before the site is built for the public.
-const missing = ['name', 'email', 'phone', 'town'].filter((k) => !String(BUSINESS[k] || '').trim());
-if (missing.length && !process.env.SITE_DRAFT) throw new Error(`website/business.js: fill in ${missing.join(', ')} before building the site.`);
+// Who sells Klass8. The business name, email and phone are shown wherever they
+// are filled in; without them the contact page offers only its form.
 const B = { ...BUSINESS };
-for (const k of missing) B[k] = `[${k} to fill in]`;
+const missing = ['name', 'email', 'phone', 'town'].filter((k) => !String(B[k] || '').trim());
+if (missing.length) console.warn(`website/business.js: not filled in yet: ${missing.join(', ')}`);
 
-// The K8 mark (navy K, amber 8), as on the app.
-const [mx, my, mx2, my2] = MARK.box;
-const markSvg = `<svg viewBox="${mx} ${my} ${mx2 - mx} ${my2 - my}" aria-hidden="true">${MARK.parts.map((p) => `<path fill="${p.fill}" d="${p.d}"/>`).join('')}</svg>`;
-const site = PAGES.make({ B, terms: TERMS, privacy: PRIVACY, priceMonth: fcfa(PLANS.month.amount), priceYear: fcfa(PLANS.year.amount), mark: markSvg });
-
-const lessonById = new Map(LESSONS.map((l) => [l.id, l]));
-const subjectName = (id) => SUBJECTS.find((s) => s.id === id)?.en || id;
-const plain = (s) => String(s).replace(/\*\*/g, '');
-const html = (s) =>
+const esc = (s) =>
   String(s)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    .replace(/>/g, '&gt;');
 
-// ---------- the tutor's voice ----------
-// Each clip is named by its words, so a sentence is only ever spoken once.
-const clips = new Map();
-function clip(text, lang = 'en') {
-  const said = forSpeech(plain(text), lang);
-  const file = `a/${crypto.createHash('sha1').update(`kokoro|${lang}|${said}`).digest('hex').slice(0, 20)}.mp3`;
-  clips.set(file, { file, text: said, lang });
-  return file;
-}
+// The K8 mark (navy K with its cap, amber 8), as in the app.
+const [mx, my, mx2, my2] = MARK.box;
+const markSvg = `<svg class="mark" viewBox="${mx} ${my} ${mx2 - mx} ${my2 - my}" aria-hidden="true">${MARK.parts.map((p) => `<path fill="${p.fill}" d="${p.d}"/>`).join('')}</svg>`;
 
-// Splits a paragraph into sentences for the reader, keeping **bold** marks.
-const sentences = (p) => String(p).split(/(?<=[.!?])\s+(?=[A-Z*(“"0-9])/).filter(Boolean);
-
-// The class a lesson belongs to, from its topic.
-function placeOf(lesson) {
-  const unit = unitById(lesson.unit);
-  return { subject: subjectName(unit?.subject), form: unit?.form || null, topic: unit?.title || '' };
-}
-
-// ---------- lessons read aloud ----------
-const readers = READERS.map(({ id, tab, paragraphs, tip = true, lang = 'en' }) => {
-  const lesson = lessonById.get(id);
-  if (!lesson) throw new Error(`no lesson ${id}`);
-  const paras = (paragraphs || lesson.body.map((_, i) => i)).map((i) => lesson.body[i]);
-  if (tip && lesson.tip) paras.push(`**Exam tip.** ${lesson.tip}`);
-  return {
-    id,
-    tab,
-    ...placeOf(lesson),
-    n: lesson.n,
-    title: lesson.title,
-    minutes: lesson.minutes,
-    head: clip(lesson.title, lang),
-    paragraphs: paras.map((p) => sentences(p).map((s) => ({ html: html(s), clip: clip(s, lang) }))),
-  };
-});
-
-// ---------- the board ----------
-const boards = BOARDS.map(({ tab, lesson: id, q, steps }) => {
-  const lesson = lessonById.get(id);
-  if (!lesson) throw new Error(`no lesson ${id}`);
-  return { tab, ...placeOf(lesson), lesson: lesson.title, q, ask: clip(q), steps: steps.map(([board, say]) => ({ board, say, clip: clip(say) })) };
-});
-
-// ---------- a diagram that explains itself ----------
-const heartSpec = DIAGRAMS['heart-section'];
-const render = (active) => renderToStaticMarkup(React.createElement(DiagramView, { spec: heartSpec, active })).replace('<svg ', '<svg role="img" aria-label="Vertical section through the mammalian heart" ');
-const names = heartSpec.labels.map((l) => String(l[0]).replace(/\n/g, ' '));
-for (const p of HEART_PARTS) if (!names.includes(p.name)) throw new Error(`no heart label ${p.name}`);
-const heart = {
-  title: heartSpec.title,
-  plain: render(null),
-  lit: names.map((_, i) => render(i)),
-  intro: { en: clip(HEART_INTRO.en, 'en'), fr: clip(HEART_INTRO.fr, 'fr') },
-  parts: HEART_PARTS.map((p) => ({ name: p.name, fr: p.frName, label: names.indexOf(p.name), en: clip(`${p.name}. ${p.en}`, 'en'), frClip: clip(`${p.frName}. ${p.fr}`, 'fr'), say: p.en, sayFr: p.fr })),
-};
-
-// ---------- the 3D heart ----------
-const heart3d = ANATOMY.models.heart;
-const MODEL_NAMES = { lv: 'Ventricles', atria: 'Atria', aorta: 'Aorta', venacava: 'Vena cava' };
-const model = {
-  file: 'models/heart.glb',
-  bytes: heart3d.bytes,
-  credit: ANATOMY.credit,
-  parts: Object.entries(heart3d.parts)
-    .filter(([key, p]) => p.label && MODEL_NAMES[key])
-    .map(([key, p]) => ({ key, name: MODEL_NAMES[key], at: p.anchor, color: p.color })),
-};
-
-// ---------- real questions ----------
-const quiz = QUIZ.map(({ unit: uid, q: index, lesson: lid }) => {
-  let item;
-  let unit;
-  if (lid) {
-    const lesson = lessonById.get(lid);
-    unit = unitById(lesson.unit);
-    item = lesson.questions?.[index] || (index === 'check' ? { q: lesson.check.q, a: lesson.check.a, why: lesson.check.why } : null);
-  } else {
-    unit = unitById(uid);
-    item = unit?.quiz?.[index];
-  }
-  if (!item || !unit) throw new Error(`no question ${uid || lid} ${index}`);
-  return { subject: subjectName(unit.subject), form: unit.form || null, topic: unit.title, q: item.q, a: item.a, why: item.why || '' };
-});
-
-// ---------- the syllabus, class by class ----------
+// What the app holds, counted from its own data.
+const lessonById = new Map(LESSONS.map((l) => [l.id, l]));
 const open = SUBJECTS.filter((s) => s.available);
-const syllabus = {
-  classes: CLASSES.map((c) => ({ id: c.id, level: c.level })),
-  subjects: open.map((s) => {
-    const forms = {};
-    for (const form of formsFor(s.id)) {
-      forms[form] = unitsForForm(s.id, form)
-        .sort(byPlace(form))
-        .map((u) => {
-          const at = placeIn(u, form);
-          return { title: u.title, term: at.term || null, seq: at.seq || null, lessons: (u.lessonIds || []).filter((id) => lessonById.has(id)).length };
-        });
-    }
-    return { id: s.id, name: s.en, fr: s.fr, level: s.level, code: s.code || null, forms };
-  }),
-};
-
-// ---------- the weekly report a parent receives ----------
-// Written by the app's own report code, for an example student.
-const report = reportText({ ...REPORT, generatedAt: Date.now() }, 'en');
-
-// ---------- what the app holds ----------
 const openIds = new Set(open.map((s) => s.id));
 const openUnits = units.filter((u) => openIds.has(u.subject));
 const lessonIds = new Set(openUnits.flatMap((u) => u.lessonIds || []).filter((id) => lessonById.has(id)));
-const questions =
-  openUnits.reduce((n, u) => n + (u.quiz?.length || 0), 0) + [...lessonIds].reduce((n, id) => n + (lessonById.get(id).questions?.length || 0), 0);
+const questions = openUnits.reduce((n, u) => n + (u.quiz?.length || 0), 0) + [...lessonIds].reduce((n, id) => n + (lessonById.get(id).questions?.length || 0), 0);
+const n = (x) => x.toLocaleString('en-GB');
 const stats = {
-  subjects: open.length,
-  oLevel: open.filter((s) => s.level === 'O').length,
-  aLevel: open.filter((s) => s.level === 'A').length,
-  topics: openUnits.length,
-  lessons: lessonIds.size,
-  workedExamples: [...lessonIds].reduce((n, id) => n + (lessonById.get(id).examples?.length || 0), 0),
-  questions,
-  diagrams: Object.keys(DIAGRAMS).length,
-  models: Object.keys(ANATOMY.models).length,
+  lessons: n(lessonIds.size),
+  questions: n(questions),
+  diagrams: n(Object.keys(DIAGRAMS).length),
+  models: n(Object.keys(ANATOMY.models).length),
+  subjects: n(open.length),
 };
+
+// The subjects, by level, as chips.
+const chips = (level) =>
+  open
+    .filter((s) => s.level === level)
+    .map((s) => `<li>${esc(s.en)}</li>`)
+    .join('');
+
+// The heart, drawn by the app's own diagram code, with its exam labels.
+const heart = renderToStaticMarkup(React.createElement(DiagramView, { spec: DIAGRAMS['heart-section'] })).replace('<svg ', '<svg role="img" aria-label="Labelled vertical section through the mammalian heart" ');
+
+const site = PAGES.make({ B, terms: TERMS, privacy: PRIVACY, priceMonth: fcfa(PLANS.month.amount), priceYear: fcfa(PLANS.year.amount), mark: markSvg });
+
+const fill = {
+  ...stats,
+  MARK: markSvg,
+  PLANS: site.plans,
+  HEART: heart,
+  SUBJECTS_O: chips('O'),
+  SUBJECTS_A: chips('A'),
+  PRICE_MONTH: esc(fcfa(PLANS.month.amount)),
+  PRICE_YEAR: esc(fcfa(PLANS.year.amount)),
+  CONTACT_CARDS: site.contactCards,
+  WHO: esc(site.who),
+  HOURS: esc(site.hours),
+};
+const fillIn = (html) =>
+  html
+    .replace(/\{\{IMG:([\w-]+)\}\}/g, (m, id) => PAGES.photo(id))
+    .replace(/\{\{SAY:([\w-]+)\|([^|}]+)\|([^|}]+)(\|light)?\}\}/g, (m, clip, title, note, light) => PAGES.say(clip, title, note, !!light))
+    .replace(/\{\{(\w+)\}\}/g, (m, k) => (k in fill ? fill[k] : m));
+
+// A page: the shared head, header and footer around its own content.
+const shell = ({ title, desc, url, body }) => `<!doctype html>
+<html lang="en">
+<head>
+${site.head(title, desc, url)}
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+${site.header}
+<main id="main">
+${body}
+</main>
+${site.footer}
+</body>
+</html>
+`;
 
 // ---------- write the site ----------
 fs.rmSync(DIST, { recursive: true, force: true });
-fs.cpSync(SRC, DIST, { recursive: true });
-fs.mkdirSync(path.join(DIST, 'data'), { recursive: true });
-fs.mkdirSync(path.join(DIST, 'models'), { recursive: true });
-fs.copyFileSync(path.join(ROOT, 'worker/assets/models/heart.glb'), path.join(DIST, 'models/heart.glb'));
-const write = (file, data) => fs.writeFileSync(path.join(DIST, file), typeof data === 'string' ? data : JSON.stringify(data));
-write('data/home.json', { stats, readers, boards, quiz, model, report });
-write('data/heart.json', heart);
-write('data/syllabus.json', syllabus);
-write('img/mark.svg', markSvg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ').replace(' aria-hidden="true"', ''));
-for (const pg of site.pages) write(pg.file, pg.html);
-write('voice.json', [...clips.values()]);
+fs.cpSync(SRC, DIST, { recursive: true, filter: (f) => !f.includes(`${path.sep}pages`) });
+const write = (file, data) => fs.writeFileSync(path.join(DIST, file), data);
+write('img/mark.svg', markSvg.replace('<svg class="mark" ', '<svg xmlns="http://www.w3.org/2000/svg" ').replace(' aria-hidden="true"', ''));
+
+const pages = [];
+for (const file of fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith('.html'))) {
+  const raw = fs.readFileSync(path.join(SRC, 'pages', file), 'utf8');
+  const m = raw.match(/^<!--page (\{.*?\}) -->\n/s);
+  if (!m) throw new Error(`${file}: the first line must be <!--page {"title": ..., "desc": ...} -->`);
+  const meta = JSON.parse(m[1]);
+  const slug = file.replace(/\.html$/, '');
+  pages.push({ file, title: meta.title, desc: meta.desc, url: slug === 'index' ? '/' : `/${slug}`, body: raw.slice(m[0].length) });
+}
+for (const pol of site.policies) pages.push({ file: `${pol.slug}.html`, title: `${pol.title} | Klass8`, desc: pol.desc, url: `/${pol.slug}`, body: pol.body });
 
 // Each page names its files with a fingerprint, so browsers keep them until they change.
 const stamp = (file) => crypto.createHash('sha1').update(fs.readFileSync(path.join(DIST, file))).digest('hex').slice(0, 10);
-for (const page of fs.readdirSync(DIST).filter((f) => f.endsWith('.html'))) {
-  const p = path.join(DIST, page);
-  const out = fs
-    .readFileSync(p, 'utf8')
-    .replace(/(href|src)="(\/?)([\w/.-]+\.(?:css|js))"/g, (m, attr, slash, file) => `${attr}="${slash}${file}?v=${stamp(file)}"`)
-    .replace(/\{\{LOGO_MARK\}\}/g, LOGO_MARK)
-    .replace(/\{\{PRICING\}\}/g, site.pricing)
-    .replace(/\{\{FOOTER\}\}/g, site.footer)
-    .replace(/\{\{MARK\}\}/g, markSvg)
-    .replace(/\{\{(\w+)\}\}/g, (m, k) => (k in stats ? stats[k].toLocaleString('en-GB') : m));
-  fs.writeFileSync(p, out);
+for (const pg of pages) {
+  let out = fillIn(shell(pg));
+  out = fillIn(out);
+  out = out.replace(/(href|src)="(\/?)([\w/.-]+\.(?:css|js))"/g, (m, attr, slash, file) => `${attr}="${slash}${file}?v=${stamp(file)}"`);
+  const left = out.match(/\{\{[\w:|-]+\}\}/);
+  if (left) throw new Error(`${pg.file}: ${left[0]} was not filled`);
+  write(pg.file, out);
 }
-console.log(`website/dist: ${readers.length} readings, ${boards.length} boards, ${quiz.length} questions, ${clips.size} voice clips`);
+console.log('website/dist:', pages.map((p) => p.file).join(', '));
 console.log(stats);
