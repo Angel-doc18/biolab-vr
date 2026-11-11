@@ -1,19 +1,22 @@
 <!--page {"title": "Contact us | Klass8", "desc": "Write to the Klass8 team about the app, a payment, a school licence or your account."} -->
-<section class="phero phero--plain">
+<section class="phero phero--plain" aria-labelledby="page-title">
   <div class="wrap phero__in">
-    <h1>Contact us</h1>
-    <p>Questions about the app, a payment, a school licence or your account. We answer {{HOURS}}.</p>
+    <div data-rise style="--delay: 0.05s">{{CRUMBS:Contact us}}</div>
+    <h1 id="page-title" data-rise style="--delay: 0.2s">Contact us</h1>
+    <p data-rise style="--delay: 0.4s">Questions about the app, a payment, a school licence or your account. We answer {{HOURS}}.</p>
   </div>
 </section>
 
 <section class="sec">
-  <div class="wrap split" style="align-items: start">
-    <div class="split__copy">
+  <div class="wrap split split--top">
+    <div class="split__copy" data-reveal="left">
+      <p class="label">Write to us</p>
       <h2>Send us a message</h2>
       <p>For help with a payment, give the phone number of your Klass8 account and the payment reference shown in the app. Read the <a href="/refunds">refund policy</a>.</p>
       {{CONTACT_CARDS}}
+      <p>Looking for a quick answer? Read the <a href="/faq">questions and answers</a>.</p>
     </div>
-    <form class="form split__media" data-contact novalidate>
+    <form class="form" data-contact data-reveal="zoom" novalidate>
       <label>Your name
         <input name="name" autocomplete="name" required maxlength="80">
       </label>

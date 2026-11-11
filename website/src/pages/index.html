@@ -1,59 +1,34 @@
-<!--page {"title": "Klass8: every lesson from Form 1 to Upper Sixth, taught out loud", "desc": "Klass8 is the study app for secondary school students in Cameroon. It follows the MINESEC syllabus class by class, reads every lesson aloud, solves questions step by step and marks handwritten answers."} -->
+<!--page {"title": "Klass8: every lesson explained, every exam prepared", "desc": "Klass8 is the study app for secondary school students in Cameroon. It follows the MINESEC syllabus from Form 1 to Upper Sixth, explains every lesson aloud, solves questions step by step and marks handwritten answers."} -->
 <section class="hero" aria-labelledby="hero-title">
-  <div class="hero__slides" aria-hidden="true">
+  <div class="hero__media" aria-hidden="true">
     <div class="hero__slide is-on" style="--img: {{IMG:1567057419565-4349c49d8a04}}"></div>
     <div class="hero__slide" style="--img: {{IMG:1662858557337-48c9ecf07ee0}}"></div>
     <div class="hero__slide" style="--img: {{IMG:1536337005238-94b997371b40}}"></div>
   </div>
-  <div class="wrap hero__grid">
-    <div>
-      <h1 id="hero-title">Every lesson from Form 1 to Upper Sixth, taught out loud.</h1>
-      <p class="hero__lead">Klass8 follows the MINESEC syllabus for your class. Listen to each lesson, watch questions solved step by step on the board, and have your handwritten answers marked, all the way to the GCE.</p>
-      <div class="hero__cta">
-        <a class="btn btn--amber btn--lg" href="/download/">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download for Android
-        </a>
-        <a class="btn btn--ghost btn--lg" href="/app">Open in your browser</a>
-      </div>
-      <div class="voices">
-        {{SAY:hello-en|Hear the tutor|In English}}
-        {{SAY:hello-fr|Écouter le tuteur|En français}}
-      </div>
-      <p class="hero__note">Your first month is free. Then {{PRICE_MONTH}} a month, paid by MTN or Orange Money.</p>
+  <div class="hero__in">
+    <p class="hero__kicker" data-rise style="--delay: 0.1s">For secondary school students in Cameroon</p>
+    <h1 id="hero-title" data-rise style="--delay: 0.25s"><span class="line">Every lesson, explained.</span> <span class="line">Every exam, prepared.</span></h1>
+    <p class="hero__lead" data-rise style="--delay: 0.45s">Klass8 follows the MINESEC syllabus for your class, from Form 1 to Upper Sixth, and teaches it the way a good teacher does.</p>
+    <div class="hero__cta" data-rise style="--delay: 0.65s">
+      <a class="btn btn--amber btn--lg" href="/download/">Start your free month</a>
+      <a class="btn btn--ghost btn--lg" href="/features">See how it works</a>
     </div>
-
-    <figure class="board" aria-label="A physics question solved on the board, step by step">
-      <figcaption class="board__head">
-        <span>Physics, Form 4</span>
-        <span class="board__voice" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-      </figcaption>
-      <p class="board__q">A car starts from rest and accelerates uniformly at 2.5 m/s² for 8 s. Find its final velocity and the distance it travels.</p>
-      <ol class="board__steps">
-        <li style="--d: 0"><span>u = 0,  a = 2.5 m/s²,  t = 8 s</span><em>Write down what we know.</em></li>
-        <li style="--d: 1"><span>v = u + at = 0 + 2.5 × 8 = 20 m/s</span><em>No distance yet, so use v = u + at.</em></li>
-        <li style="--d: 2"><span>s = ut + ½at² = ½ × 2.5 × 8²</span><em>Square the time first: 8² is 64.</em></li>
-        <li style="--d: 3"><span>s = 80 m</span><em>Half of 2.5 × 64 is 80 metres.</em></li>
-      </ol>
-      <p class="board__check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Checked a second time before you see it</p>
-    </figure>
   </div>
-  <div class="hero__dots" role="group" aria-label="Photographs">
-    <button class="hero__dot is-on" type="button" aria-label="Photograph 1"></button>
-    <button class="hero__dot" type="button" aria-label="Photograph 2"></button>
-    <button class="hero__dot" type="button" aria-label="Photograph 3"></button>
-    <button class="hero__pause" type="button" aria-label="Pause the photographs" data-state="playing">
-      <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>
-      <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+  <div class="hero__foot" role="group" aria-label="Photographs">
+    <button class="hero__bar is-on" type="button" aria-label="Photograph 1"></button>
+    <button class="hero__bar" type="button" aria-label="Photograph 2"></button>
+    <button class="hero__bar" type="button" aria-label="Photograph 3"></button>
+    <button class="hero__pause" type="button" aria-label="Pause the photographs">
+      <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h5v16H6zM13 4h5v16h-5z" fill="currentColor"/></svg>
+      <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg>
     </button>
   </div>
 </section>
 
-<section class="marks" aria-label="The examinations Klass8 prepares for">
-  <div class="wrap marks__in">
-    <p>Written for the Cameroon syllabus</p>
-    <ul class="marks__list">
-      <li>MINESEC</li>
+<section class="exams" aria-label="The examinations Klass8 prepares for">
+  <div class="wrap exams__in">
+    <p>Built on the MINESEC syllabus for</p>
+    <ul class="exams__list" data-stagger="fade">
       <li>GCE O Level</li>
       <li>GCE A Level</li>
       <li>ITC</li>
@@ -62,119 +37,178 @@
   </div>
 </section>
 
-<section class="count" aria-label="What Klass8 holds">
-  <div class="wrap">
-    <p><strong>{{lessons}} lessons</strong>, <strong>{{questions}} practice questions</strong> and <strong>{{diagrams}} labelled diagrams</strong>, written class by class for students in Cameroon.</p>
-  </div>
-</section>
-
-<section class="sec" aria-labelledby="ways-title">
-  <div class="wrap">
-    <div class="sec__head">
-      <h2 id="ways-title">A teacher beside you, whenever you revise</h2>
-      <p>Klass8 does what a good teacher does in class: explains, works examples on the board, marks your work and tells you what to practise next.</p>
+<section class="sec" aria-labelledby="welcome-title">
+  <div class="wrap welcome">
+    <div data-reveal>
+      <p class="label">Welcome to Klass8</p>
+      <h2 id="welcome-title">Everything your class needs, in one place.</h2>
+      <p>Lessons for every topic of your year, worked examples, practicals, past-paper style questions and a tutor who explains, solves and marks. Written for the Cameroon syllabus, class by class, and checked against the schemes of work used in schools.</p>
+      <a class="more" href="/subjects" style="margin-top: 30px">See the subjects <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
-    <div class="ways">
-      <a class="way" href="/features#listen">
-        <span class="way__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1M4 13h3v6H5a1 1 0 0 1-1-1zM20 13h-3v6h2a1 1 0 0 0 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>
-        <h3>Listen to lessons</h3>
-        <p>Every lesson read aloud and explained, in English or in French.</p>
-        <span class="link">How it works</span>
-      </a>
-      <a class="way" href="/features#solve">
-        <span class="way__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>
-        <h3>Snap and solve</h3>
-        <p>Photograph a question and watch it solved step by step on the board.</p>
-        <span class="link">How it works</span>
-      </a>
-      <a class="way" href="/features#mark">
-        <span class="way__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 13 2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <h3>Get your work marked</h3>
-        <p>Answer on paper, take a photo, and see every mark you earned and missed.</p>
-        <span class="link">How it works</span>
-      </a>
-      <a class="way" href="/features#exam">
-        <span class="way__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9.5V13l2.5 1.5M10 3h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-        <h3>Practise for the GCE</h3>
-        <p>Timed papers and term tests for your class, with every answer explained.</p>
-        <span class="link">How it works</span>
-      </a>
+    <div class="numbers" data-stagger>
+      <div><strong data-count="{{LESSONS_N}}">{{lessons}}</strong><span>lessons, each with worked examples</span></div>
+      <div><strong data-count="{{QUESTIONS_N}}">{{questions}}</strong><span>practice questions with explanations</span></div>
+      <div><strong data-count="{{DIAGRAMS_N}}">{{diagrams}}</strong><span>labelled diagrams, drawn for the exam</span></div>
     </div>
   </div>
 </section>
 
-<section class="sec sec--paper" aria-labelledby="listen-title">
-  <div class="wrap split">
-    <div class="split__copy">
-      <h2 id="listen-title">Hear a lesson the way a teacher explains it</h2>
-      <p>A natural voice reads each lesson and explains the ideas, the examples and what examiners look for. Press play and hear the tutor for yourself.</p>
-      <div class="voices">
-        {{SAY:lesson-en|A biology lesson|The heart and circulation|light}}
-        {{SAY:board-en|A physics step|Solving on the board|light}}
+<section class="sec sec--paper sec--clip" aria-labelledby="show-title">
+  <div class="wrap">
+    <div class="head head--center" data-reveal>
+      <p class="label">One app, four ways to learn</p>
+      <h2 id="show-title">A teacher beside you, whenever you revise</h2>
+    </div>
+    <div class="show" data-tabs data-auto>
+      <div class="show__tabs" role="tablist" aria-label="What Klass8 does" data-stagger>
+        <button class="tab" role="tab" id="t-listen" aria-controls="p-listen" aria-selected="true">
+          <span class="tab__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1M4 13h3v6H5a1 1 0 0 1-1-1zM20 13h-3v6h2a1 1 0 0 0 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>
+          <span><b class="tab__t">Listen to every lesson</b><span class="tab__d">A natural voice reads each lesson and explains it, in English or in French, while the words light up on the screen.</span></span>
+        </button>
+        <button class="tab" role="tab" id="t-solve" aria-controls="p-solve" aria-selected="false" tabindex="-1">
+          <span class="tab__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>
+          <span><b class="tab__t">Snap a question, see it solved</b><span class="tab__d">Photograph any question and watch it worked out step by step, then checked a second time before you see the answer.</span></span>
+        </button>
+        <button class="tab" role="tab" id="t-mark" aria-controls="p-mark" aria-selected="false" tabindex="-1">
+          <span class="tab__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 13 2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><b class="tab__t">Get your work marked</b><span class="tab__d">Answer on paper, take a photo, and see every mark you earned and missed against an examiner's scheme.</span></span>
+        </button>
+        <button class="tab" role="tab" id="t-exam" aria-controls="p-exam" aria-selected="false" tabindex="-1">
+          <span class="tab__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9.5V13l2.5 1.5M10 3h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <span><b class="tab__t">Practise for the GCE</b><span class="tab__d">Timed papers and term tests for your class, with the explanation behind every answer.</span></span>
+        </button>
       </div>
-    </div>
-    <div class="split__media phone" aria-hidden="true">
-      <div class="phone__screen">
-        <div class="app-bar"><span class="app-back"></span><div><b>The heart and circulation</b><small>Biology, Form 4, lesson 3.1</small></div></div>
-        <div class="lesson">
-          <p>Mammals have a <b>double circulation</b>: blood passes through the heart twice for each complete circuit of the body.</p>
-          <p><mark>The pulmonary circulation carries blood to the lungs,</mark> and the systemic circulation carries it to the rest of the body.</p>
-          <p>The heart has four chambers. The right atrium receives deoxygenated blood from the body through the vena cava.</p>
-          <div class="tip"><b>Exam tip.</b> Say which side of the heart carries oxygenated blood.</div>
+      <div class="show__stage" data-reveal="zoom">
+        <div class="phone is-on" id="p-listen" role="tabpanel" aria-labelledby="t-listen">
+          {{SCREEN:listen}}
         </div>
-        <div class="player"><span class="player__btn"></span><div class="player__bar"><i></i></div><small>0:12</small></div>
+        <div class="phone" id="p-solve" role="tabpanel" aria-labelledby="t-solve">
+          {{SCREEN:solve}}
+        </div>
+        <div class="phone" id="p-mark" role="tabpanel" aria-labelledby="t-mark">
+          {{SCREEN:mark}}
+        </div>
+        <div class="phone" id="p-exam" role="tabpanel" aria-labelledby="t-exam">
+          {{SCREEN:exam}}
+        </div>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="sec sec--navy" aria-labelledby="voice-title">
+  <div class="wrap">
+    <figure class="listen" data-reveal>
+      <p class="label" id="voice-title">Hear the tutor</p>
+      <blockquote>“The pulmonary circulation carries blood to the lungs, and the systemic circulation carries it to the rest of the body.”</blockquote>
+      <figcaption>Biology, Form 4: the heart and circulation</figcaption>
+      <button class="play" type="button" data-audio="/audio/lesson-en.mp3" aria-label="Play the tutor reading this lesson">
+        <span class="play__btn"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h5v16H6zM13 4h5v16h-5z" fill="currentColor"/></svg></span>
+        <span class="play__text"><b>Play the lesson</b><small data-len>13 seconds</small></span>
+      </button>
+      <div class="voices">
+        {{SAY:hello-en|The tutor says hello|In English}}
+        {{SAY:hello-fr|Le tuteur en français|En français}}
+        {{SAY:board-en|A step on the board|Physics}}
+      </div>
+    </figure>
   </div>
 </section>
 
 <section class="sec" aria-labelledby="class-title">
-  <div class="wrap split split--flip">
-    <div class="split__copy">
-      <h2 id="class-title">Your class, your syllabus, term by term</h2>
-      <p>Tell Klass8 your class and your subjects. Your lessons follow the MINESEC syllabus and the scheme of work of each term, from Form 1 to Upper Sixth, in general and technical schools.</p>
-      <ul class="ticks">
-        <li>{{subjects}} subjects open, from Biology to Literature</li>
-        <li>GCE Ordinary and Advanced Level, ITC and ATC</li>
-        <li>Lessons, quizzes and papers for your own class</li>
-      </ul>
-      <a class="btn btn--navy" href="/subjects">See the subjects</a>
+  <div class="wrap split">
+    <div class="photo" style="--img: {{IMG:1632215861513-130b66fe97f4}}" role="img" aria-label="Students reading together in a classroom"><i></i></div>
+    <div class="split__copy" data-reveal>
+      <p class="label">Your class, your syllabus</p>
+      <h2 id="class-title">Organised the way your school year is</h2>
+      <p>Choose your class and your subjects. Every topic sits in the term and sequence your teachers follow, for general and technical schools.</p>
+      <div data-tabs>
+        <div class="lvl-tabs" role="tablist" aria-label="Level">
+          <button role="tab" id="l-o" aria-controls="lp-o" aria-selected="true">Ordinary Level</button>
+          <button role="tab" id="l-a" aria-controls="lp-a" aria-selected="false" tabindex="-1">Advanced Level</button>
+        </div>
+        <div class="lvl-panel" id="lp-o" role="tabpanel" aria-labelledby="l-o"><ul class="chips">{{SUBJECTS_O}}</ul></div>
+        <div class="lvl-panel" id="lp-a" role="tabpanel" aria-labelledby="l-a" hidden><ul class="chips">{{SUBJECTS_A}}</ul></div>
+      </div>
+      <a class="more" href="/subjects">How the syllabus is organised <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
-    <div class="split__media split__photo" style="--img: {{IMG:1632215861513-130b66fe97f4}}" role="img" aria-label="Students reading in a classroom"></div>
   </div>
 </section>
 
 <section class="sec sec--paper" id="pricing" aria-labelledby="pricing-title">
   <div class="wrap">
-    <div class="sec__head">
+    <div class="head head--center" data-reveal>
+      <p class="label">Prices</p>
       <h2 id="pricing-title">Start free. Pay only if you stay.</h2>
-      <p>One price opens everything: every subject, lesson, practical and paper, with the tutor and the marking. Pay by MTN or Orange Money, with nothing renewing automatically.</p>
+      <p>One price opens everything for your class. Pay by MTN or Orange Money, and nothing renews automatically.</p>
     </div>
-    {{PLANS}}
-    <p class="howpay"><a class="link" href="/pricing">How payment works, and what schools pay</a></p>
+    <div data-reveal>{{PLANS}}</div>
+    <p class="after"><a class="more" href="/pricing">How payment works <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
   </div>
 </section>
 
-<section class="sec sec--navy" aria-labelledby="start-title">
+<section class="sec" aria-labelledby="family-title">
   <div class="wrap">
-    <div class="sec__head">
-      <h2 id="start-title">Ready in three minutes</h2>
-      <p>No forms to fill in at school, no card to add.</p>
+    <div class="head" data-reveal>
+      <p class="label">Beyond the student</p>
+      <h2 id="family-title">For the parents and teachers who help</h2>
     </div>
-    <ol class="steps">
-      <li><h3>Download Klass8</h3><p>Install it on your Android phone, or open it in any browser.</p></li>
-      <li><h3>Tell us your class</h3><p>Your class, your exam year and your subjects, one question at a time.</p></li>
-      <li><h3>Start your free month</h3><p>Everything is open for 30 days. Pay by mobile money only if you want to continue.</p></li>
-    </ol>
+    <div class="cards" data-stagger>
+      <a class="card" href="/schools#parents">
+        <span class="card__img"><i style="--img: {{IMG:1758525861614-4d3cb34751d8}}"></i></span>
+        <span class="card__body">
+          <h3>Parents</h3>
+          <p>Follow your child's revision from your own phone, with a report every week. Parent accounts are free.</p>
+          <span class="more">For parents <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </span>
+      </a>
+      <a class="card" href="/schools#licence">
+        <span class="card__img"><i style="--img: {{IMG:1473649085228-583485e6e4d7}}"></i></span>
+        <span class="card__body">
+          <h3>Schools and teachers</h3>
+          <p>Give every student Klass8 with one school licence, and follow each class from a free teacher account.</p>
+          <span class="more">For schools <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </span>
+      </a>
+    </div>
   </div>
 </section>
 
-<section class="final" style="--img: {{IMG:1643488422823-ca046d82123b}}" aria-labelledby="final-title">
-  <div class="wrap final__in">
+<section class="sec sec--paper" aria-labelledby="faq-title">
+  <div class="wrap faq">
+    <div class="head" data-reveal>
+      <p class="label">Questions</p>
+      <h2 id="faq-title">What students and parents ask</h2>
+      <p><a class="more" href="/faq">All questions <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
+    </div>
+    <div class="faq__list" data-reveal>
+      <details>
+        <summary>Is Klass8 free?</summary>
+        <p>Your first month is free, with everything open. After that, Klass8 costs {{PRICE_MONTH}} for a month or {{PRICE_YEAR}} for a year. Nothing renews automatically.</p>
+      </details>
+      <details>
+        <summary>How do I pay?</summary>
+        <p>In the app, choose a plan, then MTN Mobile Money or Orange Money, and enter your number. Approve the request on your phone with your PIN. Payments are processed by Fapshi, and Klass8 never asks for your PIN.</p>
+      </details>
+      <details>
+        <summary>Does it follow my school's syllabus?</summary>
+        <p>Yes. Klass8 follows the MINESEC syllabuses and the term-by-term schemes of work, from Form 1 to Upper Sixth, for the GCE Ordinary and Advanced Levels, the ITC and the ATC.</p>
+      </details>
+      <details>
+        <summary>Which phones does it work on?</summary>
+        <p>Klass8 runs on Android phones: download it from this site. On any other phone or on a computer, open it in your browser.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="final" aria-labelledby="final-title">
+  <div class="final__media" style="--img: {{IMG:1643488422823-ca046d82123b}}" aria-hidden="true"></div>
+  <div class="wrap final__in" data-reveal>
     <h2 id="final-title">The GCE is closer than you think. Start today.</h2>
     <p>Every subject for your class, the tutor and the marking, free for your first 30 days.</p>
     <div class="hero__cta">
-      <a class="btn btn--amber btn--lg" href="/download/">Download for Android</a>
+      <a class="btn btn--amber btn--lg" href="/download/">Start your free month</a>
       <a class="btn btn--ghost btn--lg" href="/app">Open in your browser</a>
     </div>
   </div>

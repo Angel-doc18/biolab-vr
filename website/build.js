@@ -60,6 +60,7 @@ const { PLANS, fcfa } = require(path.join(ROOT, 'src/data/plan.js'));
 const { MARK } = require(path.join(ROOT, 'src/ui/brand.js'));
 const BUSINESS = require('./business.js');
 const PAGES = require('./pages.js');
+const SCREEN = require('./screens.js');
 
 // Who sells Klass8. The business name, email and phone are shown wherever they
 // are filled in; without them the contact page offers only its form.
@@ -85,6 +86,7 @@ const openUnits = units.filter((u) => openIds.has(u.subject));
 const lessonIds = new Set(openUnits.flatMap((u) => u.lessonIds || []).filter((id) => lessonById.has(id)));
 const questions = openUnits.reduce((n, u) => n + (u.quiz?.length || 0), 0) + [...lessonIds].reduce((n, id) => n + (lessonById.get(id).questions?.length || 0), 0);
 const n = (x) => x.toLocaleString('en-GB');
+const raw = { LESSONS_N: lessonIds.size, QUESTIONS_N: questions, DIAGRAMS_N: Object.keys(DIAGRAMS).length };
 const stats = {
   lessons: n(lessonIds.size),
   questions: n(questions),
@@ -103,10 +105,14 @@ const chips = (level) =>
 // The heart, drawn by the app's own diagram code, with its exam labels.
 const heart = renderToStaticMarkup(React.createElement(DiagramView, { spec: DIAGRAMS['heart-section'] })).replace('<svg ', '<svg role="img" aria-label="Labelled vertical section through the mammalian heart" ');
 
+// The same heart, small and silent, for the lesson inside the phone.
+const heartSmall = heart.replace(' role="img" aria-label="Labelled vertical section through the mammalian heart"', ' aria-hidden="true" focusable="false"');
+
 const site = PAGES.make({ B, terms: TERMS, privacy: PRIVACY, priceMonth: fcfa(PLANS.month.amount), priceYear: fcfa(PLANS.year.amount), mark: markSvg });
 
 const fill = {
   ...stats,
+  ...raw,
   MARK: markSvg,
   PLANS: site.plans,
   HEART: heart,
@@ -120,7 +126,9 @@ const fill = {
 };
 const fillIn = (html) =>
   html
+    .replace(/\{\{SCREEN:(\w+)\}\}/g, (m, name) => SCREEN(name, { heart: heartSmall }))
     .replace(/\{\{IMG:([\w-]+)\}\}/g, (m, id) => PAGES.photo(id))
+    .replace(/\{\{CRUMBS:([^}]+)\}\}/g, (m, title) => PAGES.crumbs(title))
     .replace(/\{\{SAY:([\w-]+)\|([^|}]+)\|([^|}]+)(\|light)?\}\}/g, (m, clip, title, note, light) => PAGES.say(clip, title, note, !!light))
     .replace(/\{\{(\w+)\}\}/g, (m, k) => (k in fill ? fill[k] : m));
 
@@ -150,7 +158,7 @@ write('img/mark.svg', markSvg.replace('<svg class="mark" ', '<svg xmlns="http://
 const pages = [];
 for (const file of fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsWith('.html'))) {
   const raw = fs.readFileSync(path.join(SRC, 'pages', file), 'utf8');
-  const m = raw.match(/^<!--page (\{.*?\}) -->\n/s);
+  const m = raw.match(/^<!--page (\{.*?\}) -->\r?\n/s);
   if (!m) throw new Error(`${file}: the first line must be <!--page {"title": ..., "desc": ...} -->`);
   const meta = JSON.parse(m[1]);
   const slug = file.replace(/\.html$/, '');
@@ -164,7 +172,7 @@ for (const pg of pages) {
   let out = fillIn(shell(pg));
   out = fillIn(out);
   out = out.replace(/(href|src)="(\/?)([\w/.-]+\.(?:css|js))"/g, (m, attr, slash, file) => `${attr}="${slash}${file}?v=${stamp(file)}"`);
-  const left = out.match(/\{\{[\w:|-]+\}\}/);
+  const left = out.match(/\{\{[^}]+\}\}/);
   if (left) throw new Error(`${pg.file}: ${left[0]} was not filled`);
   write(pg.file, out);
 }

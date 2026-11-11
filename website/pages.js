@@ -7,17 +7,19 @@ const esc = (s) =>
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-const FONTS = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Kalam:wght@400;700&display=swap';
+const FONTS = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Figtree:wght@400..800&display=swap';
 
 // A photograph from Unsplash, sized for a full-width background.
 const photo = (id) => `url('https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1800&q=65')`;
 
 // A button that plays one of the tutor's recorded clips.
-const say = (clip, title, note, light) => `<button class="say${light ? ' say--light' : ''}" type="button" data-audio="/audio/${clip}.mp3" aria-label="${esc(title)}: play the tutor's voice">
-  <span class="say__icon"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg></span>
-  <span class="say__text"><b>${esc(title)}</b><small data-len>${esc(note)}</small></span>
-  <span class="say__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+const say = (clip, title, note, light) => `<button class="chip-play${light ? ' chip-play--light' : ''}" type="button" data-audio="/audio/${clip}.mp3" aria-label="${esc(title)}: play the tutor's voice">
+  <i><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h5v16H6zM13 4h5v16h-5z" fill="currentColor"/></svg></i>
+  <span>${esc(title)}</span><span class="sr" data-len>${esc(note)}</span>
 </button>`;
+
+// The small "Home > page" trail at the top of a page.
+const crumbs = (title) => `<nav class="crumbs" aria-label="You are here"><a href="/">Home</a><span aria-hidden="true">/</span><span>${esc(title)}</span></nav>`;
 
 function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
   const who = B.name || 'Klass8';
@@ -40,6 +42,7 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com">
 <link rel="stylesheet" href="${FONTS}">
+<script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.K8)document.documentElement.classList.remove('js')},3000)</script>
 <link rel="stylesheet" href="/site.css">
 <script src="/site.js" defer></script>`;
 
@@ -50,13 +53,10 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
       <a href="/features">Features</a>
       <a href="/subjects">Subjects</a>
       <a href="/pricing">Prices</a>
-      <a href="/schools">Schools and parents</a>
+      <a href="/schools">Schools</a>
       <a href="/about">About</a>
-      <a href="/contact">Contact</a>
-      <a class="hd__navapp" href="/app">Open in your browser</a>
     </nav>
     <div class="hd__act">
-      <a class="hd__link" href="/app">Open in your browser</a>
       <a class="btn btn--amber btn--sm" href="/download/">Download</a>
       <button class="hd__menu" type="button" aria-controls="menu" aria-expanded="false" data-menu>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -66,47 +66,42 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
   </div>
 </header>`;
 
-  const contactLines = [
-    `<p>${esc(who)}${has('town') ? `<br>${esc(B.town)}, ${esc(B.country)}` : `<br>${esc(B.country)}`}</p>`,
-    has('email') || has('phone') ? `<p>${has('email') ? `<a href="mailto:${esc(B.email)}">${esc(B.email)}</a>` : ''}${has('email') && has('phone') ? '<br>' : ''}${has('phone') ? esc(B.phone) : ''}</p>` : '<p><a href="/contact">Send us a message</a></p>',
-  ].join('');
 
   const footer = `<footer class="ft">
   <div class="wrap">
     <div class="ft__top">
-      <a class="logo logo--light" href="/" aria-label="Klass8 home">${mark}<span>Klass8</span></a>
-      <p class="ft__motto">Learn. Practise. Excel.</p>
-    </div>
-    <div class="ft__grid">
-      <nav aria-label="Klass8">
-        <h2>Klass8</h2>
-        <a href="/features">Features</a>
-        <a href="/subjects">Subjects</a>
-        <a href="/pricing">Prices</a>
-        <a href="/schools">Schools and parents</a>
-        <a href="/about">About us</a>
-      </nav>
-      <nav aria-label="Get Klass8">
-        <h2>Get Klass8</h2>
-        <a href="/download/">Download for Android</a>
-        <a href="/app">Open in your browser</a>
-        <a href="/faq">Questions and answers</a>
-        <a href="/contact">Contact us</a>
-      </nav>
-      <nav aria-label="Legal">
-        <h2>Policies</h2>
-        <a href="/terms">Terms of service</a>
-        <a href="/privacy">Privacy policy</a>
-        <a href="/refunds">Refund policy</a>
-        <a href="/delete-account">Delete your account</a>
-      </nav>
-      <div>
-        <h2>Contact</h2>
-        ${contactLines}
+      <div class="ft__brand">
+        <a class="logo logo--light" href="/" aria-label="Klass8 home">${mark}<span>Klass8</span></a>
+        <p>The study app for secondary school students in Cameroon, from Form 1 to Upper Sixth.</p>
+        <p class="ft__motto">Learn. Practise. Excel.</p>
+      </div>
+      <div class="ft__cols">
+        <nav aria-label="Klass8">
+          <h2>Klass8</h2>
+          <a href="/features">Features</a>
+          <a href="/subjects">Subjects</a>
+          <a href="/pricing">Prices</a>
+          <a href="/schools">Schools and parents</a>
+          <a href="/about">About us</a>
+        </nav>
+        <nav aria-label="Help">
+          <h2>Help</h2>
+          <a href="/download/">Download for Android</a>
+          <a href="/app">Open in your browser</a>
+          <a href="/faq">Questions and answers</a>
+          <a href="/contact">Contact us</a>
+        </nav>
+        <nav aria-label="Policies">
+          <h2>Policies</h2>
+          <a href="/terms">Terms of service</a>
+          <a href="/privacy">Privacy policy</a>
+          <a href="/refunds">Refund policy</a>
+          <a href="/delete-account">Delete your account</a>
+        </nav>
       </div>
     </div>
     <div class="ft__base">
-      <p>Klass8 follows the MINESEC syllabuses and prepares students for the GCE Board examinations. Payments by MTN Mobile Money and Orange Money are processed by Fapshi. Photographs from Unsplash.</p>
+      <p>Klass8 follows the MINESEC syllabuses and prepares students for the GCE Board examinations. Payments by MTN Mobile Money and Orange Money are processed by Fapshi. Photographs from Unsplash. ${esc(who)}${has('town') ? `, ${esc(B.town)}` : ''}, ${esc(B.country)}.${has('email') ? ` ${esc(B.email)}.` : ''}</p>
       <p>© 2026 ${esc(who)}</p>
     </div>
   </div>
@@ -151,7 +146,7 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
   const sections = (list) => list.map(([h, p]) => `<h2>${esc(h)}</h2>\n<p>${esc(p)}</p>`).join('\n');
   const reach = has('email') ? `<a href="mailto:${esc(B.email)}">${esc(B.email)}</a>${has('phone') ? ` or ${esc(wa)} on WhatsApp` : ''}` : 'the <a href="/contact">contact form</a>';
   const updated = 'Last updated on 11 November 2026.';
-  const plain = (title, intro) => `<section class="phero phero--plain"><div class="wrap phero__in"><h1>${esc(title)}</h1><p>${intro}</p></div></section>`;
+  const plain = (title, intro) => `<section class="phero phero--plain"><div class="wrap phero__in">${crumbs(title)}<h1>${esc(title)}</h1><p>${intro}</p></div></section>`;
 
   const policies = [
     {
@@ -222,4 +217,4 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
   return { head, header, footer, plans, policies, contactCards: contactCards ? `<dl class="contact">${contactCards}</dl>` : '', who, hours: B.hours };
 }
 
-module.exports = { make, say, photo, esc };
+module.exports = { make, say, photo, esc, crumbs };

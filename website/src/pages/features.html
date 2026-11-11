@@ -1,20 +1,29 @@
 <!--page {"title": "Features | Klass8", "desc": "Lessons read aloud, questions solved step by step from a photo, handwritten answers marked against an examiner's scheme, diagrams, 3D models and timed GCE practice."} -->
-<section class="phero" style="--img: {{IMG:1633455153917-7651231ad61b}}">
+<section class="phero" aria-labelledby="page-title">
+  <div class="phero__media" style="--img: {{IMG:1633455153917-7651231ad61b}}" aria-hidden="true"></div>
   <div class="wrap phero__in">
-    <h1>Everything you need to revise, in one app</h1>
-    <p>Klass8 explains your lessons, solves questions with you, marks your work and gets you ready for the GCE, at the level of your own class.</p>
-    <div class="hero__cta">
-      <a class="btn btn--amber btn--lg" href="/download/">Download for Android</a>
-      <a class="btn btn--ghost btn--lg" href="/app">Open in your browser</a>
-    </div>
+    <div data-rise style="--delay: 0.05s">{{CRUMBS:Features}}</div>
+    <h1 id="page-title" data-rise style="--delay: 0.2s">Everything you need to revise, in one app</h1>
+    <p data-rise style="--delay: 0.4s">Klass8 explains your lessons, solves questions with you, marks your work and gets you ready for the GCE, at the level of your own class.</p>
   </div>
 </section>
 
+<nav class="jump" aria-label="On this page">
+  <div class="wrap jump__in">
+    <a href="#listen">Lessons</a>
+    <a href="#solve">Solve</a>
+    <a href="#mark">Marking</a>
+    <a href="#diagrams">Diagrams</a>
+    <a href="#exam">Exam practice</a>
+  </div>
+</nav>
+
 <section class="sec" id="listen" aria-labelledby="f-listen">
   <div class="wrap split">
-    <div class="split__copy">
+    <div class="split__copy" data-reveal="left">
+      <p class="label">Lessons</p>
       <h2 id="f-listen">Listen to every lesson</h2>
-      <p>A natural voice reads each lesson and explains it the way a good teacher does, in English or in French. The words are highlighted as they are read, so you can follow along, then test yourself with the questions at the end.</p>
+      <p>A natural voice reads each lesson and explains it the way a good teacher does, in English or in French. The words light up as they are read, so you can follow along, then test yourself with the questions at the end.</p>
       <ul class="ticks">
         <li>Every topic of your class, in the order of the school year</li>
         <li>Worked examples and exam tips in every lesson</li>
@@ -24,59 +33,37 @@
         {{SAY:lesson-en|Hear a lesson|The heart and circulation|light}}
       </div>
     </div>
-    <div class="split__media phone" aria-hidden="true">
-      <div class="phone__screen">
-        <div class="app-bar"><span class="app-back"></span><div><b>The heart and circulation</b><small>Biology, Form 4, lesson 3.1</small></div></div>
-        <div class="lesson">
-          <p>Mammals have a <b>double circulation</b>: blood passes through the heart twice for each complete circuit of the body.</p>
-          <p><mark>The pulmonary circulation carries blood to the lungs,</mark> and the systemic circulation carries it to the rest of the body.</p>
-          <p>The heart has four chambers. The right atrium receives deoxygenated blood from the body through the vena cava.</p>
-          <div class="tip"><b>Exam tip.</b> Say which side of the heart carries oxygenated blood.</div>
-        </div>
-        <div class="player"><span class="player__btn"></span><div class="player__bar"><i></i></div><small>0:12</small></div>
-      </div>
+    <div class="phone" data-reveal="zoom" aria-hidden="true">
+      {{SCREEN:listen}}
     </div>
   </div>
 </section>
 
 <section class="sec sec--paper" id="solve" aria-labelledby="f-solve">
   <div class="wrap split split--flip">
-    <div class="split__copy">
-      <h2 id="f-solve">Snap a question, watch it solved</h2>
-      <p>Photograph a question from your textbook, a past paper or your exercise book. The tutor writes the working on the board one line at a time and explains each line aloud. A second pass works the question again and corrects any slip before you see the answer.</p>
+    <div class="split__copy" data-reveal="right">
+      <p class="label">Solve</p>
+      <h2 id="f-solve">Snap a question, see it solved</h2>
+      <p>Photograph a question from your textbook, a past paper or your exercise book. The tutor works it out one line at a time and explains each line. A second pass works the question again and corrects any slip before you see the answer.</p>
       <ul class="ticks">
         <li>Printed or handwritten questions</li>
         <li>Ask about any step you did not follow</li>
         <li>A similar question to try on your own</li>
       </ul>
       <div class="voices">
-        {{SAY:board-en|Hear a step explained|Physics, on the board|light}}
+        {{SAY:board-en|Hear a step explained|Physics|light}}
       </div>
     </div>
-    <div class="split__media phone" aria-hidden="true">
-      <div class="phone__screen">
-        <div class="app-bar"><span class="app-back"></span><div><b>Workspace</b><small>Chemistry, Form 5</small></div></div>
-        <div class="ws">
-          <div class="ws__snap"><span class="ws__btn ws__btn--on">Snap it</span><span class="ws__btn">Upload</span></div>
-          <div class="ws__board">
-            <small>The question read from your photo</small>
-            <p>What mass of calcium oxide forms when 25 g of calcium carbonate is heated? (Ca = 40, C = 12, O = 16)</p>
-            <ol>
-              <li>Mr(CaCO₃) = 40 + 12 + 48 = 100</li>
-              <li>moles = 25 ÷ 100 = 0.25 mol</li>
-              <li>1 mol CaCO₃ gives 1 mol CaO</li>
-              <li>mass = 0.25 × 56 = 14 g</li>
-            </ol>
-          </div>
-        </div>
-      </div>
+    <div class="phone" data-reveal="zoom" aria-hidden="true">
+      {{SCREEN:solve}}
     </div>
   </div>
 </section>
 
 <section class="sec" id="mark" aria-labelledby="f-mark">
   <div class="wrap split">
-    <div class="split__copy">
+    <div class="split__copy" data-reveal="left">
+      <p class="label">Marking</p>
       <h2 id="f-mark">Answer on paper, get it marked</h2>
       <p>Write your answer the way you would in the exam, take a photo and get your marks against an examiner's mark scheme: what earned marks, what lost them and a model answer. It works for structured questions and for Paper 3 practicals.</p>
       <ul class="ticks">
@@ -85,36 +72,25 @@
         <li>Tells you exactly what to fix</li>
       </ul>
     </div>
-    <div class="split__media phone" aria-hidden="true">
-      <div class="phone__screen">
-        <div class="app-bar"><span class="app-back"></span><div><b>Mark my working</b><small>Physics, Form 4</small></div></div>
-        <div class="mk">
-          <div class="mk__score"><b>2</b><span>/ 4</span><small>marks</small></div>
-          <ul class="mk__rows">
-            <li class="ok"><b>1/1</b>v = u + at, with the values put in</li>
-            <li class="ok"><b>1/1</b>v = 20 m/s, with its unit</li>
-            <li class="no"><b>0/1</b>The time was not squared in s = ½at²</li>
-            <li class="no"><b>0/1</b>s should be 80 m</li>
-          </ul>
-          <div class="mk__fb">Square the time before you multiply: ½ × 2.5 × 8² = 80 m.</div>
-        </div>
-      </div>
+    <div class="phone" data-reveal="zoom" aria-hidden="true">
+      {{SCREEN:mark}}
     </div>
   </div>
 </section>
 
 <section class="sec sec--paper" id="diagrams" aria-labelledby="f-diagram">
   <div class="wrap split split--flip">
-    <div class="split__copy">
+    <div class="split__copy" data-reveal="right">
+      <p class="label">Diagrams</p>
       <h2 id="f-diagram">Diagrams that explain themselves</h2>
-      <p>Every diagram is labelled the way the GCE expects, with ruled label lines that do not cross. Tap a part and the tutor tells you what it is and what it does. Organs like the heart, the lungs and the brain also open in 3D, so you can turn them in your hand.</p>
+      <p>Every diagram is labelled the way the GCE expects, with ruled label lines that never cross. Tap a part and the tutor tells you what it is and what it does. Organs like the heart, the lungs and the brain also open in 3D, so you can turn them in your hand.</p>
       <ul class="ticks">
         <li>{{diagrams}} diagrams across the subjects</li>
         <li>{{models}} anatomy models in 3D</li>
         <li>Practicals with real readings, tables and graphs</li>
       </ul>
     </div>
-    <figure class="split__media diagram">
+    <figure class="diagram" data-reveal="zoom">
       {{HEART}}
     </figure>
   </div>
@@ -122,7 +98,8 @@
 
 <section class="sec" id="exam" aria-labelledby="f-exam">
   <div class="wrap split">
-    <div class="split__copy">
+    <div class="split__copy" data-reveal="left">
+      <p class="label">Exam practice</p>
       <h2 id="f-exam">Practise like the real exam</h2>
       <p>Timed Paper 1 multiple choice, Paper 2 structured questions and term tests for your class, with the explanation behind every answer. Klass8 shows the topics you find hardest, so you know what to revise next.</p>
       <ul class="ticks">
@@ -131,24 +108,15 @@
         <li>Your grade estimate as you practise</li>
       </ul>
     </div>
-    <div class="split__media phone" aria-hidden="true">
-      <div class="phone__screen">
-        <div class="app-bar"><span class="app-back"></span><div><b>Paper 1</b><small>Biology, question 12 of 50</small></div><span class="timer">1:04:37</span></div>
-        <div class="mcq">
-          <p>Which blood vessel carries oxygenated blood from the lungs to the heart?</p>
-          <span class="opt">A. Pulmonary artery</span>
-          <span class="opt opt--on">B. Pulmonary vein</span>
-          <span class="opt">C. Vena cava</span>
-          <span class="opt">D. Aorta</span>
-          <div class="mcq__why"><b>Correct.</b> The pulmonary vein is the only vein that carries oxygenated blood.</div>
-        </div>
-      </div>
+    <div class="phone" data-reveal="zoom" aria-hidden="true">
+      {{SCREEN:exam}}
     </div>
   </div>
 </section>
 
-<section class="final" style="--img: {{IMG:1536337005238-94b997371b40}}" aria-labelledby="final-title">
-  <div class="wrap final__in">
+<section class="final" aria-labelledby="final-title">
+  <div class="final__media" style="--img: {{IMG:1536337005238-94b997371b40}}" aria-hidden="true"></div>
+  <div class="wrap final__in" data-reveal>
     <h2 id="final-title">Try every feature free for a month.</h2>
     <p>No card and nothing to pay. Choose a plan only if you want to continue.</p>
     <div class="hero__cta">

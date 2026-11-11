@@ -1,25 +1,20 @@
 <!--page {"title": "Questions and answers | Klass8", "desc": "Answers to common questions about Klass8: the free month, prices, mobile money payments, the syllabus, phones, parents and data."} -->
-<section class="phero" style="--img: {{IMG:1540302819037-abacaf0f1e1e}}">
+<section class="phero" aria-labelledby="page-title">
+  <div class="phero__media" style="--img: {{IMG:1540302819037-abacaf0f1e1e}}" aria-hidden="true"></div>
   <div class="wrap phero__in">
-    <h1>Questions and answers</h1>
-    <p>What students and parents ask us most. Anything else? <a class="link" style="color: inherit" href="/contact">Contact us</a>.</p>
+    <div data-rise style="--delay: 0.05s">{{CRUMBS:Questions and answers}}</div>
+    <h1 id="page-title" data-rise style="--delay: 0.2s">Questions and answers</h1>
+    <p data-rise style="--delay: 0.4s">What students and parents ask us most. Anything else? <a href="/contact" style="color: inherit">Contact us</a>.</p>
   </div>
 </section>
 
-<section class="sec" aria-label="Questions">
+<section class="sec" aria-labelledby="q-use">
   <div class="wrap faq">
-    <div class="sec__head">
-      <h2>Using Klass8</h2>
+    <div class="head" data-reveal>
+      <p class="label">The app</p>
+      <h2 id="q-use">Using Klass8</h2>
     </div>
-    <div class="faq__list">
-      <details>
-        <summary>Is Klass8 free?</summary>
-        <p>Your first month is free, with everything open. After that, Klass8 costs {{PRICE_MONTH}} for a month or {{PRICE_YEAR}} for a year. Nothing renews automatically.</p>
-      </details>
-      <details>
-        <summary>How do I pay?</summary>
-        <p>In the app, choose a plan, then MTN Mobile Money or Orange Money, and enter your number. Approve the request on your phone with your PIN. Payments are processed by Fapshi, and Klass8 never asks for your PIN.</p>
-      </details>
+    <div class="faq__list" data-reveal>
       <details>
         <summary>Does it follow my school's syllabus?</summary>
         <p>Yes. Klass8 follows the MINESEC syllabuses and the term-by-term schemes of work, from Form 1 to Upper Sixth, for the GCE Ordinary and Advanced Levels. Technical students choose their stream for the ITC and the ATC.</p>
@@ -36,20 +31,61 @@
         <summary>How accurate are the solutions and the marking?</summary>
         <p>Lessons are written for the syllabus and checked. Questions solved by the tutor are checked a second time before you see them, and marking follows an examiner's scheme. They are made by AI, so check important answers with your lessons or your teacher.</p>
       </details>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--paper" aria-labelledby="q-pay">
+  <div class="wrap faq">
+    <div class="head" data-reveal>
+      <p class="label">Prices</p>
+      <h2 id="q-pay">Paying</h2>
+      <p>The full details are in the <a href="/refunds">refund policy</a>.</p>
+    </div>
+    <div class="faq__list" data-reveal>
+      <details>
+        <summary>Is Klass8 free?</summary>
+        <p>Your first month is free, with everything open. After that, Klass8 costs {{PRICE_MONTH}} for a month or {{PRICE_YEAR}} for a year. Nothing renews automatically.</p>
+      </details>
+      <details>
+        <summary>How do I pay?</summary>
+        <p>In the app, choose a plan, then MTN Mobile Money or Orange Money, and enter your number. Approve the request on your phone with your PIN. Payments are processed by Fapshi, and Klass8 never asks for your PIN.</p>
+      </details>
+      <details>
+        <summary>What if money is taken but Klass8 does not open?</summary>
+        <p>Contact us within 14 days with your phone number and the payment reference shown in the app. We either open Klass8 on your account or refund the full amount to the same number within 7 working days.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="q-acc">
+  <div class="wrap faq">
+    <div class="head" data-reveal>
+      <p class="label">Your account</p>
+      <h2 id="q-acc">Parents and privacy</h2>
+      <p>Read the <a href="/privacy">privacy policy</a>.</p>
+    </div>
+    <div class="faq__list" data-reveal>
       <details>
         <summary>Can my parent follow my progress?</summary>
         <p>Yes. A parent can link to your account from a free parent account, or receive the weekly report you turn on.</p>
       </details>
       <details>
         <summary>What happens to my data?</summary>
-        <p>We keep only what Klass8 needs to work, never sell it and show no advertising. You can delete your account at any time. Read the <a href="/privacy">privacy policy</a>.</p>
+        <p>We keep only what Klass8 needs to work, never sell it and show no advertising. You can delete your account at any time.</p>
+      </details>
+      <details>
+        <summary>How do I delete my account?</summary>
+        <p>In the app, go to Me, then Account and security, and tap Delete my account. You can also <a href="/delete-account">ask us to delete it</a>.</p>
       </details>
     </div>
   </div>
 </section>
 
-<section class="final" style="--img: {{IMG:1567057419565-4349c49d8a04}}" aria-labelledby="final-title">
-  <div class="wrap final__in">
+<section class="final" aria-labelledby="final-title">
+  <div class="final__media" style="--img: {{IMG:1567057419565-4349c49d8a04}}" aria-hidden="true"></div>
+  <div class="wrap final__in" data-reveal>
     <h2 id="final-title">Still deciding? Try it free.</h2>
     <p>Everything is open for your first 30 days.</p>
     <div class="hero__cta">
