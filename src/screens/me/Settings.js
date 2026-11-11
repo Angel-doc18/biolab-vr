@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { Modal } from 'react-native';
 import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
-import { Field, passwordValid, Toggle } from '../../ui/form';
-import { TimePicker } from '../onboarding/Goals';
+import { Field, passwordValid } from '../../ui/form';
 import { del, get, post, setSession } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-import { cancelDailyReminder, scheduleDailyReminder } from '../../lib/reminders';
-import { STUDY_TIME_ROWS, nearestStudyTime, studyTimeLabel } from '../../lib/studyTime';
+import { studyTimeLabel } from '../../lib/studyTime';
 
 function Section({ title, children }) {
   return (
@@ -20,12 +18,9 @@ function Section({ title, children }) {
 }
 
 export default function Settings({ navigation }) {
-  const { user, updateMe, logout, prefs, savePrefs } = useApp();
+  const { user, updateMe, logout, prefs } = useApp();
   const L = useL();
   const [name, setName] = useState(user?.name || '');
-  const [time, setTime] = useState(user?.reminderTime || '18:30');
-  const [minutes, setMinutes] = useState(() => nearestStudyTime(user?.dailyMinutes));
-  const [reminder, setReminder] = useState(prefs.reminder !== false);
   const [pwOpen, setPwOpen] = useState(false);
   const [delOpen, setDelOpen] = useState(false);
   const [payments, setPayments] = useState(null);
@@ -37,8 +32,7 @@ export default function Settings({ navigation }) {
     setBusy(true);
     setError(null);
     try {
-      await updateMe({ name: name.trim(), reminderTime: time, dailyMinutes: minutes });
-      if (reminder) await scheduleDailyReminder(time, minutes, prefs.lang);
+      await updateMe({ name: name.trim() });
       showToast(L('Saved', 'Enregistré'));
     } catch (e) {
       setError(e);
@@ -70,7 +64,7 @@ export default function Settings({ navigation }) {
               </V>
             </V>
             {user?.role === 'student' && (
-              <P c="flex-row items-center justify-between" onPress={() => navigation.navigate('ExamClass', { fromSettings: true })}>
+              <P c="flex-row items-center justify-between" onPress={() => navigation.navigate('SchoolKind', { flow: 'class' })}>
                 <V>
                   <T c="font-label-lg text-label-lg text-on-surface">{L('Exam and class', 'Examen et classe')}</T>
                   <T c="font-body-sm text-body-sm text-on-surface-variant">
@@ -94,42 +88,16 @@ export default function Settings({ navigation }) {
           </Section>
 
           {user?.role === 'student' && (
-            <Section title={L('Daily reminder', 'Rappel quotidien')}>
-              <V c="flex-row items-center justify-between">
+            <Section title={L('Study plan', 'Plan d’étude')}>
+              <P c="flex-row items-center justify-between" onPress={() => navigation.navigate('Grade', { flow: 'plan' })}>
                 <V c="flex-1 pr-2">
-                  <T c="font-label-lg text-label-lg text-on-surface">{L('Remind me to revise', 'Me rappeler de réviser')}</T>
+                  <T c="font-label-lg text-label-lg text-on-surface">{L('Grade, time each day and reminder', 'Note, temps par jour et rappel')}</T>
                   <T c="font-body-sm text-body-sm text-on-surface-variant">
-                    {studyTimeLabel(minutes)} {L('at', 'à')} {time}
+                    {L('Grade', 'Note')} {user?.targetGrade || 'A'} · {studyTimeLabel(user?.dailyMinutes || 60)} · {prefs.reminder === false ? L('no reminder', 'sans rappel') : `${L('reminder at', 'rappel à')} ${user?.reminderTime || '18:30'}`}
                   </T>
                 </V>
-                <Toggle
-                  on={reminder}
-                  onPress={async () => {
-                    const next = !reminder;
-                    setReminder(next);
-                    savePrefs({ reminder: next });
-                    if (next) await scheduleDailyReminder(time, minutes, prefs.lang);
-                    else await cancelDailyReminder();
-                  }}
-                  accessibilityLabel="Daily reminder"
-                />
-              </V>
-              {reminder && (
-                <>
-                  <TimePicker value={time} onChange={setTime} L={L} />
-                  <V c="gap-space-xs" accessibilityRole="radiogroup">
-                    {STUDY_TIME_ROWS.map((row) => (
-                      <V key={row[0]} c="flex-row gap-space-xs">
-                        {row.map((m) => (
-                          <P key={m} c={`flex-1 py-space-sm rounded-xl items-center ${minutes === m ? 'bg-primary' : 'bg-surface-container-low'}`} onPress={() => setMinutes(m)} accessibilityRole="radio" accessibilityState={{ checked: minutes === m }}>
-                            <T c={`font-label-lg text-label-lg ${minutes === m ? 'text-on-primary' : 'text-on-surface'}`}>{studyTimeLabel(m)}</T>
-                          </P>
-                        ))}
-                      </V>
-                    ))}
-                  </V>
-                </>
-              )}
+                <Ic n="chevron_right" c="outline" />
+              </P>
             </Section>
           )}
           <ErrorNote error={error} />

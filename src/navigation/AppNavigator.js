@@ -16,9 +16,9 @@ import Otp from '../screens/auth/Otp';
 import Forgot from '../screens/auth/Forgot';
 import Reset from '../screens/auth/Reset';
 import Role from '../screens/onboarding/Role';
-import ExamClass from '../screens/onboarding/ExamClass';
+import { ClassPick, ExamYear, SchoolKind, Series, Subjects } from '../screens/onboarding/ClassSteps';
 import School from '../screens/onboarding/School';
-import Goals from '../screens/onboarding/Goals';
+import { Grade, Reminder, StudyTime } from '../screens/onboarding/PlanSteps';
 import SetupDone from '../screens/onboarding/SetupDone';
 import LinkChild from '../screens/onboarding/LinkChild';
 import CreateClass from '../screens/onboarding/CreateClass';
@@ -106,7 +106,7 @@ const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Fo
 // What a student whose free month has ended (and who has not paid) can still
 // open: signing in and out, setting up the account, the platform charges and
 // settings. Anything else leads to the platform charges.
-const OPEN_WHEN_LOCKED = [...PUBLIC, 'Role', 'ExamClass', 'School', 'Goals', 'SetupDone', 'Paywall', 'Pay', 'Voucher', 'Settings', 'Offline'];
+const OPEN_WHEN_LOCKED = [...PUBLIC, 'Role', 'SchoolKind', 'ClassPick', 'ExamYear', 'Series', 'Subjects', 'School', 'Grade', 'StudyTime', 'Reminder', 'SetupDone', 'Paywall', 'Pay', 'Voucher', 'Settings', 'Offline'];
 
 const theme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: C['surface-container-lowest'], primary: C['primary-container'] } };
 
@@ -140,9 +140,15 @@ export default function AppNavigator() {
         <Stack.Screen name="Forgot" component={Forgot} />
         <Stack.Screen name="Reset" component={Reset} />
         <Stack.Screen name="Role" component={Role} options={{ gestureEnabled: false }} />
-        <Stack.Screen name="ExamClass" component={ExamClass} />
+        <Stack.Screen name="SchoolKind" component={SchoolKind} />
+        <Stack.Screen name="ClassPick" component={ClassPick} />
+        <Stack.Screen name="ExamYear" component={ExamYear} />
+        <Stack.Screen name="Series" component={Series} />
+        <Stack.Screen name="Subjects" component={Subjects} />
         <Stack.Screen name="School" component={School} />
-        <Stack.Screen name="Goals" component={Goals} />
+        <Stack.Screen name="Grade" component={Grade} />
+        <Stack.Screen name="StudyTime" component={StudyTime} />
+        <Stack.Screen name="Reminder" component={Reminder} />
         <Stack.Screen name="SetupDone" component={SetupDone} options={{ gestureEnabled: false }} />
         <Stack.Screen name="LinkChild" component={LinkChild} />
         <Stack.Screen name="CreateClass" component={CreateClass} />

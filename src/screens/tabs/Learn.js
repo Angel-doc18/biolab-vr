@@ -27,7 +27,7 @@ export default function Learn({ navigation }) {
           items={cards}
           onPick={(id) => navigation.navigate('Topics', { subject: id, mode: 'learn' })}
           manage={L('Add or change subjects', 'Ajouter ou changer de matière')}
-          onManage={() => navigation.navigate('ExamClass', { fromSettings: true })}
+          onManage={() => navigation.navigate('Subjects', { flow: 'subjects' })}
         />
 
         <Section title={L('Also in Learn', 'Aussi dans Apprendre')}>

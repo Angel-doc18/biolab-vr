@@ -43,7 +43,7 @@ export default function Lab({ navigation }) {
           items={cards}
           onPick={(id) => navigation.navigate('Topics', { subject: id, mode: 'lab' })}
           manage={L('Add or change subjects', 'Ajouter ou changer de matière')}
-          onManage={() => navigation.navigate('ExamClass', { fromSettings: true })}
+          onManage={() => navigation.navigate('Subjects', { flow: 'subjects' })}
         />
 
         {!!next && (

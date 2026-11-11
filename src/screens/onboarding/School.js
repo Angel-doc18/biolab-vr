@@ -5,8 +5,7 @@ import { Cta, ErrorNote, Screen, useToast } from '../../ui/chrome';
 import { get, post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-import { nextStep } from '../../navigation/routes';
-import { OnbHeader, StepBar } from './Steps';
+import { OnbHeader, StepBar, useStepNav } from './Steps';
 
 export const REGIONS = ['Adamawa', 'Centre', 'East', 'Far North', 'Littoral', 'North', 'North West', 'South', 'South West', 'West'];
 
@@ -138,7 +137,8 @@ export default function School({ navigation, route }) {
     }
   };
 
-  const next = () => (fromSettings ? navigation.goBack() : navigation.navigate(nextStep(user?.role || 'student', 'School')));
+  const { advance } = useStepNav('School');
+  const next = () => (fromSettings ? navigation.goBack() : advance());
   const submit = async () => {
     if (!picked) {
       if (teacher) return setError(L('Choose your school or add it.', 'Choisissez ou ajoutez votre école.'));

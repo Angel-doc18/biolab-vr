@@ -160,7 +160,7 @@ export default function Me({ navigation }) {
         )}
 
         {student && (
-          <Section title={L('Subjects', 'Matières')} action={L('Change', 'Modifier')} onAction={() => navigation.navigate('ExamClass', { fromSettings: true })}>
+          <Section title={L('Subjects', 'Matières')} action={L('Change', 'Modifier')} onAction={() => navigation.navigate('Subjects', { flow: 'subjects' })}>
             <V c="bg-surface-container-lowest rounded-xl shadow-sm">
               {subjects.map((id, i) => {
                 const s = stats.bySubject[id];

@@ -100,7 +100,7 @@ function StudentHome({ navigation }) {
         <ChargesCard user={user} onPress={() => navigation.navigate('Paywall')} />
 
         <V c="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container">
-          <P c="p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('ExamClass', { fromSettings: true })} accessibilityRole="button" accessibilityLabel={L('Change your class', 'Changer de classe')}>
+          <P c="p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('ClassPick', { flow: 'changeClass' })} accessibilityRole="button" accessibilityLabel={L('Change your class', 'Changer de classe')}>
             <V c="w-12 h-12 rounded-xl bg-surface-container-low items-center justify-center">
               <Ic n="school" s={26} c="primary-container" fill />
             </V>
@@ -137,7 +137,7 @@ function StudentHome({ navigation }) {
             currentLabel={L('Studying now', 'En cours')}
             onPick={(id) => navigation.navigate('Topics', { subject: id, mode: 'learn' })}
             manage={L('Add or change subjects', 'Ajouter ou changer de matière')}
-            onManage={() => navigation.navigate('ExamClass', { fromSettings: true })}
+            onManage={() => navigation.navigate('Subjects', { flow: 'subjects' })}
           />
         </Section>
 

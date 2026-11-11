@@ -26,6 +26,8 @@ function PlanCard({ on, free, title, price, note, badge, onPress }) {
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ checked: on }}
+      aria-checked={on}
+      accessibilityLabel={`${title}, ${price}`}
       scale={1}
     >
       <V c="flex-row items-center gap-space-sm">

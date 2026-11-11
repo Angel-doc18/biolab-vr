@@ -67,7 +67,7 @@ export default function Exams({ navigation }) {
           items={cards}
           onPick={(id) => navigation.navigate('ExamMenu', { subject: id })}
           manage={L('Add or change subjects', 'Ajouter ou changer de matière')}
-          onManage={() => navigation.navigate('ExamClass', { fromSettings: true })}
+          onManage={() => navigation.navigate('Subjects', { flow: 'subjects' })}
         />
 
         <Section title={L('From your teacher', 'De votre enseignant')} action={assignments.length ? null : L('Join a class', 'Rejoindre une classe')} onAction={() => navigation.navigate('JoinClass')}>
