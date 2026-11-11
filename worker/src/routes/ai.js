@@ -2,7 +2,7 @@ import { HttpError, limit, now, ok, readJson } from '../lib/http.js';
 import { isPro, requireAccess, requireUser } from '../lib/auth.js';
 import { int, oneOf, str } from '../lib/validate.js';
 import { sha256, uuid } from '../lib/crypto.js';
-import { explainItems, markAnswer, solveQuestion, tutorReply } from '../lib/ai.js';
+import { checkSolution, explainItems, markAnswer, readQuestion, solveQuestion, tutorReply, writeScheme } from '../lib/ai.js';
 import { today } from '../lib/notify.js';
 import { subjectOr } from '../lib/subjects.js';
 
@@ -78,25 +78,90 @@ function lessonOf(v) {
 export async function solve(request, env) {
   const user = await requireUser(request, env);
   requireAccess(user, env);
-  const b = await readJson(request, 64 * 1024);
+  const b = await readJson(request, 6 * 1024 * 1024);
   const subject = subjectOr(b.subject);
   const lang = oneOf(b.lang ?? user.lang ?? 'en', 'Language', ['en', 'fr']);
-  const question = str(b.question, 'Question', { min: 3, max: 1500 });
+  // A typed question, or a photo of one (printed or handwritten).
+  const image = b.image ? photoOf(b.image) : null;
+  let question = image ? null : str(b.question, 'Question', { min: 3, max: 1500 });
   const lesson = lessonOf(b.lesson);
   const className = user.class_name || '';
-  const key = await sha256(JSON.stringify(['solve', subject, lang, className, question.replace(/\s+/g, ' ').trim().toLowerCase(), lesson?.title || '']));
-  const hit = await env.DB.prepare('SELECT body FROM ai_explanations WHERE key = ?').bind(key).first();
   const tier = isPro(user, env) ? 'pro' : 'free';
   const used = await usage(env, user.id);
-  if (hit) return ok({ solution: JSON.parse(hit.body), cached: true, asksLeft: Math.max(0, AI_LIMITS[tier].asks - used.asks) });
-  await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are sending questions too quickly. Wait a moment.');
-  if (used.asks >= AI_LIMITS[tier].asks) {
-    throw new HttpError(402, tier === 'pro' ? 'You have reached today\'s question limit.' : 'You have used today\'s free questions.', 'quota');
+  const kind = image ? 'photos' : 'asks';
+  const left = (u) => ({ asksLeft: Math.max(0, AI_LIMITS[tier].asks - u.asks), photosLeft: Math.max(0, AI_LIMITS[tier].photos - u.photos) });
+  if (!image) {
+    const key = solveKey(subject, lang, className, question, lesson);
+    const hit = await env.DB.prepare('SELECT body FROM ai_explanations WHERE key = ?').bind(await key).first();
+    if (hit) return ok({ solution: JSON.parse(hit.body), cached: true, ...left(used) });
   }
-  const solution = await solveQuestion(env, { subject, lang, className, question, lesson });
-  await env.DB.prepare('INSERT OR REPLACE INTO ai_explanations (key, kind, body, created_at) VALUES (?, ?, ?, ?)').bind(key, 'solve', JSON.stringify(solution), now()).run();
-  await consume(env, user.id, 'asks');
-  return ok({ solution, cached: false, asksLeft: Math.max(0, AI_LIMITS[tier].asks - used.asks - 1) });
+  await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are sending questions too quickly. Wait a moment.');
+  if (used[kind] >= AI_LIMITS[tier][kind]) {
+    throw new HttpError(402, kind === 'photos' ? 'You have used today\'s photo questions. Type the question instead, or try again tomorrow.' : tier === 'pro' ? 'You have reached today\'s question limit.' : 'You have used today\'s free questions.', 'quota');
+  }
+  if (image) question = await readQuestion(env, image);
+  const key = await solveKey(subject, lang, className, question, lesson);
+  const hit = image ? await env.DB.prepare('SELECT body FROM ai_explanations WHERE key = ?').bind(key).first() : null;
+  let solution = hit ? JSON.parse(hit.body) : null;
+  if (!solution) {
+    // Solved, then checked by an independent pass; a solution found wrong is
+    // solved again with the examiner's notes.
+    solution = await solveQuestion(env, { subject, lang, className, question, lesson });
+    const verdict = await checkSolution(env, { subject, className, question, solution });
+    if (!verdict.correct && verdict.problems) {
+      solution = await solveQuestion(env, { subject, lang, className, question, lesson, note: verdict.problems }).catch(() => solution);
+    }
+    await env.DB.prepare('INSERT OR REPLACE INTO ai_explanations (key, kind, body, created_at) VALUES (?, ?, ?, ?)').bind(key, 'solve', JSON.stringify(solution), now()).run();
+  }
+  await consume(env, user.id, kind);
+  const after = { ...used, [kind]: used[kind] + 1 };
+  return ok({ solution, question: image ? question : undefined, cached: false, ...left(after) });
+}
+
+const solveKey = (subject, lang, className, question, lesson) =>
+  sha256(JSON.stringify(['solve', subject, lang, className, question.replace(/\s+/g, ' ').trim().toLowerCase(), lesson?.title || '']));
+
+// A photo sent by the app: JPEG, PNG or WebP, as base64.
+function photoOf(v) {
+  const mediaType = v?.mediaType;
+  if (!IMAGE_TYPES.includes(mediaType)) throw new HttpError(400, 'Photo must be JPEG, PNG or WebP.', 'invalid_input');
+  const data = typeof v.data === 'string' ? v.data : '';
+  if (!/^[A-Za-z0-9+/=]+$/.test(data) || data.length < 1000 || data.length > 3_200_000) {
+    throw new HttpError(400, 'The photo could not be read. Try a smaller, clearer photo.', 'invalid_input');
+  }
+  return { mediaType, data };
+}
+
+// Marking any question: a Paper 3 question, a past paper, homework. The
+// question (typed or a photo) gets a mark scheme written by an examiner pass,
+// then the answer (typed or a photo of the working on paper) is marked on it.
+export async function markAny(request, env) {
+  const user = await requireUser(request, env);
+  requireAccess(user, env);
+  await limit(env.AI_LIMITER, `ai:${user.id}`, 'Please wait a moment before marking another answer.');
+  const used = await usage(env, user.id);
+  const b = await readJson(request, 7 * 1024 * 1024);
+  const subject = subjectOr(b.subject);
+  const questionImage = b.questionImage ? photoOf(b.questionImage) : null;
+  const answerImage = b.answerImage ? photoOf(b.answerImage) : null;
+  let question = questionImage ? null : str(b.question, 'Question', { min: 5, max: 3000 });
+  const answerText = answerImage ? null : str(b.answerText, 'Answer', { min: 2, max: 6000 });
+  const kind = questionImage || answerImage ? 'photos' : 'marks';
+  if (used[kind] >= AI_LIMITS.pro[kind]) {
+    throw new HttpError(402, kind === 'photos' ? 'You have used today\'s photo markings. Type the answer instead, or try again tomorrow.' : 'You have reached today\'s marking limit.', 'quota');
+  }
+  if (questionImage) question = await readQuestion(env, questionImage);
+  const className = user.class_name || '';
+  const { scheme, total } = await writeScheme(env, { subject, className, question });
+  const result = await markAnswer(env, { question, markScheme: scheme, maxMarks: total, answerText, image: answerImage, subject });
+  await consume(env, user.id, kind);
+  return ok({
+    question,
+    result,
+    marksLeft: Math.max(0, AI_LIMITS.pro.marks - used.marks - (kind === 'marks' ? 1 : 0)),
+    photosLeft: Math.max(0, AI_LIMITS.pro.photos - used.photos - (kind === 'photos' ? 1 : 0)),
+    markedAt: now(),
+  });
 }
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];

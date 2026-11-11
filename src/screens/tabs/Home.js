@@ -149,7 +149,7 @@ function StudentHome({ navigation }) {
               { icon: 'timer', title: L('Practice papers', 'Épreuves'), sub: paper2Config(subject) ? L('Paper 1, Paper 2, topic quizzes', 'Épreuves 1 et 2, quiz') : L('Paper 1 and topic quizzes', 'Épreuve 1 et quiz'), onPress: () => navigation.navigate('ExamMenu', { subject }) },
               { icon: 'forum', title: L('Ask the tutor', 'Demander au tuteur'), sub: quota ? `${quota.asksLeft} ${L('questions left today', 'questions restantes')}` : L('Answers read aloud', 'Réponses lues à voix haute'), onPress: () => navigation.navigate('Tutor', { unitId: focus.id, subject }) },
               { icon: 'co_present', title: L('Workspace', 'Espace de travail'), sub: L('Questions solved step by step on the board', 'Questions résolues au tableau, étape par étape'), onPress: () => navigation.navigate('Workspace', { unitId: focus.id, subject }) },
-              { icon: 'grading', title: L('Mark my answer', 'Corriger ma réponse'), sub: L('Typed or photographed', 'Tapée ou photographiée'), onPress: () => navigation.navigate('MarkAnswer', { subject }) },
+              { icon: 'grading', title: L('Mark my answer', 'Corriger ma réponse'), sub: L('Any question, typed or photographed', 'Toute question, tapée ou photographiée'), onPress: () => navigation.navigate('MarkAny', { subject }) },
             ]}
           />
         </Section>

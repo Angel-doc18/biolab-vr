@@ -466,6 +466,29 @@ export default function LabRun({ navigation, route }) {
               </P>
             )}
           </V>
+
+          <V c="p-space-md rounded-xl bg-surface-container-lowest border border-outline-variant gap-space-sm">
+            <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+              {L('Paper 3 practice', 'Entraînement à l’épreuve 3')}
+            </T>
+            <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+              {L('Have a Paper 3 question from a past paper or your teacher? Solve it on the board, or answer it on paper and have your working marked.', 'Une question d’épreuve 3 d’une ancienne épreuve ou de votre enseignant ? Résolvez-la au tableau, ou répondez sur papier et faites corriger votre travail.')}
+            </T>
+            <V c="flex-row gap-space-sm">
+              <P c="flex-1 h-12 rounded-xl bg-surface-container-low flex-row items-center justify-center gap-1.5" onPress={() => navigation.navigate('Workspace', { subject: lab.subject })}>
+                <Ic n="co_present" s={20} c="primary-container" />
+                <T c="font-label-md text-label-md text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('Solve a question', 'Résoudre une question')}
+                </T>
+              </P>
+              <P c="flex-1 h-12 rounded-xl bg-primary-container flex-row items-center justify-center gap-1.5" onPress={() => navigation.navigate('MarkAny', { subject: lab.subject })}>
+                <Ic n="photo_camera" s={20} c="on-primary" />
+                <T c="font-label-md text-label-md text-on-primary" style={{ fontWeight: '700' }}>
+                  {L('Mark my answer', 'Corriger ma réponse')}
+                </T>
+              </P>
+            </V>
+          </V>
         </V>
       </Screen>
       {toast}

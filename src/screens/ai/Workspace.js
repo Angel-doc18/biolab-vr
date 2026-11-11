@@ -17,6 +17,7 @@ import { lessonById } from '../../data/lessons';
 import { focusUnit } from '../../state/selectors';
 import { subjectName } from '../../data/subjects';
 import { NeedsInternet } from '../../ui/Offline';
+import { pickAnswerPhoto } from '../../lib/photo';
 
 const BOARD = '#fbfaf5';
 const INK = '#1f2a37';
@@ -82,6 +83,8 @@ export default function Workspace({ navigation, route }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [asked, setAsked] = useState(null);
+  const [fromPhoto, setFromPhoto] = useState(false);
+  const [reading, setReading] = useState(false);
   const [sol, setSol] = useState(null);
   const [cursor, setCursor] = useState(-1); // step being written; steps.length means the answer is shown
   const [playing, setPlaying] = useState(false);
@@ -185,6 +188,7 @@ export default function Workspace({ navigation, route }) {
       const r = await post('/v1/ai/solve', { subject, lang, question: q.slice(0, 1500), lesson: ctx ? { title: ctx.title, text: ctx.text } : undefined }, { timeout: 120000 });
       if (typeof r.asksLeft === 'number') setQuota((x) => (x ? { ...x, asksLeft: r.asksLeft } : x));
       setAsked(q);
+      setFromPhoto(false);
       setSol(r.solution);
       setDraft('');
       remember(q, r.solution);
@@ -195,6 +199,43 @@ export default function Workspace({ navigation, route }) {
       if (e.code === 'quota') refreshQuota();
     } finally {
       setBusy(false);
+    }
+  };
+
+  // A photo of the question (printed or handwritten): the server reads it,
+  // solves it and checks the solution.
+  const solvePhoto = async (source) => {
+    if (busy) return;
+    setError(null);
+    let photo;
+    try {
+      photo = await pickAnswerPhoto(source);
+    } catch (e) {
+      return setError(e);
+    }
+    if (!photo) return;
+    halt();
+    setBusy(true);
+    setReading(true);
+    setReply(null);
+    setAskingStep(null);
+    setShowAll(false);
+    try {
+      const r = await post('/v1/ai/solve', { subject, lang, image: { mediaType: photo.mediaType, data: photo.base64 }, lesson: ctx ? { title: ctx.title, text: ctx.text } : undefined }, { timeout: 180000 });
+      setQuota((x) => (x ? { ...x, ...(typeof r.asksLeft === 'number' ? { asksLeft: r.asksLeft } : {}), ...(typeof r.photosLeft === 'number' ? { photosLeft: r.photosLeft } : {}) } : x));
+      const q = r.question || '';
+      setAsked(q);
+      setFromPhoto(true);
+      setSol(r.solution);
+      remember(q, r.solution);
+      scroller.current?.scrollTo?.({ y: 0, animated: true });
+      playFrom(0, r.solution);
+    } catch (e) {
+      setError(e);
+      if (e.code === 'quota') refreshQuota();
+    } finally {
+      setBusy(false);
+      setReading(false);
     }
   };
 
@@ -264,7 +305,9 @@ export default function Workspace({ navigation, route }) {
         {busy && (
           <V c="rounded-xl border border-outline-variant p-space-lg items-center gap-space-sm" style={{ backgroundColor: BOARD }}>
             <ActivityIndicator color={C['primary-container']} />
-            <T c="font-body-md text-body-md text-on-surface-variant">{L('The tutor is working it out...', 'Le tuteur réfléchit...')}</T>
+            <T c="font-body-md text-body-md text-on-surface-variant" style={{ textAlign: 'center' }}>
+              {reading ? L('Reading the question from your photo, then solving and checking it...', 'Lecture de la question sur votre photo, puis résolution et vérification...') : L('The tutor is solving it and checking the answer...', 'Le tuteur résout et vérifie la réponse...')}
+            </T>
           </V>
         )}
 
@@ -272,10 +315,17 @@ export default function Workspace({ navigation, route }) {
           <>
             <V c="rounded-xl border border-outline-variant overflow-hidden" style={{ backgroundColor: BOARD }}>
               <V c="px-space-md py-space-sm border-b border-outline-variant gap-1">
-                <T c="font-label-md text-label-md text-on-surface-variant">{L('Question', 'Question')}</T>
+                <T c="font-label-md text-label-md text-on-surface-variant">{fromPhoto ? L('The question read from your photo', 'La question lue sur votre photo') : L('Question', 'Question')}</T>
                 <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
                   {asked}
                 </T>
+                {fromPhoto && (
+                  <P c="self-start pt-1" onPress={() => setDraft(asked)} hitSlop={6}>
+                    <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                      {L('Not quite right? Correct it below and solve again', 'Pas tout à fait juste ? Corrigez-la ci-dessous et résolvez à nouveau')}
+                    </T>
+                  </P>
+                )}
               </V>
 
               {sol.steps.map((st, i) =>
@@ -408,6 +458,21 @@ export default function Workspace({ navigation, route }) {
           <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
             {sol ? L('Another question for the board', 'Une autre question pour le tableau') : L('Your question', 'Votre question')}
           </T>
+          <V c="flex-row gap-space-sm">
+            <P c="flex-1 h-12 rounded-xl bg-primary-container flex-row items-center justify-center gap-1.5" onPress={() => solvePhoto('camera')} disabled={busy} accessibilityLabel={L('Snap the question', 'Photographier la question')}>
+              <Ic n="photo_camera" s={20} c="on-primary" />
+              <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
+                {L('Snap it', 'Photographier')}
+              </T>
+            </P>
+            <P c="flex-1 h-12 rounded-xl bg-surface-container-low flex-row items-center justify-center gap-1.5" onPress={() => solvePhoto('library')} disabled={busy} accessibilityLabel={L('Upload a photo of the question', 'Importer une photo de la question')}>
+              <Ic n="photo_library" s={20} c="on-surface" />
+              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                {L('Upload', 'Importer')}
+              </T>
+            </P>
+          </V>
+          <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Or type it:', 'Ou tapez-la :')}</T>
           <Input
             c="min-h-[96px] max-h-[200px] bg-surface-container-lowest border border-outline-variant px-3 py-3 rounded-xl text-body-md"
             placeholder={L('Type or paste a question, for example a calculation from your exercise book', 'Tapez ou collez une question, par exemple un calcul de votre cahier')}
@@ -419,7 +484,7 @@ export default function Workspace({ navigation, route }) {
           />
           <Cta label={L('Solve it on the board', 'Résoudre au tableau')} icon="co_present" loading={busy} disabled={draft.trim().length < 3} onPress={() => solve()} />
           <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ fontSize: 11, lineHeight: 16 }}>
-            {quota ? `${quota.asksLeft} ${L('questions left today', 'questions restantes aujourd’hui')}. ` : ''}
+            {quota ? `${quota.asksLeft} ${L('questions left today', 'questions restantes aujourd’hui')}${typeof quota.photosLeft === 'number' ? `, ${quota.photosLeft} ${L('by photo', 'par photo')}` : ''}. ` : ''}
             {L('A question already solved for your class opens without using one. Solutions are made by AI; check them against your lessons.', 'Une question déjà résolue pour votre classe s’ouvre sans en utiliser. Les solutions sont faites par IA ; vérifiez-les avec vos leçons.')}
           </T>
         </V>

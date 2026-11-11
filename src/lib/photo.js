@@ -3,7 +3,23 @@
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
-const MAX_B64 = 5_000_000;
+const MAX_B64 = 3_000_000;
+const MAX_SIDE = 1600;
+
+// The photo resized to at most 1600 pixels on its longer side and saved as a
+// JPEG: sharp enough to read handwriting, small enough to send on mobile data.
+async function shrink(a) {
+  try {
+    const ctx = ImageManipulator.manipulate(a.uri);
+    const long = Math.max(a.width || 0, a.height || 0);
+    if (long > MAX_SIDE) ctx.resize((a.width || 0) >= (a.height || 0) ? { width: MAX_SIDE } : { height: MAX_SIDE });
+    const image = await ctx.renderAsync();
+    const out = await image.saveAsync({ compress: 0.72, format: SaveFormat.JPEG, base64: true });
+    return out?.base64 ? { uri: out.uri, base64: out.base64, mediaType: 'image/jpeg', width: out.width, height: out.height } : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function pickAnswerPhoto(source = 'camera') {
   const opts = { mediaTypes: ['images'], quality: 0.5, base64: true, allowsEditing: true, exif: false };
@@ -19,6 +35,8 @@ export async function pickAnswerPhoto(source = 'camera') {
   }
   if (res.canceled || !res.assets?.[0]) return null;
   const a = res.assets[0];
+  const small = await shrink(a);
+  if (small) return small;
   if (!a.base64) throw new Error('The photo could not be read. Try again.');
   if (a.base64.length > MAX_B64) throw new Error('The photo is too large. Move closer to the page or crop it.');
   const mediaType = a.mimeType && ['image/jpeg', 'image/png', 'image/webp'].includes(a.mimeType) ? a.mimeType : 'image/jpeg';

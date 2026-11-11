@@ -70,6 +70,7 @@ const routes = [
   ['POST', '/v1/ai/mark', ai.mark],
   ['POST', '/v1/ai/explain', ai.explain],
   ['POST', '/v1/ai/solve', ai.solve],
+  ['POST', '/v1/ai/mark-any', ai.markAny],
   ['GET', '/v1/admin/overview', admin.overview],
   ['GET', '/v1/admin/users', admin.listUsers],
   ['POST', `/v1/admin/users/${ID}/days`, admin.grantDays],

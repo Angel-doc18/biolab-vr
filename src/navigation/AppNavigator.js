@@ -40,6 +40,7 @@ import Paper2 from '../screens/exams/Paper2';
 import Results from '../screens/exams/Results';
 import Tutor from '../screens/ai/Tutor';
 import MarkAnswer from '../screens/ai/MarkAnswer';
+import MarkAny from '../screens/ai/MarkAny';
 import Workspace from '../screens/ai/Workspace';
 import Paywall from '../screens/me/Paywall';
 import Pay from '../screens/me/Pay';
@@ -170,6 +171,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Tutor" component={Tutor} />
         <Stack.Screen name="Workspace" component={Workspace} />
         <Stack.Screen name="MarkAnswer" component={MarkAnswer} />
+        <Stack.Screen name="MarkAny" component={MarkAny} />
         <Stack.Screen name="ParentReport" component={ParentReport} />
         <Stack.Screen name="Notifications" component={Notifications} />
         <Stack.Screen name="Search" component={Search} />

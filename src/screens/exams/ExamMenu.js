@@ -204,6 +204,13 @@ export default function ExamMenu({ navigation, route }) {
                 onPress={() => navigation.navigate('Topics', { subject, mode: 'lab' })}
               />
             )}
+            <Choice
+              icon="photo_camera"
+              tint={tint}
+              title={L('Paper 3 or any question: mark my working', 'Épreuve 3 ou toute question : corriger mon travail')}
+              sub={L('Answer on paper as in the exam, photograph the question and your working, and get it marked.', 'Répondez sur papier comme à l’examen, photographiez la question et votre travail, et faites-le corriger.')}
+              onPress={() => navigation.navigate('MarkAny', { subject })}
+            />
             {P2 ? (
               <Choice
                 icon="grading"

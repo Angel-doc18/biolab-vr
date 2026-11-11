@@ -51,7 +51,7 @@ async function modelsFor(env, vision) {
   return others.length ? others : preferred;
 }
 
-export async function groqChat(env, { messages, vision = false, json = false, maxTokens = 2000, temperature = 0.4 }) {
+export async function groqChat(env, { messages, vision = false, json = false, maxTokens = 2000, temperature = 0.4, reasoning = null }) {
   if (!env.GROQ_API_KEY) throw new HttpError(503, 'The AI tutor is not available yet.', 'ai_unavailable');
   const models = await modelsFor(env, vision);
   let lastError = null;
@@ -70,6 +70,8 @@ export async function groqChat(env, { messages, vision = false, json = false, ma
           max_tokens: maxTokens,
           temperature,
           ...(json ? { response_format: { type: 'json_object' } } : {}),
+          // Only the gpt-oss models take a reasoning effort; others would refuse it.
+          ...(reasoning && model.startsWith('openai/gpt-oss') ? { reasoning_effort: reasoning } : {}),
         }),
       });
     } catch (e) {
@@ -93,10 +95,15 @@ export async function groqChat(env, { messages, vision = false, json = false, ma
       lastError = new Error(`groq_${res.status}`);
       continue;
     }
-    if (res.status === 429) throw new HttpError(503, 'The AI tutor is busy right now. Please try again in a minute.', 'ai_busy');
+    // This model's per-minute allowance is used up: the next model has its own.
+    if (res.status === 429) {
+      lastError = new Error('groq_429');
+      continue;
+    }
     if (res.status === 401 || res.status === 403) throw new HttpError(503, 'The AI tutor is not available yet.', 'ai_unavailable');
     lastError = new Error(`groq_${res.status}`);
   }
   console.error('groq_all_models_failed', lastError?.message);
+  if (lastError?.message === 'groq_429') throw new HttpError(503, 'The AI tutor is busy right now. Please try again in a minute.', 'ai_busy');
   throw new HttpError(502, 'The AI tutor could not answer just now. Please try again.', 'ai_failed');
 }

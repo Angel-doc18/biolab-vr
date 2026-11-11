@@ -428,7 +428,7 @@ const plainBoard = (t) =>
     .join('\n');
 const spoken = (t) => clean(t).replace(/\*\*|[#`$]/g, '').replace(/\s+/g, ' ').trim();
 
-export async function solveQuestion(env, { subject, lang, className, question, lesson }) {
+export async function solveQuestion(env, { subject, lang, className, question, lesson, note }) {
   const provider = aiProvider(env);
   if (!provider) throw new HttpError(503, 'The tutor is not available yet.', 'ai_unavailable');
   const prompt = [
@@ -437,15 +437,16 @@ export async function solveQuestion(env, { subject, lang, className, question, l
     lessonNote(lesson),
     `Write in ${lang === 'fr' ? 'French' : 'English'}.`,
     `Question to solve on the board:\n"""\n${question}\n"""`,
+    note ? `A first attempt at this question was checked by an examiner and was wrong: ${note}\nSolve it again from the start and get it right.` : null,
   ]
     .filter(Boolean)
     .join('\n\n');
   for (const temperature of [0.2, 0]) {
     let text;
     if (provider === 'groq') {
-      ({ text } = await groqChat(env, { json: true, maxTokens: 3500, temperature, messages: [{ role: 'system', content: SOLVE_SYSTEM }, { role: 'user', content: prompt }] }));
+      ({ text } = await groqChat(env, { json: true, maxTokens: 6000, temperature, reasoning: 'high', messages: [{ role: 'system', content: SOLVE_SYSTEM }, { role: 'user', content: prompt }] }));
     } else {
-      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 6000, system: SOLVE_SYSTEM, output_config: { effort: 'medium' }, ...FALLBACK, messages: [{ role: 'user', content: prompt }] });
+      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 8000, system: SOLVE_SYSTEM, output_config: { effort: 'high' }, ...FALLBACK, messages: [{ role: 'user', content: prompt }] });
       if (response.stop_reason === 'refusal') throw new HttpError(422, 'The tutor can only solve secondary school questions.', 'solve_refused');
       text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
     }
@@ -460,4 +461,103 @@ export async function solveQuestion(env, { subject, lang, className, question, l
     }
   }
   throw new HttpError(502, 'The tutor could not solve this question just now. Try again or rephrase it.', 'solve_failed');
+}
+
+// ---------- questions from a photo, checked solutions, schemes for any question ----------
+
+const READ_PROMPT = `This photo shows a school question: from an examination paper, a textbook, a worksheet or written by hand. Write the question out exactly as it appears: every part label ((a), (b), (i)), every number with its unit, every option of a multiple-choice question, and the marks shown, for example (4 marks). Where the question has a diagram, table or graph, describe what it shows in square brackets with all its values and labels, for example [Diagram: a ray of light meets a glass block at 40 degrees to the normal]. Do not answer the question. Output only the question. If there is no readable question in the photo, output exactly: [UNREADABLE]`;
+
+// Writes out the question in a photo, word for word, for solving or marking.
+export async function readQuestion(env, image) {
+  const provider = aiProvider(env);
+  if (!provider) throw new HttpError(503, 'The tutor is not available yet.', 'ai_unavailable');
+  let text;
+  if (provider === 'groq') {
+    ({ text } = await groqChat(env, {
+      vision: true,
+      maxTokens: 1500,
+      temperature: 0,
+      messages: [{ role: 'user', content: [{ type: 'text', text: READ_PROMPT }, { type: 'image_url', image_url: { url: `data:${image.mediaType};base64,${image.data}` } }] }],
+    }));
+  } else {
+    const response = await client(env).beta.messages.create({
+      model: MODEL,
+      max_tokens: 2000,
+      ...FALLBACK,
+      messages: [{ role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } }, { type: 'text', text: READ_PROMPT }] }],
+    });
+    text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+  }
+  const q = clean(text || '').trim();
+  if (q.length < 5 || /\[UNREADABLE\]/i.test(q)) {
+    throw new HttpError(422, 'The question in this photo could not be read. Take a closer, clearer photo in good light, or type the question.', 'unreadable');
+  }
+  return q.slice(0, 3000);
+}
+
+const CHECK_SYSTEM = `You are a senior Cameroon GCE examiner checking a worked solution before a student sees it. First work the question out yourself, independently. Then check every step of the solution against your own working: each number and calculation, each unit, sign and rounding, each formula, each balanced equation, each definition and fact. Be strict: an answer that is wrong, incomplete or not what the question asks is not correct.
+Reply with JSON only: {"correct": true} if the whole solution is right, or {"correct": false, "problems": string} where "problems" says exactly what is wrong and what the right working or answer is.`;
+
+const Checked = z.object({ correct: z.coerce.boolean(), problems: z.coerce.string().default('') });
+
+// A second, independent pass over a solution. Returns { correct, problems };
+// a check that cannot be done never blocks the solution.
+export async function checkSolution(env, { subject, className, question, solution }) {
+  const provider = aiProvider(env);
+  const written = solution.steps.map((s, i) => `Step ${i + 1}: ${s.board}`).join('\n') + `\nFinal answer: ${solution.answer}`;
+  const prompt = [subjectLine(subject), classGuide(className), `Question:\n"""\n${question}\n"""`, `Worked solution to check:\n"""\n${written}\n"""`].filter(Boolean).join('\n\n');
+  try {
+    let text;
+    if (provider === 'groq') {
+      ({ text } = await groqChat(env, { json: true, maxTokens: 4000, temperature: 0, reasoning: 'high', messages: [{ role: 'system', content: CHECK_SYSTEM }, { role: 'user', content: prompt }] }));
+    } else if (provider === 'anthropic') {
+      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 6000, system: CHECK_SYSTEM, output_config: { effort: 'high' }, ...FALLBACK, messages: [{ role: 'user', content: prompt }] });
+      text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+    } else return { correct: true, problems: '' };
+    const parsed = Checked.parse(JSON.parse(clean(text).replace(/^```(?:json)?\s*|\s*```$/g, '')));
+    return { correct: parsed.correct, problems: parsed.problems.slice(0, 1500) };
+  } catch {
+    return { correct: true, problems: '' };
+  }
+}
+
+const SCHEME_SYSTEM = `You are a senior Cameroon GCE examiner writing the mark scheme for one question, as the GCE Board would, so that a student's answer can be marked fairly.
+Rules:
+- Use the marks printed on the question if they are shown, for example (6 marks) or [4]; add them up over the parts. If no marks are shown, give a fair total between 2 and 20 for the work the question asks for.
+- One mark point for each creditable fact, step or skill, each worth 1 or 2 marks, adding up exactly to the total. At most 12 points.
+- Calculations: method, substitution, and answer with its unit as separate points.
+- Practical (Paper 3) questions: readings and their precision, a table with headings and units, the graph (scales, labelled axes, points plotted, best-fit line), calculations, the conclusion, and sources of error or precautions, as the question asks.
+- Write each point as the examiner would: what the student must write or do to earn it.
+- Never use em dashes.
+Reply with JSON only: {"total": number, "scheme": [{"point": string, "marks": number}]}`;
+
+const Scheme = z.object({ total: z.coerce.number(), scheme: z.array(z.object({ point: z.coerce.string(), marks: z.coerce.number() })).min(1) });
+
+// A mark scheme for a question that has none in the app (a Paper 3 question,
+// a past paper, homework), worked out the way an examiner would.
+export async function writeScheme(env, { subject, className, question }) {
+  const provider = aiProvider(env);
+  if (!provider) throw new HttpError(503, 'Marking is not available yet.', 'ai_unavailable');
+  const prompt = [subjectLine(subject), classGuide(className), `Question:\n"""\n${question}\n"""`].filter(Boolean).join('\n\n');
+  for (const temperature of [0.1, 0]) {
+    let text;
+    if (provider === 'groq') {
+      ({ text } = await groqChat(env, { json: true, maxTokens: 3000, temperature, reasoning: 'medium', messages: [{ role: 'system', content: SCHEME_SYSTEM }, { role: 'user', content: prompt }] }));
+    } else {
+      const response = await client(env).beta.messages.create({ model: MODEL, max_tokens: 4000, system: SCHEME_SYSTEM, output_config: { effort: 'medium' }, ...FALLBACK, messages: [{ role: 'user', content: prompt }] });
+      text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+    }
+    try {
+      const s = Scheme.parse(JSON.parse(clean(text).replace(/^```(?:json)?\s*|\s*```$/g, '')));
+      const scheme = s.scheme
+        .slice(0, 12)
+        .map((p) => ({ point: clean(p.point).slice(0, 400), marks: Math.max(1, Math.min(10, Math.round(p.marks) || 1)) }))
+        .filter((p) => p.point.length >= 3);
+      const total = scheme.reduce((a, p) => a + p.marks, 0);
+      if (scheme.length && total >= 1 && total <= 40) return { scheme, total };
+    } catch {
+      // malformed: try once more at temperature 0
+    }
+  }
+  throw new HttpError(502, 'A mark scheme could not be written for this question. Try again, or type the question.', 'scheme_failed');
 }
