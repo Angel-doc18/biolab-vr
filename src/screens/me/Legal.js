@@ -8,7 +8,7 @@ import { ANATOMY_CREDIT } from '../../three/anatomy';
 
 const UPDATED = '3 November 2026';
 
-const TERMS = [
+export const TERMS = [
   ['Using Klass8', 'Klass8 is a learning and revision app for Cameroon secondary school students, following the MINESEC programmes and the GCE syllabuses. You may use it for your own study. Give accurate details when you register and keep your password private.'],
   ['Content', 'Lessons, diagrams, questions, mark schemes and practicals were written for this app to follow the GCE syllabuses. They are not official GCE Board papers, and grades shown in the app are practice estimates, not exam results. The 3D anatomy models are based on BodyParts3D (credit below); the molecule, apparatus and other models are drawn for this app.'],
   ['AI tutor and marking', 'The tutor and answer marking are produced by an AI system. They can contain mistakes. Check important facts against your lessons and your teacher, and use "Report" on any answer that is wrong or inappropriate. Do not include other people’s personal information in questions or photos.'],
@@ -18,7 +18,7 @@ const TERMS = [
   ['Changes', 'We may update the app and these terms. Important changes are shown in the app.'],
 ];
 
-const PRIVACY = [
+export const PRIVACY = [
   ['Who is responsible', 'Klass8 processes your personal data under Cameroon Law No. 2024/017 on personal data protection.'],
   ['What we collect', 'Your name, phone number, optional email, role (student, parent or teacher), school, class, exam year, the subjects you take and study preferences. If a student gives a parent’s phone number for progress reports, we keep that number. For students we store the study record: lessons read, quiz and paper scores, practicals completed and study minutes. Drawings and tutor conversations stay on your phone. If something breaks in the app, it sends us the error message, the place in the app where it happened and the app and Android versions, never who you are.'],
   ['Parents and guardians', 'A parent or guardian can follow a child’s progress by linking to the child from a parent account, or by receiving the progress reports the child turns on. A parent can ask us at any time to see, correct or delete their child’s data, or to stop the reports.'],
