@@ -148,29 +148,40 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
   const updated = 'Last updated on 11 November 2026.';
   const plain = (title, intro) => `<section class="phero phero--plain"><div class="wrap phero__in">${crumbs(title)}<h1>${esc(title)}</h1><p>${intro}</p></div></section>`;
 
+  // A policy page: its sections, with a list of them beside the text on wide screens.
+  const slug = (t) => t.replace(/<[^>]+>/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const withToc = (html) => {
+    const heads = [];
+    const body = html.replace(/<h2>(.*?)<\/h2>/g, (m, t) => {
+      heads.push([slug(t), t]);
+      return `<h2 id="${slug(t)}">${t}</h2>`;
+    });
+    return `<div class="wrap policy"><nav class="toc" aria-label="On this page"><p>On this page</p>${heads.map(([id, t]) => `<a href="#${id}">${t}</a>`).join('')}</nav><article class="prose">${body}</article></div>`;
+  };
+
   const policies = [
     {
       slug: 'terms',
       title: 'Terms of service',
       desc: 'The terms for using Klass8, the study app for secondary school students in Cameroon.',
       body: `${plain('Terms of service', `${updated} These terms apply to the Klass8 app and website, provided by ${esc(who)}.`)}
-<article class="wrap prose">${sections(terms)}
-<h2>Contact</h2><p>Questions about these terms: ${reach}.</p></article>`,
+${withToc(`${sections(terms)}
+<h2>Contact</h2><p>Questions about these terms: ${reach}.</p>`)}`,
     },
     {
       slug: 'privacy',
       title: 'Privacy policy',
       desc: 'How Klass8 collects, uses and protects personal data.',
       body: `${plain('Privacy policy', `${updated} ${esc(who)} is responsible for the personal data that Klass8 processes.`)}
-<article class="wrap prose">${sections(privacy)}
-<h2>Contact</h2><p>To see, correct or delete your data, or for any question about privacy: ${reach}.</p></article>`,
+${withToc(`${sections(privacy)}
+<h2>Contact</h2><p>To see, correct or delete your data, or for any question about privacy: ${reach}.</p>`)}`,
     },
     {
       slug: 'refunds',
       title: 'Refund policy',
       desc: 'When and how Klass8 platform charges are refunded.',
       body: `${plain('Refund policy', `${updated} Every new student account starts with a free month, so you can try everything before paying.`)}
-<article class="wrap prose">
+${withToc(`
 <p>Klass8 sells access to its lessons, practicals, papers and tutor (the platform charges): ${esc(priceMonth)} for one month or ${esc(priceYear)} for one year.</p>
 <h2>Nothing is charged without your approval</h2>
 <p>Each payment is a single request that you approve on your own phone with your mobile money PIN. Charges never renew automatically.</p>
@@ -186,14 +197,14 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
 <p>Licences bought by a school for its students are refunded according to the agreement made with that school.</p>
 <h2>How to ask for a refund</h2>
 <p>Write to us through ${reach} with your name, the phone number of your Klass8 account and the payment reference. We answer within 2 working days.</p>
-</article>`,
+`)}`,
     },
     {
       slug: 'delete-account',
       title: 'Delete your account',
       desc: 'How to delete a Klass8 account and its data.',
       body: `${plain('Delete your account', 'You can delete your Klass8 account at any time. Deleting it removes your personal data from our servers.')}
-<article class="wrap prose">
+${withToc(`
 <h2>In the app</h2>
 <ol>
 <li>Open Klass8 and sign in.</li>
@@ -204,7 +215,7 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
 <p>Write to us through ${reach}, from the phone number of the account, asking us to delete it. We delete the account and its data within 7 days and tell you when it is done.</p>
 <h2>What is removed, and what is kept</h2>
 <p>We remove your name, phone number, email, school and class, your progress and your profile picture. Records of payments are kept for as long as the accounting law requires, without your lessons or progress.</p>
-</article>`,
+`)}`,
     },
   ];
 

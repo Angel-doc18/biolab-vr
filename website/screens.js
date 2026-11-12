@@ -133,6 +133,54 @@ ${head('Paper 1', 'Biology, Form 5', `<span class="sh__timer">${icon.clock}1:04:
 </div>
 ${tabbar('exams')}</div>
 ${notes([icon.clock, 'Timed like the GCE'], [icon.check, 'The reason behind every answer'])}`,
+
+  pay: ({ priceYear }) => `<div class="phone__screen">${status}
+${head('Payment', 'Klass8 platform charges')}
+<div class="scr scr--pay">
+  <span class="kicker">Your plan</span>
+  <div class="plan-pick"><div><b>One year</b><small>365 days of everything</small></div><strong>${priceYear}</strong></div>
+  <span class="kicker">Your network</span>
+  <div class="net" aria-hidden="true"><span class="is-on"><i class="net__dot net__dot--mtn"></i>MTN Mobile Money</span><span><i class="net__dot net__dot--orange"></i>Orange Money</span></div>
+  <span class="kicker">Mobile money number</span>
+  <div class="field" aria-hidden="true"><span>+237</span><b>6 7X XX XX XX</b></div>
+  <div class="pay-btn" aria-hidden="true">Pay ${priceYear}</div>
+  <p class="pay-note">${icon.shield}You approve the payment on your own phone with your PIN. Klass8 never asks for it.</p>
+  <p class="pay-by">Payments processed by Fapshi</p>
+</div>
+${tabbar('me')}</div>
+${notes([icon.check, 'Nothing renews automatically'], [icon.shield, 'Your PIN stays on your phone'])}`,
+
+  report: () => `<div class="phone__screen">${status}
+${head('Weekly report', 'Brenda, Form 4')}
+<div class="scr scr--report">
+  <div class="rep-top">
+    <div><small>Time revising this week</small><b>5 h 20 min</b><span class="up">1 h more than last week</span></div>
+  </div>
+  <div class="days" aria-hidden="true">${[['M', 62], ['T', 48], ['W', 80], ['T', 36], ['F', 70], ['S', 100], ['S', 14]].map(([d, h]) => `<span><i style="--h:${h}%"></i><small>${d}</small></span>`).join('')}</div>
+  <div class="rep-two"><div><b>3</b><small>topics finished</small></div><div><b>72%</b><small>average score</small></div></div>
+  <ul class="done">
+    <li><span>The heart and circulation</span><b>80%</b></li>
+    <li><span>Blood vessels</span><b>70%</b></li>
+    <li><span>Respiration</span><b class="lo">58%</b></li>
+  </ul>
+  <div class="fb"><b>Worth a word</b>Respiration was the hardest topic this week. Its practice test is ready in the app.</div>
+</div>
+${tabbar('home')}</div>
+${notes([icon.clock, 'A report every week'], [icon.me, 'Free for parents'])}`,
+
+  class: () => `<div class="phone__screen">${status}
+${head('Form 4 Biology', '38 students')}
+<div class="scr scr--class">
+  <div class="seg" aria-hidden="true"><span class="is-on">${icon.list}Topics</span><span>${icon.me}Students</span></div>
+  <span class="kicker">Hardest topics this week</span>
+  <ul class="bars">
+    ${[['Respiration', 48], ['Enzymes', 55], ['Transport in plants', 63], ['The heart and circulation', 81]].map(([t, p]) => `<li><span>${t}</span><b>${p}%</b><i><em style="width:${p}%"${p < 60 ? ' class="lo"' : ''}></em></i></li>`).join('')}
+  </ul>
+  <div class="setwork"><div><b>Set work</b><small>A 10 question test on Respiration, due Friday</small></div><span class="pay-btn">Set it</span></div>
+  <div class="est"><span>Finished last week's work</span><b>31 of 38</b></div>
+</div>
+${tabbar('learn')}</div>
+${notes([icon.list, 'Work set from the syllabus'], [icon.exams, 'Results for every topic'])}`,
 };
 
 module.exports = (name, data = {}) => {

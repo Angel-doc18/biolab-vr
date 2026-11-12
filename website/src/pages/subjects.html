@@ -13,7 +13,7 @@
     <div class="head head--center" data-reveal>
       <p class="label">Open today</p>
       <h2 id="levels-title">{{subjects}} subjects, and more on the way</h2>
-      <p>Choose your class and tick the subjects you take. New subjects are being written for every class.</p>
+      <p>Choose a subject to see every topic it covers, class by class. New subjects are being written for every class.</p>
     </div>
     <div class="levels" data-stagger>
       <div class="level">
@@ -28,18 +28,26 @@
   </div>
 </section>
 
-<section class="sec" aria-labelledby="year-title">
+<section class="sec" id="syllabus" aria-labelledby="syl-title">
   <div class="wrap">
     <div class="head" data-reveal>
-      <p class="label">The school year</p>
-      <h2 id="year-title">Organised the way your school year is</h2>
-      <p>Each topic sits in the term and the sequence your teachers follow, so Klass8 is always working on what you are studying in class.</p>
+      <p class="label">Every topic</p>
+      <h2 id="syl-title">See what your class will study</h2>
+      <p>Choose a subject and a class. The topics appear in the term and the order your teachers follow, exactly as Klass8 teaches them.</p>
     </div>
-    <ol class="terms" data-stagger>
-      <li class="term"><span>Sequences 1 and 2</span><h3>First term</h3><p>The foundations of each subject for your class, with a test after each sequence.</p></li>
-      <li class="term"><span>Sequences 3 and 4</span><h3>Second term</h3><p>The core topics of the year, with practicals and structured questions.</p></li>
-      <li class="term"><span>Sequences 5 and 6</span><h3>Third term</h3><p>The last topics and revision, and for exam classes, full GCE papers.</p></li>
-    </ol>
+    <div class="syl" data-syllabus data-reveal>
+      <div class="syl__bar">
+        <label class="syl__pick">
+          <span>Subject</span>
+          <select id="syl-subject"></select>
+        </label>
+        <div class="syl__forms" id="syl-forms" role="group" aria-label="Class"></div>
+      </div>
+      <p class="syl__sum" id="syl-sum" aria-live="polite"></p>
+      <div class="syl__terms" id="syl-terms"></div>
+      <noscript><p class="syl__sum">Turn on JavaScript in your browser to see the topics of each class.</p></noscript>
+    </div>
+    {{SYLLABUS}}
   </div>
 </section>
 

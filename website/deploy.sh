@@ -6,6 +6,7 @@
 #
 # The nginx site "klass8" serves / and the pages (/features, /pricing, ...)
 # from /var/www/klass8/site, and /app from the web app in /var/www/klass8/app.
+# The download page is also copied to /var/www/klass8/download, beside the APK.
 set -eu
 HOST=${KLASS8_HOST:-root@72.61.177.234}
 cd "$(dirname "$0")"
@@ -17,4 +18,6 @@ tar czf - -C dist . | ssh "$HOST" 'set -eu
   rm -rf /var/www/klass8/site.old
   [ -d /var/www/klass8/site ] && mv /var/www/klass8/site /var/www/klass8/site.old
   mv /var/www/klass8/site.new /var/www/klass8/site
+  # The download page lives beside the APK (which update-apk.sh keeps current).
+  install -m 644 /var/www/klass8/site/download.html /var/www/klass8/download/index.html
   echo "site updated $(date -u +%FT%TZ)"'

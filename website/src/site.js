@@ -228,6 +228,116 @@
     });
   });
 
+  // ---------- the syllabus browser: every topic of a subject, class by class ----------
+  const syl = document.querySelector('[data-syllabus]');
+  const sylData = document.getElementById('syllabus-data');
+  if (syl && sylData) {
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const subjects = JSON.parse(sylData.textContent);
+    const pick = syl.querySelector('#syl-subject');
+    const formsBox = syl.querySelector('#syl-forms');
+    const sum = syl.querySelector('#syl-sum');
+    const terms = syl.querySelector('#syl-terms');
+    const TERM = ['First term', 'Second term', 'Third term'];
+    const LEVEL = { O: 'Ordinary Level', A: 'Advanced Level' };
+    pick.innerHTML = ['O', 'A']
+      .map((l) => `<optgroup label="${LEVEL[l]}">${subjects.filter((s) => s.level === l).map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</optgroup>`)
+      .join('');
+    let form = null;
+    const show = () => {
+      const s = subjects.find((x) => x.id === pick.value) || subjects[0];
+      const forms = Object.keys(s.forms);
+      if (!forms.includes(form)) form = forms.includes('Form 4') ? 'Form 4' : forms.includes('Lower Sixth') ? 'Lower Sixth' : forms[0];
+      formsBox.innerHTML = forms.map((f) => `<button type="button" aria-pressed="${f === form}">${esc(f)}</button>`).join('');
+      const list = s.forms[form].map((u, i) => ({ title: u[0], term: u[1], lessons: u[2], n: i + 1 }));
+      const lessons = list.reduce((n, u) => n + u.lessons, 0);
+      sum.innerHTML = `<b>${esc(s.name)}, ${esc(form)}:</b> ${list.length} topics and ${lessons.toLocaleString('en-GB')} lessons.`;
+      const termed = list.some((u) => u.term);
+      const cols = termed
+        ? [1, 2, 3].map((t) => [TERM[t - 1], list.filter((u) => u.term === t)]).concat([['Through the year', list.filter((u) => !u.term)]]).filter((c) => c[1].length)
+        : [['Topics in teaching order', list]];
+      terms.style.setProperty('--cols', Math.min(cols.length, 3));
+      terms.innerHTML = cols
+        .map(([h, items]) => `<div class="syl__term"><h3>${h}</h3><ol>${items.map((u) => `<li><span class="syl__n">${u.n}</span><span><b>${esc(u.title)}</b>${u.lessons ? `<small>${u.lessons} lesson${u.lessons > 1 ? 's' : ''}</small>` : ''}</span></li>`).join('')}</ol></div>`)
+        .join('');
+      terms.classList.remove('is-new');
+      void terms.offsetWidth;
+      terms.classList.add('is-new');
+    };
+    const fromHash = (scroll) => {
+      const id = location.hash.startsWith('#s-') ? location.hash.slice(3) : '';
+      if (!subjects.some((s) => s.id === id)) return false;
+      pick.value = id;
+      show();
+      if (scroll) document.getElementById('syllabus')?.scrollIntoView({ behavior: still ? 'auto' : 'smooth' });
+      return true;
+    };
+    pick.addEventListener('change', show);
+    formsBox.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      form = b.textContent;
+      show();
+    });
+    window.addEventListener('hashchange', () => fromHash(true));
+    if (!fromHash(true)) {
+      pick.value = subjects.some((s) => s.id === 'biology') ? 'biology' : subjects[0].id;
+      show();
+    }
+  }
+
+  // ---------- download page: the version and size of the newest app ----------
+  const apkMeta = document.querySelector('[data-apk-meta]');
+  if (apkMeta) {
+    fetch('/download/version.json', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((v) => {
+        if (v && v.version && v.size) apkMeta.textContent = `Version ${String(v.version).replace(/^v/, '')} for Android phones, ${Math.round(v.size / 1048576)} MB`;
+      })
+      .catch(() => {});
+  }
+
+  // ---------- questions page: search every question ----------
+  const findInput = document.querySelector('[data-find-input]');
+  if (findInput) {
+    const none = document.querySelector('[data-find-none]');
+    const groups = [...document.querySelectorAll('[data-find-group]')];
+    const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    findInput.addEventListener('input', () => {
+      const words = norm(findInput.value).split(/\s+/).filter(Boolean);
+      let shown = 0;
+      groups.forEach((g) => {
+        let inGroup = 0;
+        g.querySelectorAll('details').forEach((d) => {
+          const hit = words.every((w) => norm(d.textContent).includes(w));
+          d.hidden = !hit;
+          if (hit) inGroup++;
+          if (words.length && hit) d.open = true;
+          if (!words.length) d.open = false;
+        });
+        g.hidden = !inGroup;
+        shown += inGroup;
+      });
+      none.hidden = shown > 0;
+    });
+  }
+
+  // ---------- policy pages: show which section is being read ----------
+  const tocLinks = [...document.querySelectorAll('.toc a')];
+  if (tocLinks.length && 'IntersectionObserver' in window) {
+    const heads = tocLinks.map((a) => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+    const mark = (id) => tocLinks.forEach((a) => a.classList.toggle('is-on', a.getAttribute('href') === `#${id}`));
+    const seen = new IntersectionObserver(
+      (entries) => {
+        const top = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (top) mark(top.target.id);
+      },
+      { rootMargin: '-90px 0px -60% 0px' }
+    );
+    heads.forEach((h) => seen.observe(h));
+    if (heads[0]) mark(heads[0].id);
+  }
+
   // ---------- contact form ----------
   const form = document.querySelector('[data-contact]');
   if (form) {

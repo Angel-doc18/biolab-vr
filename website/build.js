@@ -50,7 +50,7 @@ Module._load = function (request, parent, isMain) {
 };
 
 const { LESSONS } = require(path.join(ROOT, 'src/data/lessons.js'));
-const { units } = require(path.join(ROOT, 'src/data/units.js'));
+const { units, formsFor, unitsForForm, byPlace, placeIn } = require(path.join(ROOT, 'src/data/units.js'));
 const { SUBJECTS } = require(path.join(ROOT, 'src/data/subjects.js'));
 const { DiagramView } = require(path.join(ROOT, 'src/diagrams/Diagram.js'));
 const { DIAGRAMS } = require(path.join(ROOT, 'src/diagrams/index.js'));
@@ -99,8 +99,21 @@ const stats = {
 const chips = (level) =>
   open
     .filter((s) => s.level === level)
-    .map((s) => `<li>${esc(s.en)}</li>`)
+    .map((s) => `<li><a href="/subjects#s-${s.id}">${esc(s.en)}</a></li>`)
     .join('');
+
+// Every topic of every open subject, class by class and term by term, for the
+// syllabus browser on the subjects page: [title, term, lessons].
+const syllabus = open.map((s) => {
+  const forms = formsFor(s.id).filter((f) => !s.classes || s.classes.includes(f));
+  const list = (form) =>
+    unitsForForm(s.id, form)
+      .sort(form ? byPlace(form) : (a, b) => (a.n ?? 0) - (b.n ?? 0))
+      .map((u) => [u.title, (form ? placeIn(u, form).term : u.term) || 0, (u.lessonIds || []).filter((id) => lessonById.has(id)).length]);
+  const whole = s.level === 'A' ? 'Lower and Upper Sixth' : 'Form 1 to Form 5';
+  return { id: s.id, name: s.en, level: s.level, forms: forms.length ? Object.fromEntries(forms.map((f) => [f, list(f)])) : { [whole]: list(null) } };
+});
+const syllabusJson = JSON.stringify(syllabus).replace(/</g, '\\u003c');
 
 // The heart, drawn by the app's own diagram code, with its exam labels.
 const heart = renderToStaticMarkup(React.createElement(DiagramView, { spec: DIAGRAMS['heart-section'] })).replace('<svg ', '<svg role="img" aria-label="Labelled vertical section through the mammalian heart" ');
@@ -118,6 +131,7 @@ const fill = {
   HEART: heart,
   SUBJECTS_O: chips('O'),
   SUBJECTS_A: chips('A'),
+  SYLLABUS: `<script type="application/json" id="syllabus-data">${syllabusJson}</script>`,
   PRICE_MONTH: esc(fcfa(PLANS.month.amount)),
   PRICE_YEAR: esc(fcfa(PLANS.year.amount)),
   CONTACT_CARDS: site.contactCards,
@@ -126,7 +140,7 @@ const fill = {
 };
 const fillIn = (html) =>
   html
-    .replace(/\{\{SCREEN:(\w+)\}\}/g, (m, name) => SCREEN(name, { heart: heartSmall }))
+    .replace(/\{\{SCREEN:(\w+)\}\}/g, (m, name) => SCREEN(name, { heart: heartSmall, priceYear: esc(fcfa(PLANS.year.amount)) }))
     .replace(/\{\{IMG:([\w-]+)\}\}/g, (m, id) => PAGES.photo(id))
     .replace(/\{\{CRUMBS:([^}]+)\}\}/g, (m, title) => PAGES.crumbs(title))
     .replace(/\{\{SAY:([\w-]+)\|([^|}]+)\|([^|}]+)(\|light)?\}\}/g, (m, clip, title, note, light) => PAGES.say(clip, title, note, !!light))
@@ -162,7 +176,7 @@ for (const file of fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsW
   if (!m) throw new Error(`${file}: the first line must be <!--page {"title": ..., "desc": ...} -->`);
   const meta = JSON.parse(m[1]);
   const slug = file.replace(/\.html$/, '');
-  pages.push({ file, title: meta.title, desc: meta.desc, url: slug === 'index' ? '/' : `/${slug}`, body: raw.slice(m[0].length) });
+  pages.push({ file, title: meta.title, desc: meta.desc, url: slug === 'index' ? '/' : slug === 'download' ? '/download/' : `/${slug}`, body: raw.slice(m[0].length) });
 }
 for (const pol of site.policies) pages.push({ file: `${pol.slug}.html`, title: `${pol.title} | Klass8`, desc: pol.desc, url: `/${pol.slug}`, body: pol.body });
 

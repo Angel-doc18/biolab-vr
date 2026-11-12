@@ -4,11 +4,22 @@
   <div class="wrap phero__in">
     <div data-rise style="--delay: 0.05s">{{CRUMBS:Questions and answers}}</div>
     <h1 id="page-title" data-rise style="--delay: 0.2s">Questions and answers</h1>
-    <p data-rise style="--delay: 0.4s">What students and parents ask us most. Anything else? <a href="/contact" style="color: inherit">Contact us</a>.</p>
+    <p data-rise style="--delay: 0.4s">What students and parents ask us most, about the app, paying and your account.</p>
   </div>
 </section>
 
-<section class="sec" aria-labelledby="q-use">
+<div class="find" data-find>
+  <div class="wrap">
+    <label class="find__box">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15zM21 21l-5.2-5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="sr">Search the questions</span>
+      <input type="search" placeholder="Search the questions" autocomplete="off" data-find-input>
+    </label>
+    <p class="find__none" data-find-none hidden>No question matches. <a href="/contact">Ask us directly</a> and we will answer.</p>
+  </div>
+</div>
+
+<section class="sec sec--top" aria-labelledby="q-use" data-find-group>
   <div class="wrap faq">
     <div class="head" data-reveal>
       <p class="label">The app</p>
@@ -17,15 +28,19 @@
     <div class="faq__list" data-reveal>
       <details>
         <summary>Does it follow my school's syllabus?</summary>
-        <p>Yes. Klass8 follows the MINESEC syllabuses and the term-by-term schemes of work, from Form 1 to Upper Sixth, for the GCE Ordinary and Advanced Levels. Technical students choose their stream for the ITC and the ATC.</p>
+        <p>Yes. Klass8 follows the MINESEC syllabuses and the term-by-term schemes of work, from Form 1 to Upper Sixth, for the GCE Ordinary and Advanced Levels. Technical students choose their stream for the ITC and the ATC. You can <a href="/subjects#syllabus">see every topic of your class</a>.</p>
       </details>
       <details>
         <summary>Which phones does it work on?</summary>
-        <p>Klass8 runs on Android phones: download it from this site. On any other phone or on a computer, open it in your browser.</p>
+        <p>Klass8 runs on Android phones: <a href="/download/">download it from this site</a>. On any other phone or on a computer, <a href="/app">open it in your browser</a>.</p>
       </details>
       <details>
         <summary>Can I use it without internet?</summary>
         <p>Lessons you have opened or downloaded can be read without internet. The tutor, the marking and payments need a connection.</p>
+      </details>
+      <details>
+        <summary>Can I learn in French?</summary>
+        <p>Yes. You choose English or French when you set up the app, and the tutor explains, solves and marks in the language you choose.</p>
       </details>
       <details>
         <summary>How accurate are the solutions and the marking?</summary>
@@ -35,7 +50,7 @@
   </div>
 </section>
 
-<section class="sec sec--paper" aria-labelledby="q-pay">
+<section class="sec sec--paper" aria-labelledby="q-pay" data-find-group>
   <div class="wrap faq">
     <div class="head" data-reveal>
       <p class="label">Prices</p>
@@ -52,6 +67,10 @@
         <p>In the app, choose a plan, then MTN Mobile Money or Orange Money, and enter your number. Approve the request on your phone with your PIN. Payments are processed by Fapshi, and Klass8 never asks for your PIN.</p>
       </details>
       <details>
+        <summary>Does anything renew automatically?</summary>
+        <p>No. Each payment is one request that you approve on your phone. When your days end, Klass8 asks you to choose a plan again.</p>
+      </details>
+      <details>
         <summary>What if money is taken but Klass8 does not open?</summary>
         <p>Contact us within 14 days with your phone number and the payment reference shown in the app. We either open Klass8 on your account or refund the full amount to the same number within 7 working days.</p>
       </details>
@@ -59,7 +78,7 @@
   </div>
 </section>
 
-<section class="sec" aria-labelledby="q-acc">
+<section class="sec" aria-labelledby="q-acc" data-find-group>
   <div class="wrap faq">
     <div class="head" data-reveal>
       <p class="label">Your account</p>
@@ -83,14 +102,14 @@
   </div>
 </section>
 
-<section class="final" aria-labelledby="final-title">
-  <div class="final__media" style="--img: {{IMG:1567057419565-4349c49d8a04}}" aria-hidden="true"></div>
-  <div class="wrap final__in" data-reveal>
-    <h2 id="final-title">Still deciding? Try it free.</h2>
-    <p>Everything is open for your first 30 days.</p>
-    <div class="hero__cta">
-      <a class="btn btn--amber btn--lg" href="/download/">Download for Android</a>
-      <a class="btn btn--ghost btn--lg" href="/app">Open in your browser</a>
+<section class="sec sec--paper sec--tight" aria-labelledby="ask-title">
+  <div class="wrap">
+    <div class="ask-band" data-reveal>
+      <div>
+        <h2 id="ask-title">Still have a question?</h2>
+        <p>Write to us and we answer {{HOURS}}.</p>
+      </div>
+      <a class="btn btn--navy btn--lg" href="/contact">Contact us</a>
     </div>
   </div>
 </section>

@@ -13,28 +13,48 @@
     <div class="head head--center" data-reveal>
       <p class="label">Plans</p>
       <h2 id="plans-title">Choose how you start</h2>
-      <p>Every plan opens every subject, lesson, practical, 3D model and paper, with the tutor and the marking. Parent and teacher accounts are always free.</p>
+      <p>Every plan opens every subject of your class, with the tutor and the marking. Parent and teacher accounts are always free.</p>
     </div>
     <div data-reveal>{{PLANS}}</div>
   </div>
 </section>
 
-<section class="sec" aria-labelledby="pay-title">
+<section class="sec" aria-labelledby="incl-title">
   <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">Paying</p>
-      <h2 id="pay-title">How you pay</h2>
-      <p>You pay inside the app, from your own phone. Payments are processed by Fapshi, and Klass8 never asks for your PIN.</p>
+    <div class="head head--center" data-reveal>
+      <p class="label">In every plan</p>
+      <h2 id="incl-title">Nothing is kept back for a higher price</h2>
     </div>
-    <ol class="pay-steps" data-stagger>
-      <li><h3>Choose a plan</h3><p>In the app, open Plans and choose one month or one year.</p></li>
-      <li><h3>Enter your number</h3><p>Choose MTN Mobile Money or Orange Money and type the number that will pay.</p></li>
-      <li><h3>Approve on your phone</h3><p>Confirm the request with your PIN. Klass8 opens as soon as the payment is confirmed.</p></li>
-    </ol>
+    <ul class="incl" data-stagger>
+      <li><span class="incl__i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1M4 13h3v6H5a1 1 0 0 1-1-1zM20 13h-3v6h2a1 1 0 0 0 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><h3>Every lesson, read aloud</h3><p>All the topics of your class, explained in English or in French, with worked examples.</p></li>
+      <li><span class="incl__i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/></svg></span><h3>Snap and solve</h3><p>Photograph any question and see it worked out step by step, then checked a second time.</p></li>
+      <li><span class="incl__i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 13 2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3>Marking of your answers</h3><p>Answers written on paper, marked against an examiner's scheme, Paper 3 included.</p></li>
+      <li><span class="incl__i"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9.5V13l2.5 1.5M10 3h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><h3>Papers and term tests</h3><p>Timed GCE papers and sequence tests for your class, with the reason behind every answer.</p></li>
+      <li><span class="incl__i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3M7.5 15h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3>Practicals and 3D models</h3><p>Practicals with real readings, labelled diagrams and organs you can turn in 3D.</p></li>
+      <li><span class="incl__i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3>A weekly report for parents</h3><p>Time spent, topics finished and scores, sent to a free parent account.</p></li>
+    </ul>
   </div>
 </section>
 
-<section class="sec sec--paper" aria-labelledby="pq-title">
+<section class="sec sec--paper" aria-labelledby="pay-title">
+  <div class="wrap split split--flip">
+    <div class="split__copy" data-reveal="right">
+      <p class="label">Paying</p>
+      <h2 id="pay-title">Paid in the app, from your own phone</h2>
+      <p>Payments are processed by Fapshi. Klass8 never asks for your PIN, and nothing is taken until you approve it.</p>
+      <ol class="vsteps">
+        <li><h3>Choose a plan</h3><p>In the app, open Plans and choose one month or one year.</p></li>
+        <li><h3>Enter your number</h3><p>Choose MTN Mobile Money or Orange Money and type the number that will pay.</p></li>
+        <li><h3>Approve on your phone</h3><p>Confirm the request with your PIN. Klass8 opens as soon as the payment is confirmed.</p></li>
+      </ol>
+    </div>
+    <div class="phone" data-reveal="zoom" aria-hidden="true">
+      {{SCREEN:pay}}
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="pq-title">
   <div class="wrap faq">
     <div class="head" data-reveal>
       <p class="label">Questions</p>
