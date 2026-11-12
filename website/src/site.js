@@ -5,6 +5,10 @@
   const root = document.documentElement;
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (still) root.classList.add('no-motion');
+  // Set in the page head. lite: low-memory phones and data saver get no
+  // decorative motion. slow: on 2G or 3G the extra hero photographs are skipped.
+  const lite = root.classList.contains('lite');
+  const slow = lite || root.classList.contains('slow');
 
   // ---------- header: white once scrolled, tucked away while reading down ----------
   const hd = document.querySelector('[data-hd]');
@@ -26,22 +30,30 @@
   // ---------- menu on small screens ----------
   const menu = document.querySelector('[data-menu]');
   if (menu && hd) {
-    const close = () => {
-      hd.classList.remove('is-open');
-      menu.setAttribute('aria-expanded', 'false');
+    const set = (open) => {
+      hd.classList.toggle('is-open', open);
+      root.classList.toggle('is-locked', open);
+      menu.setAttribute('aria-expanded', String(open));
+      menu.querySelector('.sr').textContent = open ? 'Close the menu' : 'Menu';
     };
+    const close = () => hd.classList.contains('is-open') && set(false);
     menu.addEventListener('click', () => {
       const open = !hd.classList.contains('is-open');
-      hd.classList.toggle('is-open', open);
-      menu.setAttribute('aria-expanded', String(open));
+      set(open);
+      if (open) hd.querySelector('.hd__nav > a')?.focus({ preventScroll: true });
     });
     hd.querySelectorAll('.hd__nav a').forEach((a) => a.addEventListener('click', close));
-    document.addEventListener('keydown', (e) => e.key === 'Escape' && close());
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !hd.classList.contains('is-open')) return;
+      close();
+      menu.focus();
+    });
+    window.matchMedia('(min-width: 981px)').addEventListener('change', (e) => e.matches && close());
   }
 
   // ---------- the page the visitor is on ----------
   const here = location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
-  document.querySelectorAll('.hd__nav a').forEach((a) => {
+  document.querySelectorAll('.hd__nav > a').forEach((a) => {
     const to = a.getAttribute('href').replace(/\/$/, '') || '/';
     if (to === here) a.setAttribute('aria-current', 'page');
   });
@@ -51,9 +63,26 @@
   const slides = [...document.querySelectorAll('.hero__slide')];
   const bars = [...document.querySelectorAll('.hero__bar')];
   const pause = document.querySelector('.hero__pause');
-  if (hero && slides.length > 1) {
+  if (hero && slides.length > 1 && !slow) {
     let i = 0;
     let timer = null;
+    const later = slides.filter((sl) => sl.style.getPropertyValue('--next'));
+    const urlOf = (v) => (v.match(/url\(['"]?(.*?)['"]?\)/) || [])[1];
+    let loading = null;
+    const loadLater = () =>
+      loading || (loading = Promise.all(
+        later.map((sl) => {
+          const big = sl.style.getPropertyValue('--next');
+          const small = sl.style.getPropertyValue('--next-s');
+          sl.style.setProperty('--img', big);
+          sl.style.setProperty('--img-s', small);
+          return new Promise((done) => {
+            const im = new Image();
+            im.onload = im.onerror = done;
+            im.src = urlOf(window.matchMedia('(max-width: 700px)').matches ? small : big);
+          });
+        })
+      ));
     const show = (n) => {
       i = (n + slides.length) % slides.length;
       slides.forEach((s, k) => s.classList.toggle('is-on', k === i));
@@ -77,10 +106,15 @@
       hero.classList.add('is-paused');
       pause?.setAttribute('aria-label', 'Play the photographs');
     };
-    bars.forEach((b, k) => b.addEventListener('click', () => (show(k), timer && play())));
-    pause?.addEventListener('click', () => (timer ? stop() : play()));
+    bars.forEach((b, k) => b.addEventListener('click', () => loadLater().then(() => (show(k), timer && play()))));
+    pause?.addEventListener('click', () => (timer ? stop() : loadLater().then(play)));
     show(0);
-    still ? stop() : play();
+    if (still) stop();
+    else {
+      // Start turning only once the other photographs have arrived.
+      const start = () => setTimeout(() => loadLater().then(play), 1200);
+      document.readyState === 'complete' ? start() : window.addEventListener('load', start, { once: true });
+    }
   }
 
   // ---------- motion on scroll ----------
@@ -128,7 +162,8 @@
 
   // Photographs behind heroes and the closing band drift a little slower than the page.
   const drift = [...document.querySelectorAll('.hero__media, .phero__media, .final__media')];
-  if (!still && drift.length) {
+  const wideMouse = window.matchMedia('(min-width: 901px) and (hover: hover) and (pointer: fine)').matches;
+  if (!still && !lite && wideMouse && drift.length) {
     let ticking = false;
     const move = () => {
       ticking = false;
@@ -157,6 +192,9 @@
         if (panel.classList.contains('phone')) panel.classList.toggle('is-on', on);
         else panel.hidden = !on;
       });
+      const cap = box.querySelector('.show__cap');
+      const desc = tab.querySelector('.tab__d');
+      if (cap && desc) cap.textContent = desc.textContent;
     };
     // The showcase moves to the next screen every 7 seconds while it is in view,
     // until the visitor chooses a tab themselves.

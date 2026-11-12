@@ -141,16 +141,18 @@ const fill = {
 const fillIn = (html) =>
   html
     .replace(/\{\{SCREEN:(\w+)\}\}/g, (m, name) => SCREEN(name, { heart: heartSmall, priceYear: esc(fcfa(PLANS.year.amount)) }))
+    // A photo set as --img (or --next, loaded later) also gets a phone-sized copy, --img-s.
+    .replace(/--(img|next): \{\{IMG:([\w-]+)\}\}/g, (m, v, id) => `--${v}: ${PAGES.photo(id)}; --${v}-s: ${PAGES.photo(id, 800)}`)
     .replace(/\{\{IMG:([\w-]+)\}\}/g, (m, id) => PAGES.photo(id))
     .replace(/\{\{CRUMBS:([^}]+)\}\}/g, (m, title) => PAGES.crumbs(title))
     .replace(/\{\{SAY:([\w-]+)\|([^|}]+)\|([^|}]+)(\|light)?\}\}/g, (m, clip, title, note, light) => PAGES.say(clip, title, note, !!light))
     .replace(/\{\{(\w+)\}\}/g, (m, k) => (k in fill ? fill[k] : m));
 
 // A page: the shared head, header and footer around its own content.
-const shell = ({ title, desc, url, body }) => `<!doctype html>
+const shell = ({ title, desc, url, body, lcp }) => `<!doctype html>
 <html lang="en">
 <head>
-${site.head(title, desc, url)}
+${site.head(title, desc, url, lcp)}
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -183,7 +185,8 @@ for (const pol of site.policies) pages.push({ file: `${pol.slug}.html`, title: `
 // Each page names its files with a fingerprint, so browsers keep them until they change.
 const stamp = (file) => crypto.createHash('sha1').update(fs.readFileSync(path.join(DIST, file))).digest('hex').slice(0, 10);
 for (const pg of pages) {
-  let out = fillIn(shell(pg));
+  const lcp = (pg.body.match(/--img: \{\{IMG:([\w-]+)\}\}/) || [])[1];
+  let out = fillIn(shell({ ...pg, lcp }));
   out = fillIn(out);
   out = out.replace(/(href|src)="(\/?)([\w/.-]+\.(?:css|js))"/g, (m, attr, slash, file) => `${attr}="${slash}${file}?v=${stamp(file)}"`);
   const left = out.match(/\{\{[^}]+\}\}/);

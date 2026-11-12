@@ -7,10 +7,12 @@ const esc = (s) =>
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-const FONTS = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Figtree:wght@400..800&display=swap';
+const FONTS = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..600&family=Figtree:wght@400..800&display=swap';
 
-// A photograph from Unsplash, sized for a full-width background.
-const photo = (id) => `url('https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1800&q=65')`;
+// A photograph from Unsplash. Unsplash picks AVIF or WebP for each browser;
+// phones get the 800px copy and wider screens the 1600px one (see build.js).
+const photoUrl = (id, w = 1600) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=${w > 1000 ? 65 : 60}`;
+const photo = (id, w) => `url('${photoUrl(id, w)}')`;
 
 // A button that plays one of the tutor's recorded clips.
 const say = (clip, title, note, light) => `<button class="chip-play${light ? ' chip-play--light' : ''}" type="button" data-audio="/audio/${clip}.mp3" aria-label="${esc(title)}: play the tutor's voice">
@@ -26,7 +28,16 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
   const has = (k) => !!String(B[k] || '').trim();
   const wa = B.whatsapp || B.phone;
 
-  const head = (title, desc, url) => `<meta charset="utf-8">
+  // The first photograph of the page is fetched straight away, at the size for
+  // the screen, because it is the largest thing on screen when the page opens.
+  const preload = (id) =>
+    id
+      ? `
+<link rel="preload" as="image" href="${photoUrl(id, 800)}" media="(max-width: 700px)" fetchpriority="high">
+<link rel="preload" as="image" href="${photoUrl(id)}" media="(min-width: 701px)" fetchpriority="high">`
+      : '';
+
+  const head = (title, desc, url, lcp) => `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
@@ -40,9 +51,9 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
 <link rel="icon" href="/img/mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://images.unsplash.com">
+<link rel="preconnect" href="https://images.unsplash.com">${preload(lcp)}
 <link rel="stylesheet" href="${FONTS}">
-<script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.K8)document.documentElement.classList.remove('js')},3000)</script>
+<script>(function(d){var c=navigator.connection||{},m=navigator.deviceMemory;d.classList.add('js');if(c.saveData||(m&&m<=2))d.classList.add('lite');if(/2g|3g/.test(c.effectiveType||''))d.classList.add('slow');setTimeout(function(){if(!window.K8)d.classList.remove('js')},3000)})(document.documentElement)</script>
 <link rel="stylesheet" href="/site.css">
 <script src="/site.js" defer></script>`;
 
@@ -55,11 +66,17 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
       <a href="/pricing">Prices</a>
       <a href="/schools">Schools</a>
       <a href="/about">About</a>
+      <div class="hd__sheet">
+        <a class="btn btn--amber btn--lg" href="/download/">Download for Android</a>
+        <a class="btn btn--line btn--lg" href="/app">Open in your browser</a>
+        <p>Questions? <a href="/contact">Contact us</a> or read the <a href="/faq">answers</a>.</p>
+      </div>
     </nav>
     <div class="hd__act">
       <a class="btn btn--amber btn--sm" href="/download/">Download</a>
       <button class="hd__menu" type="button" aria-controls="menu" aria-expanded="false" data-menu>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="i-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="i-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span class="sr">Menu</span>
       </button>
     </div>
@@ -228,4 +245,4 @@ ${withToc(`
   return { head, header, footer, plans, policies, contactCards: contactCards ? `<dl class="contact">${contactCards}</dl>` : '', who, hours: B.hours };
 }
 
-module.exports = { make, say, photo, esc, crumbs };
+module.exports = { make, say, photo, photoUrl, esc, crumbs };
