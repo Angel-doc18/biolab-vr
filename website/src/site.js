@@ -473,6 +473,33 @@
       .catch(() => {});
   }
 
+  // ---------- prices: the ones an admin set, in place of those built in ----------
+  const priceEls = document.querySelectorAll('[data-price], [data-price-n], [data-price-save]');
+  if (priceEls.length) {
+    const num = (n) => Number(n).toLocaleString('en-US');
+    const WORDS = ['', 'one month', 'two months', 'three months', 'four months', 'five months', 'six months'];
+    fetch('/v1/billing/plans', { headers: { accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const m = Number(d?.plans?.month?.amount);
+        const y = Number(d?.plans?.year?.amount);
+        if (!(m > 0) || !(y > 0)) return;
+        const amount = { month: m, year: y };
+        document.querySelectorAll('[data-price]').forEach((el) => {
+          if (amount[el.dataset.price]) el.textContent = `${num(amount[el.dataset.price])} FCFA`;
+        });
+        document.querySelectorAll('[data-price-n]').forEach((el) => {
+          if (amount[el.dataset.priceN]) el.textContent = num(amount[el.dataset.priceN]);
+        });
+        // How many months a year costs less than twelve single months.
+        const saved = Math.floor(12 - y / m + 0.05);
+        document.querySelectorAll('[data-price-save]').forEach((el) => {
+          el.textContent = saved >= 1 && saved < WORDS.length ? `: ${WORDS[saved]} free compared with paying each month` : '';
+        });
+      })
+      .catch(() => {});
+  }
+
   // ---------- download page: the version and size of the newest app ----------
   const apkMeta = document.querySelector('[data-apk-meta]');
   if (apkMeta) {

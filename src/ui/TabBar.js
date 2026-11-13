@@ -13,8 +13,9 @@ export const TABS = [
   { name: 'Me', icon: 'account_circle', en: 'Me', fr: 'Moi' },
 ];
 
-// Bottom navigation (h-16). The active pill glides between tabs.
-export function TabBarView({ activeIndex, onSelect }) {
+// Bottom navigation (h-16). The active pill glides between tabs. `tabs` is the
+// student set by default; the admin console passes its own.
+export function TabBarView({ activeIndex, onSelect, tabs = TABS }) {
   const insets = useSafeAreaInsets();
   const L = useL();
   const [w, setW] = useState(0);
@@ -22,7 +23,7 @@ export function TabBarView({ activeIndex, onSelect }) {
   useEffect(() => {
     Animated.spring(x, { toValue: activeIndex, useNativeDriver: true, stiffness: 300, damping: 30, mass: 1 }).start();
   }, [activeIndex, x]);
-  const slot = w / TABS.length;
+  const slot = w / tabs.length;
   return (
     <View
       style={{
@@ -69,7 +70,7 @@ export function TabBarView({ activeIndex, onSelect }) {
           />
         )}
         <V c="flex-1 flex-row items-center justify-around">
-          {TABS.map((t, i) => {
+          {tabs.map((t, i) => {
             const on = i === activeIndex;
             return (
               <Pressable
@@ -96,9 +97,10 @@ export function TabBarView({ activeIndex, onSelect }) {
 }
 
 // Adapter for @react-navigation/bottom-tabs.
-export default function TabBar({ state, navigation }) {
+export default function TabBar({ state, navigation, tabs }) {
   return (
     <TabBarView
+      tabs={tabs}
       activeIndex={state.index}
       onSelect={(name, i) => {
         const route = state.routes[i];

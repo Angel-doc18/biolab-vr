@@ -14,6 +14,7 @@ const KIND = {
   report: { icon: 'insights', bg: 'bg-surface-container', fg: 'primary-container', group: 'reports' },
   parent: { icon: 'family_restroom', bg: 'bg-surface-container', fg: 'primary-container', group: 'reports' },
   payment: { icon: 'workspace_premium', bg: 'bg-tertiary-fixed/50', fg: 'tertiary', group: 'account' },
+  announcement: { icon: 'campaign', bg: 'bg-surface-container', fg: 'primary-container', group: 'account' },
 };
 
 function ago(at, L) {

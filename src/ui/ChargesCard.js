@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Cta } from './chrome';
 import { Ic, P, T, V } from './kit';
 import { useL } from '../i18n';
 import { PLANS, fcfa } from '../data/plan';
+import { get } from '../api/client';
 
 // The platform charges in plain sight for students, on Home and Me: the price
 // and a Pay button, so nobody has to look for where to pay. Shown only while
@@ -12,10 +13,32 @@ const STORE_BUILD = process.env.EXPO_PUBLIC_STORE === 'play';
 const longDate = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 const daysBetween = (from, to) => Math.ceil((to - from) / 86_400_000);
 
+// The prices an admin set, from the server; the last ones seen are kept while
+// the app is open, and the built-in prices are used until the first answer.
+let lastPlans = null;
+function usePlans() {
+  const [plans, setPlans] = useState(lastPlans || PLANS);
+  useEffect(() => {
+    let live = true;
+    get('/v1/billing/plans', { auth: false })
+      .then((r) => {
+        if (!r?.plans?.month || !r?.plans?.year) return;
+        lastPlans = r.plans;
+        if (live) setPlans(r.plans);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+  return plans;
+}
+
 export default function ChargesCard({ user, onPress }) {
   const L = useL();
   // Read the clock once when the card appears; the screen re-mounts it when opened again.
   const [now] = useState(() => Date.now());
+  const plans = usePlans();
   if (!user || user.role !== 'student' || user.isAdmin || user.trialUntil == null) return null;
   const paidUntil = user.proUntil && user.proUntil > now ? user.proUntil : null;
 
@@ -54,7 +77,7 @@ export default function ChargesCard({ user, onPress }) {
       : L('Payment due', 'Paiement à faire');
   const body = STORE_BUILD
     ? L('Ask your school for a voucher to keep every subject, lesson and paper open.', 'Demandez un code à votre école pour garder toutes les matières, leçons et épreuves ouvertes.')
-    : `${L('Pay', 'Payez')} ${fcfa(PLANS.month.amount)} ${L('a month or', 'par mois ou')} ${fcfa(PLANS.year.amount)} ${L('a year with MTN MoMo or Orange Money to keep every subject, lesson and paper open.', 'par an avec MTN MoMo ou Orange Money pour garder toutes les matières, leçons et épreuves ouvertes.')}`;
+    : `${L('Pay', 'Payez')} ${fcfa(plans.month.amount)} ${L('a month or', 'par mois ou')} ${fcfa(plans.year.amount)} ${L('a year with MTN MoMo or Orange Money to keep every subject, lesson and paper open.', 'par an avec MTN MoMo ou Orange Money pour garder toutes les matières, leçons et épreuves ouvertes.')}`;
 
   return (
     <V c="bg-primary-container rounded-xl p-space-md gap-space-sm">

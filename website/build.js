@@ -180,8 +180,9 @@ const fill = {
   // Until the business name is filled in, say where Klass8 is made rather than 'by Klass8'.
   MADE_BY: String(B.name || '').trim() ? `made and run by ${esc(B.name)}, in Cameroon` : 'made and run in Cameroon',
   SYLLABUS: `<script type="application/json" id="syllabus-data">${syllabusJson}</script>`,
-  PRICE_MONTH: esc(fcfa(PLANS.month.amount)),
-  PRICE_YEAR: esc(fcfa(PLANS.year.amount)),
+  // Each price sits in a span that site.js updates from the prices an admin sets.
+  PRICE_MONTH: `<span data-price="month">${esc(fcfa(PLANS.month.amount))}</span>`,
+  PRICE_YEAR: `<span data-price="year">${esc(fcfa(PLANS.year.amount))}</span>`,
   CONTACT_CARDS: site.contactCards,
   WHO: esc(site.who),
   HOURS: esc(site.hours),
@@ -189,7 +190,7 @@ const fill = {
 const fillIn = (html) =>
   html
     .replace(/\{\{SPEAK:(en|fr)\}\}/g, (m, k) => speak(k))
-    .replace(/\{\{SCREEN:(\w+)\}\}/g, (m, name) => SCREEN(name, { heart: heartSmall, priceYear: esc(fcfa(PLANS.year.amount)) }))
+    .replace(/\{\{SCREEN:(\w+)\}\}/g, (m, name) => SCREEN(name, { heart: heartSmall, priceYear: `<span data-price="year">${esc(fcfa(PLANS.year.amount))}</span>` }))
     // A photo set as --img (or --next, loaded later) also gets a phone-sized copy, --img-s.
     .replace(/--(img|next): \{\{IMG:([\w-]+)\}\}/g, (m, v, id) => `--${v}: ${PAGES.photo(id)}; --${v}-s: ${PAGES.photo(id, 800)}`)
     .replace(/\{\{IMG:([\w-]+)\}\}/g, (m, id) => PAGES.photo(id))

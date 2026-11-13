@@ -4,13 +4,10 @@ import { sha256, uuid } from '../lib/crypto.js';
 import { int, oneOf, phone, str } from '../lib/validate.js';
 import { directPay, payLink, paymentStatus, paymentsConfigured, paymentsOf, verifyFapshiWebhook } from '../lib/providers.js';
 import { notify } from '../lib/notify.js';
+import { currentPlans, loadSettings } from '../lib/settings.js';
 
-// The platform charges. Prices are decided here, never by the client. A year
-// costs ten months: two months free.
-export const PLANS = {
-  month: { amount: 350, days: 30, label: 'Platform charges, 1 month' },
-  year: { amount: 3500, days: 365, label: 'Platform charges, 1 year' },
-};
+// The platform charges. Prices are decided on the server, never by the client:
+// an admin sets them in the app (lib/settings.js), 350 and 3,500 FCFA until then.
 
 // How students pay: 'prompt' (Fapshi Direct Pay, a request appears on the
 // phone) once Fapshi has switched Direct Pay on for the account
@@ -20,7 +17,7 @@ const plain = (id) => id.replace(/[^a-zA-Z0-9]/g, '');
 const publicBase = (request, env) => (env.PUBLIC_API_URL || new URL(request.url).origin).replace(/\/+$/, '');
 
 export async function plans(request, env) {
-  return ok({ plans: PLANS, paymentsOpen: paymentsConfigured(env), checkout: checkoutMode(env), paywall: paywallOn(env) });
+  return ok({ plans: currentPlans(), paymentsOpen: paymentsConfigured(env), checkout: checkoutMode(env), paywall: paywallOn(env) });
 }
 
 // The payment is written down before Fapshi is asked, so one whose request
@@ -29,6 +26,7 @@ export async function initiatePayment(request, env) {
   const user = await requireUser(request, env);
   await limit(env.WRITE_LIMITER, `pay:${user.id}`, 'Please wait a moment before trying again.');
   const b = await readJson(request);
+  const PLANS = currentPlans();
   const planId = oneOf(b.plan, 'Plan', Object.keys(PLANS));
   const plan = PLANS[planId];
   const mode = checkoutMode(env);
@@ -71,7 +69,7 @@ export async function initiatePayment(request, env) {
 // to today, once it has run out), so a month paid in the free month starts
 // when the free month ends.
 function paidUntil(user, planId) {
-  const length = PLANS[planId].days * 86_400_000;
+  const length = currentPlans()[planId].days * 86_400_000;
   const freeEnd = user ? trialUntil(user) : null;
   const inFreeMonth = freeEnd && now() < freeEnd && !(user.pro_until > freeEnd);
   if (planId === 'year' && inFreeMonth) return user.created_at + length;
@@ -98,7 +96,7 @@ async function settle(env, payment, providerData) {
       const user = await env.DB.prepare('SELECT role, created_at, pro_until FROM users WHERE id = ?').bind(payment.user_id).first();
       const until = paidUntil(user, payment.plan);
       await env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until, now(), payment.user_id).run();
-      await notify(env, payment.user_id, 'payment', 'Payment received', `${PLANS[payment.plan].label}: ${payment.amount} FCFA. Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`, { reference: payment.reference });
+      await notify(env, payment.user_id, 'payment', 'Payment received', `${currentPlans()[payment.plan].label}: ${payment.amount} FCFA. Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`, { reference: payment.reference });
     }
     return 'SUCCESSFUL';
   }
@@ -152,6 +150,7 @@ export async function getPayment(request, env, id) {
 // checked every few minutes until they end: a payment page expires after 24
 // hours, a request on the phone ends as paid or failed.
 export async function reconcilePayments(env) {
+  await loadSettings(env);
   if (!paymentsConfigured(env)) return;
   const { results } = await env.DB.prepare(
     "SELECT * FROM payments WHERE status = 'PENDING' AND applied = 0 AND created_at > ? ORDER BY created_at LIMIT 40"

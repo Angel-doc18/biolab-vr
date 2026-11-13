@@ -17,6 +17,7 @@ import { reportAppError } from './routes/appErrors.js';
 import { sendContact } from './routes/contact.js';
 import { notify } from './lib/notify.js';
 import { aiProvider } from './lib/ai.js';
+import { loadSettings } from './lib/settings.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
 const routes = [
@@ -88,6 +89,16 @@ const routes = [
   ['GET', '/v1/admin/licence-requests', admin.listLicenceRequests],
   ['GET', '/v1/admin/app-errors', admin.listAppErrors],
   ['GET', '/v1/admin/contact-messages', admin.listContactMessages],
+  ['POST', `/v1/admin/contact-messages/${ID}/done`, admin.markMessage],
+  ['DELETE', `/v1/admin/contact-messages/${ID}`, admin.deleteMessage],
+  ['GET', `/v1/admin/users/${ID}`, admin.getUser],
+  ['POST', `/v1/admin/users/${ID}/block`, admin.blockUser],
+  ['DELETE', `/v1/admin/users/${ID}`, admin.deleteUser],
+  ['GET', '/v1/admin/settings', admin.getSettings],
+  ['PUT', '/v1/admin/settings', admin.putSettings],
+  ['GET', '/v1/admin/ai-reports', admin.listAiReports],
+  ['POST', `/v1/admin/ai-reports/${ID}/resolve`, admin.resolveAiReport],
+  ['POST', '/v1/admin/announce', admin.announce],
   ['GET', '/v1/team', team.listTeam],
   ['GET', `/v1/team/${ID}/photo`, team.teamPhoto],
   ['GET', '/v1/admin/team', team.adminListTeam],
@@ -116,6 +127,7 @@ function corsHeaders(request, env) {
 
 async function handle(request, env) {
   const url = new URL(request.url);
+  await loadSettings(env); // the admin's settings (prices, charges), kept in memory
   if (request.method === 'OPTIONS') return new Response(null, { status: 204 });
   for (const [method, pattern, handler] of routes) {
     const match = url.pathname.match(pattern);
@@ -126,6 +138,7 @@ async function handle(request, env) {
 
 // Daily at 17:00 UTC (18:00 in Cameroon).
 async function scheduled(env) {
+  await loadSettings(env);
   const day = 86_400_000;
   // Klass8's own server also checks open payments every few minutes (server/main.js).
   await billing.reconcilePayments(env).catch((e) => console.error('reconcile', e?.message));

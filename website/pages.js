@@ -139,7 +139,7 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
       </article>
       <article class="plan">
         <h3>One month</h3>
-        <p class="plan__price">${esc(priceMonth.replace(' FCFA', ''))} <span>FCFA</span></p>
+        <p class="plan__price"><span data-price-n="month">${esc(priceMonth.replace(' FCFA', ''))}</span> <span>FCFA</span></p>
         <p class="plan__note">30 days of everything. Pay again when you want more.</p>
         <ul>
           <li>No automatic renewal</li>
@@ -150,8 +150,8 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
       <article class="plan">
         <span class="plan__tag plan__tag--quiet">Best value</span>
         <h3>One year</h3>
-        <p class="plan__price">${esc(priceYear.replace(' FCFA', ''))} <span>FCFA</span></p>
-        <p class="plan__note">365 days of everything: two months free compared with paying each month.</p>
+        <p class="plan__price"><span data-price-n="year">${esc(priceYear.replace(' FCFA', ''))}</span> <span>FCFA</span></p>
+        <p class="plan__note">365 days of everything<span data-price-save>: two months free compared with paying each month</span>.</p>
         <ul>
           <li>No automatic renewal</li>
           <li>Counts from the day you joined</li>
@@ -199,7 +199,7 @@ ${withToc(`${sections(privacy)}
       desc: 'When and how Klass8 platform charges are refunded.',
       body: `${plain('Refund policy', `${updated} Every new student account starts with a free month, so you can try everything before paying.`)}
 ${withToc(`
-<p>Klass8 sells access to its lessons, practicals, papers and tutor (the platform charges): ${esc(priceMonth)} for one month or ${esc(priceYear)} for one year.</p>
+<p>Klass8 sells access to its lessons, practicals, papers and tutor (the platform charges): <span data-price="month">${esc(priceMonth)}</span> for one month or <span data-price="year">${esc(priceYear)}</span> for one year.</p>
 <h2>Nothing is charged without your approval</h2>
 <p>Each payment is a single request that you approve on your own phone with your mobile money PIN. Charges never renew automatically.</p>
 <h2>A payment that did not open Klass8</h2>

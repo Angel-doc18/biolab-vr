@@ -45,7 +45,14 @@ import Workspace from '../screens/ai/Workspace';
 import Paywall from '../screens/me/Paywall';
 import Pay from '../screens/me/Pay';
 import Voucher from '../screens/me/Voucher';
-import Admin from '../screens/me/Admin';
+import AdminTabs, { ADMIN_TABS } from '../screens/admin/AdminTabs';
+import AdminPerson from '../screens/admin/Person';
+import AdminPrices from '../screens/admin/Prices';
+import AdminMessages from '../screens/admin/Messages';
+import AdminReports from '../screens/admin/Reports';
+import AdminAnnounce from '../screens/admin/Announce';
+import AdminTeam from '../screens/admin/Team';
+import AdminProblems from '../screens/admin/Problems';
 import Offline from '../screens/me/Offline';
 import ParentReport from '../screens/me/ParentReport';
 import Notifications from '../screens/me/Notifications';
@@ -104,7 +111,8 @@ function MainTabs() {
 }
 
 // The admin console is here too: it follows the admin's own session, not the user's.
-const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Forgot', 'Reset', 'Legal', 'Admin'];
+const ADMIN = ['Admin', 'AdminPerson', 'AdminPrices', 'AdminMessages', 'AdminReports', 'AdminAnnounce', 'AdminTeam', 'AdminProblems', ...ADMIN_TABS.map((t) => t.name)];
+const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Forgot', 'Reset', 'Legal', ...ADMIN];
 // What a student whose free month has ended (and who has not paid) can still
 // open: signing in and out, setting up the account, the platform charges and
 // settings. Anything else leads to the platform charges.
@@ -182,7 +190,14 @@ export default function AppNavigator() {
         <Stack.Screen name="Paywall" component={Paywall} options={modalOptions} />
         <Stack.Screen name="Pay" component={Pay} />
         <Stack.Screen name="Voucher" component={Voucher} />
-        <Stack.Screen name="Admin" component={Admin} options={() => ({ ...fadeIn(), gestureEnabled: false })} />
+        <Stack.Screen name="Admin" component={AdminTabs} options={() => ({ ...fadeIn(), gestureEnabled: false })} />
+        <Stack.Screen name="AdminPerson" component={AdminPerson} />
+        <Stack.Screen name="AdminPrices" component={AdminPrices} />
+        <Stack.Screen name="AdminMessages" component={AdminMessages} />
+        <Stack.Screen name="AdminReports" component={AdminReports} />
+        <Stack.Screen name="AdminAnnounce" component={AdminAnnounce} />
+        <Stack.Screen name="AdminTeam" component={AdminTeam} />
+        <Stack.Screen name="AdminProblems" component={AdminProblems} />
         <Stack.Screen name="Offline" component={Offline} options={modalOptions} />
       </Stack.Navigator>
     </NavigationContainer>

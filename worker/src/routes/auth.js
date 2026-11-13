@@ -76,6 +76,7 @@ export async function login(request, env) {
     return ok(await adminSession(env, admin));
   }
   if (!user || !valid) throw new HttpError(401, GENERIC_LOGIN_ERROR, 'invalid_credentials');
+  if (user.blocked_at) throw new HttpError(403, 'This account has been blocked. Contact Klass8.', 'account_blocked');
   const session = await issueSession(env, user);
   return ok({ user: publicUser(user, env), ...session });
 }

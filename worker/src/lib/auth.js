@@ -4,6 +4,9 @@
 import { HttpError, now } from './http.js';
 import { randomToken, sha256, signJwt, uuid, verifyJwt } from './crypto.js';
 import { userSubjects } from './subjects.js';
+import { setting } from './settings.js';
+
+const BLOCKED = 'This account has been blocked. Contact Klass8.';
 
 const ACCESS_TTL = 15 * 60; // seconds
 const REFRESH_TTL_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
@@ -34,7 +37,7 @@ export async function rotateRefresh(env, refreshToken) {
   }
   if (row.expires_at < now()) throw new HttpError(401, 'Session expired. Please log in again.', 'unauthorized');
   await env.DB.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE id = ?').bind(row.id).run();
-  const user = await env.DB.prepare('SELECT id, role FROM users WHERE id = ? AND deleted_at IS NULL').bind(row.user_id).first();
+  const user = await env.DB.prepare('SELECT id, role FROM users WHERE id = ? AND deleted_at IS NULL AND blocked_at IS NULL').bind(row.user_id).first();
   if (!user) throw new HttpError(401, 'Session expired. Please log in again.', 'unauthorized');
   return issueSession(env, user);
 }
@@ -54,6 +57,7 @@ export async function requireUser(request, env, roles) {
   if (!claims?.sub || claims.kind === 'admin') throw new HttpError(401, 'Please log in.', 'unauthorized');
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ? AND deleted_at IS NULL').bind(claims.sub).first();
   if (!user) throw new HttpError(401, 'Please log in.', 'unauthorized');
+  if (user.blocked_at) throw new HttpError(401, BLOCKED, 'account_blocked');
   if (roles && !roles.includes(user.role)) throw new HttpError(403, 'You do not have access to this.', 'forbidden');
   return user;
 }
@@ -63,7 +67,12 @@ export async function requireUser(request, env, roles) {
 // whole app. After that a student's first month is free, then the app is open
 // while a payment (or a school code) lasts. Parents and teachers do not pay.
 // The app takes its answer from `pro`, so no new build is needed to switch.
-export const paywallOn = (env) => env?.PAYWALL === 'on';
+// An admin can switch the charges on or off in the app (settings 'paywall');
+// until then PAYWALL in the server's environment decides.
+export const paywallOn = (env) => {
+  const v = setting('paywall');
+  return v === 'on' || v === 'off' ? v === 'on' : env?.PAYWALL === 'on';
+};
 // FREE_DAYS on the server sets the free first period (default 30 days; 0 means
 // the charges apply from sign-up). Read from the server's environment.
 export function freeDays() {
