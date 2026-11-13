@@ -46,6 +46,7 @@ import Paywall from '../screens/me/Paywall';
 import Pay from '../screens/me/Pay';
 import Voucher from '../screens/me/Voucher';
 import Admin from '../screens/me/Admin';
+import AdminLogin from '../screens/me/AdminLogin';
 import Offline from '../screens/me/Offline';
 import ParentReport from '../screens/me/ParentReport';
 import Notifications from '../screens/me/Notifications';
@@ -103,7 +104,8 @@ function MainTabs() {
   );
 }
 
-const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Forgot', 'Reset', 'Legal'];
+// The admin screens are here too: they follow the admin's own session, not the user's.
+const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Forgot', 'Reset', 'Legal', 'AdminLogin', 'Admin'];
 // What a student whose free month has ended (and who has not paid) can still
 // open: signing in and out, setting up the account, the platform charges and
 // settings. Anything else leads to the platform charges.
@@ -181,7 +183,8 @@ export default function AppNavigator() {
         <Stack.Screen name="Paywall" component={Paywall} options={modalOptions} />
         <Stack.Screen name="Pay" component={Pay} />
         <Stack.Screen name="Voucher" component={Voucher} />
-        <Stack.Screen name="Admin" component={Admin} />
+        <Stack.Screen name="AdminLogin" component={AdminLogin} options={fadeIn} />
+        <Stack.Screen name="Admin" component={Admin} options={() => ({ ...fadeIn(), gestureEnabled: false })} />
         <Stack.Screen name="Offline" component={Offline} options={modalOptions} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,26 +1,18 @@
-// Admin endpoints: for an admin account (users.is_admin, set on the server with
-// make-admin.sh) signed in to the app, or for the operator's ADMIN_TOKEN.
-import { HttpError, clientIp, created, limit, now, ok, readJson } from '../lib/http.js';
-import { randomCode, safeEqual, sha256, uuid } from '../lib/crypto.js';
+// Admin endpoints: for an admin account (its own account, created on the server
+// with make-admin.sh and signed in from the app's admin sign-in), or for the
+// operator's ADMIN_TOKEN.
+import { HttpError, created, now, ok, readJson } from '../lib/http.js';
+import { randomCode, sha256, uuid } from '../lib/crypto.js';
 import { int, oneOf, str } from '../lib/validate.js';
-import { accessEnd, freeDays, isPro, paywallOn, requireUser } from '../lib/auth.js';
+import { accessEnd, freeDays, isPro, paywallOn } from '../lib/auth.js';
 import { paymentsConfigured } from '../lib/providers.js';
 import { notify } from '../lib/notify.js';
+import { requireAdmin } from '../lib/adminAuth.js';
 
 const DAY = 86_400_000;
 
-// Anyone else gets "not found", so the admin endpoints do not show themselves.
-export async function requireAdmin(request, env) {
-  const token = request.headers.get('x-admin-token');
-  if (token) {
-    await limit(env.AUTH_LIMITER, `admin:${clientIp(request)}`);
-    if (env.ADMIN_TOKEN && env.ADMIN_TOKEN.length >= 32 && safeEqual(token, env.ADMIN_TOKEN)) return { id: null };
-    throw new HttpError(404, 'Not found.', 'not_found');
-  }
-  const user = await requireUser(request, env);
-  if (!user.is_admin) throw new HttpError(404, 'Not found.', 'not_found');
-  return user;
-}
+// Who may use these endpoints: an admin account (lib/adminAuth.js) or the operator's ADMIN_TOKEN.
+export { requireAdmin };
 
 const startOfMonth = () => {
   const d = new Date();

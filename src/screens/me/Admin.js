@@ -1,13 +1,13 @@
-// The admin screens, for an account marked as admin on the server
-// (make-admin.sh): the figures, accounts (with days given or taken), payments,
+// The admin console, for Klass8's own admin accounts (made on the server with
+// make-admin.sh and signed in on the admin sign-in, apart from every student,
+// parent and teacher account): the figures, accounts (with days given or taken), payments,
 // schools (codes and licence requests), and the team shown on the website.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
-import { get, post } from '../../api/client';
-import { useApp } from '../../state/store';
+import { adminSignOut, currentAdmin, get, loadAdminSession, onAdminSignedOut, post } from '../../api/adminClient';
 import { useL } from '../../i18n';
 import { fcfa } from '../../data/plan';
 import AdminTeam from './AdminTeam';
@@ -359,22 +359,63 @@ function Schools({ L, showToast }) {
   );
 }
 
-export default function Admin() {
-  const { user } = useApp();
+export default function Admin({ navigation }) {
   const L = useL();
+  const [admin, setAdmin] = useState(currentAdmin());
+  const [checked, setChecked] = useState(false);
   const [tab, setTab] = useState('overview');
   const [key, setKey] = useState(0); // pull to refresh: the tab loads again
   const [toast, showToast] = useToast();
+
+  // Only a signed-in admin account sees this screen; when the admin session
+  // ends (signed out, expired, switched off) it is the admin sign-in again.
+  const toSignIn = useCallback(() => navigation.reset({ index: 0, routes: [{ name: 'AdminLogin' }] }), [navigation]);
+  useEffect(() => {
+    let live = true;
+    loadAdminSession().then((sess) => {
+      if (!live) return;
+      if (!sess) toSignIn();
+      else {
+        setAdmin(sess.admin);
+        setChecked(true);
+      }
+    });
+    const off = onAdminSignedOut(toSignIn);
+    return () => {
+      live = false;
+      off();
+    };
+  }, [toSignIn]);
+  const signOut = async () => {
+    await adminSignOut();
+    navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+  };
+
   return (
     <V c="flex-1">
       <Screen
         bg="bg-surface"
         keyboard
-        header={<StackHeader title={L('Admin', 'Admin')} avatar={false} />}
+        header={
+          <StackHeader
+            title={L('Klass8 admin', 'Admin Klass8')}
+            subtitle={admin?.name || ''}
+            noBack
+            avatar={false}
+            right={
+              <P c="h-10 px-3 rounded-lg flex-row items-center gap-1.5 bg-surface-container-low" onPress={signOut} accessibilityLabel={L('Sign out of the admin', 'Se déconnecter de l’admin')}>
+                <Ic n="logout" s={18} c="on-surface" />
+                <T c="font-label-md text-label-md text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('Sign out', 'Déconnexion')}
+                </T>
+              </P>
+            }
+          />
+        }
         refreshControl={<RefreshControl refreshing={false} onRefresh={() => setKey((k) => k + 1)} />}
       >
-        {!user?.isAdmin ? (
-          <T c="font-body-md text-body-md text-on-surface-variant pt-space-lg">{L('This account is not an admin.', 'Ce compte n’est pas administrateur.')}</T>
+        {!checked ? (
+          <ActivityIndicator color={C['primary-container']} style={{ marginTop: 32 }} />
         ) : (
           <V c="pt-space-md pb-space-xl gap-space-md">
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>

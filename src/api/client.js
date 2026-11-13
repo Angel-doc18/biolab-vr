@@ -162,3 +162,6 @@ export const put = (p, body, o) => api(p, { ...o, method: 'PUT', body });
 // For audio and other files: resolves to { bytes: ArrayBuffer, type }.
 export const postBytes = (p, body, o) => api(p, { ...o, method: 'POST', body: body ?? {}, binary: true });
 export const del = (p, body, o) => api(p, { ...o, method: 'DELETE', body });
+
+// The bare request, without the user's session, for the admin client (src/api/adminClient.js).
+export { raw as rawRequest };

@@ -6,7 +6,8 @@ import { ActivityIndicator } from 'react-native';
 import { Avatar, C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote } from '../../ui/chrome';
 import { Field, Label, Toggle } from '../../ui/form';
-import { API_BASE, del, get, patch, post, put } from '../../api/client';
+import { API_BASE } from '../../api/client';
+import { del, get, patch, post, put } from '../../api/adminClient';
 import { pickProfilePhoto } from '../../lib/photo';
 
 const BIO_MAX = 280;

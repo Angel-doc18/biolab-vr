@@ -4,7 +4,7 @@
 import { HttpError, json, now, ok, readJson, created } from '../lib/http.js';
 import { uuid } from '../lib/crypto.js';
 import { bool, str } from '../lib/validate.js';
-import { requireAdmin } from './admin.js';
+import { requireAdmin } from '../lib/adminAuth.js';
 
 const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BASE64 = 350_000; // about 260 KB of image, as for profile pictures

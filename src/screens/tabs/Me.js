@@ -192,12 +192,6 @@ export default function Me({ navigation }) {
           </Section>
         )}
 
-        {user?.isAdmin && (
-          <V c="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-            <MenuRow first title={L('Admin', 'Admin')} sub={L('Accounts, payments and school codes', 'Comptes, paiements et codes d’école')} onPress={() => navigation.navigate('Admin')} />
-          </V>
-        )}
-
         <V c="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
           {student && (
             <MenuRow

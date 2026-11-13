@@ -12,6 +12,7 @@ import * as avatar from './routes/avatar.js';
 import * as models from './routes/models.js';
 import * as voice from './routes/voice.js';
 import * as team from './routes/team.js';
+import * as adminAuth from './lib/adminAuth.js';
 import { reportAppError } from './routes/appErrors.js';
 import { sendContact } from './routes/contact.js';
 import { notify } from './lib/notify.js';
@@ -74,6 +75,10 @@ const routes = [
   ['POST', '/v1/ai/explain', ai.explain],
   ['POST', '/v1/ai/solve', ai.solve],
   ['POST', '/v1/ai/mark-any', ai.markAny],
+  ['POST', '/v1/admin/login', adminAuth.signIn],
+  ['POST', '/v1/admin/refresh', adminAuth.refreshAdmin],
+  ['POST', '/v1/admin/logout', adminAuth.signOut],
+  ['GET', '/v1/admin/me', adminAuth.me],
   ['GET', '/v1/admin/overview', admin.overview],
   ['GET', '/v1/admin/users', admin.listUsers],
   ['POST', `/v1/admin/users/${ID}/days`, admin.grantDays],

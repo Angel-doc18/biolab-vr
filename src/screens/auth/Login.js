@@ -116,6 +116,9 @@ export default function Login({ navigation }) {
         <P c="items-center pt-space-xs" onPress={() => navigation.navigate('Legal', { doc: 'help' })} hitSlop={8}>
           <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Help and contact', 'Aide et contact')}</T>
         </P>
+        <P c="items-center" onPress={() => navigation.navigate('AdminLogin')} hitSlop={8}>
+          <T c="font-body-sm text-body-sm text-outline">{L('Klass8 team? Admin sign in', 'Équipe Klass8 ? Connexion admin')}</T>
+        </P>
       </V>
     </Screen>
   );

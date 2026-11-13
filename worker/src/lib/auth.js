@@ -50,7 +50,8 @@ export async function requireUser(request, env, roles) {
   const header = request.headers.get('authorization') || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   const claims = await verifyJwt(token, env.JWT_SECRET);
-  if (!claims?.sub) throw new HttpError(401, 'Please log in.', 'unauthorized');
+  // An admin's token is for the admin screens only, never a user's session.
+  if (!claims?.sub || claims.kind === 'admin') throw new HttpError(401, 'Please log in.', 'unauthorized');
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ? AND deleted_at IS NULL').bind(claims.sub).first();
   if (!user) throw new HttpError(401, 'Please log in.', 'unauthorized');
   if (roles && !roles.includes(user.role)) throw new HttpError(403, 'You do not have access to this.', 'forbidden');

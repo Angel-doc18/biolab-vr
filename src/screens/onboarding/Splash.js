@@ -8,6 +8,7 @@ import { LOGO, LOGO_COLORS } from '../../ui/brand';
 import { LOW_END, noSlide } from '../../lib/device';
 import { firstName, greeting } from '../../state/selectors';
 import { useL } from '../../i18n';
+import { loadAdminSession } from '../../api/adminClient';
 
 // The opening. It takes over from the system splash (the K8 mark alone,
 // centred): a soft ring pulses out, the graduation cap is tossed up with a full
@@ -93,6 +94,11 @@ export default function Splash({ navigation }) {
   }));
   const [shown, setShown] = useState(false);
   const went = useRef(false);
+  // An admin signed in on this device opens straight on the admin console.
+  const [admin, setAdmin] = useState(undefined);
+  useEffect(() => {
+    loadAdminSession().then((sess) => setAdmin(sess || null), () => setAdmin(null));
+  }, []);
   const name = firstName(user?.name);
 
   // Sizes: the logo is up to 74% of the screen wide; k turns logo units into dp.
@@ -157,11 +163,12 @@ export default function Splash({ navigation }) {
   // The first screen opens once the opening has played (or been tapped away)
   // and the app is ready.
   useEffect(() => {
-    if (!shown || !ready || went.current) return;
+    if (!shown || !ready || admin === undefined || went.current) return;
     went.current = true;
-    if (auth.status === 'authed') navigation.reset(routeAfterAuth(user));
+    if (admin) navigation.reset({ index: 0, routes: [{ name: 'Admin' }] });
+    else if (auth.status === 'authed') navigation.reset(routeAfterAuth(user));
     else navigation.replace(prefs.seenWelcome ? 'Login' : 'Welcome');
-  }, [shown, ready, auth.status, user, prefs.seenWelcome, navigation]);
+  }, [shown, ready, admin, auth.status, user, prefs.seenWelcome, navigation]);
 
   const markStyle = {
     transform: [
