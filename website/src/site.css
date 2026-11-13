@@ -1160,3 +1160,6 @@ a, button, summary, label, select { -webkit-tap-highlight-color: transparent; }
    so its width is the same share of the size on a phone as on a desktop. */
 .hero h1 { max-width: none; font-variation-settings: 'opsz' 144; font-size: min(5.2rem, calc((100vw - 2 * var(--gut)) / 9.6)); }
 .hero h1 .line { display: block; }
+/* On the narrowest phones the line above the voices can take four lines; keep
+   room for four so the buttons never move when the caption changes. */
+@media (max-width: 380px) { .speak__cap { min-height: 6.4em; } }
