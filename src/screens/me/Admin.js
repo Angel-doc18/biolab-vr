@@ -1,6 +1,6 @@
 // The admin console, for Klass8's own admin accounts (made on the server with
-// make-admin.sh and signed in on the admin sign-in, apart from every student,
-// parent and teacher account): the figures, accounts (with days given or taken), payments,
+// make-admin.sh, apart from every student, parent and teacher account, and
+// signed in on the same sign-in page as everyone): the figures, accounts (with days given or taken), payments,
 // schools (codes and licence requests), and the team shown on the website.
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
@@ -368,8 +368,8 @@ export default function Admin({ navigation }) {
   const [toast, showToast] = useToast();
 
   // Only a signed-in admin account sees this screen; when the admin session
-  // ends (signed out, expired, switched off) it is the admin sign-in again.
-  const toSignIn = useCallback(() => navigation.reset({ index: 0, routes: [{ name: 'AdminLogin' }] }), [navigation]);
+  // ends (signed out, expired, switched off) it is the sign-in page again.
+  const toSignIn = useCallback(() => navigation.reset({ index: 0, routes: [{ name: 'Login' }] }), [navigation]);
   useEffect(() => {
     let live = true;
     loadAdminSession().then((sess) => {

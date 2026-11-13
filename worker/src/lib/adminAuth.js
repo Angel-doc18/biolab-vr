@@ -1,5 +1,6 @@
-// Admin accounts and their sign-in. Admins are not users: they live in their
-// own table, are created only on the server (make-admin.sh), and their tokens
+// Admin accounts and their sessions. Admins are not users: they live in their
+// own table, are created only on the server (make-admin.sh), sign in on the same
+// page as everyone (POST /v1/auth/login recognises them), and their tokens
 // carry kind: 'admin', so an admin token never acts as a user and a user's
 // token never opens the admin endpoints. The operator's ADMIN_TOKEN still
 // works for scripts.
@@ -35,6 +36,13 @@ async function issue(env, admin) {
   return { admin: publicAdmin(admin), accessToken, refreshToken: refresh, expiresIn: ACCESS_TTL };
 }
 
+// What a sign-in returns for an admin account: kind 'admin' tells the app to
+// open the admin console instead of a user's session.
+export async function adminSession(env, admin) {
+  await env.DB.prepare('UPDATE admins SET last_login_at = ? WHERE id = ?').bind(now(), admin.id).run();
+  return { kind: 'admin', ...(await issue(env, admin)) };
+}
+
 // Anyone who is not an admin gets "not found", so the admin endpoints do not show themselves.
 export async function requireAdmin(request, env) {
   const token = request.headers.get('x-admin-token');
@@ -51,7 +59,7 @@ export async function requireAdmin(request, env) {
   return admin;
 }
 
-// POST /v1/admin/login { login, password }
+// POST /v1/admin/login { login, password } (kept for app builds that had a separate admin sign-in)
 export async function signIn(request, env) {
   await limit(env.AUTH_LIMITER, `admin-login:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
   const b = await readJson(request);
@@ -62,8 +70,7 @@ export async function signIn(request, env) {
   const valid = await verifyPassword(pw, admin?.password_hash || DUMMY.hash, admin?.password_salt || DUMMY.salt);
   if (!admin || !valid) throw new HttpError(401, LOGIN_ERROR, 'invalid_credentials');
   if (admin.disabled) throw new HttpError(403, 'This admin account is switched off.', 'admin_disabled');
-  await env.DB.prepare('UPDATE admins SET last_login_at = ? WHERE id = ?').bind(now(), admin.id).run();
-  return ok(await issue(env, admin));
+  return ok(await adminSession(env, admin));
 }
 
 // POST /v1/admin/refresh { refreshToken }

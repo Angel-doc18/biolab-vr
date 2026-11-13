@@ -1,8 +1,8 @@
 // The admin console's own session. Admin accounts are separate from students,
-// parents and teachers (worker/src/lib/adminAuth.js): they sign in on the
-// admin sign-in screen, their tokens open only the admin endpoints, and they
-// are kept apart from the user's session. On a phone the session lives in the
-// keychain; in a browser, only for the open tab.
+// parents and teachers (worker/src/lib/adminAuth.js) but sign in on the same
+// page: when the sign-in answers with kind 'admin', the session is kept here,
+// apart from the user's, and its tokens open only the admin endpoints. On a
+// phone the session lives in the keychain; in a browser, only for the open tab.
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { ApiError, rawRequest } from './client';
@@ -64,8 +64,8 @@ export function onAdminSignedOut(fn) {
   return () => listeners.delete(fn);
 }
 
-export async function adminSignIn(login, password) {
-  const r = await rawRequest('/v1/admin/login', { method: 'POST', body: { login, password } });
+// Keeps the admin session a sign-in returned (kind: 'admin').
+export async function adminUseSession(r) {
   await save(r);
   loaded = true;
   return r.admin;

@@ -3,6 +3,7 @@ import { hashPassword, randomDigits, sha256, uuid, verifyPassword, safeEqual } f
 import { UPDATE_MESSAGE, issueSession, outdatedApp, publicUser, requireUser, revokeRefresh, rotateRefresh } from '../lib/auth.js';
 import { email, oneOf, password, phone, str } from '../lib/validate.js';
 import { channels, messagingConfigured, sendCode } from '../lib/messaging.js';
+import { adminLogin, adminSession } from '../lib/adminAuth.js';
 
 const GENERIC_LOGIN_ERROR = 'Phone number, email or password is incorrect.';
 const OTP_TTL = 10 * 60 * 1000;
@@ -62,7 +63,18 @@ export async function login(request, env) {
     }
     if (ph) user = await env.DB.prepare('SELECT * FROM users WHERE phone = ? AND deleted_at IS NULL').bind(ph).first();
   }
+  // Admin accounts sign in on this same page. They are their own accounts
+  // (lib/adminAuth.js); when the details are an admin's, the answer is an admin
+  // session (kind: 'admin') and the app opens the admin console. Both
+  // passwords are always checked, so the answer takes as long either way.
+  const adminKey = adminLogin(identifier);
+  const admin = adminKey ? await env.DB.prepare('SELECT * FROM admins WHERE login = ?').bind(adminKey).first() : null;
+  const adminValid = await verifyPassword(pw, admin?.password_hash || DUMMY.hash, admin?.password_salt || DUMMY.salt);
   const valid = await verifyPassword(pw, user?.password_hash || DUMMY.hash, user?.password_salt || DUMMY.salt);
+  if (admin && adminValid) {
+    if (admin.disabled) throw new HttpError(403, 'This account is switched off. Contact Klass8.', 'admin_disabled');
+    return ok(await adminSession(env, admin));
+  }
   if (!user || !valid) throw new HttpError(401, GENERIC_LOGIN_ERROR, 'invalid_credentials');
   const session = await issueSession(env, user);
   return ok({ user: publicUser(user, env), ...session });

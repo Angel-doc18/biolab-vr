@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState } from 'react-native';
 import { del, get, loadSession, onPaymentRequired, onSessionLost, patch as apiPatch, post, put, setSession } from '../api/client';
+import { adminUseSession } from '../api/adminClient';
 import { EMPTY, examSubject, merge, minutesThisWeek, streak, syllabusMastery, touchDay, unitMastery, bestExam } from './progress';
 import { units, unitsShown } from '../data/units';
 import { lessonIdsFor } from '../data/lessons';
@@ -154,6 +155,12 @@ export function AppProvider({ children }) {
 
   const login = useCallback(async (identifier, password) => {
     const r = await post('/v1/auth/login', { identifier, password }, { auth: false });
+    // An admin account signs in on the same page: its session is the admin
+    // console's own (api/adminClient), never a user's.
+    if (r.kind === 'admin') {
+      await adminUseSession(r);
+      return r;
+    }
     await startSession(r);
     return r;
   }, [startSession]);
