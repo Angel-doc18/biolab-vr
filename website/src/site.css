@@ -1121,3 +1121,42 @@ a, button, summary, label, select { -webkit-tap-highlight-color: transparent; }
   .speak__cap { min-height: 4.9em; font-size: 1.02rem; }
   .speak__more { gap: 0 18px; margin-top: -4px; }
 }
+
+/* =====================================================================
+   The team (About page, and those marked for it on the home page)
+   ===================================================================== */
+.team { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 40px 28px; }
+.team--home { grid-template-columns: repeat(auto-fit, minmax(200px, 250px)); justify-content: center; }
+.person { display: grid; align-content: start; gap: 4px; }
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lite) .person { animation: pop-in 0.7s var(--ease) both; animation-delay: calc(var(--i, 0) * 0.08s); }
+}
+.person__photo { position: relative; display: block; aspect-ratio: 1; margin-bottom: 14px; overflow: hidden; border-radius: var(--r-lg); background: var(--navy); box-shadow: 0 30px 60px -40px rgba(1, 22, 63, 0.6); }
+.person__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.person__ini { position: absolute; inset: 0; display: grid; place-items: center; color: var(--amber); font: 600 clamp(2.4rem, 5vw, 3.4rem)/1 var(--serif); letter-spacing: 0.02em; }
+.person h3 { font: 600 1.35rem/1.25 var(--serif); }
+.person__role { color: #b47a00; font-weight: 700; font-size: 0.95rem; }
+.person__bio { margin-top: 8px; color: var(--muted); font-size: 0.98rem; }
+.person__link { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding-block: 6px; color: var(--navy); font-weight: 700; font-size: 0.95rem; text-decoration: none; }
+.person__link svg { width: 16px; height: 16px; }
+@media (hover: hover) { .person__link:hover { text-decoration: underline; text-underline-offset: 4px; } }
+.team__after { margin-top: 48px; text-align: center; }
+.team[hidden] + .team__after { margin-top: 0; }
+
+@media (max-width: 600px) {
+  .team { grid-template-columns: 1fr 1fr; gap: 28px 14px; }
+  .person h3 { font-size: 1.12rem; }
+  .person__role { font-size: 0.88rem; }
+  .person__bio { font-size: 0.92rem; }
+  .person__photo { margin-bottom: 10px; border-radius: var(--r); }
+  /* on the home page the people are a row to swipe */
+  .team--home { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(-1 * var(--gut)); padding: 4px var(--gut) 12px; scroll-padding-inline: var(--gut); justify-content: flex-start; }
+  .team--home::-webkit-scrollbar { display: none; }
+  .team--home .person { flex: 0 0 62%; scroll-snap-align: start; }
+}
+
+/* The headline is two lines at every width: each sentence keeps to one line,
+   sized from the space it has. Fraunces is held at its display cut (opsz 144)
+   so its width is the same share of the size on a phone as on a desktop. */
+.hero h1 { max-width: none; font-variation-settings: 'opsz' 144; font-size: min(5.2rem, calc((100vw - 2 * var(--gut)) / 9.6)); }
+.hero h1 .line { display: block; }

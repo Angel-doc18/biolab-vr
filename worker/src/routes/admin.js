@@ -10,7 +10,7 @@ import { notify } from '../lib/notify.js';
 const DAY = 86_400_000;
 
 // Anyone else gets "not found", so the admin endpoints do not show themselves.
-async function requireAdmin(request, env) {
+export async function requireAdmin(request, env) {
   const token = request.headers.get('x-admin-token');
   if (token) {
     await limit(env.AUTH_LIMITER, `admin:${clientIp(request)}`);

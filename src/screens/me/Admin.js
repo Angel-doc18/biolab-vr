@@ -1,8 +1,8 @@
 // The admin screens, for an account marked as admin on the server
 // (make-admin.sh): the figures, accounts (with days given or taken), payments,
-// and schools (codes and licence requests).
+// schools (codes and licence requests), and the team shown on the website.
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, RefreshControl } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
@@ -10,6 +10,7 @@ import { get, post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { fcfa } from '../../data/plan';
+import AdminTeam from './AdminTeam';
 
 const date = (t) => (t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-');
 const phoneText = (p) => (p ? `+${p.slice(0, 3)} ${p.slice(3, 6)} ${p.slice(6, 8)} ${p.slice(8, 10)} ${p.slice(10)}` : '');
@@ -18,6 +19,7 @@ const TABS = [
   ['accounts', 'Accounts', 'Comptes'],
   ['payments', 'Payments', 'Paiements'],
   ['schools', 'Schools', 'Écoles'],
+  ['team', 'Team', 'Équipe'],
 ];
 
 function Card({ title, children }) {
@@ -375,16 +377,17 @@ export default function Admin() {
           <T c="font-body-md text-body-md text-on-surface-variant pt-space-lg">{L('This account is not an admin.', 'Ce compte n’est pas administrateur.')}</T>
         ) : (
           <V c="pt-space-md pb-space-xl gap-space-md">
-            <V c="flex-row gap-1.5">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
               {TABS.map(([id, en, fr]) => (
-                <Chip key={id} grow on={tab === id} label={L(en, fr)} onPress={() => setTab(id)} />
+                <Chip key={id} on={tab === id} label={L(en, fr)} onPress={() => setTab(id)} />
               ))}
-            </V>
+            </ScrollView>
             <V key={`${tab}-${key}`}>
               {tab === 'overview' && <Overview L={L} />}
               {tab === 'accounts' && <Accounts L={L} showToast={showToast} />}
               {tab === 'payments' && <Payments L={L} />}
               {tab === 'schools' && <Schools L={L} showToast={showToast} />}
+              {tab === 'team' && <AdminTeam L={L} showToast={showToast} />}
             </V>
           </V>
         )}

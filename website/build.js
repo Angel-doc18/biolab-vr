@@ -177,6 +177,8 @@ const fill = {
   SUBJECTS_O: chips('O'),
   SUBJECTS_A: chips('A'),
   TRANSCRIPT: transcript,
+  // Until the business name is filled in, say where Klass8 is made rather than 'by Klass8'.
+  MADE_BY: String(B.name || '').trim() ? `made and run by ${esc(B.name)}, in Cameroon` : 'made and run in Cameroon',
   SYLLABUS: `<script type="application/json" id="syllabus-data">${syllabusJson}</script>`,
   PRICE_MONTH: esc(fcfa(PLANS.month.amount)),
   PRICE_YEAR: esc(fcfa(PLANS.year.amount)),

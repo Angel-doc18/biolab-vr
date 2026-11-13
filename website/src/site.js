@@ -439,6 +439,40 @@
     }
   }
 
+  // ---------- the team, as the admins keep it in the app ----------
+  // Each list stays hidden (and the home section with it) until the server
+  // returns at least one person for it.
+  const teamLists = [...document.querySelectorAll('[data-team]')];
+  if (teamLists.length) {
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const initials = (name) => {
+      const parts = String(name).trim().split(/\s+/).filter(Boolean);
+      return ((parts[0]?.[0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+    };
+    const card = (m, i, full) => `<li class="person" style="--i: ${i}">
+      <span class="person__photo">${m.photo ? `<img src="${esc(m.photo)}" alt="" width="480" height="480" loading="lazy" decoding="async">` : `<span class="person__ini" aria-hidden="true">${esc(initials(m.name))}</span>`}</span>
+      <h3>${esc(m.name)}</h3>
+      <p class="person__role">${esc(m.role)}</p>
+      ${full && m.bio ? `<p class="person__bio">${esc(m.bio)}</p>` : ''}
+      ${full && m.link && /^https:\/\//i.test(m.link) ? `<a class="person__link" href="${esc(m.link)}" target="_blank" rel="noopener noreferrer">Profile<span class="sr"> of ${esc(m.name)}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>` : ''}
+    </li>`;
+    fetch('/v1/team', { headers: { accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const all = Array.isArray(d?.members) ? d.members : [];
+        teamLists.forEach((list) => {
+          const home = list.dataset.team === 'home';
+          const people = home ? all.filter((m) => m.onHome) : all;
+          if (!people.length) return;
+          list.innerHTML = people.map((m, i) => card(m, i, !home)).join('');
+          list.hidden = false;
+          const section = list.closest('[data-team-section]');
+          if (section) section.hidden = false;
+        });
+      })
+      .catch(() => {});
+  }
+
   // ---------- download page: the version and size of the newest app ----------
   const apkMeta = document.querySelector('[data-apk-meta]');
   if (apkMeta) {

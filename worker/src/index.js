@@ -11,6 +11,7 @@ import { channels, sendNotice } from './lib/messaging.js';
 import * as avatar from './routes/avatar.js';
 import * as models from './routes/models.js';
 import * as voice from './routes/voice.js';
+import * as team from './routes/team.js';
 import { reportAppError } from './routes/appErrors.js';
 import { sendContact } from './routes/contact.js';
 import { notify } from './lib/notify.js';
@@ -82,6 +83,15 @@ const routes = [
   ['GET', '/v1/admin/licence-requests', admin.listLicenceRequests],
   ['GET', '/v1/admin/app-errors', admin.listAppErrors],
   ['GET', '/v1/admin/contact-messages', admin.listContactMessages],
+  ['GET', '/v1/team', team.listTeam],
+  ['GET', `/v1/team/${ID}/photo`, team.teamPhoto],
+  ['GET', '/v1/admin/team', team.adminListTeam],
+  ['POST', '/v1/admin/team', team.addTeamMember],
+  ['PATCH', `/v1/admin/team/${ID}`, team.editTeamMember],
+  ['DELETE', `/v1/admin/team/${ID}`, team.removeTeamMember],
+  ['POST', `/v1/admin/team/${ID}/move`, team.moveTeamMember],
+  ['PUT', `/v1/admin/team/${ID}/photo`, team.putTeamPhoto],
+  ['DELETE', `/v1/admin/team/${ID}/photo`, team.deleteTeamPhoto],
 ].map(([method, path, handler]) => [method, new RegExp(`^${path}$`), handler]);
 
 // Browsers are only allowed from the origins listed in ALLOWED_ORIGINS (the web
