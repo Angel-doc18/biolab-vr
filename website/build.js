@@ -61,6 +61,8 @@ const { MARK } = require(path.join(ROOT, 'src/ui/brand.js'));
 const BUSINESS = require('./business.js');
 const PAGES = require('./pages.js');
 const SCREEN = require('./screens.js');
+const INTRO = require('./intro.js');
+const { readMp3 } = require('./mp3len.js');
 
 // Who sells Klass8. The business name, email and phone are shown wherever they
 // are filled in; without them the contact page offers only its form.
@@ -121,6 +123,49 @@ const heart = renderToStaticMarkup(React.createElement(DiagramView, { spec: DIAG
 // The same heart, small and silent, for the lesson inside the phone.
 const heartSmall = heart.replace(' role="img" aria-label="Labelled vertical section through the mammalian heart"', ' aria-hidden="true" focusable="false"');
 
+// The home hero's speaking buttons: the tutor explains Klass8 in English or in
+// French, one clip per sentence, with the sentence shown as a caption.
+const attr = (s) => esc(s).replace(/"/g, '&quot;');
+const play = '<svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24"><path d="M6.5 5h4v14h-4zM13.5 5h4v14h-4z" fill="currentColor"/></svg>';
+// The sentences of a language are joined into one file (frames copied as they
+// are), so one tap plays them all on every phone, with no gaps while loading.
+const joined = {};
+const joinIntro = (key) => {
+  if (joined[key]) return joined[key];
+  const parts = INTRO[key].lines.map((t, i) => ({ t, ...readMp3(path.join(SRC, 'audio', `intro-${key}-${i + 1}.mp3`)) }));
+  const data = Buffer.concat(parts.flatMap((pt) => pt.frames));
+  fs.mkdirSync(path.join(DIST, 'audio'), { recursive: true });
+  fs.writeFileSync(path.join(DIST, 'audio', `intro-${key}.mp3`), data);
+  let at = 0;
+  const cues = parts.map((pt) => {
+    const cue = [+at.toFixed(2), pt.t];
+    at += pt.seconds;
+    return cue;
+  });
+  const v = crypto.createHash('sha1').update(data).digest('hex').slice(0, 10);
+  return (joined[key] = { src: `/audio/intro-${key}.mp3?v=${v}`, cues, total: at });
+};
+const speak = (key) => {
+  const v = INTRO[key];
+  const { src, cues, total } = joinIntro(key);
+  const secs = Math.round(total);
+  const note = key === 'fr' ? `Klass8 en ${secs} secondes` : `Klass8 in ${secs} seconds`;
+  return `<button class="speak__btn" type="button" lang="${v.lang}" data-src="${src}" data-cues="${attr(JSON.stringify(cues))}" data-total="${total.toFixed(2)}" data-note="${attr(note)}">
+        <span class="speak__icon" aria-hidden="true"><svg class="speak__ring" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><circle class="speak__prog" cx="26" cy="26" r="24" pathLength="100"/></svg>${play}</span>
+        <span class="speak__txt"><b>${esc(v.label)}</b><small data-speak-note>${esc(note)}</small></span>
+        <span class="speak__wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      </button>`;
+};
+const transcript = `<dialog class="tx" id="transcript" aria-labelledby="tx-title">
+  <div class="tx__head">
+    <h2 id="tx-title">What the tutor says</h2>
+    <button class="tx__close" type="button" data-tx-close aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="tx__cols">
+    ${['en', 'fr'].map((k) => `<section lang="${k}"><h3>${k === 'fr' ? 'En français' : 'In English'}</h3>${INTRO[k].lines.map((l) => `<p>${esc(l)}</p>`).join('')}</section>`).join('\n    ')}
+  </div>
+</dialog>`;
+
 const site = PAGES.make({ B, terms: TERMS, privacy: PRIVACY, priceMonth: fcfa(PLANS.month.amount), priceYear: fcfa(PLANS.year.amount), mark: markSvg });
 
 const fill = {
@@ -131,6 +176,7 @@ const fill = {
   HEART: heart,
   SUBJECTS_O: chips('O'),
   SUBJECTS_A: chips('A'),
+  TRANSCRIPT: transcript,
   SYLLABUS: `<script type="application/json" id="syllabus-data">${syllabusJson}</script>`,
   PRICE_MONTH: esc(fcfa(PLANS.month.amount)),
   PRICE_YEAR: esc(fcfa(PLANS.year.amount)),
@@ -140,6 +186,7 @@ const fill = {
 };
 const fillIn = (html) =>
   html
+    .replace(/\{\{SPEAK:(en|fr)\}\}/g, (m, k) => speak(k))
     .replace(/\{\{SCREEN:(\w+)\}\}/g, (m, name) => SCREEN(name, { heart: heartSmall, priceYear: esc(fcfa(PLANS.year.amount)) }))
     // A photo set as --img (or --next, loaded later) also gets a phone-sized copy, --img-s.
     .replace(/--(img|next): \{\{IMG:([\w-]+)\}\}/g, (m, v, id) => `--${v}: ${PAGES.photo(id)}; --${v}-s: ${PAGES.photo(id, 800)}`)
@@ -167,7 +214,7 @@ ${site.footer}
 
 // ---------- write the site ----------
 fs.rmSync(DIST, { recursive: true, force: true });
-fs.cpSync(SRC, DIST, { recursive: true, filter: (f) => !f.includes(`${path.sep}pages`) });
+fs.cpSync(SRC, DIST, { recursive: true, filter: (f) => !f.includes(`${path.sep}pages`) && !/intro-(en|fr)-\d+\.mp3$/.test(f) });
 const write = (file, data) => fs.writeFileSync(path.join(DIST, file), data);
 write('img/mark.svg', markSvg.replace('<svg class="mark" ', '<svg xmlns="http://www.w3.org/2000/svg" ').replace(' aria-hidden="true"', ''));
 

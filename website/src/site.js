@@ -244,6 +244,8 @@
   });
 
   // ---------- the tutor's voice: one clip at a time ----------
+  // Any voice that starts asks every other one on the page to stop.
+  const hush = (except) => document.dispatchEvent(new CustomEvent('k8:voice', { detail: except }));
   let current = null;
   document.querySelectorAll('[data-audio]').forEach((btn) => {
     const audio = new Audio();
@@ -256,7 +258,8 @@
     const off = () => btn.classList.remove('is-playing');
     audio.addEventListener('ended', off);
     audio.addEventListener('pause', off);
-    audio.addEventListener('play', () => btn.classList.add('is-playing'));
+    audio.addEventListener('play', () => (btn.classList.add('is-playing'), hush(audio)));
+    document.addEventListener('k8:voice', (e) => e.detail !== audio && !audio.paused && audio.pause());
     btn.addEventListener('click', () => {
       if (!audio.paused) return audio.pause();
       if (current && current !== audio) current.pause();
@@ -265,6 +268,118 @@
       audio.play().catch(() => {});
     });
   });
+
+  // ---------- home hero: the tutor explains Klass8, in English or in French ----------
+  // Each button plays one file; the sentence being said is shown and lit up as
+  // a caption, and a ring fills as it goes. The transcript holds every word.
+  const speakBox = document.querySelector('[data-speak-box]');
+  const tx = document.getElementById('transcript');
+  const openTx = () => tx && (tx.showModal ? tx.showModal() : tx.setAttribute('open', ''));
+  if (tx) {
+    document.querySelectorAll('[data-tx-open]').forEach((b) => b.addEventListener('click', openTx));
+    tx.querySelector('[data-tx-close]')?.addEventListener('click', () => tx.close());
+    tx.addEventListener('click', (e) => e.target === tx && tx.close()); // a tap outside the box closes it
+  }
+  if (speakBox) {
+    const cap = speakBox.querySelector('[data-speak-cap]');
+    const go = speakBox.querySelector('[data-speak-go]');
+    // The line above the voices describes Klass8; while the tutor speaks it
+    // becomes the caption, and it comes back once the tutor has finished.
+    const idle = cap.innerHTML;
+    let rest = 0;
+    const restore = () => {
+      cap.innerHTML = idle;
+      cap.classList.remove('is-new');
+      void cap.offsetWidth;
+      cap.classList.add('is-new');
+    };
+    const escHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    speakBox.querySelectorAll('.speak__btn').forEach((btn) => {
+      const fr = btn.lang === 'fr';
+      const cues = JSON.parse(btn.dataset.cues);
+      const total = Number(btn.dataset.total);
+      const note = btn.querySelector('[data-speak-note]');
+      const ring = btn.querySelector('.speak__prog');
+      const audio = new Audio();
+      audio.preload = 'none';
+      let shown = -1;
+      let raf = 0;
+      const warm = () => {
+        if (audio.src) return;
+        audio.preload = 'auto';
+        audio.src = btn.dataset.src;
+      };
+      const words = {
+        playing: fr ? 'Touchez pour mettre en pause' : 'Tap to pause',
+        paused: fr ? 'En pause, touchez pour reprendre' : 'Paused, tap to carry on',
+        loading: fr ? 'Chargement…' : 'Loading…',
+      };
+      const set = (state) => {
+        btn.classList.toggle('is-playing', state === 'playing');
+        btn.classList.toggle('is-loading', state === 'loading');
+        btn.classList.toggle('is-on', state !== 'idle');
+        speakBox.classList.toggle('is-paused', state === 'paused');
+        note.textContent = words[state] || btn.dataset.note;
+      };
+      const showCue = () => {
+        clearTimeout(rest);
+        const t = audio.currentTime;
+        let k = 0;
+        while (k + 1 < cues.length && cues[k + 1][0] <= t + 0.05) k++;
+        if (k === shown) return;
+        shown = k;
+        const end = k + 1 < cues.length ? cues[k + 1][0] : total;
+        cap.innerHTML = `<span class="speak__line" lang="${btn.lang}" style="--d: ${(end - cues[k][0]).toFixed(2)}s">${escHtml(cues[k][1])}</span>`;
+        cap.classList.remove('is-new');
+        void cap.offsetWidth;
+        cap.classList.add('is-new');
+      };
+      const tick = () => {
+        ring.style.strokeDasharray = `${Math.min(100, (audio.currentTime / total) * 100).toFixed(2)} 100`;
+        showCue();
+        raf = requestAnimationFrame(tick);
+      };
+      audio.addEventListener('playing', () => {
+        set('playing');
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(tick);
+      });
+      audio.addEventListener('waiting', () => set('loading'));
+      audio.addEventListener('pause', () => {
+        cancelAnimationFrame(raf);
+        if (!audio.ended) set(audio.currentTime > 0 ? 'paused' : 'idle');
+      });
+      audio.addEventListener('ended', () => {
+        cancelAnimationFrame(raf);
+        ring.style.strokeDasharray = '100 100';
+        set('idle');
+        go?.classList.add('is-ready'); // having heard it, the way in stands out
+        setTimeout(() => (ring.style.strokeDasharray = '0 100'), 1500);
+        clearTimeout(rest);
+        rest = setTimeout(() => (shown = -1, restore()), 2600);
+      });
+      audio.addEventListener('error', () => {
+        if (!audio.src) return;
+        cancelAnimationFrame(raf);
+        set('idle');
+        cap.textContent = fr ? 'Le son ne peut pas être lu ici. Voici ce que dit le tuteur.' : 'The sound cannot play here. Here is what the tutor says.';
+        openTx();
+      });
+      document.addEventListener('k8:voice', (e) => e.detail !== audio && !audio.paused && audio.pause());
+      btn.addEventListener('pointerenter', warm, { once: true });
+      btn.addEventListener('focus', warm, { once: true });
+      btn.addEventListener('click', () => {
+        warm();
+        if (!audio.paused) return audio.pause();
+        hush(audio);
+        if (audio.ended) audio.currentTime = 0;
+        if (audio.currentTime === 0) shown = -1;
+        go?.classList.remove('is-ready');
+        set('loading');
+        audio.play().catch(() => set(audio.currentTime > 0 ? 'paused' : 'idle'));
+      });
+    });
+  }
 
   // ---------- the syllabus browser: every topic of a subject, class by class ----------
   const syl = document.querySelector('[data-syllabus]');

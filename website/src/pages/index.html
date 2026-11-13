@@ -8,12 +8,19 @@
   <div class="hero__in">
     <p class="hero__kicker" data-rise style="--delay: 0.1s">For secondary school students in Cameroon</p>
     <h1 id="hero-title" data-rise style="--delay: 0.25s"><span class="line">Every lesson, explained.</span> <span class="line">Every exam, prepared.</span></h1>
-    <p class="hero__lead" data-rise style="--delay: 0.45s">Klass8 follows the MINESEC syllabus for your class, from Form 1 to Upper Sixth, and teaches it the way a good teacher does.</p>
-    <div class="hero__cta" data-rise style="--delay: 0.65s">
-      <a class="btn btn--amber btn--lg" href="/download/">Start your free month</a>
-      <a class="btn btn--ghost btn--lg" href="/features">See how it works</a>
+    <div class="speak" data-speak-box data-rise style="--delay: 0.45s">
+      <p class="speak__cap" data-speak-cap><span class="speak__idle">Klass8 follows the MINESEC syllabus for your class, from Form 1 to Upper Sixth, and teaches it the way a good teacher does.</span></p>
+      <div class="speak__btns" role="group" aria-label="Hear Klass8 explained">
+      {{SPEAK:en}}
+      {{SPEAK:fr}}
+      </div>
+      <p class="speak__more">
+        <a class="speak__go" href="/download/" data-speak-go>Start your free month <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <button class="speak__tx" type="button" data-tx-open aria-haspopup="dialog">Transcript</button>
+      </p>
     </div>
   </div>
+  {{TRANSCRIPT}}
   <div class="hero__foot" role="group" aria-label="Photographs">
     <button class="hero__bar is-on" type="button" aria-label="Photograph 1"></button>
     <button class="hero__bar" type="button" aria-label="Photograph 2"></button>
