@@ -145,13 +145,14 @@ export async function balance(env, userId) {
     .first();
   const w = await env.DB.prepare(
     `SELECT COALESCE(SUM(CASE WHEN status = 'paid' THEN amount END), 0) AS paidOut,
-            COALESCE(SUM(CASE WHEN status = 'requested' THEN amount END), 0) AS requested
+            COALESCE(SUM(CASE WHEN status = 'requested' THEN amount END), 0) AS requested,
+            COALESCE(SUM(CASE WHEN status IN ('held', 'spent') THEN amount END), 0) AS usedForKlass8
      FROM withdrawals WHERE user_id = ?`
   )
     .bind(userId)
     .first();
-  const available = Math.max(0, (c?.ready || 0) - (w?.paidOut || 0) - (w?.requested || 0));
-  return { earned: c?.earned || 0, available, held: c?.held || 0, paidOut: w?.paidOut || 0, requested: w?.requested || 0 };
+  const available = Math.max(0, (c?.ready || 0) - (w?.paidOut || 0) - (w?.requested || 0) - (w?.usedForKlass8 || 0));
+  return { earned: c?.earned || 0, available, held: c?.held || 0, paidOut: w?.paidOut || 0, requested: w?.requested || 0, usedForKlass8: w?.usedForKlass8 || 0 };
 }
 
 // Everyone who invited people, with how they are doing.

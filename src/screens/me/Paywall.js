@@ -58,6 +58,27 @@ function PlanCard({ on, free, title, price, note, badge, onPress }) {
   );
 }
 
+// How many months to pay on the monthly plan, 1 to 11 (12 is the yearly plan).
+function Months({ L, months, setMonths }) {
+  const step = (d) => setMonths((m) => Math.min(11, Math.max(1, m + d)));
+  return (
+    <V c="flex-row items-center gap-space-sm px-space-md py-space-sm rounded-xl bg-surface-container-lowest border border-outline-variant">
+      <T c="flex-1 font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+        {L('How many months?', 'Combien de mois ?')}
+      </T>
+      <P c="w-11 h-11 rounded-xl bg-surface-container-low items-center justify-center" onPress={() => step(-1)} disabled={months <= 1} accessibilityLabel={L('One month less', 'Un mois de moins')}>
+        <Ic n="remove" s={22} c="primary-container" />
+      </P>
+      <T c="w-10 text-center font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '800', fontVariant: ['tabular-nums'] }} accessibilityLiveRegion="polite">
+        {months}
+      </T>
+      <P c="w-11 h-11 rounded-xl bg-surface-container-low items-center justify-center" onPress={() => step(1)} disabled={months >= 11} accessibilityLabel={L('One month more', 'Un mois de plus')}>
+        <Ic n="add" s={22} c="primary-container" />
+      </P>
+    </V>
+  );
+}
+
 function WhoRow({ on, title, sub, warn, onPress }) {
   return (
     <P c={`flex-row items-center gap-space-sm px-space-md py-space-sm rounded-xl border ${on ? 'border-primary-container bg-surface-container-low' : 'border-outline-variant bg-surface-container-lowest'}`} onPress={onPress} accessibilityRole="checkbox" accessibilityState={{ checked: on }} scale={1}>
@@ -133,6 +154,7 @@ export default function Paywall({ navigation, route }) {
       return n;
     });
   const forKids = parent && picked.size > 0;
+  const [months, setMonths] = useState(1);
   const count = parent ? picked.size + (selfOn ? 1 : 0) : 1;
   const [toast, showToast] = useToast();
 
@@ -167,6 +189,7 @@ export default function Paywall({ navigation, route }) {
       ? enter()
       : navigation.navigate('Pay', {
           plan: effective,
+          months: effective === 'month' ? months : 1,
           ...(forKids ? { for: [...picked], self: selfOn, names: kids.filter((k) => picked.has(k.student.id)).map((k) => k.student.name) } : {}),
         });
 
@@ -196,7 +219,7 @@ export default function Paywall({ navigation, route }) {
         : L('Continue with my free month', 'Continuer avec mon mois gratuit')
       : count === 0
         ? L('Choose who you are paying for', 'Choisissez pour qui vous payez')
-        : `${L('Continue to payment', 'Continuer vers le paiement')}: ${fcfa((P_[effective]?.amount || 0) * count)}${count > 1 ? ` (${count} ${L('accounts', 'comptes')})` : ''}`;
+        : `${L('Continue to payment', 'Continuer vers le paiement')}: ${fcfa((P_[effective]?.amount || 0) * count * (effective === 'month' ? months : 1))}${count > 1 ? ` (${count} ${L('accounts', 'comptes')})` : ''}`;
 
   return (
     <V c="flex-1">
@@ -212,7 +235,7 @@ export default function Paywall({ navigation, route }) {
                 {choice !== 'free' && !open && (
                   <T c="font-body-sm text-body-sm text-error">{L('Mobile money payments are not open yet. A school voucher works now.', 'Les paiements mobile money ne sont pas encore ouverts. Un code d’école fonctionne déjà.')}</T>
                 )}
-                <Cta variant="dark" icon={null} label={label} disabled={(effective !== 'free' && !open) || (effective !== 'free' && count === 0)} onPress={go} />
+                <Cta variant="dark" icon={null} label={label} disabled={effective !== 'free' && count === 0} onPress={go} />
               </>
             )}
           </V>
@@ -246,16 +269,17 @@ export default function Paywall({ navigation, route }) {
                   <PlanCard
                     on={effective === 'month'}
                     onPress={() => setChoice('month')}
-                    title={L('One month', 'Un mois')}
-                    price={`${fcfa(P_.month?.amount || 0)}${count > 1 ? ` × ${count}` : ''}`}
+                    title={effective === 'month' && months > 1 ? `${months} ${L('months', 'mois')}` : L('One month', 'Un mois')}
+                    price={`${fcfa((P_.month?.amount || 0) * (effective === 'month' ? months : 1))}${count > 1 ? ` × ${count}` : ''}`}
                     note={
                       forKids
-                        ? L('30 days for each account ticked, added to the time they already have. No automatic renewal.', '30 jours pour chaque compte coché, ajoutés au temps restant. Pas de renouvellement automatique.')
+                        ? `${30 * months} ${L('days for each account ticked, added to the time they already have. No automatic renewal.', 'jours pour chaque compte coché, ajoutés au temps restant. Pas de renouvellement automatique.')}`
                         : freeUntil
-                          ? L('30 days, starting when your free month ends. No automatic renewal.', '30 jours, à partir de la fin de votre mois gratuit. Pas de renouvellement automatique.')
-                          : L('30 days. Pay again each month. No automatic renewal.', '30 jours. À payer chaque mois. Pas de renouvellement automatique.')
+                          ? `${30 * months} ${L('days, starting when your free month ends. No automatic renewal.', 'jours, à partir de la fin de votre mois gratuit. Pas de renouvellement automatique.')}`
+                          : `${30 * months} ${L('days. No automatic renewal.', 'jours. Pas de renouvellement automatique.')}`
                     }
                   />
+                  {effective === 'month' && <Months L={L} months={months} setMonths={setMonths} />}
                   <PlanCard
                     on={effective === 'year'}
                     onPress={() => setChoice('year')}

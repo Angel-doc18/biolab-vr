@@ -154,6 +154,11 @@ export default function AdminMoney({ navigation, route }) {
                 <Figure value={money(s.kept)} label={L('Klass8 keeps', 'Klass8 garde')} tone="ok" />
                 <Figure value={`${s.payments}`} label={`${L('payments from', 'paiements de')} ${s.payers} ${s.payers === 1 ? L('person', 'personne') : L('people', 'personnes')}`} />
               </V>
+              {s.fromEarnings > 0 && (
+                <T c="font-body-sm text-body-sm text-on-surface-variant">
+                  {L('Also', 'En plus,')} {money(s.fromEarnings)} {L('of access was paid with partner earnings (not counted above).', 'd’accès payés avec des gains de partenaires (non comptés ci-dessus).')}
+                </T>
+              )}
               {s.series.length > 1 && (
                 <V c="gap-1">
                   <T c="font-label-md text-label-md text-on-surface-variant">

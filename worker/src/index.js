@@ -118,6 +118,7 @@ const routes = [
   ['GET', '/v1/partner/programme', partner.publicProgramme],
   ['GET', '/v1/partner', partner.myPartner],
   ['POST', '/v1/partner/apply', partner.applyPromo],
+  ['POST', '/v1/partner/autopay', partner.setAutopay],
   ['POST', '/v1/partner/withdraw', partner.withdraw],
   ['POST', `/v1/partner/withdrawals/${ID}/cancel`, partner.cancelWithdrawal],
   ['GET', '/v1/admin/partners', adminPartners.listPartners],

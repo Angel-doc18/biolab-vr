@@ -8,14 +8,21 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
 import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
-import { Field, PhoneField } from '../../ui/form';
+import { Field, PhoneField, Toggle } from '../../ui/form';
 import { useL } from '../../i18n';
 import { post } from '../../api/client';
 import { loadPartner, shareMessage } from '../../ui/InviteCard';
 
 const money = (n) => `${Math.round(Number(n) || 0).toLocaleString('en-US')} FCFA`;
 const day = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-const W_STATUS = { requested: ['Waiting to be sent', 'En attente d’envoi', '#fff3d6', '#8a5a00'], paid: ['Sent', 'Envoyé', '#e3f4ec', '#0f7b5a'], rejected: ['Not sent', 'Non envoyé', '#fdecea', '#b3261e'], cancelled: ['Cancelled', 'Annulé', '#eef1f6', '#4e5b77'] };
+const W_STATUS = {
+  requested: ['Waiting to be sent', 'En attente d’envoi', '#fff3d6', '#8a5a00'],
+  paid: ['Sent', 'Envoyé', '#e3f4ec', '#0f7b5a'],
+  rejected: ['Not sent', 'Non envoyé', '#fdecea', '#b3261e'],
+  cancelled: ['Cancelled', 'Annulé', '#eef1f6', '#4e5b77'],
+  spent: ['Paid Klass8', 'Payé Klass8', '#e6eef7', '#02287b'],
+  held: ['Held for a payment', 'Réservé pour un paiement', '#fff3d6', '#8a5a00'],
+};
 
 function Box({ children, c = '' }) {
   return <V c={`bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container ${c}`}>{children}</V>;
@@ -65,6 +72,17 @@ export function InviteBody({ header = null }) {
   const [code, setCode] = useState('');
   const [codeBusy, setCodeBusy] = useState(false);
   const [codeError, setCodeError] = useState(null);
+  const switchAutopay = async () => {
+    const on = !p.autopay;
+    setP((x) => ({ ...x, autopay: on }));
+    try {
+      await post('/v1/partner/autopay', { on });
+      showToast(on ? L('Klass8 will renew from your earnings when your time runs out.', 'Klass8 se renouvellera avec vos gains à la fin de votre temps.') : L('Klass8 will not renew from your earnings.', 'Klass8 ne se renouvellera pas avec vos gains.'));
+    } catch (e) {
+      setP((x) => ({ ...x, autopay: !on }));
+      showToast(e.message);
+    }
+  };
 
   const load = useCallback(async (force = true) => {
     try {
@@ -194,6 +212,20 @@ export function InviteBody({ header = null }) {
                 </V>
               </Box>
 
+              <Box>
+                <P c="p-space-md flex-row items-center gap-space-sm" onPress={switchAutopay} accessibilityRole="switch" accessibilityState={{ checked: !!p.autopay }}>
+                  <V c="flex-1 gap-0.5">
+                    <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                      {L('Pay Klass8 from my earnings', 'Payer Klass8 avec mes gains')}
+                    </T>
+                    <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
+                      {L('When your time runs out, your earnings renew it by themselves: a year if they cover a year, otherwise a month. You are told each time.', 'À la fin de votre temps, vos gains le renouvellent : un an s’ils couvrent un an, sinon un mois. Vous êtes averti à chaque fois.')}
+                    </T>
+                  </V>
+                  <Toggle on={!!p.autopay} onPress={switchAutopay} accessibilityLabel={L('Pay Klass8 from my earnings', 'Payer Klass8 avec mes gains')} />
+                </P>
+              </Box>
+
               <V c="gap-space-xs">
                 <Title>{L('Withdraw to mobile money', 'Retirer par mobile money')}</Title>
                 <Box>
@@ -230,7 +262,8 @@ export function InviteBody({ header = null }) {
                             </V>
                           </V>
                           <T c="font-body-sm text-body-sm text-on-surface-variant">
-                            {day(w.createdAt)}, {w.phone.replace(/^237/, '+237 ')}
+                            {day(w.createdAt)}
+                            {w.phone ? `, ${w.phone.replace(/^237/, '+237 ')}` : ''}
                             {w.reference ? `, ${L('transaction', 'transaction')} ${w.reference}` : ''}
                             {w.reason ? `. ${w.reason}` : ''}
                           </T>

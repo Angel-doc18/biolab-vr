@@ -8,7 +8,7 @@ import { useL } from '../../i18n';
 import { patch, post } from '../../api/adminClient';
 import { Card, Figure, Loading, Pill, Row, Section, Sheet, date, money, phoneText, roleName, useAdminCan, useAdminLoad } from './kit';
 
-const W_STATUS = { requested: ['Waiting', 'En attente', 'warn'], paid: ['Paid', 'Payé', 'ok'], rejected: ['Turned down', 'Refusé', 'bad'], cancelled: ['Cancelled', 'Annulé', 'muted'] };
+const W_STATUS = { requested: ['Waiting', 'En attente', 'warn'], paid: ['Paid', 'Payé', 'ok'], rejected: ['Turned down', 'Refusé', 'bad'], cancelled: ['Cancelled', 'Annulé', 'muted'], spent: ['Paid Klass8', 'Payé Klass8', 'info'], held: ['Held', 'Réservé', 'warn'] };
 
 export default function AdminPartner({ navigation, route }) {
   const { id } = route.params;

@@ -58,8 +58,18 @@ export async function myPartner(request, env) {
     withdrawals,
     invitedBy: ref ? { name: firstName(ref.name), code: ref.code } : null,
     canAddCode: !ref && now() - (user.created_at || 0) <= p.applyDays * DAY,
+    autopay: Boolean(user.ref_autopay),
     payoutPhone: user.phone,
   });
+}
+
+// POST /v1/partner/autopay { on }  renew Klass8 from earnings by itself when time runs out.
+export async function setAutopay(request, env) {
+  const user = await requireUser(request, env);
+  const b = await readJson(request);
+  if (typeof b.on !== 'boolean') throw new HttpError(400, 'Say on or off.', 'invalid_input');
+  await env.DB.prepare('UPDATE users SET ref_autopay = ?, updated_at = ? WHERE id = ?').bind(b.on ? 1 : 0, now(), user.id).run();
+  return ok({ autopay: b.on });
 }
 
 // POST /v1/partner/apply { code }  for someone who joined without the code they were given.

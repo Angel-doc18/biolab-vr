@@ -13,7 +13,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import worker from '../src/index.js';
-import { reconcilePayments } from '../src/routes/billing.js';
+import { autoRenewFromEarnings, reconcilePayments } from '../src/routes/billing.js';
 import { tick } from '../src/lib/monitor.js';
 import { D1 } from './d1.js';
 
@@ -160,6 +160,8 @@ daily(2, 30, 'backup', backup);
 // Fapshi sends each payment's webhook only once: open payments are checked
 // every 3 minutes as well, so a missed webhook never leaves a paid pass shut.
 setInterval(() => reconcilePayments(env).catch((e) => console.error('reconcile', e?.message)), 3 * 60_000);
+// Anyone whose time runs out and who has partner earnings is renewed from them.
+setInterval(() => autoRenewFromEarnings(env).catch((e) => console.error('autorenew', e?.message)), 15 * 60_000);
 // The system watch: traffic, speed, errors, the machine and security, once a minute.
 setInterval(() => tick(env, DATA).catch((e) => console.error('monitor', e?.message)), 60_000);
 

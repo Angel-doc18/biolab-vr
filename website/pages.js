@@ -142,7 +142,7 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
       <article class="plan">
         <h3>One month</h3>
         <p class="plan__price"><span data-price-n="month">${esc(priceMonth.replace(' FCFA', ''))}</span> <span>FCFA</span></p>
-        <p class="plan__note">30 days of everything. Pay again when you want more.</p>
+        <p class="plan__note">30 days of everything, or up to 11 months at once.</p>
         <ul>
           <li>No automatic renewal</li>
           <li>Starts after your free month</li>

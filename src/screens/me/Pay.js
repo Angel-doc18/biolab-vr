@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, AppState, Linking, Modal, Platform } from 'react-native';
-import { C, Input, P, T, V } from '../../ui/kit';
+import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader } from '../../ui/chrome';
 import { get, post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { PLANS as LOCAL_PLANS, fcfa } from '../../data/plan';
 import { NeedsInternet } from '../../ui/Offline';
+import { Toggle } from '../../ui/form';
+import { loadPartner } from '../../ui/InviteCard';
 import { PROVIDERS, operatorFor } from '../../lib/payments';
 
 // Paying for the plan chosen on the platform charges screen (route.params.plan).
@@ -18,6 +20,7 @@ export default function Pay({ navigation, route }) {
   const { user, refreshMe, refreshQuota } = useApp();
   const L = useL();
   const plan = route.params?.plan === 'month' ? 'month' : 'year';
+  const months = plan === 'month' ? Math.min(11, Math.max(1, route.params?.months || 1)) : 1;
   // A parent paying for children: their ids and names, and whether the parent is included.
   const forIds = route.params?.for || [];
   const self = forIds.length ? !!route.params?.self : true;
@@ -31,6 +34,14 @@ export default function Pay({ navigation, route }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [payment, setPayment] = useState(null); // { id, status, amount, link }
+  // Partner earnings that can pay all or part of this.
+  const [earnings, setEarnings] = useState(0);
+  const [useEarnings, setUseEarnings] = useState(true);
+  useEffect(() => {
+    loadPartner(true)
+      .then((r) => setEarnings(r?.balance?.available || 0))
+      .catch(() => {});
+  }, []);
   const poll = useRef(null);
 
   const loadPlans = useCallback(() => {
@@ -46,9 +57,13 @@ export default function Pay({ navigation, route }) {
   useEffect(() => () => clearTimeout(poll.current), []);
 
   const unit = (plans || LOCAL_PLANS)[plan]?.amount;
-  const amount = unit ? unit * count : unit;
+  const amount = unit ? unit * count * months : unit;
+  // The same sums as the server: earnings first, at least 100 FCFA by mobile money.
+  let credit = useEarnings && amount ? Math.min(earnings, amount) : 0;
+  if (credit < (amount || 0) && (amount || 0) - credit < 100) credit = Math.max(0, (amount || 0) - 100);
+  const cash = (amount || 0) - credit;
   const prov = PROVIDERS.find((p) => p.id === provider);
-  const planName = plan === 'year' ? L('One year', 'Un an') : L('One month', 'Un mois');
+  const planName = plan === 'year' ? L('One year', 'Un an') : months > 1 ? `${months} ${L('months', 'mois')}` : L('One month', 'Un mois');
 
   const check = async (id, tries = 0) => {
     try {
@@ -92,7 +107,7 @@ export default function Pay({ navigation, route }) {
 
   const pay = async () => {
     const d = phone.replace(/\D/g, '');
-    if (checkout === 'prompt') {
+    if (checkout === 'prompt' && cash > 0) {
       if (!/^6\d{8}$/.test(d)) return setError(L('Enter your 9 digit mobile money number.', 'Entrez votre numéro mobile money (9 chiffres).'));
       const op = operatorFor(d);
       if (op && op !== provider) return setError(L('This number belongs to the other network. Choose the matching one.', 'Ce numéro appartient à l’autre réseau. Choisissez le bon.'));
@@ -101,8 +116,16 @@ export default function Pay({ navigation, route }) {
     setError(null);
     try {
       const who = forIds.length ? { for: forIds, self } : {};
-      const body = checkout === 'prompt' ? { plan, phone: `237${d}`, medium: provider, ...who } : { plan, ...who };
+      const extra = { months, useEarnings: credit > 0, ...who };
+      const body = checkout === 'prompt' && cash > 0 ? { plan, phone: `237${d}`, medium: provider, ...extra } : { plan, ...extra };
       const r = await post('/v1/billing/pay', body);
+      // Paid in full from earnings: open now, nothing to wait for.
+      if (r.payment.status === 'SUCCESSFUL') {
+        setPayment({ id: r.payment.id, status: 'SUCCESSFUL', amount: r.payment.amount });
+        await refreshMe();
+        refreshQuota();
+        return;
+      }
       const link = r.payment.link || null;
       setPayment({ id: r.payment.id, status: 'PENDING', amount: r.payment.amount, link });
       // A browser only opens a new tab straight from a tap, so on the web the
@@ -130,7 +153,14 @@ export default function Pay({ navigation, route }) {
           <V c="px-margin pt-space-sm gap-space-xs" style={{ paddingBottom: 12 }}>
             <NeedsInternet what={{ en: 'pay', fr: 'payer' }} />
             <ErrorNote error={error} />
-            <Cta variant="dark" icon={null} label={`${L('Pay', 'Payer')} ${amount ? fcfa(amount) : ''}`} loading={busy} disabled={!open} onPress={pay} />
+            <Cta
+              variant="dark"
+              icon={null}
+              label={cash === 0 && amount ? L('Pay with my earnings', 'Payer avec mes gains') : `${L('Pay', 'Payer')} ${amount ? fcfa(cash) : ''}${credit ? ` ${L('by mobile money', 'par mobile money')}` : ''}`}
+              loading={busy}
+              disabled={!open && cash > 0}
+              onPress={pay}
+            />
           </V>
         }
       >
@@ -154,9 +184,33 @@ export default function Pay({ navigation, route }) {
             </P>
           </V>
 
-          {!open && <T c="font-body-sm text-body-sm text-error">{L('Mobile money payments are not open yet. A school voucher works now.', 'Les paiements mobile money ne sont pas encore ouverts. Un code d’école fonctionne déjà.')}</T>}
+          {earnings > 0 && (
+            <V c="p-space-md rounded-xl gap-space-xs" style={{ backgroundColor: '#fff3d6' }}>
+              <P c="flex-row items-center gap-space-sm" onPress={() => setUseEarnings((v) => !v)} accessibilityRole="switch" accessibilityState={{ checked: useEarnings }}>
+                <Ic n="redeem" s={22} c="tertiary" />
+                <V c="flex-1 gap-0.5">
+                  <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                    {L('Use my earnings', 'Utiliser mes gains')}
+                  </T>
+                  <T c="font-body-sm text-body-sm text-on-surface-variant">
+                    {fcfa(earnings)} {L('from Invite and earn', 'de Inviter et gagner')}
+                  </T>
+                </V>
+                <Toggle on={useEarnings} onPress={() => setUseEarnings((v) => !v)} accessibilityLabel={L('Use my earnings', 'Utiliser mes gains')} />
+              </P>
+              {credit > 0 && (
+                <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 19 }}>
+                  {cash === 0
+                    ? `${L('Your earnings pay all of it', 'Vos gains paient tout')} (${fcfa(credit)}). ${L('Nothing to pay by mobile money.', 'Rien à payer par mobile money.')}`
+                    : `${fcfa(credit)} ${L('from your earnings, and', 'de vos gains, et')} ${fcfa(cash)} ${L('by mobile money.', 'par mobile money.')}`}
+                </T>
+              )}
+            </V>
+          )}
 
-          {checkout === 'link' ? (
+          {!open && cash > 0 && <T c="font-body-sm text-body-sm text-error">{L('Mobile money payments are not open yet. A school voucher works now.', 'Les paiements mobile money ne sont pas encore ouverts. Un code d’école fonctionne déjà.')}</T>}
+
+          {cash === 0 && amount ? null : checkout === 'link' ? (
             <V c="gap-space-xs">
               <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
                 {L('Pay with mobile money', 'Payer par mobile money')}

@@ -39,8 +39,8 @@ export async function overview(request, env) {
     .first();
   const money = await env.DB.prepare(
     `SELECT
-       COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' THEN amount END), 0) AS total,
-       COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' AND updated_at >= ? THEN amount END), 0) AS thisMonth,
+       COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' THEN amount - credit END), 0) AS total,
+       COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' AND updated_at >= ? THEN amount - credit END), 0) AS thisMonth,
        COUNT(CASE WHEN status = 'SUCCESSFUL' THEN 1 END) AS paid,
        COUNT(CASE WHEN status = 'PENDING' THEN 1 END) AS pending,
        COUNT(CASE WHEN status = 'REVIEW' THEN 1 END) AS review
@@ -452,12 +452,13 @@ export async function money(request, env) {
   const from = Math.max(0, Math.min(to - 60_000, Number(q.get('from')) || to - 30 * DAY));
   const status = q.get('status') || '';
   const sums = await env.DB.prepare(
-    `SELECT COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' THEN amount END), 0) AS total,
+    `SELECT COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' THEN amount - credit END), 0) AS total,
+            COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' THEN credit END), 0) AS fromEarnings,
             COUNT(CASE WHEN status = 'SUCCESSFUL' THEN 1 END) AS paid,
             COUNT(DISTINCT CASE WHEN status = 'SUCCESSFUL' THEN user_id END) AS payers,
-            COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' AND plan = 'month' THEN amount END), 0) AS monthAmount,
+            COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' AND plan = 'month' THEN amount - credit END), 0) AS monthAmount,
             COUNT(CASE WHEN status = 'SUCCESSFUL' AND plan = 'month' THEN 1 END) AS monthCount,
-            COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' AND plan = 'year' THEN amount END), 0) AS yearAmount,
+            COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' AND plan = 'year' THEN amount - credit END), 0) AS yearAmount,
             COUNT(CASE WHEN status = 'SUCCESSFUL' AND plan = 'year' THEN 1 END) AS yearCount,
             COUNT(CASE WHEN status = 'PENDING' THEN 1 END) AS pending,
             COUNT(CASE WHEN status = 'REVIEW' THEN 1 END) AS review,
@@ -471,7 +472,7 @@ export async function money(request, env) {
   // Bars: by hour for up to 2 days, by day up to 62 days, by week up to a year, then by month.
   const span = to - from;
   const step = span <= 2 * DAY ? 'hour' : span <= 62 * DAY ? 'day' : span <= 366 * DAY ? 'week' : 'month';
-  const { results: rows } = await env.DB.prepare("SELECT amount, created_at AS t FROM payments WHERE status = 'SUCCESSFUL' AND created_at >= ? AND created_at < ?").bind(from, to).all();
+  const { results: rows } = await env.DB.prepare("SELECT amount - credit AS amount, created_at AS t FROM payments WHERE status = 'SUCCESSFUL' AND created_at >= ? AND created_at < ?").bind(from, to).all();
   const keyOf = (ms) => {
     const d = new Date(ms);
     if (step === 'hour') return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours());
@@ -517,6 +518,7 @@ export async function money(request, env) {
     afterFees,
     fees: (sums?.total || 0) - afterFees,
     partnerShare: share?.amount || 0,
+    fromEarnings: sums?.fromEarnings || 0,
     kept: afterFees - (share?.amount || 0),
     payments: sums?.paid || 0,
     payers: sums?.payers || 0,
