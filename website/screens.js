@@ -30,13 +30,13 @@ const status = `<div class="st" aria-hidden="true"><b>9:41</b><i class="st__isla
   <svg viewBox="0 0 27 12"><rect x="0.5" y="0.5" width="22" height="11" rx="3.2" fill="none" stroke="currentColor" opacity="0.45"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.8"/><rect x="24" y="4" width="2" height="4" rx="1" opacity="0.45"/></svg>
 </span></div>`;
 
-const tabbar = (on) => `<nav class="tb" aria-hidden="true">${[
+const tabbar = (on, only) => `<nav class="tb" aria-hidden="true">${[
   ['home', 'Home'],
   ['learn', 'Learn'],
   ['lab', 'Lab'],
   ['exams', 'Exams'],
   ['me', 'Me'],
-].map(([k, label]) => `<span class="tb__i${k === on ? ' is-on' : ''}">${icon[k]}<small>${label}</small></span>`).join('')}</nav><i class="home-bar" aria-hidden="true"></i>`;
+].filter(([k]) => !only || only.includes(k)).map(([k, label]) => `<span class="tb__i${k === on ? ' is-on' : ''}">${icon[k]}<small>${label}</small></span>`).join('')}</nav><i class="home-bar" aria-hidden="true"></i>`;
 
 const head = (title, meta, extra = '') => `<div class="sh"><span class="sh__back">${icon.back}</span><div class="sh__t"><small>${meta}</small><b>${title}</b></div>${extra}</div>`;
 
@@ -149,6 +149,22 @@ ${head('Payment', 'Klass8 platform charges')}
 </div>
 ${tabbar('me')}</div>
 ${notes([icon.check, 'Nothing renews automatically'], [icon.shield, 'Your PIN stays on your phone'])}`,
+
+  invite: () => `<div class="phone__screen">${status}
+${head('Invite and earn', 'Klass8 partner')}
+<div class="scr scr--invite">
+  <div class="inv-code"><small>Your promo code</small><b>GRAC6457</b><span>You earn <span data-ref="rate">20%</span> each time someone who joined with it pays.</span><i class="inv-share">Share my code</i></div>
+  <div class="inv-money"><div><b>4,074 FCFA</b><small>you can withdraw now</small></div><div><b>679 FCFA</b><small>waiting 7 days</small></div></div>
+  <span class="kicker">People who joined with your code</span>
+  <ul class="inv-people">
+    <li><i>${icon.check}</i><span>Paul S.<small>Form 5, paid for a year</small></span><b>679</b></li>
+    <li><i>${icon.check}</i><span>Mireille T.<small>Lower Sixth, paid for a year</small></span><b>679</b></li>
+    <li><i>${icon.check}</i><span>Junior A.<small>Form 3, paid for a month</small></span><b>68</b></li>
+  </ul>
+  <div class="pay-btn" aria-hidden="true">Ask for my money</div>
+</div>
+${tabbar('home', ['home', 'me'])}</div>
+${notes([icon.check, 'A share of every payment'], [icon.shield, 'Withdrawn by mobile money'])}`,
 
   report: () => `<div class="phone__screen">${status}
 ${head('Weekly report', 'Brenda, Form 4')}

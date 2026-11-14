@@ -500,6 +500,47 @@
       .catch(() => {});
   }
 
+  // ---------- partners: the share and rules the founders set, and examples ----------
+  const refEls = document.querySelectorAll('[data-ref]');
+  if (refEls.length) {
+    const num = (n) => Math.round(Number(n)).toLocaleString('en-US');
+    Promise.all([
+      fetch('/v1/partner/programme', { headers: { accept: 'application/json' } }).then((r) => (r.ok ? r.json() : null)),
+      fetch('/v1/billing/plans', { headers: { accept: 'application/json' } }).then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([p, plans]) => {
+        if (!p || !(p.rate >= 0)) return;
+        const year = Number(plans?.plans?.year?.amount) || 3500;
+        const net = Math.round(year * 0.97);
+        const share = Math.floor((net * p.rate) / 100);
+        const text = {
+          rate: `${p.rate}%`,
+          span: p.months ? `for ${p.months} months` : 'for as long as they keep paying',
+          min: `${num(p.minWithdraw)} FCFA`,
+          hold: `${p.holdDays} days`,
+          'bonus-text': p.bonusDays ? `, and get ${p.bonusDays} extra free days` : '',
+          'ex-paid': `${num(year)} FCFA`,
+          'ex-net': `${num(net)} FCFA`,
+          'ex-share': `${num(share)} FCFA`,
+          'ex-ten': `${num(share * 10)} FCFA`,
+        };
+        document.querySelectorAll('[data-ref]').forEach((el) => {
+          if (text[el.dataset.ref] != null) el.textContent = text[el.dataset.ref];
+        });
+      })
+      .catch(() => {});
+  }
+
+  // ---------- download page: a promo code someone shared (?code=...) ----------
+  const promo = document.querySelector('[data-promo]');
+  if (promo) {
+    const code = (new URLSearchParams(location.search).get('code') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+    if (code.length >= 4) {
+      promo.querySelector('b').textContent = code;
+      promo.hidden = false;
+    }
+  }
+
   // ---------- download page: the version and size of the newest app ----------
   const apkMeta = document.querySelector('[data-apk-meta]');
   if (apkMeta) {

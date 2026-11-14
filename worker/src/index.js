@@ -115,6 +115,7 @@ const routes = [
   ['GET', '/v1/admin/notices', adminAccount.listNotices],
   ['GET', '/v1/admin/admins', adminAccount.listAdmins],
   // the partner programme
+  ['GET', '/v1/partner/programme', partner.publicProgramme],
   ['GET', '/v1/partner', partner.myPartner],
   ['POST', '/v1/partner/apply', partner.applyPromo],
   ['POST', '/v1/partner/withdraw', partner.withdraw],
@@ -168,7 +169,7 @@ function corsHeaders(request, env) {
 
 // Open during maintenance: admins, signing in (admins still can), payments
 // arriving from Fapshi, error reports and the public website's data.
-const OPEN_IN_MAINTENANCE = /^\/v1\/(health|admin\/|auth\/login|billing\/(fapshi-webhook|plans|return)|app\/errors|team|contact)/;
+const OPEN_IN_MAINTENANCE = /^\/v1\/(health|admin\/|auth\/login|billing\/(fapshi-webhook|plans|return)|app\/errors|team|contact|partner\/programme)/;
 const AI_PATHS = /^\/v1\/ai\/(ask|mark|explain|solve|mark-any)$/;
 const blockNoted = new Map();
 

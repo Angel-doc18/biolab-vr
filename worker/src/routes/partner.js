@@ -1,6 +1,6 @@
 // "Invite and earn", for every account: the person's promo code, who joined
 // with it, what they earned, and withdrawals to mobile money.
-import { HttpError, created, limit, now, ok, readJson } from '../lib/http.js';
+import { HttpError, created, json, limit, now, ok, readJson } from '../lib/http.js';
 import { uuid } from '../lib/crypto.js';
 import { int, phone } from '../lib/validate.js';
 import { requireUser } from '../lib/auth.js';
@@ -14,6 +14,12 @@ const initial = (n) => {
   const parts = String(n || '').trim().split(/\s+/);
   return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0] || 'Someone';
 };
+
+// GET /v1/partner/programme  the rules, for the public website (no account needed).
+export async function publicProgramme() {
+  const p = programme();
+  return json({ on: p.on, rate: p.rate, months: p.months, minWithdraw: p.minWithdraw, holdDays: p.holdDays, bonusDays: p.bonusDays, fee: 3 }, 200, { 'cache-control': 'public, max-age=120' });
+}
 
 // GET /v1/partner
 export async function myPartner(request, env) {

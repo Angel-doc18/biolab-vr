@@ -69,6 +69,7 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
       <div class="hd__sheet">
         <a class="btn btn--amber btn--lg" href="/download/">Download for Android</a>
         <a class="btn btn--line btn--lg" href="/app">Open in your browser</a>
+        <p>Earn with your promo code: <a href="/partners">partners</a>.</p>
         <p>Questions? <a href="/contact">Contact us</a> or read the <a href="/faq">answers</a>.</p>
       </div>
     </nav>
@@ -99,6 +100,7 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
           <a href="/subjects">Subjects</a>
           <a href="/pricing">Prices</a>
           <a href="/schools">Schools and parents</a>
+          <a href="/partners">Partners: invite and earn</a>
           <a href="/about">About us</a>
         </nav>
         <nav aria-label="Help">
