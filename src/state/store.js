@@ -40,10 +40,12 @@ export function AppProvider({ children }) {
   // Forgets the sign-in on this phone when the server refuses it (the account
   // was removed, or the app now talks to a different server), so the old
   // profile is never shown again.
-  const dropSession = () => {
+  // A blocked account is told why on the sign-in page.
+  const dropSession = (e) => {
     setSession(null).catch(() => {});
     AsyncStorage.multiRemove([USER, AVATAR]).catch(() => {});
-    setAuth({ status: 'guest', user: null, pro: false });
+    const blocked = e?.code === 'account_blocked';
+    setAuth({ status: 'guest', user: null, pro: false, reason: blocked ? 'blocked' : undefined, notice: blocked ? e.message : null });
     setAvatarUri(null);
   };
 
@@ -59,7 +61,7 @@ export function AppProvider({ children }) {
         setAuth({ status: 'authed', user: cached.user, pro: Boolean(cached.pro) });
         await loadProgress(cached.user.id);
         refreshMe().catch((e) => {
-          if (e?.status === 401) dropSession();
+          if (e?.status === 401) dropSession(e);
         });
       } else {
         setAuth({ status: 'guest', user: null, pro: false });

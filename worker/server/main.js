@@ -14,6 +14,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import worker from '../src/index.js';
 import { reconcilePayments } from '../src/routes/billing.js';
+import { tick } from '../src/lib/monitor.js';
 import { D1 } from './d1.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -78,6 +79,16 @@ const ASSETS = {
 
 const env = {
   ...process.env,
+  DATA_DIR: DATA,
+  // "Make a backup now" in the CTO's System tab.
+  backupNow: () => {
+    const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+    const file = path.join(DATA, 'backups', `klass8-manual-${stamp}.db`);
+    if (!fs.existsSync(file)) DB.sqlite.exec(`VACUUM INTO '${file.replace(/'/g, "''")}'`);
+    const manual = fs.readdirSync(path.join(DATA, 'backups')).filter((f) => f.startsWith('klass8-manual-')).sort().slice(0, -5);
+    for (const f of manual) fs.rmSync(path.join(DATA, 'backups', f));
+    return path.basename(file);
+  },
   DB,
   ASSETS,
   AUTH_LIMITER: limiter(10, 60),
@@ -149,6 +160,8 @@ daily(2, 30, 'backup', backup);
 // Fapshi sends each payment's webhook only once: open payments are checked
 // every 3 minutes as well, so a missed webhook never leaves a paid pass shut.
 setInterval(() => reconcilePayments(env).catch((e) => console.error('reconcile', e?.message)), 3 * 60_000);
+// The system watch: traffic, speed, errors, the machine and security, once a minute.
+setInterval(() => tick(env, DATA).catch((e) => console.error('monitor', e?.message)), 60_000);
 
 server.listen(PORT, () => console.log(`Klass8 API on port ${PORT}, data in ${DATA}`));
 const stop = () => server.close(() => process.exit(0));

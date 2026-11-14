@@ -12,6 +12,7 @@ import { labsFor } from '../../data/labs';
 import { mockRef, p1For } from '../../lib/exam';
 import { minutesLabel, subjectName } from '../../data/subjects';
 import { Section } from './Home';
+import InviteCard from '../../ui/InviteCard';
 
 const DAY = 86400000;
 
@@ -119,6 +120,7 @@ export function TeacherPortal({ navigation, standalone }) {
       <Screen header={header} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}>
         <V c="pt-space-md pb-space-xl gap-space-lg">
           <ErrorNote error={error} />
+          <InviteCard navigation={navigation} compact />
 
           {!classes.length ? (
             <V c="gap-space-sm">

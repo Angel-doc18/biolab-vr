@@ -31,6 +31,7 @@ export default function AdminPerson({ navigation, route }) {
   const [sheet, setSheet] = useState(null); // 'block', 'unblock' or 'delete'
   const [acting, setActing] = useState(false);
   const [actError, setActError] = useState(null);
+  const [reason, setReason] = useState('');
   const u = data?.user;
   const name = u?.name || route.params.name || '';
 
@@ -60,7 +61,12 @@ export default function AdminPerson({ navigation, route }) {
         navigation.goBack();
         return;
       }
-      const r = await post(`/v1/admin/users/${id}/block`, { blocked: sheet === 'block' });
+      if (sheet === 'block' && reason.trim().length < 5) {
+        setActError(L('Write the reason. The person sees it when they try to sign in.', 'Écrivez la raison. La personne la verra en essayant de se connecter.'));
+        return;
+      }
+      const r = await post(`/v1/admin/users/${id}/block`, sheet === 'block' ? { blocked: true, reason: reason.trim() } : { blocked: false });
+      setReason('');
       setData((d) => ({ ...d, user: r.user }));
       showToast(sheet === 'block' ? L(`${name} is blocked`, `Compte de ${name} bloqué`) : L(`${name} can sign in again`, `Compte de ${name} débloqué`));
       setSheet(null);
@@ -91,6 +97,7 @@ export default function AdminPerson({ navigation, route }) {
                     {status[0] !== roleName(u.role, L) && <Pill text={status[0]} tone={status[1]} />}
                   </V>
                 </V>
+                {u.blocked && !!u.blockedReason && <Row icon="block" iconBg="#fdecea" iconTint="error" title={u.blockedReason} sub={L('Why the account is blocked (the person sees this)', 'Pourquoi le compte est bloqué (la personne le voit)')} />}
                 {!!u.phone && <Row icon="call" title={phoneText(u.phone)} sub={L('Phone number', 'Numéro de téléphone')} />}
                 {!!u.email && <Row icon="alternate_email" title={u.email} sub={L('Email', 'E-mail')} />}
                 {!!(u.className || u.schoolName) && <Row icon="school" title={[u.className, u.schoolName].filter(Boolean).join(', ')} sub={L('Class and school', 'Classe et école')} />}
@@ -126,6 +133,28 @@ export default function AdminPerson({ navigation, route }) {
                   </Card>
                 </Section>
               )}
+
+              <Section title={L('Invite and earn', 'Inviter et gagner')}>
+                <Card>
+                  <Row
+                    first
+                    icon="redeem"
+                    iconBg="#fff3d6"
+                    iconTint="tertiary"
+                    title={data.partner?.code ? `${L('Promo code', 'Code promo')} ${data.partner.code}` : L('No promo code yet', 'Pas encore de code promo')}
+                    sub={`${data.partner?.invited || 0} ${L('people joined with it', 'personnes inscrites avec')}`}
+                    onPress={data.partner?.code ? () => navigation.navigate('AdminPartner', { id: u.id, name: u.name }) : undefined}
+                  />
+                  {!!data.partner?.invitedBy && (
+                    <Row
+                      icon="person_add"
+                      title={`${L('Joined with', 'Inscrit avec le code de')} ${data.partner.invitedBy.name || L('a deleted account', 'un compte supprimé')}`}
+                      sub={`${data.partner.invitedBy.code}, ${date(data.partner.invitedBy.at)}`}
+                      onPress={data.partner.invitedBy.id ? () => navigation.push('AdminPerson', { id: data.partner.invitedBy.id, name: data.partner.invitedBy.name }) : undefined}
+                    />
+                  )}
+                </Card>
+              </Section>
 
               {data.payments.length > 0 && (
                 <Section title={L('Payments', 'Paiements')}>
@@ -185,6 +214,22 @@ export default function AdminPerson({ navigation, route }) {
         action={sheet === 'delete' ? L('Delete for ever', 'Supprimer pour toujours') : sheet === 'block' ? L('Block the account', 'Bloquer le compte') : L('Unblock the account', 'Débloquer le compte')}
         onAction={act}
       >
+        {sheet === 'block' && (
+          <V c="gap-1.5">
+            <T c="font-label-md text-label-md text-on-surface" style={{ fontWeight: '700' }}>
+              {L('Reason (the person sees it)', 'Raison (la personne la voit)')}
+            </T>
+            <Input
+              c="min-h-[84px] px-4 py-3 rounded-xl bg-surface-container-low text-body-md font-body-md text-on-surface"
+              placeholder={L('e.g. Sharing answers during the mock exam.', 'ex. Partage de réponses pendant l’examen blanc.')}
+              value={reason}
+              onChangeText={setReason}
+              maxLength={200}
+              multiline
+              textAlignVertical="top"
+            />
+          </V>
+        )}
         <ErrorNote error={actError} />
       </Sheet>
       {toast}

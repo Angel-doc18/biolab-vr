@@ -4,7 +4,8 @@ import { sha256, uuid } from '../lib/crypto.js';
 import { int, oneOf, phone, str } from '../lib/validate.js';
 import { directPay, payLink, paymentStatus, paymentsConfigured, paymentsOf, verifyFapshiWebhook } from '../lib/providers.js';
 import { notify } from '../lib/notify.js';
-import { currentPlans, loadSettings } from '../lib/settings.js';
+import { currentPlans, loadSettings, setting } from '../lib/settings.js';
+import { earnFromPayment } from '../lib/partners.js';
 
 // The platform charges. Prices are decided on the server, never by the client:
 // an admin sets them in the app (lib/settings.js), 350 and 3,500 FCFA until then.
@@ -31,6 +32,7 @@ export async function initiatePayment(request, env) {
   const plan = PLANS[planId];
   const mode = checkoutMode(env);
   if (!paymentsConfigured(env)) throw new HttpError(503, 'Mobile money payments are not open yet.', 'payments_unavailable');
+  if (setting('payments_off') === 'on') throw new HttpError(503, 'Payments are paused for a short while. Please try again later; your account stays open meanwhile.', 'payments_paused');
   const ph = mode === 'prompt' ? phone(b.phone, 'Mobile money number') : '';
   const medium = mode === 'prompt' ? oneOf(b.medium, 'Payment method', ['mobile money', 'orange money']) : null;
   const id = uuid();
@@ -97,6 +99,7 @@ async function settle(env, payment, providerData) {
       const until = paidUntil(user, payment.plan);
       await env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until, now(), payment.user_id).run();
       await notify(env, payment.user_id, 'payment', 'Payment received', `${currentPlans()[payment.plan].label}: ${payment.amount} FCFA. Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`, { reference: payment.reference });
+      await earnFromPayment(env, payment);
     }
     return 'SUCCESSFUL';
   }

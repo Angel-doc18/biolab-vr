@@ -17,8 +17,10 @@ export async function patchMe(request, env) {
   // The role can be chosen during onboarding only, never changed afterwards.
   if ('role' in b) {
     if (user.onboarded) throw new HttpError(403, 'Your role cannot be changed.', 'forbidden');
-    fields.role = oneOf(b.role, 'Role', ['student', 'parent', 'teacher']);
+    fields.role = oneOf(b.role, 'Role', ['student', 'parent', 'teacher', 'partner']);
   }
+  // A partner says who they invite for: themselves, a school or a business.
+  if ('partnerKind' in b) fields.partner_kind = b.partnerKind === null ? null : oneOf(b.partnerKind, 'Partner type', ['person', 'school', 'business']);
   if ('name' in b) fields.name = str(b.name, 'Full name', { min: 2, max: 80 });
   if ('lang' in b) fields.lang = oneOf(b.lang, 'Language', ['en', 'fr']);
   if ('level' in b) fields.level = oneOf(b.level, 'Level', ['O', 'A']);

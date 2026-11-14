@@ -29,12 +29,16 @@ export default function AdminHome({ navigation }) {
   const go = (name, params) => navigation.navigate(name, params ? { ...params, at: Date.now() } : undefined);
   const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
+  const schools = d?.me?.role === 'cto' ? 'AdminSchoolsPage' : 'AdminSchools';
   const attention = d
     ? [
+        d.alerts?.critical > 0 && d.me?.can?.system && { icon: 'error', title: plural(d.alerts.critical, L('urgent system alert', 'alerte système urgente'), L('urgent system alerts', 'alertes système urgentes')), sub: L('Open System to see what to do.', 'Ouvrez Système pour savoir quoi faire.'), to: () => go('AdminSystem') },
+        d.withdrawRequests?.count > 0 && { icon: 'account_balance_wallet', title: plural(d.withdrawRequests.count, L('partner waiting to be paid', 'partenaire attend son paiement'), L('partners waiting to be paid', 'partenaires attendent leur paiement')), sub: `${d.withdrawRequests.amount.toLocaleString('en-US')} FCFA ${L('in all', 'au total')}`, to: () => go('AdminPartners') },
+        d.unreadNotices > 0 && { icon: 'shield', title: plural(d.unreadNotices, L('notice about your account', 'avis sur votre compte'), L('notices about your account', 'avis sur votre compte')), to: () => go('AdminNotices') },
         d.newMessages > 0 && { icon: 'mail', title: plural(d.newMessages, L('new message from the website', 'nouveau message du site'), L('new messages from the website', 'nouveaux messages du site')), to: () => go('AdminMessages') },
         d.openReports > 0 && { icon: 'flag', title: plural(d.openReports, L('report on an AI answer', 'signalement sur une réponse IA'), L('reports on AI answers', 'signalements sur des réponses IA')), to: () => go('AdminReports') },
         d.money.review > 0 && { icon: 'error', title: plural(d.money.review, L('payment to check', 'paiement à vérifier'), L('payments to check', 'paiements à vérifier')), sub: L('The amount did not match what was asked.', 'Le montant ne correspondait pas.'), to: () => go('AdminMoney', { status: 'REVIEW' }) },
-        d.licenceRequests > 0 && { icon: 'school', title: plural(d.licenceRequests, L('school licence request', 'demande de licence d’école'), L('school licence requests', 'demandes de licence d’école')), to: () => go('AdminSchools') },
+        d.licenceRequests > 0 && { icon: 'school', title: plural(d.licenceRequests, L('school licence request', 'demande de licence d’école'), L('school licence requests', 'demandes de licence d’école')), to: () => go(schools) },
       ].filter(Boolean)
     : [];
 
@@ -78,16 +82,18 @@ export default function AdminHome({ navigation }) {
         <Section title={L('Quick actions', 'Actions rapides')}>
           <TileGrid
             items={[
-              { icon: 'person_search', title: L('Find a person', 'Trouver un compte'), sub: L('Give days, block or delete', 'Donner des jours, bloquer, supprimer'), onPress: () => go('AdminPeople') },
-              { icon: 'redeem', bg: '#e3f4ec', tint: 'secondary', title: L('Make school codes', 'Créer des codes d’école'), sub: L('Klass8 for a whole class', 'Klass8 pour toute une classe'), onPress: () => go('AdminSchools') },
-              { icon: 'campaign', bg: '#fff3d6', tint: 'tertiary', title: L('Send an announcement', 'Envoyer une annonce'), sub: L('A message in everyone’s app', 'Un message dans l’application'), onPress: () => go('AdminAnnounce') },
-              { icon: 'price_change', title: L('Change prices', 'Changer les prix'), sub: L('Plans and charges', 'Formules et frais'), onPress: () => go('AdminPrices') },
+              { icon: 'handshake', bg: '#fff3d6', tint: 'tertiary', title: L('Partners', 'Partenaires'), sub: L('Promo codes and withdrawals', 'Codes promo et retraits'), onPress: () => go('AdminPartners') },
+              { icon: 'redeem', bg: '#e3f4ec', tint: 'secondary', title: L('Make school codes', 'Créer des codes d’école'), sub: L('Klass8 for a whole class', 'Klass8 pour toute une classe'), onPress: () => go(schools) },
+              { icon: 'campaign', title: L('Send an announcement', 'Envoyer une annonce'), sub: L('A message in everyone’s app', 'Un message dans l’application'), onPress: () => go('AdminAnnounce') },
+              d?.me?.can?.owner
+                ? { icon: 'price_change', title: L('Change prices', 'Changer les prix'), sub: L('Plans and charges', 'Formules et frais'), onPress: () => go('AdminPrices') }
+                : { icon: 'person_search', title: L('Find a person', 'Trouver un compte'), sub: L('Give days, block or delete', 'Donner des jours, bloquer, supprimer'), onPress: () => go('AdminPeople') },
             ]}
           />
         </Section>
 
         {!!d && (
-          <Section title={L('Charges', 'Frais')} action={L('Change', 'Modifier')} onAction={() => go('AdminPrices')}>
+          <Section title={L('Charges', 'Frais')} action={d.me?.can?.owner ? L('Change', 'Modifier') : null} onAction={() => go('AdminPrices')}>
             <Card>
               <Row first icon="sell" title={`${fcfa(d.prices.month)} ${L('a month', 'par mois')}, ${fcfa(d.prices.year)} ${L('a year', 'par an')}`} sub={d.settings.paywall ? L('Students are charged after their free month.', 'Les élèves paient après leur mois gratuit.') : L('Klass8 is free for everyone at the moment.', 'Klass8 est gratuit pour tous en ce moment.')} right={<Pill text={d.settings.paywall ? L('Charging', 'Payant') : L('Free', 'Gratuit')} tone={d.settings.paywall ? 'ok' : 'info'} />} onPress={() => go('AdminPrices')} />
             </Card>

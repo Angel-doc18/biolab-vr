@@ -11,8 +11,10 @@ import { Card, Chips, Sheet } from './kit';
 
 const BODY_MAX = 500;
 
-export default function AdminAnnounce({ navigation }) {
+export default function AdminAnnounce({ navigation, route }) {
   const L = useL();
+  const update = route.params?.mode === 'update';
+  const [version, setVersion] = useState('');
   const [audience, setAudience] = useState('everyone');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -26,19 +28,22 @@ export default function AdminAnnounce({ navigation }) {
     student: L('every student', 'chaque élève'),
     parent: L('every parent', 'chaque parent'),
     teacher: L('every teacher', 'chaque enseignant'),
+    partner: L('every partner', 'chaque partenaire'),
   }[audience];
 
   const check = () => {
     setError(null);
     if (title.trim().length < 3) return setError(L('Write a short title.', 'Écrivez un titre court.'));
-    if (body.trim().length < 3) return setError(L('Write the message.', 'Écrivez le message.'));
+    if (body.trim().length < (update ? 10 : 3)) return setError(update ? L('Say in a sentence or two what changed.', 'Dites en une ou deux phrases ce qui change.') : L('Write the message.', 'Écrivez le message.'));
     setConfirm(true);
   };
   const send = async () => {
     setSending(true);
     setError(null);
     try {
-      const r = await post('/v1/admin/announce', { audience, title: title.trim(), body: body.trim() });
+      const r = update
+        ? await post('/v1/admin/updates', { audience, version: version.trim() || undefined, title: title.trim(), body: body.trim() })
+        : await post('/v1/admin/announce', { audience, title: title.trim(), body: body.trim() });
       setConfirm(false);
       showToast(`${L('Sent to', 'Envoyé à')} ${r.sent} ${r.sent === 1 ? L('person', 'personne') : L('people', 'personnes')}`);
       setTitle('');
@@ -53,10 +58,12 @@ export default function AdminAnnounce({ navigation }) {
 
   return (
     <V c="flex-1">
-      <Screen header={<StackHeader title={L('Send an announcement', 'Envoyer une annonce')} avatar={false} />} keyboard>
+      <Screen header={<StackHeader title={update ? L('Tell everyone about an update', 'Annoncer une mise à jour') : L('Send an announcement', 'Envoyer une annonce')} avatar={false} />} keyboard>
         <V c="gap-space-lg pt-space-md pb-space-xl">
           <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-            {L('It appears in the Notifications page of each person you choose, the next time they open Klass8.', 'Elle apparaît dans la page Notifications de chaque personne choisie, à sa prochaine ouverture de Klass8.')}
+            {update
+              ? L('Explain in plain words what the new version changes for people. It appears in their Notifications.', 'Expliquez simplement ce que la nouvelle version change. Cela apparaît dans leurs notifications.')
+              : L('It appears in the Notifications page of each person you choose, the next time they open Klass8.', 'Elle apparaît dans la page Notifications de chaque personne choisie, à sa prochaine ouverture de Klass8.')}
           </T>
           <V c="gap-1.5">
             <Label>{L('Who it is for', 'Pour qui')}</Label>
@@ -68,9 +75,11 @@ export default function AdminAnnounce({ navigation }) {
                 ['student', L('Students', 'Élèves')],
                 ['parent', L('Parents', 'Parents')],
                 ['teacher', L('Teachers', 'Enseignants')],
+                ['partner', L('Partners', 'Partenaires')],
               ]}
             />
           </V>
+          {update && <Field label={L('Version (optional)', 'Version (facultatif)')} value={version} onChangeText={setVersion} maxLength={20} placeholder="1.0.96" />}
           <Field label={L('Title', 'Titre')} value={title} onChangeText={setTitle} maxLength={120} placeholder={L('e.g. Mock exams start on Monday', 'ex. Les examens blancs commencent lundi')} />
           <V c="gap-1.5">
             <Label right={<T c="font-label-sm text-label-sm text-outline">{`${body.length}/${BODY_MAX}`}</T>}>{L('Message', 'Message')}</Label>

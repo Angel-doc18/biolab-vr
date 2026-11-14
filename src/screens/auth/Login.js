@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrandLogo, P, T, V } from '../../ui/kit';
+import { BrandLogo, Ic, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { Field, Label } from '../../ui/form';
 import { useApp } from '../../state/store';
@@ -20,7 +20,7 @@ function normaliseIdentifier(v) {
 }
 
 export default function Login({ navigation }) {
-  const { login } = useApp();
+  const { login, auth } = useApp();
   const L = useL();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -58,6 +58,14 @@ export default function Login({ navigation }) {
           <V c="w-10 h-1 rounded-full bg-tertiary-container my-1" />
           <T c="font-body-md text-body-md text-on-surface-variant text-center">{L('Log in with your phone number or email.', 'Connectez-vous avec votre numéro ou votre e-mail.')}</T>
         </V>
+        {!!auth.notice && !error && (
+          <V c="w-full p-space-md rounded-xl flex-row gap-space-sm" style={{ backgroundColor: '#fdecea' }} accessibilityRole="alert">
+            <Ic n="block" s={22} c="error" />
+            <T c="flex-1 font-body-md text-body-md text-on-surface" style={{ lineHeight: 21 }}>
+              {auth.notice}
+            </T>
+          </V>
+        )}
       </V>
 
       <V c="gap-space-md">

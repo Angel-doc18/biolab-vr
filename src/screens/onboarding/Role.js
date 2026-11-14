@@ -29,6 +29,11 @@ export default function Role({ navigation }) {
       name: L('Teacher', 'Enseignant'),
       body: L('Create classes, set work and see which topics your students find hardest.', 'Créez des classes, donnez du travail et voyez les sujets les plus difficiles.'),
     },
+    {
+      id: 'partner',
+      name: L('Partner', 'Partenaire'),
+      body: L('A person, school or business that invites students with a promo code and earns a share of what they pay.', 'Une personne, école ou entreprise qui invite des élèves avec un code promo et gagne une part de leurs paiements.'),
+    },
   ];
 
   const submit = async () => {

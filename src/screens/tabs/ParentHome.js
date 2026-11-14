@@ -10,6 +10,7 @@ import { unitById } from '../../data/units';
 import { subjectName } from '../../data/subjects';
 import { shareReportPdf } from '../../lib/report';
 import { Section } from './Home';
+import InviteCard from '../../ui/InviteCard';
 
 const DAY = 86400000;
 
@@ -119,6 +120,7 @@ export default function ParentHome({ navigation }) {
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant">{L('Your children’s revision, updated as they study.', 'Les révisions de vos enfants, mises à jour pendant qu’ils travaillent.')}</T>
         </V>
+        <InviteCard navigation={navigation} compact />
         <ErrorNote error={error} />
         {items === null ? (
           <Spinner />

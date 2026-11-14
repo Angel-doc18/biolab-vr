@@ -17,9 +17,16 @@ import { reportAppError } from './routes/appErrors.js';
 import { sendContact } from './routes/contact.js';
 import { notify } from './lib/notify.js';
 import { aiProvider } from './lib/ai.js';
-import { loadSettings } from './lib/settings.js';
+import { loadSettings, setting } from './lib/settings.js';
+import * as partner from './routes/partner.js';
+import * as adminPartners from './routes/adminPartners.js';
+import * as adminAccount from './routes/adminAccount.js';
+import * as system from './routes/system.js';
+import { isBlocked, loadBlocks, securityEvent, serverProblem, track } from './lib/monitor.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
+const SIG = '(p[0-9a-z]{1,12})';
+const IP = '([0-9a-fA-F:.]{3,45})';
 const routes = [
   ['GET', '/v1/health', (req, env) => json({ ok: true, ai: aiProvider(env), messaging: channels(env), payments: paymentsConfigured(env), voices: voice.voiceChoices(env), voice: voice.voiceTag(env) })],
   ['POST', '/v1/voice', voice.speak],
@@ -99,6 +106,40 @@ const routes = [
   ['GET', '/v1/admin/ai-reports', admin.listAiReports],
   ['POST', `/v1/admin/ai-reports/${ID}/resolve`, admin.resolveAiReport],
   ['POST', '/v1/admin/announce', admin.announce],
+  ['GET', '/v1/admin/money', admin.money],
+  // each admin's own account
+  ['GET', '/v1/admin/account', adminAccount.getAccount],
+  ['PATCH', '/v1/admin/account', adminAccount.patchAccount],
+  ['POST', '/v1/admin/account/login', adminAccount.changeLogin],
+  ['POST', '/v1/admin/account/password', adminAccount.changeAdminPassword],
+  ['GET', '/v1/admin/notices', adminAccount.listNotices],
+  ['GET', '/v1/admin/admins', adminAccount.listAdmins],
+  // the partner programme
+  ['GET', '/v1/partner', partner.myPartner],
+  ['POST', '/v1/partner/apply', partner.applyPromo],
+  ['POST', '/v1/partner/withdraw', partner.withdraw],
+  ['POST', `/v1/partner/withdrawals/${ID}/cancel`, partner.cancelWithdrawal],
+  ['GET', '/v1/admin/partners', adminPartners.listPartners],
+  ['PUT', '/v1/admin/partners/settings', adminPartners.putProgramme],
+  ['GET', `/v1/admin/partners/${ID}`, adminPartners.getPartner],
+  ['PATCH', `/v1/admin/partners/${ID}`, adminPartners.patchPartner],
+  ['GET', '/v1/admin/withdrawals', adminPartners.listWithdrawals],
+  ['POST', `/v1/admin/withdrawals/${ID}/paid`, adminPartners.markPaid],
+  ['POST', `/v1/admin/withdrawals/${ID}/reject`, adminPartners.rejectWithdrawal],
+  ['POST', `/v1/admin/commissions/${ID}/cancel`, adminPartners.cancelCommission],
+  // the CTO's system tools
+  ['GET', '/v1/admin/system', system.systemStatus],
+  ['GET', '/v1/admin/alerts', system.listAlerts],
+  ['POST', `/v1/admin/alerts/${ID}/resolve`, system.resolveAlert],
+  ['GET', '/v1/admin/problems', system.listProblems],
+  ['POST', `/v1/admin/problems/${SIG}/fixed`, system.markProblem],
+  ['GET', '/v1/admin/security-events', system.listSecurityEvents],
+  ['POST', '/v1/admin/ip-blocks', system.blockIp],
+  ['DELETE', `/v1/admin/ip-blocks/${IP}`, system.unblockIp],
+  ['PUT', '/v1/admin/system/switches', system.putSwitches],
+  ['POST', '/v1/admin/system/sign-out', system.signOutEveryone],
+  ['POST', '/v1/admin/system/backup', system.backupNow],
+  ['POST', '/v1/admin/updates', system.announceUpdate],
   ['GET', '/v1/team', team.listTeam],
   ['GET', `/v1/team/${ID}/photo`, team.teamPhoto],
   ['GET', '/v1/admin/team', team.adminListTeam],
@@ -125,10 +166,33 @@ function corsHeaders(request, env) {
   };
 }
 
+// Open during maintenance: admins, signing in (admins still can), payments
+// arriving from Fapshi, error reports and the public website's data.
+const OPEN_IN_MAINTENANCE = /^\/v1\/(health|admin\/|auth\/login|billing\/(fapshi-webhook|plans|return)|app\/errors|team|contact)/;
+const AI_PATHS = /^\/v1\/ai\/(ask|mark|explain|solve|mark-any)$/;
+const blockNoted = new Map();
+
 async function handle(request, env) {
   const url = new URL(request.url);
-  await loadSettings(env); // the admin's settings (prices, charges), kept in memory
+  await loadSettings(env); // the admin's settings (prices, charges, switches), kept in memory
+  await loadBlocks(env);
   if (request.method === 'OPTIONS') return new Response(null, { status: 204 });
+  const ip = request.headers.get('cf-connecting-ip') || '';
+  if (ip && isBlocked(ip)) {
+    // noted at most once a minute per address
+    if (Date.now() - (blockNoted.get(ip) || 0) > 60_000) {
+      if (blockNoted.size > 2000) blockNoted.clear();
+      blockNoted.set(ip, Date.now());
+      await securityEvent(env, 'blocked_ip', request, url.pathname.slice(0, 80));
+    }
+    return json({ error: 'Access from your network has been blocked. Contact Klass8 if you think this is a mistake.', code: 'ip_blocked' }, 403);
+  }
+  if (setting('maintenance') === 'on' && !OPEN_IN_MAINTENANCE.test(url.pathname)) {
+    return json({ error: setting('maintenance_message') || 'Klass8 is being updated. Please try again in a few minutes.', code: 'maintenance' }, 503);
+  }
+  if (setting('ai_off') === 'on' && AI_PATHS.test(url.pathname)) {
+    return json({ error: 'The AI tutor is paused for a short while. Lessons, practicals and papers still work.', code: 'ai_paused' }, 503);
+  }
   for (const [method, pattern, handler] of routes) {
     const match = url.pathname.match(pattern);
     if (match && method === request.method) return handler(request, env, ...match.slice(1));
@@ -182,15 +246,18 @@ async function scheduled(env) {
 export default {
   async fetch(request, env) {
     let response;
+    const started = Date.now();
     try {
       response = await handle(request, env);
     } catch (err) {
       if (err instanceof HttpError) response = json({ error: err.message, code: err.code }, err.status);
       else {
         console.error('unhandled', err?.stack || err);
+        await serverProblem(env, request, err);
         response = json({ error: 'Something went wrong. Please try again.', code: 'server_error' }, 500);
       }
     }
+    track(request, response.status, Date.now() - started);
     const cors = corsHeaders(request, env);
     if (!cors) return response;
     const headers = new Headers(response.headers);

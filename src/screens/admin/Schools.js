@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { RefreshControl, Share } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Ic, P, T, V } from '../../ui/kit';
-import { Cta, ErrorNote, Screen, useToast } from '../../ui/chrome';
+import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
 import { Field } from '../../ui/form';
 import { useL } from '../../i18n';
 import { post } from '../../api/adminClient';
 import { AdminHeader, Card, Chips, Empty, Loading, Row, Section, date, useAdminLoad } from './kit';
 
-export default function AdminSchools() {
+export default function AdminSchools({ route }) {
+  const page = route?.name === 'AdminSchoolsPage';
   const L = useL();
   const codes = useAdminLoad('/v1/admin/vouchers');
   const requests = useAdminLoad('/v1/admin/licence-requests');
@@ -57,7 +58,7 @@ export default function AdminSchools() {
   return (
     <V c="flex-1">
       <Screen
-        header={<AdminHeader title={L('Schools', 'Écoles')} subtitle={L('Codes and licences', 'Codes et licences')} />}
+        header={page ? <StackHeader title={L('Schools', 'Écoles')} subtitle={L('Codes and licences', 'Codes et licences')} avatar={false} /> : <AdminHeader title={L('Schools', 'Écoles')} subtitle={L('Codes and licences', 'Codes et licences')} />}
         keyboard
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await Promise.all([codes.reload(), requests.reload()]), setRefreshing(false))} />}
       >

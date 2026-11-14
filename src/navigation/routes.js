@@ -11,6 +11,7 @@ export const ONBOARDING = {
   student: ['SchoolKind', 'ClassPick', 'ExamYear', 'Series', 'Subjects', 'School', 'Grade', 'StudyTime', 'Reminder', 'SetupDone'],
   parent: ['LinkChild', 'SetupDone'],
   teacher: ['School', 'CreateClass', 'SetupDone'],
+  partner: ['PartnerKind', 'SetupDone'],
 };
 
 // Short runs of the same steps, opened from Home, Me and Settings to change

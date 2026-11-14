@@ -55,7 +55,14 @@ export async function loadAdminSession() {
   return session;
 }
 
-// The signed-in admin ({ id, name, login }), or null.
+// Keeps the newest details of the signed-in admin (their role and title).
+export async function setCurrentAdmin(admin) {
+  if (!session || !admin) return;
+  session = { ...session, admin };
+  await writeStored(session);
+}
+
+// The signed-in admin ({ id, name, login, role, title, can }), or null.
 export const currentAdmin = () => session?.admin || null;
 
 // Called when the session ends on its own (expired, signed out elsewhere, switched off).

@@ -40,6 +40,8 @@ export default function SetupDone({ navigation, route }) {
         ]
       : role === 'parent'
       ? [L('Link each of your children with the code shown in their app. Reports arrive every week.', 'Liez chaque enfant avec le code affiché dans son application. Les rapports arrivent chaque semaine.')]
+      : role === 'partner'
+      ? [user?.schoolName, L('Your promo code is on your Home. Share it, and earn each time someone who joined with it pays.', 'Votre code promo est sur votre accueil. Partagez-le et gagnez à chaque paiement d’une personne inscrite avec.')].filter(Boolean)
       : [user?.schoolName, L('Students join your class with its code, from registration or from their profile.', 'Les élèves rejoignent votre classe avec son code, à l’inscription ou depuis leur profil.')];
 
   return (

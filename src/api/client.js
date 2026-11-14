@@ -129,7 +129,8 @@ async function refreshSession() {
       .catch(async (e) => {
         if (e.status === 401) {
           await setSession(null);
-          listeners.forEach((fn) => fn());
+          // The reason goes along (a blocked account carries the admin's reason).
+          listeners.forEach((fn) => fn(e));
         }
         throw e;
       })

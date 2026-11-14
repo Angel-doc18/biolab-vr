@@ -15,6 +15,9 @@ const KIND = {
   parent: { icon: 'family_restroom', bg: 'bg-surface-container', fg: 'primary-container', group: 'reports' },
   payment: { icon: 'workspace_premium', bg: 'bg-tertiary-fixed/50', fg: 'tertiary', group: 'account' },
   announcement: { icon: 'campaign', bg: 'bg-surface-container', fg: 'primary-container', group: 'account' },
+  update: { icon: 'system_update', bg: 'bg-surface-container', fg: 'primary-container', group: 'account' },
+  partner: { icon: 'redeem', bg: 'bg-tertiary-fixed/50', fg: 'tertiary', group: 'account' },
+  account: { icon: 'manage_accounts', bg: 'bg-surface-container', fg: 'primary-container', group: 'account' },
 };
 
 function ago(at, L) {

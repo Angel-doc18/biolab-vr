@@ -3,6 +3,7 @@ import { Avatar, Bar, Ic, P, T, V } from '../../ui/kit';
 import { Screen, TabHeader } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import ChargesCard from '../../ui/ChargesCard';
+import InviteCard from '../../ui/InviteCard';
 import { useL, useLang } from '../../i18n';
 import { examSubject, iso } from '../../state/progress';
 import { gradeFor } from '../../state/selectors';
@@ -126,6 +127,7 @@ export default function Me({ navigation }) {
         </V>
 
         <ChargesCard user={user} onPress={() => navigation.navigate('Paywall')} />
+        {user?.role !== 'partner' && <InviteCard navigation={navigation} compact />}
 
         {photoMenu && (
           <V c="bg-surface-container-lowest rounded-xl shadow-sm">

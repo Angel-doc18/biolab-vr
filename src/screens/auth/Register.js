@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { P, T, V } from '../../ui/kit';
+import { Ic, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
 import { Check, Field, PhoneField, passwordValid, validPhone } from '../../ui/form';
 import { useApp } from '../../state/store';
@@ -14,6 +14,8 @@ export default function Register({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
+  const [promo, setPromo] = useState('');
+  const [showPromo, setShowPromo] = useState(false);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -33,7 +35,7 @@ export default function Register({ navigation }) {
     setBusy(true);
     setError(null);
     try {
-      const r = await register({ name: name.trim(), phone: `237${phone}`, email: email.trim() || undefined, password });
+      const r = await register({ name: name.trim(), phone: `237${phone}`, email: email.trim() || undefined, password, referralCode: promo.trim() || undefined });
       if (r.otpAvailable) navigation.reset({ index: 0, routes: [{ name: 'Otp', params: { purpose: 'verify', phone: r.user.phone, next: 'Role' } }] });
       else navigation.reset({ index: 0, routes: [{ name: 'Role' }] });
     } catch (err) {
@@ -98,6 +100,24 @@ export default function Register({ navigation }) {
               maxLength={128}
             />
           </V>
+          {showPromo ? (
+            <Field
+              label={L('Promo code', 'Code promo')}
+              right={<T c="font-label-sm text-label-sm text-on-surface-variant">{L('Optional', 'Facultatif')}</T>}
+              placeholder={L('The code someone gave you', 'Le code qu’on vous a donné')}
+              value={promo}
+              onChangeText={(t) => setPromo(t.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12))}
+              autoCapitalize="characters"
+              maxLength={12}
+            />
+          ) : (
+            <P c="flex-row items-center gap-2 py-1" onPress={() => setShowPromo(true)} hitSlop={6} accessibilityRole="button">
+              <Ic n="redeem" s={18} c="primary-container" />
+              <T c="font-body-md text-body-md text-primary" style={{ fontWeight: '700' }}>
+                {L('I have a promo code', 'J’ai un code promo')}
+              </T>
+            </P>
+          )}
           <Check on={agree} onPress={() => setAgree((a) => !a)}>
             <T c={`font-body-sm text-body-sm ${errors.agree ? 'text-error' : 'text-on-surface-variant'}`} style={{ lineHeight: 18 }}>
               {L('I agree to the ', 'J’accepte les ')}

@@ -13,8 +13,8 @@ const MAX_PEOPLE = 40;
 
 const photoUrl = (m) => (m.photo_at ? `/v1/team/${m.id}/photo?v=${m.photo_at}` : null);
 const publicMember = (m) => ({ id: m.id, name: m.name, role: m.role, bio: m.bio, link: m.link || null, onHome: Boolean(m.on_home), photo: photoUrl(m) });
-const adminMember = (m) => ({ ...publicMember(m), visible: Boolean(m.visible), sort: m.sort, updatedAt: m.updated_at });
-const COLUMNS = 'id, name, role, bio, link, photo_at, sort, on_home, visible, updated_at';
+const adminMember = (m) => ({ ...publicMember(m), visible: Boolean(m.visible), sort: m.sort, updatedAt: m.updated_at, adminCard: Boolean(m.admin_id) });
+const COLUMNS = 'id, name, role, bio, link, photo_at, sort, on_home, visible, updated_at, admin_id';
 
 // The fields an admin can set; on an update, only the ones sent change.
 function fields(b, partial) {
@@ -92,6 +92,8 @@ export async function editTeamMember(request, env, id) {
 export async function removeTeamMember(request, env, id) {
   await requireAdmin(request, env);
   await findMember(env, id);
+  const own = await env.DB.prepare('SELECT a.name FROM team_members t JOIN admins a ON a.id = t.admin_id WHERE t.id = ?').bind(id).first();
+  if (own) throw new HttpError(400, `This card belongs to ${own.name}'s admin account. They can hide it from the website in My account.`, 'admin_card');
   await env.DB.prepare('DELETE FROM team_members WHERE id = ?').bind(id).run();
   return ok();
 }

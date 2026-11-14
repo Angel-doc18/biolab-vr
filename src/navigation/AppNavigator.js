@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { createNavigationContainerRef, NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import TabBar from '../ui/TabBar';
+import TabBar, { TABS } from '../ui/TabBar';
 import { C } from '../ui/tw';
 import { useApp } from '../state/store';
 import { calmMotion, noSlide } from '../lib/device';
@@ -53,6 +53,14 @@ import AdminReports from '../screens/admin/Reports';
 import AdminAnnounce from '../screens/admin/Announce';
 import AdminTeam from '../screens/admin/Team';
 import AdminProblems from '../screens/admin/Problems';
+import AdminAccount from '../screens/admin/Account';
+import AdminNotices from '../screens/admin/Notices';
+import AdminPartners from '../screens/admin/Partners';
+import AdminPartner from '../screens/admin/Partner';
+import AdminSecurity from '../screens/admin/Security';
+import AdminSchools from '../screens/admin/Schools';
+import Invite from '../screens/me/Invite';
+import PartnerKind from '../screens/onboarding/PartnerKind';
 import Offline from '../screens/me/Offline';
 import ParentReport from '../screens/me/ParentReport';
 import Notifications from '../screens/me/Notifications';
@@ -88,10 +96,17 @@ const modalOptions = () => ({ animation: noSlide() ? 'none' : 'slide_from_bottom
 // The first screens after the opening logo fade in over its white.
 const fadeIn = () => ({ animation: noSlide() ? 'none' : 'fade' });
 
+// A partner account is for inviting people: Home (their promo code and
+// earnings) and Me only.
+const PARTNER_TABS = TABS.filter((t) => t.name === 'Home' || t.name === 'Me');
+
 function MainTabs() {
+  const { user } = useApp();
+  const partner = user?.role === 'partner';
   return (
     <Tabs.Navigator
-      tabBar={(props) => <TabBar {...props} />}
+      key={partner ? 'partner' : 'all'}
+      tabBar={(props) => <TabBar {...props} tabs={partner ? PARTNER_TABS : undefined} />}
       screenOptions={{
         headerShown: false,
         // A short fade between tabs, left out on entry-level phones.
@@ -102,21 +117,21 @@ function MainTabs() {
       }}
     >
       <Tabs.Screen name="Home" component={Home} />
-      <Tabs.Screen name="Learn" component={Learn} />
-      <Tabs.Screen name="Lab" component={Lab} />
-      <Tabs.Screen name="Exams" component={Exams} />
+      {!partner && <Tabs.Screen name="Learn" component={Learn} />}
+      {!partner && <Tabs.Screen name="Lab" component={Lab} />}
+      {!partner && <Tabs.Screen name="Exams" component={Exams} />}
       <Tabs.Screen name="Me" component={Me} />
     </Tabs.Navigator>
   );
 }
 
 // The admin console is here too: it follows the admin's own session, not the user's.
-const ADMIN = ['Admin', 'AdminPerson', 'AdminPrices', 'AdminMessages', 'AdminReports', 'AdminAnnounce', 'AdminTeam', 'AdminProblems', ...ADMIN_TABS.map((t) => t.name)];
+const ADMIN = ['Admin', 'AdminPerson', 'AdminPrices', 'AdminMessages', 'AdminReports', 'AdminAnnounce', 'AdminTeam', 'AdminProblems', 'AdminAccount', 'AdminNotices', 'AdminPartners', 'AdminPartner', 'AdminSecurity', 'AdminSchoolsPage', ...ADMIN_TABS.map((t) => t.name)];
 const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Forgot', 'Reset', 'Legal', ...ADMIN];
 // What a student whose free month has ended (and who has not paid) can still
 // open: signing in and out, setting up the account, the platform charges and
 // settings. Anything else leads to the platform charges.
-const OPEN_WHEN_LOCKED = [...PUBLIC, 'Role', 'SchoolKind', 'ClassPick', 'ExamYear', 'Series', 'Subjects', 'School', 'Grade', 'StudyTime', 'Reminder', 'SetupDone', 'Paywall', 'Pay', 'Voucher', 'Settings', 'Offline'];
+const OPEN_WHEN_LOCKED = [...PUBLIC, 'Role', 'SchoolKind', 'ClassPick', 'ExamYear', 'Series', 'Subjects', 'School', 'Grade', 'StudyTime', 'Reminder', 'SetupDone', 'Paywall', 'Pay', 'Voucher', 'Settings', 'Offline', 'Invite', 'PartnerKind'];
 
 const theme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: C['surface-container-lowest'], primary: C['primary-container'] } };
 
@@ -198,6 +213,14 @@ export default function AppNavigator() {
         <Stack.Screen name="AdminAnnounce" component={AdminAnnounce} />
         <Stack.Screen name="AdminTeam" component={AdminTeam} />
         <Stack.Screen name="AdminProblems" component={AdminProblems} />
+        <Stack.Screen name="AdminAccount" component={AdminAccount} />
+        <Stack.Screen name="AdminNotices" component={AdminNotices} />
+        <Stack.Screen name="AdminPartners" component={AdminPartners} />
+        <Stack.Screen name="AdminPartner" component={AdminPartner} />
+        <Stack.Screen name="AdminSecurity" component={AdminSecurity} />
+        <Stack.Screen name="AdminSchoolsPage" component={AdminSchools} />
+        <Stack.Screen name="Invite" component={Invite} />
+        <Stack.Screen name="PartnerKind" component={PartnerKind} />
         <Stack.Screen name="Offline" component={Offline} options={modalOptions} />
       </Stack.Navigator>
     </NavigationContainer>

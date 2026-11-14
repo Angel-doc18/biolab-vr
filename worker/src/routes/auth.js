@@ -1,6 +1,9 @@
 import { HttpError, clientIp, created, limit, now, ok, readJson } from '../lib/http.js';
 import { hashPassword, randomDigits, sha256, uuid, verifyPassword, safeEqual } from '../lib/crypto.js';
-import { UPDATE_MESSAGE, issueSession, outdatedApp, publicUser, requireUser, revokeRefresh, rotateRefresh } from '../lib/auth.js';
+import { UPDATE_MESSAGE, blockedMessage, issueSession, outdatedApp, publicUser, requireUser, revokeRefresh, rotateRefresh } from '../lib/auth.js';
+import { setting } from '../lib/settings.js';
+import { countAuthFailure, securityEvent } from '../lib/monitor.js';
+import { applyCode, cleanCode } from '../lib/partners.js';
 import { email, oneOf, password, phone, str } from '../lib/validate.js';
 import { channels, messagingConfigured, sendCode } from '../lib/messaging.js';
 import { adminLogin, adminSession } from '../lib/adminAuth.js';
@@ -23,8 +26,15 @@ export async function register(request, env) {
   const ph = phone(body.phone);
   const mail = email(body.email);
   const pw = password(body.password);
-  const role = oneOf(body.role ?? 'student', 'Role', ['student', 'parent', 'teacher']);
+  const role = oneOf(body.role ?? 'student', 'Role', ['student', 'parent', 'teacher', 'partner']);
   const lang = oneOf(body.lang ?? 'en', 'Language', ['en', 'fr']);
+  if (setting('lock_signups') === 'on') throw new HttpError(503, 'New accounts are paused for a short while. Please try again later.', 'signups_paused');
+  // A promo code is checked before the account is made, so a typo can be fixed.
+  const promo = body.referralCode ? cleanCode(body.referralCode) : '';
+  if (promo) {
+    const owner = await env.DB.prepare('SELECT id FROM users WHERE ref_code = ? AND deleted_at IS NULL AND blocked_at IS NULL AND ref_paused = 0').bind(promo).first();
+    if (!owner) throw new HttpError(400, 'This promo code does not exist. Check it, or leave the box empty.', 'invalid_code');
+  }
 
   const existing = await env.DB.prepare('SELECT id FROM users WHERE phone = ? OR (email IS NOT NULL AND email = ?)')
     .bind(ph, mail)
@@ -40,7 +50,15 @@ export async function register(request, env) {
   )
     .bind(id, role, name, ph, mail, hash, salt, lang, t, t)
     .run();
-  const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+  let user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+  if (promo) {
+    try {
+      await applyCode(env, user, promo);
+      user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+    } catch (e) {
+      console.error('promo_on_signup', e?.code || e?.message);
+    }
+  }
   const session = await issueSession(env, user);
   return created({ user: publicUser(user, env), ...session, otpAvailable: messagingConfigured(env) });
 }
@@ -73,10 +91,16 @@ export async function login(request, env) {
   const valid = await verifyPassword(pw, user?.password_hash || DUMMY.hash, user?.password_salt || DUMMY.salt);
   if (admin && adminValid) {
     if (admin.disabled) throw new HttpError(403, 'This account is switched off. Contact Klass8.', 'admin_disabled');
-    return ok(await adminSession(env, admin));
+    return ok(await adminSession(env, admin, request));
   }
-  if (!user || !valid) throw new HttpError(401, GENERIC_LOGIN_ERROR, 'invalid_credentials');
-  if (user.blocked_at) throw new HttpError(403, 'This account has been blocked. Contact Klass8.', 'account_blocked');
+  if (!user || !valid) {
+    countAuthFailure();
+    await securityEvent(env, admin ? 'admin_login_failed' : 'login_failed', request, `${admin ? admin.login : identifier.slice(0, 60)} wrong password`);
+    throw new HttpError(401, GENERIC_LOGIN_ERROR, 'invalid_credentials');
+  }
+  if (user.blocked_at) throw new HttpError(403, blockedMessage(user), 'account_blocked');
+  if (setting('lock_logins') === 'on') throw new HttpError(503, 'Signing in is paused for a short while for maintenance. Please try again later.', 'logins_paused');
+  if (setting('maintenance') === 'on') throw new HttpError(503, setting('maintenance_message') || 'Klass8 is being updated. Please try again in a few minutes.', 'maintenance');
   const session = await issueSession(env, user);
   return ok({ user: publicUser(user, env), ...session });
 }

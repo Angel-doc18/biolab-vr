@@ -7,8 +7,10 @@ import { bool, int, oneOf, str } from '../lib/validate.js';
 import { accessEnd, freeDays, isPro, paywallOn } from '../lib/auth.js';
 import { paymentsConfigured } from '../lib/providers.js';
 import { notify } from '../lib/notify.js';
-import { requireAdmin } from '../lib/adminAuth.js';
+import { publicAdmin, requireAdmin, requireAdminCan } from '../lib/adminAuth.js';
 import { currentPlans, saveSettings } from '../lib/settings.js';
+import { securityEvent } from '../lib/monitor.js';
+import { FAPSHI_FEE } from '../lib/partners.js';
 
 const DAY = 86_400_000;
 
@@ -22,7 +24,7 @@ const startOfMonth = () => {
 
 // The figures on the admin home: accounts, students' access and money.
 export async function overview(request, env) {
-  await requireAdmin(request, env);
+  const admin = await requireAdmin(request, env);
   const t = now();
   const { results: roles } = await env.DB.prepare('SELECT role, COUNT(*) AS n FROM users WHERE deleted_at IS NULL GROUP BY role').all();
   const recent = await env.DB.prepare('SELECT COUNT(*) AS n FROM users WHERE deleted_at IS NULL AND created_at > ?').bind(t - 7 * DAY).first();
@@ -49,6 +51,10 @@ export async function overview(request, env) {
   const requests = await env.DB.prepare('SELECT COUNT(*) AS n FROM licence_requests').first();
   const messages = await env.DB.prepare('SELECT COUNT(*) AS n FROM contact_messages WHERE done_at IS NULL').first();
   const reports = await env.DB.prepare('SELECT COUNT(*) AS n FROM ai_reports WHERE resolved_at IS NULL').first();
+  const withdraw = await env.DB.prepare("SELECT COUNT(*) AS n, COALESCE(SUM(amount), 0) AS amount FROM withdrawals WHERE status = 'requested'").first();
+  const alerts = await env.DB.prepare("SELECT SUM(CASE WHEN level = 'critical' THEN 1 ELSE 0 END) AS critical, COUNT(*) AS n FROM alerts WHERE resolved_at IS NULL AND kind != 'partner'").first();
+  const notices = admin.id ? await env.DB.prepare('SELECT COUNT(*) AS n FROM admin_notices WHERE admin_id = ? AND read = 0').bind(admin.id).first() : null;
+  const firstDay = await env.DB.prepare('SELECT MIN(created_at) AS t FROM users').first();
   const { results: latest } = await env.DB.prepare(
     `SELECT p.id, p.plan, p.amount, p.status, p.created_at AS createdAt, u.name FROM payments p LEFT JOIN users u ON u.id = p.user_id
      ORDER BY p.created_at DESC LIMIT 5`
@@ -63,6 +69,11 @@ export async function overview(request, env) {
     newMessages: messages?.n || 0,
     openReports: reports?.n || 0,
     latestPayments: latest,
+    withdrawRequests: { count: withdraw?.n || 0, amount: withdraw?.amount || 0 },
+    alerts: { open: alerts?.n || 0, critical: alerts?.critical || 0 },
+    unreadNotices: notices?.n || 0,
+    startedAt: firstDay?.t || null,
+    me: admin.id ? publicAdmin(admin) : publicAdmin({ id: null, name: 'operator', role: 'cto' }),
     prices: { month: currentPlans().month.amount, year: currentPlans().year.amount },
     settings: { paymentsOpen: paymentsConfigured(env), paywall: paywallOn(env), checkout: env.FAPSHI_DIRECT_PAY === 'on' ? 'prompt' : 'link', fapshi: env.FAPSHI_ENV === 'live' ? 'live' : 'sandbox' },
   });
@@ -81,6 +92,8 @@ const userRow = (u, env) => ({
   accessUntil: u.role === 'student' && !u.is_admin ? accessEnd(u) : null,
   access: isPro(u, env),
   blocked: Boolean(u.blocked_at),
+  blockedReason: u.blocked_reason || null,
+  partnerKind: u.partner_kind || null,
   lastActive: u.last_active || null,
 });
 
@@ -92,7 +105,7 @@ export async function listUsers(request, env) {
   const like = `%${q.replace(/[%_\\]/g, '')}%`;
   const phoneLike = digits.length >= 3 ? `%${digits}%` : '\u0000';
   const r = new URL(request.url).searchParams.get('role') || '';
-  const role = r ? oneOf(r, 'Role', ['student', 'parent', 'teacher']) : '';
+  const role = r ? oneOf(r, 'Role', ['student', 'parent', 'teacher', 'partner']) : '';
   const { results } = await env.DB.prepare(
     `SELECT u.*, p.last_active FROM users u LEFT JOIN progress p ON p.user_id = u.id
      WHERE u.deleted_at IS NULL AND (? = '' OR u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?) AND (? = '' OR u.role = ?)
@@ -118,7 +131,9 @@ export async function grantDays(request, env, id) {
     env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until || null, now(), u.id),
     env.DB.prepare('INSERT INTO admin_grants (id, admin_id, user_id, days, note, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(uuid(), admin.id, u.id, days, note, now()),
   ]);
-  if (days > 0) await notify(env, u.id, 'payment', 'Access added', `Klass8 is open on your account until ${new Date(until).toLocaleDateString('en-GB')}.`);
+  const end = new Date(until).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  if (days > 0) await notify(env, u.id, 'payment', `${days} days added to your account`, `Klass8 added ${days} days of full access to your account${note ? ` (${note})` : ''}. Everything is open until ${end}.`);
+  else await notify(env, u.id, 'payment', `${-days} days taken off your account`, `Klass8 took ${-days} days off your account${note ? `: ${note}` : ', to correct days given by mistake'}. Your access now runs until ${until ? end : 'today'}. Contact Klass8 if you think this is wrong.`);
   const fresh = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(u.id).first();
   return ok({ user: userRow(fresh, env) });
 }
@@ -225,20 +240,37 @@ export async function getUser(request, env, id) {
   )
     .bind(id)
     .first();
-  return ok({ user: userRow(u, env), payments, grants, linked, classes: classes?.n || 0 });
+  const invitedBy = await env.DB.prepare('SELECT r.code, r.created_at AS at, x.id, x.name FROM referrals r LEFT JOIN users x ON x.id = r.referrer_id WHERE r.user_id = ?').bind(id).first();
+  const invited = await env.DB.prepare('SELECT COUNT(*) AS n FROM referrals WHERE referrer_id = ?').bind(id).first();
+  return ok({
+    user: userRow(u, env),
+    payments,
+    grants,
+    linked,
+    classes: classes?.n || 0,
+    partner: { code: u.ref_code || null, invited: invited?.n || 0, invitedBy: invitedBy ? { id: invitedBy.id, name: invitedBy.name, code: invitedBy.code, at: invitedBy.at } : null },
+  });
 }
 
 // POST /v1/admin/users/:id/block { blocked }  a blocked account is signed out
 // everywhere and cannot sign in until it is unblocked.
+// The reason is shown to the person when they try to sign in.
 export async function blockUser(request, env, id) {
-  await requireAdmin(request, env);
+  const admin = await requireAdmin(request, env);
   const b = await readJson(request);
   const blocked = bool(b.blocked, 'Blocked');
-  await findUser(env, id);
+  const reason = blocked ? str(b.reason, 'Reason', { min: 5, max: 200 }) : null;
+  const u = await findUser(env, id);
   await env.DB.batch([
-    env.DB.prepare('UPDATE users SET blocked_at = ?, updated_at = ? WHERE id = ?').bind(blocked ? now() : null, now(), id),
+    env.DB.prepare('UPDATE users SET blocked_at = ?, blocked_reason = ?, updated_at = ? WHERE id = ?').bind(blocked ? now() : null, reason, now(), id),
     ...(blocked ? [env.DB.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?').bind(id)] : []),
   ]);
+  if (blocked) {
+    await notify(env, id, 'account', 'Your account was blocked', `Klass8 blocked your account: ${reason} Contact Klass8 if you think this is a mistake.`);
+  } else if (u.blocked_at) {
+    await notify(env, id, 'account', 'Your account is open again', 'Klass8 unblocked your account. You can sign in and use it as before.');
+  }
+  await securityEvent(env, blocked ? 'user_blocked' : 'user_unblocked', request, `${admin.name}: ${u.name}${reason ? ` (${reason})` : ''}`);
   return ok({ user: userRow(await findUser(env, id), env) });
 }
 
@@ -246,7 +278,7 @@ export async function blockUser(request, env, id) {
 // everything about the person from Klass8. Payments stay for the accounts,
 // with the amount and date only: the person's number and account are taken off.
 export async function deleteUser(request, env, id) {
-  await requireAdmin(request, env);
+  const admin = await requireAdmin(request, env);
   const b = await readJson(request);
   if (b.confirm !== true) throw new HttpError(400, 'Confirm that the account should be deleted.', 'confirm_required');
   const u = await findUser(env, id);
@@ -274,8 +306,14 @@ export async function deleteUser(request, env, id) {
     env.DB.prepare("UPDATE licence_requests SET user_id = 'deleted' WHERE user_id = ?").bind(id),
     env.DB.prepare("UPDATE schools SET created_by = 'deleted' WHERE created_by = ?").bind(id),
     env.DB.prepare("UPDATE payments SET user_id = 'deleted', phone = '' WHERE user_id = ?").bind(id),
+    env.DB.prepare('DELETE FROM referrals WHERE user_id = ? OR referrer_id = ?').bind(id, id),
+    env.DB.prepare('DELETE FROM commissions WHERE referrer_id = ?').bind(id),
+    env.DB.prepare("UPDATE commissions SET referred_id = 'deleted' WHERE referred_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM withdrawals WHERE user_id = ? AND status != 'paid'").bind(id),
+    env.DB.prepare("UPDATE withdrawals SET user_id = 'deleted', phone = '' WHERE user_id = ?").bind(id),
     env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id),
   ]);
+  await securityEvent(env, 'user_deleted', request, `${admin.name}: ${u.name} (${u.role})`);
   return ok({ deleted: true, name: u.name });
 }
 
@@ -301,8 +339,9 @@ export async function getSettings(request, env) {
 
 // PUT /v1/admin/settings { priceMonth?, priceYear?, charging? }
 export async function putSettings(request, env) {
-  const admin = await requireAdmin(request, env);
+  const admin = await requireAdminCan(request, env, 'owner');
   const b = await readJson(request);
+  const before = { ...currentPlans(), charging: paywallOn(env) };
   const changes = {};
   if (b.priceMonth !== undefined) changes.price_month = int(b.priceMonth, 'The monthly price', { min: 100, max: 100000 });
   if (b.priceYear !== undefined) changes.price_year = int(b.priceYear, 'The yearly price', { min: 100, max: 1000000 });
@@ -312,6 +351,28 @@ export async function putSettings(request, env) {
     changes.paywall = on ? 'on' : 'off';
   }
   await saveSettings(env, changes, admin.id || 'operator');
+  // Students are told, in plain words, what changed for them.
+  const after = { ...currentPlans(), charging: paywallOn(env) };
+  const lines = [];
+  const f = (n) => `${n.toLocaleString('en-US')} FCFA`;
+  if (after.month.amount !== before.month.amount || after.year.amount !== before.year.amount) {
+    lines.push(`New prices from today: ${f(after.month.amount)} for a month (was ${f(before.month.amount)}) and ${f(after.year.amount)} for a year (was ${f(before.year.amount)}). Days you already paid for are not changed.`);
+  }
+  if (after.charging !== before.charging) {
+    lines.push(after.charging ? 'Platform charges now apply: after your free month, pay by mobile money to keep everything open.' : 'Klass8 is free for everyone for now: no payment is needed to use everything.');
+  }
+  if (lines.length && b.tell !== false) {
+    const { results } = await env.DB.prepare("SELECT id FROM users WHERE role = 'student' AND deleted_at IS NULL").all();
+    const t = now();
+    const text = lines.join(' ');
+    for (let i = 0; i < results.length; i += 200) {
+      await env.DB.batch(
+        results.slice(i, i + 200).map((u) =>
+          env.DB.prepare("INSERT INTO notifications (id, user_id, kind, title, body, data, read, created_at) VALUES (lower(hex(randomblob(16))), ?, 'payment', 'Klass8 prices', ?, NULL, 0, ?)").bind(u.id, text.slice(0, 500), t)
+        )
+      );
+    }
+  }
   return ok(settingsBody(env));
 }
 
@@ -361,7 +422,7 @@ export async function resolveAiReport(request, env, id) {
 export async function announce(request, env) {
   await requireAdmin(request, env);
   const b = await readJson(request);
-  const audience = oneOf(b.audience, 'Who it is for', ['everyone', 'student', 'parent', 'teacher']);
+  const audience = oneOf(b.audience, 'Who it is for', ['everyone', 'student', 'parent', 'teacher', 'partner']);
   const title = str(b.title, 'Title', { min: 3, max: 120 });
   const body = str(b.body, 'Message', { min: 3, max: 500 });
   const { results } = await env.DB.prepare("SELECT id FROM users WHERE deleted_at IS NULL AND blocked_at IS NULL AND (? = 'everyone' OR role = ?)").bind(audience, audience).all();
@@ -374,4 +435,92 @@ export async function announce(request, env) {
     );
   }
   return ok({ sent: results.length });
+}
+
+// ---------- money over any period ----------
+
+// GET /v1/admin/money?from=&to=&status=  (times in ms; by default the last 30 days)
+// What came in over the period, by plan, over time, and what partners earned from it.
+export async function money(request, env) {
+  await requireAdmin(request, env);
+  const q = new URL(request.url).searchParams;
+  const t = now();
+  const to = Math.min(t, Number(q.get('to')) || t);
+  const from = Math.max(0, Math.min(to - 60_000, Number(q.get('from')) || to - 30 * DAY));
+  const status = q.get('status') || '';
+  const sums = await env.DB.prepare(
+    `SELECT COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' THEN amount END), 0) AS total,
+            COUNT(CASE WHEN status = 'SUCCESSFUL' THEN 1 END) AS paid,
+            COUNT(DISTINCT CASE WHEN status = 'SUCCESSFUL' THEN user_id END) AS payers,
+            COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' AND plan = 'month' THEN amount END), 0) AS monthAmount,
+            COUNT(CASE WHEN status = 'SUCCESSFUL' AND plan = 'month' THEN 1 END) AS monthCount,
+            COALESCE(SUM(CASE WHEN status = 'SUCCESSFUL' AND plan = 'year' THEN amount END), 0) AS yearAmount,
+            COUNT(CASE WHEN status = 'SUCCESSFUL' AND plan = 'year' THEN 1 END) AS yearCount,
+            COUNT(CASE WHEN status = 'PENDING' THEN 1 END) AS pending,
+            COUNT(CASE WHEN status = 'REVIEW' THEN 1 END) AS review,
+            COUNT(CASE WHEN status IN ('FAILED', 'EXPIRED') THEN 1 END) AS failed
+     FROM payments WHERE created_at >= ? AND created_at < ?`
+  )
+    .bind(from, to)
+    .first();
+  const share = await env.DB.prepare('SELECT COALESCE(SUM(amount), 0) AS amount, COUNT(*) AS n FROM commissions WHERE cancelled_at IS NULL AND created_at >= ? AND created_at < ?').bind(from, to).first();
+  const joined = await env.DB.prepare("SELECT COUNT(*) AS n, SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) AS students FROM users WHERE created_at >= ? AND created_at < ?").bind(from, to).first();
+  // Bars: by hour for up to 2 days, by day up to 62 days, by week up to a year, then by month.
+  const span = to - from;
+  const step = span <= 2 * DAY ? 'hour' : span <= 62 * DAY ? 'day' : span <= 366 * DAY ? 'week' : 'month';
+  const { results: rows } = await env.DB.prepare("SELECT amount, created_at AS t FROM payments WHERE status = 'SUCCESSFUL' AND created_at >= ? AND created_at < ?").bind(from, to).all();
+  const keyOf = (ms) => {
+    const d = new Date(ms);
+    if (step === 'hour') return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours());
+    if (step === 'day') return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    if (step === 'week') return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - ((d.getUTCDay() + 6) % 7) * DAY;
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  };
+  const next = (k) => {
+    if (step === 'hour') return k + 3600_000;
+    if (step === 'day') return k + DAY;
+    if (step === 'week') return k + 7 * DAY;
+    const d = new Date(k);
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
+  };
+  const series = [];
+  const index = new Map();
+  for (let k = keyOf(from); k < to && series.length < 120; k = next(k)) {
+    index.set(k, series.length);
+    series.push({ t: k, amount: 0, count: 0 });
+  }
+  for (const r of rows) {
+    const i = index.get(keyOf(r.t));
+    if (i != null) {
+      series[i].amount += r.amount;
+      series[i].count += 1;
+    }
+  }
+  const { results: items } = await env.DB.prepare(
+    `SELECT p.id, p.reference, p.plan, p.amount, p.status, p.operator, p.created_at AS createdAt, u.id AS userId, u.name, u.phone
+     FROM payments p LEFT JOIN users u ON u.id = p.user_id WHERE p.created_at >= ? AND p.created_at < ? AND (? = '' OR p.status = ?)
+     ORDER BY p.created_at DESC LIMIT 200`
+  )
+    .bind(from, to, status, status)
+    .all();
+  const afterFees = Math.round((sums?.total || 0) * (1 - FAPSHI_FEE));
+  const firstDay = await env.DB.prepare('SELECT MIN(created_at) AS t FROM users').first();
+  return ok({
+    from,
+    to,
+    step,
+    startedAt: firstDay?.t || null,
+    total: sums?.total || 0,
+    afterFees,
+    fees: (sums?.total || 0) - afterFees,
+    partnerShare: share?.amount || 0,
+    kept: afterFees - (share?.amount || 0),
+    payments: sums?.paid || 0,
+    payers: sums?.payers || 0,
+    byPlan: { month: { amount: sums?.monthAmount || 0, count: sums?.monthCount || 0 }, year: { amount: sums?.yearAmount || 0, count: sums?.yearCount || 0 } },
+    open: { pending: sums?.pending || 0, review: sums?.review || 0, failed: sums?.failed || 0 },
+    joined: { accounts: joined?.n || 0, students: joined?.students || 0 },
+    series,
+    items,
+  });
 }

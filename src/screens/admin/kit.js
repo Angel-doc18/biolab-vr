@@ -6,7 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { C, Ic, Logo, P, T, V } from '../../ui/kit';
 import { Cta } from '../../ui/chrome';
-import { get } from '../../api/adminClient';
+import * as Clipboard from 'expo-clipboard';
+import { currentAdmin, get } from '../../api/adminClient';
 
 export const date = (t) => (t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-');
 export const phoneText = (p) => (p && /^237\d{9}$/.test(p) ? `+237 ${p.slice(3, 6)} ${p.slice(6, 8)} ${p.slice(8, 10)} ${p.slice(10)}` : p || '');
@@ -18,7 +19,7 @@ export function ago(t, L) {
   if (days < 30) return `${days} ${L('days ago', 'jours')}`;
   return date(t);
 }
-export const roleName = (role, L) => ({ student: L('Student', 'Élève'), parent: L('Parent', 'Parent'), teacher: L('Teacher', 'Enseignant') })[role] || role;
+export const roleName = (role, L) => ({ student: L('Student', 'Élève'), parent: L('Parent', 'Parent'), teacher: L('Teacher', 'Enseignant'), partner: L('Partner', 'Partenaire') })[role] || role;
 
 // Loads an admin list or figure; again when the screen comes back into view,
 // when `path` changes, or when reload() is called.
@@ -233,5 +234,64 @@ export function Sheet({ visible, onClose, icon = 'help', danger, title, text, ac
         </V>
       </V>
     </Modal>
+  );
+}
+
+// What the signed-in admin may do: the founder and the CTO (owner) change
+// prices and the partner programme; the CTO (system) also has the System tab.
+export function useAdminCan() {
+  const a = currentAdmin();
+  const role = a?.role || 'admin';
+  return { role, owner: role === 'ceo' || role === 'cto', system: role === 'cto', admin: a };
+}
+
+export const money = (n) => `${Math.round(Number(n) || 0).toLocaleString('en-US')} FCFA`;
+
+// Copies text and says so; on a phone that cannot copy, nothing breaks.
+export async function copyText(text, showToast, L) {
+  try {
+    await Clipboard.setStringAsync(String(text));
+    showToast?.(L ? L('Copied', 'Copié') : 'Copied');
+  } catch {
+    // the text can still be selected on screen
+  }
+}
+
+// Bars for money over time: one bar per hour, day, week or month, the height
+// in proportion to the largest. Each label is the bar's own value.
+export function Bars({ series, label, height = 120 }) {
+  const max = Math.max(1, ...series.map((s) => s.amount));
+  const many = series.length > 16;
+  return (
+    <V c="gap-1.5">
+      <V c="flex-row items-end gap-[2px]" style={{ height }} accessibilityLabel={label}>
+        {series.map((s) => (
+          <V key={s.t} c="flex-1 rounded-t-sm" style={{ height: Math.max(2, (s.amount / max) * height), backgroundColor: s.amount ? '#02287b' : '#e6eef7' }} />
+        ))}
+      </V>
+      {!many && (
+        <V c="flex-row gap-[2px]">
+          {series.map((s) => (
+            <T key={s.t} c="flex-1 font-label-sm text-label-sm text-outline text-center" style={{ fontSize: 9 }} numberOfLines={1}>
+              {label(s.t)}
+            </T>
+          ))}
+        </V>
+      )}
+    </V>
+  );
+}
+
+// A number with what it means, in a row of two or three.
+export function Figure({ value, label, tone }) {
+  return (
+    <V c="flex-1 min-w-[45%] p-space-sm rounded-xl gap-0.5" style={{ backgroundColor: tone === 'ok' ? '#e3f4ec' : tone === 'warn' ? '#fff3d6' : '#eef3fa' }}>
+      <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700', fontVariant: ['tabular-nums'] }} numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+      </T>
+      <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={2}>
+        {label}
+      </T>
+    </V>
   );
 }

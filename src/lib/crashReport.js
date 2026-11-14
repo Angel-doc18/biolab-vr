@@ -14,6 +14,16 @@ let sent = 0;
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// A random id for this installation (not the person), so the CTO can see how
+// many phones a problem reaches.
+let device = null;
+AsyncStorage.getItem('klass8.device')
+  .then(async (v) => {
+    device = v || `d${Math.random().toString(36).slice(2, 12)}${Date.now().toString(36)}`;
+    if (!v) await AsyncStorage.setItem('klass8.device', device);
+  })
+  .catch(() => {});
+
 function shape(error, where, fatal) {
   const message = error && typeof error === 'object' && 'message' in error ? error.message : error;
   return {
@@ -24,6 +34,7 @@ function shape(error, where, fatal) {
     platform: Platform.OS,
     os: String(Platform.Version ?? ''),
     build: BUILD,
+    device,
   };
 }
 

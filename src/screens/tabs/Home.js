@@ -17,6 +17,8 @@ import { SubjectGrid, TileGrid } from '../../ui/hub';
 import { useSubjectCards } from '../subjectCards';
 import ChargesCard from '../../ui/ChargesCard';
 import ParentHome from './ParentHome';
+import PartnerHome from './PartnerHome';
+import InviteCard from '../../ui/InviteCard';
 import TeacherHome from './TeacherHome';
 
 export function Section({ title, action, onAction, children }) {
@@ -98,6 +100,7 @@ function StudentHome({ navigation }) {
         </V>
 
         <ChargesCard user={user} onPress={() => navigation.navigate('Paywall')} />
+        <InviteCard navigation={navigation} />
 
         <V c="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container">
           <P c="p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('ClassPick', { flow: 'changeClass' })} accessibilityRole="button" accessibilityLabel={L('Change your class', 'Changer de classe')}>
@@ -295,5 +298,6 @@ export default function Home(props) {
   const { user } = useApp();
   if (user?.role === 'parent') return <ParentHome {...props} />;
   if (user?.role === 'teacher') return <TeacherHome {...props} />;
+  if (user?.role === 'partner') return <PartnerHome {...props} />;
   return <StudentHome {...props} />;
 }

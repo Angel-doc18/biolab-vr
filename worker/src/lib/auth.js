@@ -6,7 +6,8 @@ import { randomToken, sha256, signJwt, uuid, verifyJwt } from './crypto.js';
 import { userSubjects } from './subjects.js';
 import { setting } from './settings.js';
 
-const BLOCKED = 'This account has been blocked. Contact Klass8.';
+// What a blocked person sees, with the reason the admin gave.
+export const blockedMessage = (u) => `This account has been blocked${u?.blocked_reason ? `: ${u.blocked_reason}` : '.'} Contact Klass8 if you think this is a mistake.`;
 
 const ACCESS_TTL = 15 * 60; // seconds
 const REFRESH_TTL_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
@@ -37,8 +38,11 @@ export async function rotateRefresh(env, refreshToken) {
   }
   if (row.expires_at < now()) throw new HttpError(401, 'Session expired. Please log in again.', 'unauthorized');
   await env.DB.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE id = ?').bind(row.id).run();
-  const user = await env.DB.prepare('SELECT id, role FROM users WHERE id = ? AND deleted_at IS NULL AND blocked_at IS NULL').bind(row.user_id).first();
+  const user = await env.DB.prepare('SELECT id, role, blocked_at, blocked_reason FROM users WHERE id = ? AND deleted_at IS NULL').bind(row.user_id).first();
   if (!user) throw new HttpError(401, 'Session expired. Please log in again.', 'unauthorized');
+  if (user.blocked_at) throw new HttpError(401, blockedMessage(user), 'account_blocked');
+  const after = Number(setting('user_sessions_after') || 0);
+  if (after && row.created_at < after) throw new HttpError(401, 'Please log in again.', 'unauthorized');
   return issueSession(env, user);
 }
 
@@ -57,7 +61,10 @@ export async function requireUser(request, env, roles) {
   if (!claims?.sub || claims.kind === 'admin') throw new HttpError(401, 'Please log in.', 'unauthorized');
   const user = await env.DB.prepare('SELECT * FROM users WHERE id = ? AND deleted_at IS NULL').bind(claims.sub).first();
   if (!user) throw new HttpError(401, 'Please log in.', 'unauthorized');
-  if (user.blocked_at) throw new HttpError(401, BLOCKED, 'account_blocked');
+  if (user.blocked_at) throw new HttpError(401, blockedMessage(user), 'account_blocked');
+  // "Sign everyone out" in the CTO's System tab ends sessions made before it.
+  const after = Number(setting('user_sessions_after') || 0);
+  if (after && (claims.iat || 0) * 1000 < after) throw new HttpError(401, 'Please log in again.', 'unauthorized');
   if (roles && !roles.includes(user.role)) throw new HttpError(403, 'You do not have access to this.', 'forbidden');
   return user;
 }
@@ -84,7 +91,9 @@ export const trialUntil = (u) => (u.role === 'student' ? (u.created_at || 0) + f
 // When the student's access ends (the later of the free month and what was
 // paid); a payment or code adds its days after it.
 export const accessEnd = (u) => Math.max(u.pro_until || 0, trialUntil(u) || 0);
-export const isPro = (user, env) => !paywallOn(env) || user.role !== 'student' || Boolean(user.is_admin) || accessEnd(user) > now();
+// Parents and teachers do not pay. A partner account is for inviting people:
+// it opens the course only while charges are off or with paid days.
+export const isPro = (user, env) => !paywallOn(env) || (user.role !== 'student' && user.role !== 'partner') || Boolean(user.is_admin) || accessEnd(user) > now();
 export function requireAccess(user, env) {
   if (!isPro(user, env)) {
     const msg = freeDays() > 0 ? 'Your free month has ended. Pay the platform charges to keep using Klass8.' : 'Pay the platform charges to use Klass8.';
@@ -131,6 +140,7 @@ export function publicUser(u, env) {
     proUntil: u.pro_until || null,
     trialUntil: paywallOn(env) && !u.is_admin ? trialUntil(u) : null, // the free month, once charges apply
     isAdmin: Boolean(u.is_admin),
+    partnerKind: u.partner_kind || null,
     createdAt: u.created_at,
   };
 }

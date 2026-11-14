@@ -7,6 +7,8 @@
 import { HttpError, clientIp, limit, now, ok, readJson } from './http.js';
 import { randomToken, safeEqual, sha256, signJwt, uuid, verifyJwt, verifyPassword } from './crypto.js';
 import { phone, str } from './validate.js';
+import { setting } from './settings.js';
+import { countAuthFailure, securityEvent } from './monitor.js';
 
 const ACCESS_TTL = 15 * 60; // seconds
 const REFRESH_TTL_MS = 12 * 60 * 60 * 1000; // an admin signs in again every 12 hours
@@ -25,7 +27,17 @@ export function adminLogin(raw) {
   }
 }
 
-const publicAdmin = (a) => ({ id: a.id, name: a.name, login: a.login });
+// What each kind of admin is called, and what they may do. The founder (ceo)
+// and the CTO run everything; the CTO also has the system tools.
+export const ROLE_TITLES = { ceo: 'Founder and CEO', cto: 'Co-founder and CTO', admin: 'Admin' };
+export const publicAdmin = (a) => ({
+  id: a.id,
+  name: a.name,
+  login: a.login,
+  role: a.role || 'admin',
+  title: a.title || ROLE_TITLES[a.role] || 'Admin',
+  can: { system: a.role === 'cto' || a.id === null, owner: a.role === 'ceo' || a.role === 'cto' || a.id === null },
+});
 
 async function issue(env, admin) {
   const refresh = randomToken(32);
@@ -38,9 +50,26 @@ async function issue(env, admin) {
 
 // What a sign-in returns for an admin account: kind 'admin' tells the app to
 // open the admin console instead of a user's session.
-export async function adminSession(env, admin) {
+export async function adminSession(env, admin, request) {
   await env.DB.prepare('UPDATE admins SET last_login_at = ? WHERE id = ?').bind(now(), admin.id).run();
+  if (request) {
+    const ip = clientIp(request);
+    const seen = await env.DB.prepare("SELECT 1 FROM security_events WHERE kind = 'admin_login' AND ip = ? AND detail LIKE ? LIMIT 1").bind(ip, `${admin.login} %`).first().catch(() => null);
+    await securityEvent(env, 'admin_login', request, `${admin.login} signed in`);
+    if (!seen) {
+      await adminNotice(env, admin.id, 'security', 'New sign-in to your admin account', `Your account was signed in from a new network (${ip}) on ${new Date().toUTCString()}. If this was not you, change your password in My account at once.`);
+    }
+  }
   return { kind: 'admin', ...(await issue(env, admin)) };
+}
+
+// A note to an admin about their own account.
+export async function adminNotice(env, adminId, kind, title, body) {
+  if (!adminId) return;
+  await env.DB.prepare('INSERT INTO admin_notices (id, admin_id, kind, title, body, read, created_at) VALUES (?, ?, ?, ?, ?, 0, ?)')
+    .bind(uuid(), adminId, kind, title.slice(0, 140), body.slice(0, 600), now())
+    .run()
+    .catch(() => {});
 }
 
 // Anyone who is not an admin gets "not found", so the admin endpoints do not show themselves.
@@ -48,14 +77,26 @@ export async function requireAdmin(request, env) {
   const token = request.headers.get('x-admin-token');
   if (token) {
     await limit(env.AUTH_LIMITER, `admin:${clientIp(request)}`);
-    if (env.ADMIN_TOKEN && env.ADMIN_TOKEN.length >= 32 && safeEqual(token, env.ADMIN_TOKEN)) return { id: null, name: 'operator' };
+    if (env.ADMIN_TOKEN && env.ADMIN_TOKEN.length >= 32 && safeEqual(token, env.ADMIN_TOKEN)) return { id: null, name: 'operator', role: 'cto' };
     throw new HttpError(404, 'Not found.', 'not_found');
   }
   const header = request.headers.get('authorization') || '';
   const claims = await verifyJwt(header.startsWith('Bearer ') ? header.slice(7) : null, env.JWT_SECRET);
   if (!claims?.sub || claims.kind !== 'admin') throw new HttpError(404, 'Not found.', 'not_found');
-  const admin = await env.DB.prepare('SELECT id, name, login, disabled FROM admins WHERE id = ?').bind(claims.sub).first();
+  const admin = await env.DB.prepare('SELECT id, name, login, disabled, role, title, password_hash, password_salt FROM admins WHERE id = ?').bind(claims.sub).first();
   if (!admin || admin.disabled) throw new HttpError(401, SESSION_ENDED, 'admin_signed_out');
+  // "Sign out every admin" in System ends the sessions made before it.
+  const after = Number(setting('admin_sessions_after') || 0);
+  if (after && (claims.iat || 0) * 1000 < after) throw new HttpError(401, SESSION_ENDED, 'admin_signed_out');
+  return admin;
+}
+
+// Only the founder and the CTO (owner), or only the CTO (system).
+export async function requireAdminCan(request, env, what) {
+  const admin = await requireAdmin(request, env);
+  if (!publicAdmin(admin).can[what]) {
+    throw new HttpError(403, what === 'system' ? 'Only the CTO can use the system tools.' : 'Only the founder or the CTO can change this.', 'forbidden');
+  }
   return admin;
 }
 
@@ -68,9 +109,13 @@ export async function signIn(request, env) {
   const admin = login ? await env.DB.prepare('SELECT * FROM admins WHERE login = ?').bind(login).first() : null;
   // The password is checked even when no admin has that login, so the answer takes as long either way.
   const valid = await verifyPassword(pw, admin?.password_hash || DUMMY.hash, admin?.password_salt || DUMMY.salt);
-  if (!admin || !valid) throw new HttpError(401, LOGIN_ERROR, 'invalid_credentials');
+  if (!admin || !valid) {
+    countAuthFailure();
+    await securityEvent(env, 'admin_login_failed', request, `${login || 'unknown'} wrong password`);
+    throw new HttpError(401, LOGIN_ERROR, 'invalid_credentials');
+  }
   if (admin.disabled) throw new HttpError(403, 'This admin account is switched off.', 'admin_disabled');
-  return ok(await adminSession(env, admin));
+  return ok(await adminSession(env, admin, request));
 }
 
 // POST /v1/admin/refresh { refreshToken }
@@ -103,5 +148,5 @@ export async function signOut(request, env) {
 // GET /v1/admin/me
 export async function me(request, env) {
   const admin = await requireAdmin(request, env);
-  return ok({ admin: admin.id ? publicAdmin(admin) : { id: null, name: 'operator', login: null } });
+  return ok({ admin: admin.id ? publicAdmin(admin) : publicAdmin({ id: null, name: 'operator', login: null, role: 'cto' }) });
 }
