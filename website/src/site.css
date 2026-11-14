@@ -1145,16 +1145,16 @@ a, button, summary, label, select { -webkit-tap-highlight-color: transparent; }
 .team__after { margin-top: 48px; text-align: center; }
 .team[hidden] + .team__after { margin-top: 0; }
 
+/* On a phone, one person after another: the photo, then the name, role and bio, centred. */
 @media (max-width: 600px) {
-  .team { grid-template-columns: 1fr 1fr; gap: 28px 14px; }
-  .person h3 { font-size: 1.12rem; }
-  .person__role { font-size: 0.88rem; }
-  .person__bio { font-size: 0.92rem; }
-  .person__photo { margin-bottom: 10px; border-radius: var(--r); }
-  /* on the home page the people are a row to swipe */
-  .team--home { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(-1 * var(--gut)); padding: 4px var(--gut) 12px; scroll-padding-inline: var(--gut); justify-content: flex-start; }
-  .team--home::-webkit-scrollbar { display: none; }
-  .team--home .person { flex: 0 0 62%; scroll-snap-align: start; }
+  .team, .team--home { grid-template-columns: minmax(0, 1fr); justify-content: stretch; gap: 0; }
+  .person { justify-items: center; text-align: center; padding: 36px 0; }
+  .person + .person { border-top: 1px solid var(--line); }
+  .person:first-child { padding-top: 0; }
+  .person:last-child { padding-bottom: 0; }
+  .person__photo { width: min(220px, 64%); margin-bottom: 16px; }
+  .person h3 { font-size: 1.3rem; }
+  .person__bio { max-width: 34ch; }
 }
 
 /* The headline is two lines at every width: each sentence keeps to one line,
