@@ -18,6 +18,11 @@ export default function Pay({ navigation, route }) {
   const { user, refreshMe, refreshQuota } = useApp();
   const L = useL();
   const plan = route.params?.plan === 'month' ? 'month' : 'year';
+  // A parent paying for children: their ids and names, and whether the parent is included.
+  const forIds = route.params?.for || [];
+  const self = forIds.length ? !!route.params?.self : true;
+  const count = forIds.length + (self ? 1 : 0);
+  const whoFor = [...(self && forIds.length ? [L('you', 'vous')] : []), ...(route.params?.names || [])].join(', ');
   const [plans, setPlans] = useState(null);
   const [checkout, setCheckout] = useState('prompt');
   const [open, setOpen] = useState(true);
@@ -40,7 +45,8 @@ export default function Pay({ navigation, route }) {
   useFocusEffect(loadPlans);
   useEffect(() => () => clearTimeout(poll.current), []);
 
-  const amount = (plans || LOCAL_PLANS)[plan]?.amount;
+  const unit = (plans || LOCAL_PLANS)[plan]?.amount;
+  const amount = unit ? unit * count : unit;
   const prov = PROVIDERS.find((p) => p.id === provider);
   const planName = plan === 'year' ? L('One year', 'Un an') : L('One month', 'Un mois');
 
@@ -94,7 +100,8 @@ export default function Pay({ navigation, route }) {
     setBusy(true);
     setError(null);
     try {
-      const body = checkout === 'prompt' ? { plan, phone: `237${d}`, medium: provider } : { plan };
+      const who = forIds.length ? { for: forIds, self } : {};
+      const body = checkout === 'prompt' ? { plan, phone: `237${d}`, medium: provider, ...who } : { plan, ...who };
       const r = await post('/v1/billing/pay', body);
       const link = r.payment.link || null;
       setPayment({ id: r.payment.id, status: 'PENDING', amount: r.payment.amount, link });
@@ -134,6 +141,11 @@ export default function Pay({ navigation, route }) {
               <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
                 {planName}: {amount ? fcfa(amount) : '-'}
               </T>
+              {forIds.length > 0 && (
+                <T c="font-body-sm text-body-sm text-on-surface-variant">
+                  {L('For', 'Pour')} {whoFor} ({count} × {unit ? fcfa(unit) : '-'})
+                </T>
+              )}
             </V>
             <P onPress={() => navigation.goBack()} hitSlop={8}>
               <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>

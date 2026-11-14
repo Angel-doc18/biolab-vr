@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Bar, P, T, V } from '../../ui/kit';
+import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, Spinner, TabHeader } from '../../ui/chrome';
 import { get } from '../../api/client';
 import { useApp } from '../../state/store';
@@ -11,10 +11,37 @@ import { subjectName } from '../../data/subjects';
 import { shareReportPdf } from '../../lib/report';
 import { Section } from './Home';
 import InviteCard from '../../ui/InviteCard';
+import ChargesCard from '../../ui/ChargesCard';
 
 const DAY = 86400000;
 
-function ChildCard({ r, L, lang }) {
+const longDay = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+// Where the child stands with the platform charges, and a button to pay for them.
+function ChildAccess({ r, L, onPay }) {
+  const a = r.access;
+  if (!a || !a.charging) return null;
+  const due = !a.open;
+  return (
+    <V c="flex-row items-center gap-space-sm p-space-sm rounded-xl" style={{ backgroundColor: due ? '#fdecea' : a.paidUntil ? '#e3f4ec' : '#eef3fa' }}>
+      <Ic n={due ? 'lock' : a.paidUntil ? 'verified' : 'schedule'} s={20} c={due ? 'error' : a.paidUntil ? 'secondary' : 'primary-container'} fill={!due} />
+      <T c="flex-1 font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 19 }}>
+        {due
+          ? L('Platform charges due: lessons are locked.', 'Frais à payer : les leçons sont bloquées.')
+          : a.paidUntil
+            ? `${L('Paid until', 'Payé jusqu’au')} ${longDay(a.paidUntil)}`
+            : `${L('Free month until', 'Mois gratuit jusqu’au')} ${longDay(a.until)}`}
+      </T>
+      <P c={`h-9 px-3 rounded-lg items-center justify-center ${due ? 'bg-primary' : 'bg-surface-container-lowest'}`} onPress={onPay} accessibilityLabel={`${L('Pay for', 'Payer pour')} ${r.student.name}`}>
+        <T c={`font-label-md text-label-md ${due ? 'text-on-primary' : 'text-primary-container'}`} style={{ fontWeight: '700' }}>
+          {due ? L('Pay now', 'Payer') : L('Add time', 'Prolonger')}
+        </T>
+      </P>
+    </V>
+  );
+}
+
+function ChildCard({ r, L, lang, onPay }) {
   const idle = r.lastActive ? Math.floor((Date.now() - r.lastActive) / DAY) : null;
   const [busy, setBusy] = useState(false);
   const subjects = r.student.subjects?.length ? r.student.subjects : ['biology'];
@@ -29,6 +56,7 @@ function ChildCard({ r, L, lang }) {
           {[r.student.className, r.student.schoolName].filter(Boolean).join(', ') || L('GCE Ordinary Level candidate', 'Candidat au GCE Ordinary Level')}
         </T>
       </V>
+      <ChildAccess r={r} L={L} onPay={onPay} />
 
       <T c={`font-body-md text-body-md ${idle != null && idle >= 3 ? 'text-error' : 'text-on-surface'}`} style={{ lineHeight: 22 }}>
         {idle == null
@@ -110,6 +138,9 @@ export default function ParentHome({ navigation }) {
       load();
     }, [load])
   );
+  // Children whose free month or paid time has ended.
+  const due = (items || []).filter((r) => r.access?.charging && !r.access.open);
+  const payFor = (ids) => navigation.navigate('Paywall', { for: ids });
 
   return (
     <Screen header={<TabHeader subtitle={L('Parent or guardian', 'Parent ou tuteur')} />} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}>
@@ -120,6 +151,17 @@ export default function ParentHome({ navigation }) {
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant">{L('Your children’s revision, updated as they study.', 'Les révisions de vos enfants, mises à jour pendant qu’ils travaillent.')}</T>
         </V>
+        <ChargesCard user={user} onPress={() => navigation.navigate('Paywall')} />
+        {!!due.length && (
+          <V c="p-space-md rounded-xl gap-space-sm" style={{ backgroundColor: '#fff3d6' }}>
+            <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+              {due.length === 1
+                ? `${due[0].student.name.split(' ')[0]} ${L('needs the platform charges to keep learning.', 'a besoin des frais de plateforme pour continuer.')}`
+                : `${due.length} ${L('of your children need the platform charges to keep learning.', 'de vos enfants ont besoin des frais de plateforme.')}`}
+            </T>
+            <Cta variant="dark" icon={null} lead="payments" label={due.length === 1 ? `${L('Pay for', 'Payer pour')} ${due[0].student.name.split(' ')[0]}` : L('Pay for all of them at once', 'Payer pour tous en une fois')} onPress={() => payFor(due.map((r) => r.student.id))} />
+          </V>
+        )}
         <InviteCard navigation={navigation} compact />
         <ErrorNote error={error} />
         {items === null ? (
@@ -128,7 +170,7 @@ export default function ParentHome({ navigation }) {
           <Section title={items.length === 1 ? L('Your child', 'Votre enfant') : L('Your children', 'Vos enfants')}>
             <V c="gap-space-md">
               {items.map((r) => (
-                <ChildCard key={r.student.id} r={r} L={L} lang={prefs.lang} />
+                <ChildCard key={r.student.id} r={r} L={L} lang={prefs.lang} onPay={() => payFor([r.student.id])} />
               ))}
             </V>
           </Section>

@@ -133,16 +133,29 @@ const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Fo
 // settings. Anything else leads to the platform charges.
 const OPEN_WHEN_LOCKED = [...PUBLIC, 'Role', 'SchoolKind', 'ClassPick', 'ExamYear', 'Series', 'Subjects', 'School', 'Grade', 'StudyTime', 'Reminder', 'SetupDone', 'Paywall', 'Pay', 'Voucher', 'Settings', 'Offline', 'Invite', 'PartnerKind'];
 
+// Parents and teachers whose time has ended keep their own tools: a parent's
+// children, reports and payments for them, a teacher's classes. The lessons,
+// practicals, papers and tutor (Learn, Lab, Exams) lead to the platform charges.
+const OPEN_FOR_PARENTS_TEACHERS = [...OPEN_WHEN_LOCKED, 'Main', 'Home', 'Me', 'Notifications', 'ParentReport', 'LinkChild', 'CreateClass', 'Legal'];
+const PAYING_ROLES = ['student', 'parent', 'teacher'];
+
 const theme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: C['surface-container-lowest'], primary: C['primary-container'] } };
 
 export default function AppNavigator() {
   const { auth, pro } = useApp();
-  const locked = auth.status === 'authed' && auth.user?.role === 'student' && !pro;
+  const role = auth.user?.role;
+  const locked = auth.status === 'authed' && PAYING_ROLES.includes(role) && !pro;
   const enforce = useCallback(() => {
     if (!locked || !navRef.isReady()) return;
     const route = navRef.getCurrentRoute();
-    if (route && !OPEN_WHEN_LOCKED.includes(route.name)) navRef.reset({ index: 0, routes: [{ name: 'Paywall', params: { gate: true } }] });
-  }, [locked]);
+    if (!route) return;
+    if (role === 'student') {
+      if (!OPEN_WHEN_LOCKED.includes(route.name)) navRef.reset({ index: 0, routes: [{ name: 'Paywall', params: { gate: true } }] });
+    } else if (!OPEN_FOR_PARENTS_TEACHERS.includes(route.name)) {
+      // Back from the charges leads Home, not to the locked lessons again.
+      navRef.reset({ index: 1, routes: [{ name: 'Main', params: { screen: 'Home' } }, { name: 'Paywall', params: { locked: true } }] });
+    }
+  }, [locked, role]);
   useEffect(enforce, [enforce]);
 
   // If the session ends: after signing out, back to the welcome page; if it

@@ -1,5 +1,5 @@
 import { HttpError, created, limit, now, ok, readJson } from '../lib/http.js';
-import { requireUser } from '../lib/auth.js';
+import { accessEnd, isPro, paywallOn, requireUser } from '../lib/auth.js';
 import { randomCode, uuid } from '../lib/crypto.js';
 import { int, oneOf, str } from '../lib/validate.js';
 import { notify } from '../lib/notify.js';
@@ -255,7 +255,10 @@ export async function myChildren(request, env) {
   const reports = [];
   for (const r of results) {
     try {
-      reports.push(await buildReport(env, r.student_id));
+      const report = await buildReport(env, r.student_id);
+      const u = await env.DB.prepare('SELECT role, created_at, pro_until, is_admin FROM users WHERE id = ?').bind(r.student_id).first();
+      report.access = { open: isPro(u, env), until: accessEnd(u) || null, paidUntil: u.pro_until && u.pro_until > now() ? u.pro_until : null, charging: paywallOn(env) };
+      reports.push(report);
     } catch {
       // deleted student: skip
     }

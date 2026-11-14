@@ -87,13 +87,18 @@ export function freeDays() {
   const n = raw == null || String(raw).trim() === '' ? NaN : Number(raw);
   return Number.isFinite(n) && n >= 0 ? n : 30;
 }
-export const trialUntil = (u) => (u.role === 'student' ? (u.created_at || 0) + freeDays() * 86_400_000 : null);
+// Students, parents and teachers each have a free first month; partner
+// accounts (for inviting people) have none.
+export const PAYING_ROLES = ['student', 'parent', 'teacher'];
+export const trialUntil = (u) => (PAYING_ROLES.includes(u.role) ? (u.created_at || 0) + freeDays() * 86_400_000 : null);
 // When the student's access ends (the later of the free month and what was
 // paid); a payment or code adds its days after it.
 export const accessEnd = (u) => Math.max(u.pro_until || 0, trialUntil(u) || 0);
-// Parents and teachers do not pay. A partner account is for inviting people:
-// it opens the course only while charges are off or with paid days.
-export const isPro = (user, env) => !paywallOn(env) || (user.role !== 'student' && user.role !== 'partner') || Boolean(user.is_admin) || accessEnd(user) > now();
+// Everyone pays for the course once charges are on: students, parents and
+// teachers after their free month, partner accounts from the start. A
+// parent's reports and payments for their children, and a teacher's classes,
+// stay free (those routes do not ask for access).
+export const isPro = (user, env) => !paywallOn(env) || Boolean(user.is_admin) || accessEnd(user) > now();
 export function requireAccess(user, env) {
   if (!isPro(user, env)) {
     const msg = freeDays() > 0 ? 'Your free month has ended. Pay the platform charges to keep using Klass8.' : 'Pay the platform charges to use Klass8.';

@@ -39,7 +39,7 @@ export default function ChargesCard({ user, onPress }) {
   // Read the clock once when the card appears; the screen re-mounts it when opened again.
   const [now] = useState(() => Date.now());
   const plans = usePlans();
-  if (!user || user.role !== 'student' || user.isAdmin || user.trialUntil == null) return null;
+  if (!user || !['student', 'parent', 'teacher'].includes(user.role) || user.isAdmin || user.trialUntil == null) return null;
   const paidUntil = user.proUntil && user.proUntil > now ? user.proUntil : null;
 
   if (paidUntil) {

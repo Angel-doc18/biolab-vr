@@ -35,14 +35,30 @@ export async function initiatePayment(request, env) {
   if (setting('payments_off') === 'on') throw new HttpError(503, 'Payments are paused for a short while. Please try again later; your account stays open meanwhile.', 'payments_paused');
   const ph = mode === 'prompt' ? phone(b.phone, 'Mobile money number') : '';
   const medium = mode === 'prompt' ? oneOf(b.medium, 'Payment method', ['mobile money', 'orange money']) : null;
+  // A parent can pay for their children in the same payment (and for
+  // themselves or not). Only children linked to this parent can be chosen.
+  const forIds = Array.isArray(b.for) ? [...new Set(b.for.map(String))].slice(0, 30) : [];
+  if (forIds.length && user.role !== 'parent') throw new HttpError(403, 'Only a parent can pay for other accounts.', 'forbidden');
+  if (forIds.length) {
+    const marks = forIds.map(() => '?').join(', ');
+    const { results: linked } = await env.DB.prepare(`SELECT l.student_id FROM parent_links l JOIN users u ON u.id = l.student_id WHERE l.parent_id = ? AND u.deleted_at IS NULL AND l.student_id IN (${marks})`)
+      .bind(user.id, ...forIds)
+      .all();
+    if (linked.length !== forIds.length) throw new HttpError(400, 'One of these children is no longer linked to your account.', 'not_linked');
+  }
+  const self = forIds.length ? b.self === true : true;
+  const accounts = [...(self ? [user.id] : []), ...forIds];
+  if (!accounts.length) throw new HttpError(400, 'Choose who you are paying for.', 'invalid_input');
+  const total = plan.amount * accounts.length;
   const id = uuid();
-  const ask = { amount: plan.amount, userId: plain(user.id), externalId: plain(id), message: `Klass8 ${plan.label}` };
+  const ask = { amount: total, userId: plain(user.id), externalId: plain(id), message: accounts.length > 1 ? `Klass8 ${plan.label} x ${accounts.length}` : `Klass8 ${plan.label}` };
   await env.DB.prepare(
     `INSERT INTO payments (id, user_id, provider, reference, plan, amount, phone, operator, status, applied, created_at, updated_at)
      VALUES (?, ?, 'fapshi', NULL, ?, ?, ?, ?, 'PENDING', 0, ?, ?)`
   )
-    .bind(id, user.id, planId, plan.amount, ph, medium, now(), now())
+    .bind(id, user.id, planId, total, ph, medium, now(), now())
     .run();
+  if (forIds.length) await env.DB.batch(accounts.map((uid) => env.DB.prepare('INSERT INTO payment_for (payment_id, user_id) VALUES (?, ?)').bind(id, uid)));
   let result;
   try {
     result =
@@ -61,7 +77,7 @@ export async function initiatePayment(request, env) {
   }
   await env.DB.prepare('UPDATE payments SET reference = ?, updated_at = ? WHERE id = ?').bind(result.transId, now(), id).run();
   return created({
-    payment: { id, reference: result.transId, plan: planId, amount: plan.amount, status: 'PENDING', checkout: mode, link: mode === 'link' ? result.link : undefined },
+    payment: { id, reference: result.transId, plan: planId, amount: total, accounts: accounts.length, status: 'PENDING', checkout: mode, link: mode === 'link' ? result.link : undefined },
   });
 }
 
@@ -95,11 +111,32 @@ async function settle(env, payment, providerData) {
       .bind(now(), payment.id)
       .run();
     if (claim.meta.changes === 1) {
-      const user = await env.DB.prepare('SELECT role, created_at, pro_until FROM users WHERE id = ?').bind(payment.user_id).first();
-      const until = paidUntil(user, payment.plan);
-      await env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until, now(), payment.user_id).run();
-      await notify(env, payment.user_id, 'payment', 'Payment received', `${currentPlans()[payment.plan].label}: ${payment.amount} FCFA. Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`, { reference: payment.reference });
-      await earnFromPayment(env, payment);
+      const { results: targets } = await env.DB.prepare('SELECT user_id FROM payment_for WHERE payment_id = ?').bind(payment.id).all();
+      if (!targets.length) {
+        const user = await env.DB.prepare('SELECT role, created_at, pro_until FROM users WHERE id = ?').bind(payment.user_id).first();
+        const until = paidUntil(user, payment.plan);
+        await env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until, now(), payment.user_id).run();
+        await notify(env, payment.user_id, 'payment', 'Payment received', `${currentPlans()[payment.plan].label}: ${payment.amount} FCFA. Klass8 is open until ${new Date(until).toLocaleDateString('en-GB')}.`, { reference: payment.reference });
+        await earnFromPayment(env, payment);
+      } else {
+        // A parent's payment for their children (and maybe themselves).
+        const unit = Math.round(payment.amount / targets.length);
+        const payer = await env.DB.prepare('SELECT name FROM users WHERE id = ?').bind(payment.user_id).first();
+        const lines = [];
+        for (const { user_id: uid } of targets) {
+          const u = await env.DB.prepare('SELECT id, name, role, created_at, pro_until FROM users WHERE id = ? AND deleted_at IS NULL').bind(uid).first();
+          if (!u) continue;
+          const until = paidUntil(u, payment.plan);
+          await env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(until, now(), uid).run();
+          const day = new Date(until).toLocaleDateString('en-GB');
+          lines.push(`${uid === payment.user_id ? 'you' : u.name.split(' ')[0]} until ${day}`);
+          if (uid !== payment.user_id) {
+            await notify(env, uid, 'payment', 'Your parent paid for Klass8', `${String(payer?.name || 'Your parent').split(' ')[0]} paid the platform charges for you: ${currentPlans()[payment.plan].label}. Everything is open until ${day}.`, { reference: payment.reference });
+          }
+          await earnFromPayment(env, { ...payment, user_id: uid, amount: unit }, `${payment.id}:${uid}`);
+        }
+        await notify(env, payment.user_id, 'payment', 'Payment received', `${currentPlans()[payment.plan].label} for ${targets.length} ${targets.length === 1 ? 'account' : 'accounts'}: ${payment.amount.toLocaleString('en-US')} FCFA. Klass8 is open for ${lines.join(', ')}.`, { reference: payment.reference });
+      }
     }
     return 'SUCCESSFUL';
   }

@@ -58,8 +58,47 @@ function PlanCard({ on, free, title, price, note, badge, onPress }) {
   );
 }
 
+function WhoRow({ on, title, sub, warn, onPress }) {
+  return (
+    <P c={`flex-row items-center gap-space-sm px-space-md py-space-sm rounded-xl border ${on ? 'border-primary-container bg-surface-container-low' : 'border-outline-variant bg-surface-container-lowest'}`} onPress={onPress} accessibilityRole="checkbox" accessibilityState={{ checked: on }} scale={1}>
+      <V c={`w-6 h-6 rounded-md items-center justify-center ${on ? 'bg-primary-container' : 'border-2 border-outline-variant'}`}>{on && <Ic n="check" s={16} c="on-primary" />}</V>
+      <V c="flex-1 gap-0.5">
+        <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+          {title}
+        </T>
+        {!!sub && <T c={`font-body-sm text-body-sm ${warn ? 'text-error' : 'text-on-surface-variant'}`}>{sub}</T>}
+      </V>
+    </P>
+  );
+}
+
+// For a parent: who this payment is for, themselves and any of their children.
+function WhoFor({ L, kids, selfOn, setSelfOn, picked, toggle }) {
+  const status = (a) =>
+    !a
+      ? ''
+      : a.paidUntil
+        ? `${L('Paid until', 'Payé jusqu’au')} ${longDate(a.paidUntil)}`
+        : a.open
+          ? `${L('Free month until', 'Mois gratuit jusqu’au')} ${longDate(a.until)}`
+          : L('Platform charges due', 'Frais de plateforme à payer');
+  return (
+    <V c="gap-space-xs">
+      <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+        {L('Who are you paying for?', 'Pour qui payez-vous ?')}
+      </T>
+      <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Tick each child to pay for, and yourself if you also want the lessons. One payment covers everyone ticked.', 'Cochez chaque enfant, et vous-même si vous voulez aussi les leçons. Un seul paiement pour tous.')}</T>
+      {kids.map((k) => (
+        <WhoRow key={k.student.id} on={picked.has(k.student.id)} title={k.student.name} sub={status(k.access)} warn={k.access && !k.access.open} onPress={() => toggle(k.student.id)} />
+      ))}
+      <WhoRow on={selfOn} title={L('Myself', 'Moi-même')} sub={L('Lessons, practicals and the tutor on your own account', 'Leçons, TP et tuteur sur votre propre compte')} onPress={() => setSelfOn((v) => !v)} />
+    </V>
+  );
+}
+
 // The platform charges: choose a plan, then pay on the next screen (Pay) or
-// enter a school voucher (Voucher). route.params:
+// enter a school voucher (Voucher). For a parent, also who it is for (their
+// children, themselves). route.params:
 //   start  right after setting up the account: the free month comes first
 //   gate   the account is locked (AppNavigator); there is no way back
 export default function Paywall({ navigation, route }) {
@@ -75,6 +114,26 @@ export default function Paywall({ navigation, route }) {
   const { paidUntil, freeUntil, hadFree } = accessState(user, now);
   const [choice, setChoice] = useState(freeUntil ? 'free' : 'year');
   const [licence, setLicence] = useState(false);
+  // A parent paying for children: route.params.for may name the children to start with.
+  const parent = user?.role === 'parent';
+  const [kids, setKids] = useState([]);
+  const [picked, setPicked] = useState(() => new Set(route.params?.for || []));
+  const [selfOn, setSelfOn] = useState(() => !(route.params?.for || []).length);
+  useEffect(() => {
+    if (!parent) return;
+    get('/v1/parent/children')
+      .then((r) => setKids(r.items || []))
+      .catch(() => {});
+  }, [parent]);
+  const toggle = (id) =>
+    setPicked((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  const forKids = parent && picked.size > 0;
+  const count = parent ? picked.size + (selfOn ? 1 : 0) : 1;
   const [toast, showToast] = useToast();
 
   // Prices and whether payments are open come from the server, asked again
@@ -102,9 +161,16 @@ export default function Paywall({ navigation, route }) {
 
   const P_ = plans || LOCAL_PLANS;
   const enter = () => (start || gate || !navigation.canGoBack() ? navigation.reset({ index: 0, routes: [{ name: 'Main' }] }) : navigation.goBack());
-  const go = () => (choice === 'free' ? enter() : navigation.navigate('Pay', { plan: choice }));
+  const effective = forKids && choice === 'free' ? 'year' : choice;
+  const go = () =>
+    effective === 'free'
+      ? enter()
+      : navigation.navigate('Pay', {
+          plan: effective,
+          ...(forKids ? { for: [...picked], self: selfOn, names: kids.filter((k) => picked.has(k.student.id)).map((k) => k.student.name) } : {}),
+        });
 
-  const noCharges = user?.isAdmin || user?.role !== 'student' || !paywall;
+  const noCharges = user?.isAdmin || !['student', 'parent', 'teacher'].includes(user?.role) || !paywall;
   const title = gate
     ? hadFree
       ? L('Your free month has ended', 'Votre mois gratuit est terminé')
@@ -124,11 +190,13 @@ export default function Paywall({ navigation, route }) {
 
   const yearEnd = freeUntil ? (user.createdAt || now) + 365 * DAY : null;
   const label =
-    choice === 'free'
+    effective === 'free'
       ? start
         ? L('Start my free month', 'Commencer mon mois gratuit')
         : L('Continue with my free month', 'Continuer avec mon mois gratuit')
-      : `${L('Continue to payment', 'Continuer vers le paiement')}: ${fcfa(P_[choice]?.amount || 0)}`;
+      : count === 0
+        ? L('Choose who you are paying for', 'Choisissez pour qui vous payez')
+        : `${L('Continue to payment', 'Continuer vers le paiement')}: ${fcfa((P_[effective]?.amount || 0) * count)}${count > 1 ? ` (${count} ${L('accounts', 'comptes')})` : ''}`;
 
   return (
     <V c="flex-1">
@@ -144,7 +212,7 @@ export default function Paywall({ navigation, route }) {
                 {choice !== 'free' && !open && (
                   <T c="font-body-sm text-body-sm text-error">{L('Mobile money payments are not open yet. A school voucher works now.', 'Les paiements mobile money ne sont pas encore ouverts. Un code d’école fonctionne déjà.')}</T>
                 )}
-                <Cta variant="dark" icon={null} label={label} disabled={choice !== 'free' && !open} onPress={go} />
+                <Cta variant="dark" icon={null} label={label} disabled={(effective !== 'free' && !open) || (effective !== 'free' && count === 0)} onPress={go} />
               </>
             )}
           </V>
@@ -158,9 +226,11 @@ export default function Paywall({ navigation, route }) {
             </T>
           </V>
 
+          {!noCharges && parent && kids.length > 0 && <WhoFor L={L} kids={kids} selfOn={selfOn} setSelfOn={setSelfOn} picked={picked} toggle={toggle} />}
+
           {!noCharges && (
             <V c="gap-space-sm" accessibilityRole="radiogroup">
-              {!!freeUntil && (
+              {!!freeUntil && !forKids && (
                 <PlanCard
                   free
                   on={choice === 'free'}
@@ -174,20 +244,28 @@ export default function Paywall({ navigation, route }) {
               {!STORE_BUILD && (
                 <>
                   <PlanCard
-                    on={choice === 'month'}
+                    on={effective === 'month'}
                     onPress={() => setChoice('month')}
                     title={L('One month', 'Un mois')}
-                    price={fcfa(P_.month?.amount || 0)}
-                    note={freeUntil ? L('30 days, starting when your free month ends. No automatic renewal.', '30 jours, à partir de la fin de votre mois gratuit. Pas de renouvellement automatique.') : L('30 days. Pay again each month. No automatic renewal.', '30 jours. À payer chaque mois. Pas de renouvellement automatique.')}
+                    price={`${fcfa(P_.month?.amount || 0)}${count > 1 ? ` × ${count}` : ''}`}
+                    note={
+                      forKids
+                        ? L('30 days for each account ticked, added to the time they already have. No automatic renewal.', '30 jours pour chaque compte coché, ajoutés au temps restant. Pas de renouvellement automatique.')
+                        : freeUntil
+                          ? L('30 days, starting when your free month ends. No automatic renewal.', '30 jours, à partir de la fin de votre mois gratuit. Pas de renouvellement automatique.')
+                          : L('30 days. Pay again each month. No automatic renewal.', '30 jours. À payer chaque mois. Pas de renouvellement automatique.')
+                    }
                   />
                   <PlanCard
-                    on={choice === 'year'}
+                    on={effective === 'year'}
                     onPress={() => setChoice('year')}
                     title={L('One year', 'Un an')}
-                    price={fcfa(P_.year?.amount || 0)}
+                    price={`${fcfa(P_.year?.amount || 0)}${count > 1 ? ` × ${count}` : ''}`}
                     badge={L('Best value', 'Meilleur prix')}
                     note={
-                      yearEnd
+                      forKids
+                        ? L('365 days for each account ticked, added to the time they already have. Two months free compared with paying each month.', '365 jours pour chaque compte coché, ajoutés au temps restant. Deux mois offerts par rapport au paiement mensuel.')
+                        : yearEnd
                         ? `${L('Counts from the day you joined, so it runs until', 'Compte depuis votre inscription, donc jusqu’au')} ${longDate(yearEnd)}. ${L('Two months free compared with paying each month.', 'Deux mois offerts par rapport au paiement mensuel.')}`
                         : L('365 days. Two months free compared with paying each month. No automatic renewal.', '365 jours. Deux mois offerts par rapport au paiement mensuel. Pas de renouvellement automatique.')
                     }

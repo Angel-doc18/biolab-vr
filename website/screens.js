@@ -182,7 +182,7 @@ ${head('Weekly report', 'Brenda, Form 4')}
   <div class="fb"><b>Worth a word</b>Respiration was the hardest topic this week. Its practice test is ready in the app.</div>
 </div>
 ${tabbar('home')}</div>
-${notes([icon.clock, 'A report every week'], [icon.me, 'Free for parents'])}`,
+${notes([icon.clock, 'A report every week'], [icon.me, 'For every child'])}`,
 
   class: () => `<div class="phone__screen">${status}
 ${head('Form 4 Biology', '38 students')}

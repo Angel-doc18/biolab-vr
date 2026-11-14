@@ -4,7 +4,7 @@
 import { HttpError, created, now, ok, readJson } from '../lib/http.js';
 import { randomCode, sha256, uuid } from '../lib/crypto.js';
 import { bool, int, oneOf, str } from '../lib/validate.js';
-import { accessEnd, freeDays, isPro, paywallOn } from '../lib/auth.js';
+import { PAYING_ROLES, accessEnd, freeDays, isPro, paywallOn } from '../lib/auth.js';
 import { paymentsConfigured } from '../lib/providers.js';
 import { notify } from '../lib/notify.js';
 import { publicAdmin, requireAdmin, requireAdminCan } from '../lib/adminAuth.js';
@@ -89,7 +89,7 @@ const userRow = (u, env) => ({
   schoolName: u.school_name,
   createdAt: u.created_at,
   proUntil: u.pro_until || null,
-  accessUntil: u.role === 'student' && !u.is_admin ? accessEnd(u) : null,
+  accessUntil: PAYING_ROLES.includes(u.role) && !u.is_admin ? accessEnd(u) : null,
   access: isPro(u, env),
   blocked: Boolean(u.blocked_at),
   blockedReason: u.blocked_reason || null,
@@ -224,9 +224,11 @@ export async function getUser(request, env, id) {
   await requireAdmin(request, env);
   const u = await findUser(env, id);
   const { results: payments } = await env.DB.prepare(
-    'SELECT id, plan, amount, status, operator, created_at AS createdAt FROM payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 20'
+    `SELECT p.id, p.plan, p.amount, p.status, p.operator, p.created_at AS createdAt, CASE WHEN p.user_id != ? THEN u.name END AS paidBy
+     FROM payments p LEFT JOIN users u ON u.id = p.user_id
+     WHERE p.user_id = ? OR p.id IN (SELECT payment_id FROM payment_for WHERE user_id = ?) ORDER BY p.created_at DESC LIMIT 20`
   )
-    .bind(id)
+    .bind(id, id, id)
     .all();
   const { results: grants } = await env.DB.prepare('SELECT days, note, created_at AS createdAt FROM admin_grants WHERE user_id = ? ORDER BY created_at DESC LIMIT 20').bind(id).all();
   const { results: linked } = await env.DB.prepare(
@@ -307,6 +309,7 @@ export async function deleteUser(request, env, id) {
     env.DB.prepare("UPDATE schools SET created_by = 'deleted' WHERE created_by = ?").bind(id),
     env.DB.prepare("UPDATE payments SET user_id = 'deleted', phone = '' WHERE user_id = ?").bind(id),
     env.DB.prepare('DELETE FROM referrals WHERE user_id = ? OR referrer_id = ?').bind(id, id),
+    env.DB.prepare('DELETE FROM payment_for WHERE user_id = ?').bind(id),
     env.DB.prepare('DELETE FROM commissions WHERE referrer_id = ?').bind(id),
     env.DB.prepare("UPDATE commissions SET referred_id = 'deleted' WHERE referred_id = ?").bind(id),
     env.DB.prepare("DELETE FROM withdrawals WHERE user_id = ? AND status != 'paid'").bind(id),

@@ -79,7 +79,7 @@ export async function applyCode(env, user, raw) {
   await env.DB.prepare('INSERT INTO referrals (user_id, referrer_id, code, created_at, ends_at) VALUES (?, ?, ?, ?, ?)')
     .bind(user.id, owner.id, code, t, p.months ? t + p.months * 30 * DAY : null)
     .run();
-  if (p.bonusDays > 0 && user.role === 'student') {
+  if (p.bonusDays > 0 && ['student', 'parent', 'teacher'].includes(user.role)) {
     const fresh = await env.DB.prepare('SELECT created_at, pro_until FROM users WHERE id = ?').bind(user.id).first();
     const base = Math.max(t, fresh.pro_until || 0, (fresh.created_at || t) + 30 * DAY);
     await env.DB.prepare('UPDATE users SET pro_until = ?, updated_at = ? WHERE id = ?').bind(base + p.bonusDays * DAY, t, user.id).run();
@@ -100,7 +100,7 @@ export async function applyCode(env, user, raw) {
 
 // Called once for each payment that went through: the share for whoever
 // invited the payer.
-export async function earnFromPayment(env, payment) {
+export async function earnFromPayment(env, payment, key = payment.id) {
   try {
     const ref = await env.DB.prepare('SELECT * FROM referrals WHERE user_id = ?').bind(payment.user_id).first();
     if (!ref || (ref.ends_at && ref.ends_at < now())) return;
@@ -116,7 +116,7 @@ export async function earnFromPayment(env, payment) {
     const r = await env.DB.prepare(
       'INSERT OR IGNORE INTO commissions (id, referrer_id, referred_id, payment_id, paid, net, rate, amount, available_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     )
-      .bind(uuid(), owner.id, payment.user_id, payment.id, payment.amount, net, rate, amount, availableAt, t)
+      .bind(uuid(), owner.id, payment.user_id, key, payment.amount, net, rate, amount, availableAt, t)
       .run();
     if (r.meta.changes !== 1) return;
     const payer = await env.DB.prepare('SELECT name FROM users WHERE id = ?').bind(payment.user_id).first();
