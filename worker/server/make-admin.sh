@@ -35,7 +35,8 @@ case "$ACTION" in
   list)
     run klass8-api "${node_cmd[@]}" list ;;
   add)
-    ROLE="${2:-}"; LOGIN="${3:-}"; NAME="${4:-}"
+    # ssh passes a quoted name as separate words, so every word after the email is the name.
+    ROLE="${2:-}"; LOGIN="${3:-}"; NAME="${*:4}"
     if [ -z "$NAME" ]; then read -rp "Admin's full name: " NAME; fi
     if [ -z "$LOGIN" ]; then read -rp "Email or phone number they will sign in with: " LOGIN; fi
     if [ -z "$ROLE" ]; then read -rp "Role: ceo (the founder), cto, or admin [admin]: " ROLE; fi
