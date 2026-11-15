@@ -122,15 +122,35 @@ export default function LabRun({ navigation, route }) {
   const seg = voice.index >= 0 ? segments[voice.index] : null;
   const [mode, setMode] = useState(null);
   const listenMethod = () => {
+    if (whole) stopWhole();
     if (voice.playing) return voice.stop();
     setMode('method');
     const list = [{ text: `${lab.title}. ${lab.objective}`, at: null }, ...method.map((s, i) => ({ text: `${L('Step', 'Étape')} ${i + 1}. ${s}`, at: i }))];
     setSegments(list);
     voice.play(list);
   };
+  // ---------- the whole practical, from start to finish ----------
+  // One button: what the experiment finds out, then the apparatus diagram part
+  // by part, then every step of the method with the science behind it, and
+  // finally what the results show, the conclusion and the likely errors. It
+  // runs without stopping, in one voice, and the page follows it.
+  const scrollRef = useRef(null);
+  const layoutY = useRef({ aim: 0, diagram: 0, method: 0 });
+  const figRef = useRef(null);
+  const chain = useRef(0);
+  const [whole, setWhole] = useState(false);
+  const scrollTo = (k) => scrollRef.current?.scrollTo({ y: Math.max(0, (layoutY.current[k] || 0) - 80), animated: true });
+  const stopWhole = () => {
+    chain.current += 1;
+    voice.stop();
+    setWhole(false);
+  };
   const explain = async () => {
-    if (voice.playing) return voice.stop();
+    if (whole || voice.playing) return stopWhole();
+    resultVoice.stop();
+    const mine = ++chain.current;
     setNote(null);
+    figRef.current?.prime();
     let e = explained;
     if (!e) {
       setBusy(true);
@@ -138,16 +158,35 @@ export default function LabRun({ navigation, route }) {
         e = await fetchExplanation({ kind: 'practical', subject: lab.subject, title: lab.title, items: method, context: lab.objective, lang, className: user?.className });
         setExplained(e);
       } catch (err) {
-        setNote(err?.message || L('The tutor needs a connection the first time.', 'Le tuteur a besoin d’une connexion la première fois.'));
+        setNote(err?.message || L('The tutor needs a connection the first time. Reading the practical for now.', 'Le tuteur a besoin d’une connexion la première fois. Lecture du TP pour l’instant.'));
       } finally {
         setBusy(false);
       }
     }
-    if (!e) return;
-    const list = segmentsOf(e);
-    setSegments(list);
+    if (mine !== chain.current) return;
+    // Without a connection the practical itself is read out, which is better than nothing.
+    const all = e ? segmentsOf(e) : [{ text: `${lab.title}. ${lab.objective}`, at: null }, ...method.map((s, i) => ({ text: `${L('Step', 'Étape')} ${i + 1}. ${s}`, at: i }))];
+    const intro = all.slice(0, 1);
+    const rest = all.slice(1);
+    setWhole(true);
     setMode('explain');
-    voice.play(list);
+    setSegments(intro);
+    scrollTo('aim');
+    const toMethod = (session) => {
+      if (mine !== chain.current) return;
+      setSegments(rest);
+      scrollTo('method');
+      voice.play(rest, { session, onEnd: () => mine === chain.current && setWhole(false) });
+    };
+    const session = voice.play(intro, {
+      after: () => (lab.diagram ? figRef.current?.firstText() : null) || rest[0]?.text,
+      onEnd: () => {
+        if (mine !== chain.current) return;
+        if (!lab.diagram || !figRef.current) return toMethod(session);
+        scrollTo('diagram');
+        figRef.current.explain({ session, still: () => mine === chain.current, after: () => rest[0]?.text, onEnd: () => toMethod(session) });
+      },
+    });
   };
 
   // ---------- the teacher explains a result ----------
@@ -242,9 +281,34 @@ export default function LabRun({ navigation, route }) {
 
   return (
     <V c="flex-1">
-      <Screen header={<StackHeader title={lab.title} subtitle={`${subjectName(lab.subject, lang)} ${L('practical', 'TP')}, ${topicLabel(labUnit(lab, user?.className, subject), L)}`} subtitleColor="on-surface-variant" avatar={false} />}>
+      <Screen
+        scrollRef={scrollRef}
+        footer={
+          whole ? (
+            <P c="mx-margin my-2 h-14 px-space-md rounded-xl bg-secondary flex-row items-center gap-space-sm" onPress={stopWhole} accessibilityRole="button" accessibilityLabel={L('Stop the whole practical', 'Arrêter tout le TP')}>
+              <Ic n="stop_circle" s={26} c="on-primary" fill />
+              <T c="flex-1 font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }} numberOfLines={1}>
+                {L('Playing the whole practical', 'Lecture de tout le TP')}
+              </T>
+              <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '800' }}>
+                {L('Stop', 'Arrêter')}
+              </T>
+            </P>
+          ) : null
+        }
+        header={<StackHeader title={lab.title} subtitle={`${subjectName(lab.subject, lang)} ${L('practical', 'TP')}, ${topicLabel(labUnit(lab, user?.className, subject), L)}`} subtitleColor="on-surface-variant" avatar={false} />}>
         <V c="pt-space-md pb-space-xl gap-space-lg">
-          <V c="gap-space-xs">
+          <ListenButton
+            label={L('Listen: the whole practical, start to finish', 'Écouter : tout le TP, du début à la fin')}
+            sub={L('The aim, the apparatus part by part, every step with the science behind it, what you will see and the conclusion, without stopping', 'Le but, le matériel partie par partie, chaque étape avec la science, ce que vous verrez et la conclusion, sans arrêt')}
+            stopLabel={L('Stop listening', 'Arrêter l’écoute')}
+            busyLabel={L('Your teacher is preparing', 'Votre professeur prépare')}
+            playing={whole}
+            busy={busy}
+            onPress={explain}
+          />
+          {!!note && <T c="font-body-sm text-body-sm text-on-surface-variant">{note}</T>}
+          <V c="gap-space-xs" onLayout={(ev) => (layoutY.current.aim = ev.nativeEvent.layout.y)}>
             <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
               {L('Aim', 'But')}
             </T>
@@ -254,23 +318,15 @@ export default function LabRun({ navigation, route }) {
           </V>
 
           {!!lab.diagram && (
-            <V c="rounded-xl bg-surface-container-lowest border border-surface-container p-space-sm">
-              <Diagram id={lab.diagram} explain subject={lab.subject} maxHeight={340} />
+            <V c="rounded-xl bg-surface-container-lowest border border-surface-container p-space-sm" onLayout={(ev) => (layoutY.current.diagram = ev.nativeEvent.layout.y)}>
+              <Diagram ref={figRef} id={lab.diagram} explain subject={lab.subject} maxHeight={340} />
             </V>
           )}
 
+          <V onLayout={(ev) => (layoutY.current.method = ev.nativeEvent.layout.y)}>
           <Section title={L('Method', 'Méthode')}>
             <V c="gap-space-sm">
               <V c="gap-space-sm">
-                <ListenButton
-                  label={L('Listen: your teacher explains this experiment', 'Écouter : votre professeur explique cette expérience')}
-                  sub={L('The science behind each step, what to watch for, and what the results show', 'La science derrière chaque étape, les précautions et ce que montrent les résultats')}
-                  stopLabel={L('Stop listening', 'Arrêter l’écoute')}
-                  busyLabel={L('Your teacher is preparing', 'Votre professeur prépare')}
-                  playing={voice.playing && mode === 'explain'}
-                  busy={busy}
-                  onPress={explain}
-                />
                 <ListenButton
                   size="sm"
                   label={L('Or read the method aloud, step by step', 'Ou lire la méthode à voix haute, étape par étape')}
@@ -279,7 +335,6 @@ export default function LabRun({ navigation, route }) {
                   onPress={listenMethod}
                 />
               </V>
-              {!!note && <T c="font-body-sm text-body-sm text-on-surface-variant">{note}</T>}
               {seg?.at == null && !!seg && (
                 <V c="p-space-sm rounded-lg bg-surface-container-low">
                   <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
@@ -304,6 +359,7 @@ export default function LabRun({ navigation, route }) {
               })}
             </V>
           </Section>
+          </V>
 
           {readings ? (
             <Section title={L('Your experiment', 'Votre expérience')}>
