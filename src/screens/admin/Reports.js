@@ -8,6 +8,14 @@ import { useL } from '../../i18n';
 import { post } from '../../api/adminClient';
 import { Card, Chips, Empty, Loading, Pill, date, useAdminLoad } from './kit';
 
+// What the student picked when they reported the answer.
+const REASON = {
+  wrong: ['The answer is wrong', 'La réponse est fausse'],
+  harmful: ['The answer is harmful or unsuitable', 'La réponse est dangereuse ou inadaptée'],
+  off_topic: ['The answer is off the subject', 'La réponse est hors sujet'],
+  other: ['Something else is wrong', 'Autre problème'],
+};
+
 function Block({ label, text }) {
   if (!text) return null;
   return (
@@ -87,7 +95,7 @@ export default function AdminReports() {
                   </V>
                   <Pill text={r.resolvedAt ? L('Checked', 'Vérifié') : L('To check', 'À vérifier')} tone={r.resolvedAt ? 'ok' : 'warn'} />
                 </V>
-                <Block label={L('What is wrong, in their words', 'Le problème, selon l’élève')} text={r.reason} />
+                <Block label={L('What they reported', 'Ce que l’élève signale')} text={REASON[r.reason] ? L(REASON[r.reason][0], REASON[r.reason][1]) : r.reason} />
                 <Block label={L('Their question', 'Sa question')} text={r.question} />
                 <Block label={L('The AI answer', 'La réponse de l’IA')} text={r.answer} />
                 {!r.resolvedAt && (

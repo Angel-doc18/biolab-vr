@@ -31,9 +31,11 @@ function weakUnit(students, subject) {
   return { unit: unitById(u), pct: Math.round(v) };
 }
 
+// A row with nothing to tap (work already set) is plain, not a faded button.
 function Row({ title, sub, right, onPress, first, disabled }) {
+  const Box = onPress ? P : V;
   return (
-    <P c={`p-space-md flex-row items-center gap-space-sm ${first ? '' : 'border-t border-surface-container'}`} onPress={onPress} disabled={disabled || !onPress} scale={0.99}>
+    <Box c={`p-space-md flex-row items-center gap-space-sm ${first ? '' : 'border-t border-surface-container'}`} {...(onPress ? { onPress, disabled, scale: 0.99 } : null)}>
       <V c="flex-1 gap-0.5">
         <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '600' }} numberOfLines={2}>
           {title}
@@ -45,7 +47,7 @@ function Row({ title, sub, right, onPress, first, disabled }) {
           {right}
         </T>
       )}
-    </P>
+    </Box>
   );
 }
 

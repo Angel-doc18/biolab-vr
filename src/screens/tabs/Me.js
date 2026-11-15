@@ -99,7 +99,14 @@ export default function Me({ navigation }) {
     return { key: iso(d), future: d > new Date(), done: progress.days.includes(iso(d)) };
   });
   const until = user?.proUntil ? new Date(user.proUntil).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', day: 'numeric' }) : null;
-  const role = student ? [user?.className, user?.schoolName].filter(Boolean).join(', ') : user?.role === 'teacher' ? [L('Teacher', 'Enseignant'), user?.schoolName].filter(Boolean).join(', ') : L('Parent or guardian', 'Parent ou tuteur');
+  const partner = user?.role === 'partner';
+  const role = student
+    ? [user?.className, user?.schoolName].filter(Boolean).join(', ')
+    : user?.role === 'teacher'
+      ? [L('Teacher', 'Enseignant'), user?.schoolName].filter(Boolean).join(', ')
+      : partner
+        ? [L('Klass8 partner', 'Partenaire Klass8'), user?.schoolName].filter(Boolean).join(', ')
+        : L('Parent or guardian', 'Parent ou tuteur');
 
   return (
     <Screen bg="bg-surface" header={<TabHeader title={L('Me', 'Moi')} subtitle={user?.name || ''} />}>
@@ -120,9 +127,12 @@ export default function Me({ navigation }) {
                 {role}
               </T>
             )}
-            <P onPress={() => navigation.navigate('Paywall')} hitSlop={6}>
-              <T c="font-body-sm text-body-sm text-primary-container">{pro && until ? `${L('Full course until', 'Cours complet jusqu’au')} ${until}` : pro ? L('Everything is open while Klass8 is being tested', 'Tout est ouvert pendant les tests de Klass8') : L('Free version. See the full course', 'Version gratuite. Voir le cours complet')}</T>
-            </P>
+            {/* A partner account has no course: its Home is Invite and earn. */}
+            {!partner && (
+              <P onPress={() => navigation.navigate('Paywall')} hitSlop={6}>
+                <T c="font-body-sm text-body-sm text-primary-container">{pro && until ? `${L('Full course until', 'Cours complet jusqu’au')} ${until}` : pro ? L('Everything is open while Klass8 is being tested', 'Tout est ouvert pendant les tests de Klass8') : L('Free version. See the full course', 'Version gratuite. Voir le cours complet')}</T>
+              </P>
+            )}
           </V>
         </V>
 
