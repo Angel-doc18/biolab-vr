@@ -3,9 +3,12 @@
 //
 // Convention: the correct option is written first; options are shuffled when shown.
 
+import { QUESTIONS_1 } from './lessonQuestions1';
+
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
+  ...QUESTIONS_1,
   'he-diet-2': [
     Q('Skipping breakfast is a bad habit because it:', ['Reduces concentration at school', 'Makes you taller', 'Prevents tooth decay', 'Adds iron to the blood'], 'The body and brain need energy in the morning.'),
     Q('Too many sugary drinks and sweets can lead to:', ['Tooth decay and obesity', 'Stronger bones', 'Better eyesight', 'More protein'], 'Water is the best drink.'),
