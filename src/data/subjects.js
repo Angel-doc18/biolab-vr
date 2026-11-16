@@ -163,7 +163,7 @@ export const SUBJECTS = [
     gce: false,
     leadsTo: 'food',
     available: true,
-    classes: ['Form 2'],
+    classes: ['Form 1', 'Form 2'],
     en: 'Home Economics',
     fr: 'Économie sociale et familiale',
     p1: { count: 50, minutes: 90 },
