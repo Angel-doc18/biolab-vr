@@ -1,9 +1,12 @@
 // Extra end-of-lesson questions for the Economics lessons, by lesson id. The
 // correct option is written first; options are shuffled when shown.
 
+import { QUESTIONS_3 } from './lessonQuestions3';
+
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
+  ...QUESTIONS_3,
   // ---------- Form 4, term 1 ----------
   'ec-scarcity-4': [
     Q('Scarcity is a problem for:', ['everyone, rich and poor', 'only poor countries', 'only governments', 'nobody'], 'Wants always exceed resources.'),
