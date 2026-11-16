@@ -1,9 +1,12 @@
 // Extra end-of-lesson questions for the Commerce lessons, by lesson id. The
 // correct option is written first; options are shuffled when shown.
 
+import { QUESTIONS_3 } from './lessonQuestions3';
+
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
+  ...QUESTIONS_3,
   // ---------- Form 4, term 1 ----------
   'co-commerce-4': [
     Q('Foreign trade is divided into:', ['import, export and entrepôt trade', 'retail and wholesale', 'banking and insurance', 'barter and credit'], 'Trade between countries.'),
