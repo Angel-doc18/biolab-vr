@@ -1,9 +1,12 @@
 // Extra end-of-lesson questions for the French lessons, by lesson id.
 // The correct option is written first; options are shuffled when shown.
 
+import { QUESTIONS_1 } from './lessonQuestions1';
+
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
+  ...QUESTIONS_1,
   // ---------- Form 4, term 1 ----------
   'fr-relatifs-4': [
     Q('« C’est le professeur ___ nous aimons beaucoup. »', ['que', 'qui', 'où', 'quoi'], 'A subject (nous) follows the gap.'),
