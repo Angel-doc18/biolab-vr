@@ -9,6 +9,12 @@
 # Angel-doc18/biolab-vr (only admins can add secrets).
 # Keep the folder Documents\klass8-play-key and the password safe (a USB key or
 # your Google Drive). If they are lost, Google can reset the upload key.
+#
+# -KeyOnly: only makes the key and the file keystore-base64.txt, for the
+# repository OWNER to paste into GitHub herself (on a personal repository only
+# the owner can add secrets):
+#   powershell -ExecutionPolicy Bypass -File C:\Users\pc\dev\biolab-vr-run\store\play\setup-signing.ps1 -KeyOnly
+param([switch]$KeyOnly)
 $ErrorActionPreference = 'Stop'
 $repo = 'Angel-doc18/biolab-vr'
 $openssl = 'C:\Program Files\Git\usr\bin\openssl.exe'
@@ -16,10 +22,12 @@ $dir = Join-Path $HOME 'Documents\klass8-play-key'
 $ks = Join-Path $dir 'klass8-upload.keystore'
 
 if (-not (Test-Path $openssl)) { throw "OpenSSL was not found at $openssl (it comes with Git for Windows)." }
-gh auth status *> $null
-if ($LASTEXITCODE -ne 0) { throw 'Sign in to GitHub first with: gh auth login' }
-$admin = gh api "repos/$repo" --jq '.permissions.admin'
-if ($admin -ne 'true') { throw "The GitHub account signed in here is not an admin of $repo. Ask the owner (Angel-doc18) to make it an admin (Settings > Collaborators), or run this on the owner's account." }
+if (-not $KeyOnly) {
+  gh auth status *> $null
+  if ($LASTEXITCODE -ne 0) { throw 'Sign in to GitHub first with: gh auth login' }
+  $admin = gh api "repos/$repo" --jq '.permissions.admin'
+  if ($admin -ne 'true') { throw "The GitHub account signed in here cannot add secrets to $repo (only its owner can). Run this again with -KeyOnly and give the owner the file it makes." }
+}
 
 New-Item -ItemType Directory -Force $dir | Out-Null
 if (Test-Path $ks) {
@@ -54,6 +62,15 @@ try {
   & $openssl pkcs12 -in $ks -passin env:K8_KEY_PASS -noout 2>$null
   if ($LASTEXITCODE -ne 0) { throw 'This password does not open the existing key file. Nothing was sent to GitHub.' }
 
+  if ($KeyOnly) {
+    $out = Join-Path $dir 'keystore-base64.txt'
+    [IO.File]::WriteAllText($out, [Convert]::ToBase64String([IO.File]::ReadAllBytes($ks)))
+    Write-Host ''
+    Write-Host "Done. The key is in $dir"
+    Write-Host "Give the owner of Angel-doc18 the file $out and the password, privately (not in a group chat)."
+    Write-Host 'Once she has added the 4 secrets, delete keystore-base64.txt (keep the keystore and the password).'
+    return
+  }
   Write-Host 'Adding the 4 secrets to GitHub...'
   $b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($ks))
   gh secret set KLASS8_UPLOAD_KEYSTORE --repo $repo --body $b64
