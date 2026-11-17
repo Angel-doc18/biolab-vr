@@ -193,7 +193,10 @@ export default function Paywall({ navigation, route }) {
           ...(forKids ? { for: [...picked], self: selfOn, names: kids.filter((k) => picked.has(k.student.id)).map((k) => k.student.name) } : {}),
         });
 
-  const noCharges = user?.isAdmin || !['student', 'parent', 'teacher'].includes(user?.role) || !paywall;
+  // The founder's and the CTO's preview accounts stay free, but they can still
+  // make a real payment here, to test paying exactly as users do.
+  const testPay = !!user?.preview && !!paywall;
+  const noCharges = (user?.isAdmin && !testPay) || !['student', 'parent', 'teacher'].includes(user?.role) || !paywall;
   const title = gate
     ? hadFree
       ? L('Your free month has ended', 'Votre mois gratuit est terminé')
@@ -201,7 +204,9 @@ export default function Paywall({ navigation, route }) {
     : start
     ? L('Choose how to start', 'Choisissez comment commencer')
     : L('Choose your plan', 'Choisissez votre formule');
-  const intro = user?.isAdmin
+  const intro = testPay
+    ? L('This preview account stays free. You can still pay here to test the payment exactly as users do: the money is real and goes to Klass8.', 'Ce compte d’aperçu reste gratuit. Vous pouvez quand même payer ici pour tester le paiement comme les utilisateurs : l’argent est réel et va à Klass8.')
+    : user?.isAdmin
     ? L('Admin accounts do not pay platform charges.', 'Les comptes administrateurs ne paient pas de frais de plateforme.')
     : noCharges
     ? L('Everything is open while Klass8 is being tested, so you do not need to pay yet.', 'Tout est ouvert pendant les tests de Klass8, vous n’avez donc pas encore besoin de payer.')
