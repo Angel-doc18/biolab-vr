@@ -13,7 +13,8 @@ ask_yes() { # question, default (yes|no)
   read -rp "$1 [$2]: " a
   a=$(printf '%s' "$a" | tr -d '[:space:]')
   a=${a:-$2}
-  case "$a" in y | Y | yes | YES | Yes) return 0 ;; *) return 1 ;; esac
+  # yes, y, on, oui, o, true (any case) all mean yes
+  case "$(printf '%s' "$a" | tr '[:upper:]' '[:lower:]')" in y | yes | on | oui | o | true) return 0 ;; *) return 1 ;; esac
 }
 
 echo "Klass8 payments with Fapshi"
