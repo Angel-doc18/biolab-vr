@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import * as Speech from '../../lib/voice';
 import { Ic, P, T, V } from '../../ui/kit';
 import { StackHeader, useToast } from '../../ui/chrome';
@@ -56,7 +57,7 @@ export default function Specimen({ navigation, route }) {
   return <ModelScreen navigation={navigation} unit={unit} />;
 }
 
-function ModelScreen({ unit }) {
+function ModelScreen({ navigation, unit }) {
   const insets = useSafeAreaInsets();
   const { viewModel, user } = useApp();
   const L = useL();
@@ -77,6 +78,34 @@ function ModelScreen({ unit }) {
   const [toast, showToast] = useToast();
   const view = useRef(null);
   const modelName = UNIT_MODEL[modelOf(unit.id)];
+
+  // ---------- keeping the 3D view safe on phones ----------
+  // Only one GL view at a time, and never removed while it is drawing: the
+  // viewer stops when the screen is covered, before VR opens, and before the
+  // screen closes (the close waits a moment for the last frame).
+  const focused = useIsFocused();
+  const [leaving, setLeaving] = useState(false);
+  const [vrShown, setVrShown] = useState(false);
+  useEffect(
+    () =>
+      navigation?.addListener('beforeRemove', (e) => {
+        if (leaving) return;
+        e.preventDefault();
+        setLeaving(true);
+        setTimeout(() => navigation.dispatch(e.data.action), 240);
+      }),
+    [navigation, leaving]
+  );
+  useEffect(() => {
+    if (!vrOpen) return undefined;
+    const t = setTimeout(() => setVrShown(true), 240);
+    return () => clearTimeout(t);
+  }, [vrOpen]);
+  const closeVr = () => {
+    setVrShown(false);
+    setVrOpen(false);
+  };
+  const live = focused && !leaving && !vrOpen;
   const sizeKb = modelName ? Math.round(ANATOMY[modelName].bytes / 1024) : 0;
 
   useEffect(() => {
@@ -293,6 +322,7 @@ function ModelScreen({ unit }) {
               labels={test || !names ? 'numbers' : 'names'}
               motion={moves && motion}
               demo={demoProp}
+              live={live}
               onFail={() => setFailed(true)}
             />
           )}
@@ -461,7 +491,7 @@ function ModelScreen({ unit }) {
           )}
         </V>
       </ScrollView>
-      {vrOpen && <VRView unitId={unit.id} onClose={() => setVrOpen(false)} />}
+      {vrOpen && vrShown && <VRView unitId={unit.id} onClose={closeVr} />}
       {toast}
     </V>
   );

@@ -35,7 +35,10 @@ function StereoRig({ spec, geos, motion, drag }) {
   const base = useRef(null);
   // Every model is shown about the same size: 1.2 units from its centre to its widest side.
   const [scale, setScale] = useState(1);
-  const raw = THREE.WebGLRenderer.prototype.render;
+  // The renderer's own draw call, kept before react-three-fiber wraps it (on
+  // phones the wrapper also presents the frame). three.js now defines render on
+  // each renderer, not on the prototype, so it is saved when the renderer is made.
+  const raw = gl.rawRender || gl.render;
 
   useFrame(() => {
     const m = motion.current;
@@ -85,12 +88,22 @@ export default function VRView({ unitId, onClose }) {
     onCloseRef.current = onClose;
   });
   const failedRef = useRef(false);
-  const fail = useCallback((error) => {
-    if (failedRef.current) return;
-    failedRef.current = true;
-    reportError(error, '3d-vr');
-    onCloseRef.current?.();
+  // Leaving VR stops the drawing first and closes a moment later, once the last
+  // frame is done: removing a GL view mid-frame closes the app on many phones.
+  const [stopping, setStopping] = useState(false);
+  const close = useCallback(() => {
+    setStopping(true);
+    setTimeout(() => onCloseRef.current?.(), 220);
   }, []);
+  const fail = useCallback(
+    (error) => {
+      if (failedRef.current) return;
+      failedRef.current = true;
+      reportError(error, '3d-vr');
+      close();
+    },
+    [close]
+  );
 
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(() => {});
@@ -125,12 +138,18 @@ export default function VRView({ unitId, onClose }) {
   }, []);
 
   return (
-    <Modal visible animationType="fade" supportedOrientations={['landscape', 'portrait']} onRequestClose={onClose}>
+    <Modal visible animationType="fade" supportedOrientations={['landscape', 'portrait']} onRequestClose={close}>
       <StatusBar hidden />
       <View style={{ flex: 1, backgroundColor: '#000' }}>
         <GLBoundary onFail={fail}>
           <GLFail.Provider value={fail}>
             <Canvas
+              frameloop={stopping ? 'never' : 'always'}
+              gl={(defaults) => {
+                const r = new THREE.WebGLRenderer(defaults);
+                r.rawRender = r.render;
+                return r;
+              }}
               camera={{ position: [0, 0, 0], fov: 80, near: 0.05 }}
               onCreated={({ gl }) => {
                 gl.setClearColor('#0b1a24', 1);
@@ -145,7 +164,7 @@ export default function VRView({ unitId, onClose }) {
         </GLBoundary>
         <View style={StyleSheet.absoluteFill} {...pan.panHandlers} />
         <View pointerEvents="none" style={styles.divider} />
-        <P onPress={onClose} accessibilityLabel="Exit VR" style={styles.close}>
+        <P onPress={close} accessibilityLabel="Exit VR" style={styles.close}>
           <Ic n="close" s={20} c="on-primary" />
           <T c="font-label-sm text-label-sm text-on-primary">Exit VR</T>
         </P>

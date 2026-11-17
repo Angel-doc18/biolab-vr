@@ -7,7 +7,7 @@ import { modelOf } from '../data/units';
 import { useAnatomy } from './anatomy';
 import Specimen, { Centered, Lights, fitDistance } from './Specimen';
 import { T } from '../ui/kit';
-import { GLFail, guardRender } from './glFail';
+import { GLFail, guardRender, useGLGate } from './glFail';
 import { reportError } from '../lib/crashReport';
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -167,7 +167,7 @@ function Ping() {
  * { key, steps, step, dur, see, name } (see demos.js and Demo.js).
  */
 const Viewport = forwardRef(function Viewport(
-  { unitId, model, parts, active, onSelect, xray, explode, labels = 'names', motion = false, demo = null, onInteract, onFail, aspect = 4 / 3 },
+  { unitId, model, parts, active, onSelect, xray, explode, labels = 'names', motion = false, demo = null, live = true, onInteract, onFail, aspect = 4 / 3 },
   ref
 ) {
   const { spec, geos } = model;
@@ -205,17 +205,25 @@ const Viewport = forwardRef(function Viewport(
   const [sides, setSides] = useState({});
   const [hiddenNames, setHiddenNames] = useState([]);
   const widths = useMemo(() => (labels === 'names' ? keys.map((k) => labelWidth(parts.find((p) => p.key === k)?.name)) : null), [labels, parts, specKey]);
-  // A new GL surface after the app comes back from the background: some phones
-  // lose the old one and would show an empty frame.
+  // Drawing stops in the background, and the view gets a new GL surface when the
+  // app comes back: some phones lose the old one and would show an empty frame.
   const [surface, setSurface] = useState(0);
+  const [away, setAway] = useState(false);
   useEffect(() => {
     let last = AppState.currentState;
     const sub = AppState.addEventListener('change', (next) => {
-      if (last === 'background' && next === 'active') setSurface((s) => s + 1);
+      if (next === 'background') setAway(true);
+      if (last === 'background' && next === 'active') {
+        setAway(false);
+        setSurface((s) => s + 1);
+      }
       last = next;
     });
     return () => sub.remove();
   }, []);
+  // `live` false (the screen is covered, closing, or VR is open): stop drawing,
+  // then remove the GL view once the last frame is done.
+  const gate = useGLGate(live && !away);
 
   useEffect(() => {
     Object.assign(ctrl.current, { trx: spec.rot[0], try: spec.rot[1], fit: 0 });
@@ -286,11 +294,14 @@ const Viewport = forwardRef(function Viewport(
 
   return (
     <View style={[styles.frame, { aspectRatio: aspect }]}>
+      {gate.mounted && (
       <GLBoundary onFail={fail}>
         <GLFail.Provider value={fail}>
+        {/* One canvas for the whole visit: when the full anatomy model arrives
+            only the model inside changes, the GL surface is not rebuilt. */}
         <Canvas
-          key={`${specKey}:${surface}`}
-          frameloop="demand"
+          key={surface}
+          frameloop={gate.draw ? 'demand' : 'never'}
           camera={{ position: [0, 0, 4.4], fov: FOV, near: 0.05, far: 100 }}
           onCreated={({ gl }) => {
             gl.setClearColor('#eef2fc', 1);
@@ -321,8 +332,9 @@ const Viewport = forwardRef(function Viewport(
         </Canvas>
         </GLFail.Provider>
       </GLBoundary>
+      )}
       <View style={StyleSheet.absoluteFill} {...pan.panHandlers} />
-      {!!demo?.name && (
+      {gate.mounted && !!demo?.name && (
         <Animated.View pointerEvents="none" style={[styles.pinAnchor, { zIndex: 6, transform: tokenXY.getTranslateTransform() }]}>
           <View style={styles.token}>
             <T c="font-label-sm text-label-sm text-on-surface" style={{ fontWeight: '700' }} numberOfLines={1}>
@@ -331,7 +343,7 @@ const Viewport = forwardRef(function Viewport(
           </View>
         </Animated.View>
       )}
-      {keys.map((k, i) => {
+      {gate.mounted && keys.map((k, i) => {
         const part = parts.find((p) => p.key === k);
         if (!part) return null;
         const isActive = active === k;
