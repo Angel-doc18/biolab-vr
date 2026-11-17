@@ -74,6 +74,8 @@ const routes = [
   ['GET', '/v1/billing/payments', billing.listPayments],
   ['GET', `/v1/billing/payments/${ID}`, billing.getPayment],
   ['POST', '/v1/billing/fapshi-webhook', billing.fapshiWebhook],
+  // Opened in a browser: says it is ready (Fapshi itself sends POST requests).
+  ['GET', '/v1/billing/fapshi-webhook', () => json({ ok: true, message: 'Klass8 payment webhook is ready. Fapshi sends payment confirmations here.' })],
   ['GET', '/v1/billing/return', billing.returnPage],
   ['POST', '/v1/billing/redeem', billing.redeemVoucher],
   ['POST', '/v1/billing/licence-request', billing.licenceRequest],
