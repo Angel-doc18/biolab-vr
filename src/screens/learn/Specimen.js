@@ -1,5 +1,5 @@
-// A topic's 3D model: turn it, open it, watch it work, hear the teacher explain
-// every part, and test yourself by finding the parts.
+// A topic's 3D model: turn it, open it, watch it work while the teacher explains
+// the whole process, hear every part, and test yourself by finding the parts.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ import { useL, useLang } from '../../i18n';
 import { modelOf, topicLabel, unitById } from '../../data/units';
 import { useNarrator } from '../../lib/narrator';
 import { fetchExplanation, segmentsOf } from '../../lib/explain';
+import { demoFor, sayTime } from '../../three/demos';
 
 function Tool({ icon, label, on, onPress }) {
   return (
@@ -96,10 +97,53 @@ function ModelScreen({ unit }) {
   const items = useMemo(() => parts.map((p) => `${p.name}: ${p.desc}`), [parts]);
   const seg = voice.index >= 0 ? segments[voice.index] : null;
   const teacherPart = seg?.at != null ? parts[seg.at] : null;
+
+  // ---------- watch it work ----------
+  // The teacher explains the process from start to finish while the model acts
+  // it out: food moving down the gut, blood through the heart, air into the
+  // lungs. One button, no stopping between steps.
+  const demo = useMemo(() => demoFor(model.spec?.real || modelOf(unit.id)), [model.spec, unit.id]);
+  // When the real model arrives during a run, the same steps carry on with its
+  // own points (the built-in and the real model share the teacher's words).
+  const [run, setRun] = useState(null); // { key, list }
+  const endDemo = () => setRun(null);
+  const watch = () => {
+    if (run && voice.playing) {
+      voice.stop();
+      return endDemo();
+    }
+    Speech.stop();
+    setSpeaking(false);
+    setExplode(false);
+    setXray(false);
+    setMotion(true);
+    setNames(true);
+    setTest(null);
+    const list = demo.steps.map((s) => {
+      const at = s.part ? parts.findIndex((p) => p.key === s.part) : -1;
+      return { text: lang === 'fr' ? s.fr : s.en, at: at >= 0 ? at : null };
+    });
+    setSegments(list);
+    setRun((r) => ({ key: (r?.key ?? 0) + 1, list }));
+    voice.play(list);
+  };
+  // After the last step the model stays as the teacher left it.
+  const demoStep = run ? (voice.index >= 0 ? voice.index : run.list.length - 1) : -1;
+  const demoName = useMemo(() => {
+    if (!run) return '';
+    for (let i = demoStep; i >= 0; i--) {
+      const n = demo.steps[i]?.name;
+      if (n) return lang === 'fr' ? n[1] : n[0];
+    }
+    return '';
+  }, [run, demoStep, demo, lang]);
+  const demoProp = run && demo ? { key: run.key, steps: demo.steps, step: demoStep, dur: run.list.map((s) => sayTime(s.text)), see: demo.see !== false, name: demoName } : null;
+
   const switchLang = () => {
     voice.stop();
     Speech.stop();
     setSpeaking(false);
+    endDemo();
     setLang((l) => (l === 'fr' ? 'en' : 'fr'));
   };
 
@@ -128,7 +172,8 @@ function ModelScreen({ unit }) {
   };
 
   const teach = async () => {
-    if (voice.playing) return voice.stop();
+    if (voice.playing && !run) return voice.stop();
+    endDemo();
     Speech.stop();
     setSpeaking(false);
     setExplode(false);
@@ -142,6 +187,7 @@ function ModelScreen({ unit }) {
   // just that part.
   const select = (k) => {
     if (test) return answer(k);
+    endDemo();
     setActive(k);
     const at = parts.findIndex((p) => p.key === k);
     if (lesson && at >= 0) {
@@ -172,6 +218,7 @@ function ModelScreen({ unit }) {
   const [test, setTest] = useState(null); // { order, i, score, last }
   const startTest = () => {
     voice.stop();
+    endDemo();
     Speech.stop();
     setSpeaking(false);
     setExplode(false);
@@ -192,7 +239,7 @@ function ModelScreen({ unit }) {
   // The part that lights up: in a test, the right answer once the student has
   // chosen; while the teacher talks, the part being explained; otherwise the
   // part the student picked.
-  const shown = test ? (test.last && wanted ? wanted.key : null) : teacherPart ? teacherPart.key : active;
+  const shown = test ? (test.last && wanted ? wanted.key : null) : run && demo ? demo.steps[demoStep]?.part || null : teacherPart ? teacherPart.key : active;
   const part = parts.find((p) => p.key === shown) || parts.find((p) => p.key === active) || parts[0];
   const idx = parts.indexOf(part);
 
@@ -245,6 +292,7 @@ function ModelScreen({ unit }) {
               explode={explode}
               labels={test || !names ? 'numbers' : 'names'}
               motion={moves && motion}
+              demo={demoProp}
               onFail={() => setFailed(true)}
             />
           )}
@@ -316,12 +364,22 @@ function ModelScreen({ unit }) {
                 {moves && <Tool icon={motion ? 'pause' : 'play_arrow'} label={L('Motion', 'Mouvement')} on={motion} onPress={() => setMotion((x) => !x)} />}
               </V>
 
+              {!!demo && (
+                <ListenButton
+                  label={L('Watch it work: the teacher explains while the model shows it', 'Voir comment ça marche : le professeur explique pendant que le modèle le montre')}
+                  sub={L('The whole process from start to finish, with the model moving at every step', 'Tout le phénomène du début à la fin, le modèle bougeant à chaque étape')}
+                  stopLabel={L('Stop', 'Arrêter')}
+                  playing={!!run && voice.playing}
+                  onPress={watch}
+                />
+              )}
               <ListenButton
-                label={L('Listen: the teacher explains this model', 'Écouter : le professeur explique ce modèle')}
-                sub={L('Each part, what it does and its role in the whole', 'Chaque partie, son rôle et sa place dans l’ensemble')}
+                size={demo ? 'sm' : undefined}
+                label={demo ? L('Each part, one by one', 'Chaque partie, une par une') : L('Listen: the teacher explains this model', 'Écouter : le professeur explique ce modèle')}
+                sub={demo ? undefined : L('Each part, what it does and its role in the whole', 'Chaque partie, son rôle et sa place dans l’ensemble')}
                 stopLabel={L('Stop the teacher', 'Arrêter le professeur')}
                 busyLabel={L('The teacher is preparing the explanation', 'Le professeur prépare l’explication')}
-                playing={voice.playing}
+                playing={voice.playing && !run}
                 busy={busy}
                 onPress={teach}
               />

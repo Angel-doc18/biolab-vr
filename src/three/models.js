@@ -194,7 +194,7 @@ export const MODELS = {
   // Unit 7: arm, elbow & antagonistic muscles
   locomotion: {
     rot: [0.1, -0.5],
-    shell: [{ g: 'cyl', a: [0.08, 0.07, 1.3, 14], p: [0.46, 0.21, 0], r: [0, 0, -PI / 4], c: '#e8dcc3' }],
+    shell: [{ key: 'forearm', g: 'cyl', a: [0.08, 0.07, 1.3, 14], p: [0.46, 0.21, 0], r: [0, 0, -PI / 4], c: '#e8dcc3' }],
     parts: {
       humerus: { anchor: [0, 1.15, 0.12], meshes: [{ g: 'cyl', a: [0.1, 0.09, 1.5, 16], p: [0, 0.5, 0], c: '#eee4d0' }] },
       biceps: { anchor: [0.2, 0.55, 0.35], meshes: [{ g: 'capsule', a: [0.17, 0.65, 8, 16], p: [0.13, 0.55, 0.14], c: '#d9534f' }] },

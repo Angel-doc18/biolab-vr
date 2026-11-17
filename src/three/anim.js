@@ -15,6 +15,9 @@
 //   { k: 'slide', d, speed, phase }    move back and forth by vector d
 //   { k: 'pulse', amp, speed, phase, at } grow and shrink about point at (a beat)
 //   { k: 'spin', axis, speed, at }     turn about an axis through point at
+//   { k: 'turn', axis, at, from, to, dur } turn once from one angle to another in dur
+//                                      seconds and stay there (a forearm bending)
+//   { k: 'swing', axis, at, from, to, speed } turn back and forth between two angles
 //
 // Speeds are in radians (or units) per second. Everything is a pure function of
 // time, so a paused model always returns to the same resting place.
@@ -168,6 +171,29 @@ export function pose(an, p, t, seed = 0) {
       rot = [0, 0, 0];
       rot[i] = ang;
       if (an.at) rotateAbout(pos, p, an.at, an.axis || 'y', ang);
+      break;
+    }
+    case 'grow': {
+      // Swells once by amp over dur seconds about point at, and stays (a fruit forming).
+      const u = Math.min(1, Math.max(0, t / (an.dur ?? 3)));
+      scale = 1 + (an.amp ?? 0.3) * (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2);
+      if (an.at) for (let i = 0; i < 3; i++) pos[i] = an.at[i] + (p[i] - an.at[i]) * scale;
+      break;
+    }
+    case 'turn':
+    case 'swing': {
+      const from = an.from ?? 0;
+      const to = an.to ?? 1;
+      let f;
+      if (an.k === 'turn') {
+        const u = Math.min(1, Math.max(0, t / (an.dur ?? 2)));
+        f = u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2;
+      } else f = 0.5 - 0.5 * Math.cos(t * (an.speed ?? 1.2));
+      const ang = from + (to - from) * f;
+      const i = AXES[an.axis || 'z'];
+      rot = [0, 0, 0];
+      rot[i] = ang;
+      if (an.at) rotateAbout(pos, p, an.at, an.axis || 'z', ang);
       break;
     }
     default:

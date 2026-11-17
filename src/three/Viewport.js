@@ -27,7 +27,7 @@ export function useModelSpec(unitId) {
 const labelWidth = (name) => Math.min(150, 18 + String(name || '').length * 7);
 const overlap = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
 
-function Rig({ spec, geos, ctrl, active, xray, explodeRef, motionRef, pinXY, pinOpacity, onSides, onHidden, widths, invalidateRef, fitKey }) {
+function Rig({ spec, geos, ctrl, active, xray, explodeRef, motionRef, demoRef, focus, tokenXY, pinXY, pinOpacity, onSides, onHidden, widths, invalidateRef, fitKey }) {
   const root = useRef();
   const partRefs = useRef({});
   const { camera, size, invalidate } = useThree();
@@ -44,7 +44,8 @@ function Rig({ spec, geos, ctrl, active, xray, explodeRef, motionRef, pinXY, pin
     const c = ctrl.current;
     c.rx = THREE.MathUtils.lerp(c.rx, c.trx, 0.14);
     c.ry = THREE.MathUtils.lerp(c.ry, c.try, 0.14);
-    const tz = (c.fit || 4.4) * c.zoom;
+    // A little further back during a demonstration: things enter from outside the model.
+    const tz = (c.fit || 4.4) * c.zoom * (demoRef.current.on ? 1.12 : 1);
     c.z = THREE.MathUtils.lerp(c.z, tz, 0.16);
     if (root.current) root.current.rotation.set(c.rx, c.ry, 0);
     // Pull back while the parts are separated so they stay in frame.
@@ -105,15 +106,23 @@ function Rig({ spec, geos, ctrl, active, xray, explodeRef, motionRef, pinXY, pin
       onHidden(off);
     }
 
+    // The name of what moves in a demonstration follows it on the screen.
+    const d = demoRef.current;
+    if (d.on && d.tokenOn && d.world) {
+      v.copy(d.world).project(camera);
+      // kept inside the frame so the name is never cut off at an edge
+      tokenXY.setValue({ x: Math.min(((v.x + 1) / 2) * size.width, size.width - 120), y: Math.max(((1 - v.y) / 2) * size.height, 36) });
+    } else tokenXY.setValue({ x: -300, y: -300 });
+
     // Only draw again while something is still moving: saves the battery.
     const settling = !near(c.rx, c.trx) || !near(c.ry, c.try) || !near(c.z, tz) || !near(explodeNow.current, explodeRef.current) || !c.fit;
-    if (settling || motionRef.current) invalidate();
+    if (settling || motionRef.current || d.on) invalidate();
   });
 
   return (
     <group ref={root}>
       <Centered fitKey={fitKey} onSize={(box) => (ctrl.current.fit = fitDistance(box, size.width / Math.max(1, size.height), FOV))}>
-        <Specimen spec={spec} geos={geos} active={active} xray={xray} explodeRef={explodeRef} partRefs={partRefs} motionRef={motionRef} />
+        <Specimen spec={spec} geos={geos} active={active} xray={xray} explodeRef={explodeRef} partRefs={partRefs} motionRef={motionRef} demoRef={demoRef} focus={focus} />
       </Centered>
     </group>
   );
@@ -154,9 +163,11 @@ function Ping() {
  * Touch-driven 3D viewer with numbered pins that follow their part.
  * Swipe = turn, pinch = zoom, tap a pin = select.
  * labels: 'names' (numbers and names) or 'numbers' (numbers only, for testing yourself).
+ * demo: what the model acts out while the teacher explains it, or null:
+ * { key, steps, step, dur, see, name } (see demos.js and Demo.js).
  */
 const Viewport = forwardRef(function Viewport(
-  { unitId, model, parts, active, onSelect, xray, explode, labels = 'names', motion = false, onInteract, onFail, aspect = 4 / 3 },
+  { unitId, model, parts, active, onSelect, xray, explode, labels = 'names', motion = false, demo = null, onInteract, onFail, aspect = 4 / 3 },
   ref
 ) {
   const { spec, geos } = model;
@@ -180,6 +191,13 @@ const Viewport = forwardRef(function Viewport(
   explodeRef.current = explode ? 1 : 0;
   const motionRef = useRef(false);
   motionRef.current = !!motion;
+  const demoRef = useRef({ on: false });
+  useEffect(() => {
+    Object.assign(demoRef.current, demo ? { on: true, ...demo } : { on: false });
+    invalidateRef.current();
+  });
+  const focus = !!demo && demo.see !== false;
+  const [tokenXY] = useState(() => new Animated.ValueXY({ x: -300, y: -300 }));
   const invalidateRef = useRef(() => {});
   const specKey = `${unitId}:${spec.real || 'built-in'}`;
   const pinXY = useMemo(() => keys.map(() => new Animated.ValueXY({ x: -100, y: -100 })), [specKey]);
@@ -216,8 +234,9 @@ const Viewport = forwardRef(function Viewport(
 
   // Turn the selected part towards the viewer, only when it is facing away, so
   // the default three-quarter view is kept whenever the part is already visible.
+  // Not during a demonstration: its paths are laid out for the model's own view.
   useEffect(() => {
-    if (!active || !spec.parts[active]) return;
+    if (!active || !spec.parts[active] || demoRef.current.on) return;
     const a = spec.parts[active].anchor;
     const c = ctrl.current;
     const seen = new THREE.Vector3(...a).applyEuler(new THREE.Euler(c.trx, c.try, 0));
@@ -288,6 +307,9 @@ const Viewport = forwardRef(function Viewport(
             xray={xray}
             explodeRef={explodeRef}
             motionRef={motionRef}
+            demoRef={demoRef}
+            focus={focus}
+            tokenXY={tokenXY}
             pinXY={pinXY}
             pinOpacity={pinOpacity}
             onSides={setSides}
@@ -300,17 +322,28 @@ const Viewport = forwardRef(function Viewport(
         </GLFail.Provider>
       </GLBoundary>
       <View style={StyleSheet.absoluteFill} {...pan.panHandlers} />
+      {!!demo?.name && (
+        <Animated.View pointerEvents="none" style={[styles.pinAnchor, { zIndex: 6, transform: tokenXY.getTranslateTransform() }]}>
+          <View style={styles.token}>
+            <T c="font-label-sm text-label-sm text-on-surface" style={{ fontWeight: '700' }} numberOfLines={1}>
+              {demo.name}
+            </T>
+          </View>
+        </Animated.View>
+      )}
       {keys.map((k, i) => {
         const part = parts.find((p) => p.key === k);
         if (!part) return null;
         const isActive = active === k;
         const left = sides[k];
-        const showName = labels === 'names' && (isActive || (parts.length <= 8 && !hiddenNames.includes(k)));
+        // During a demonstration only the part being explained keeps its name, so
+        // the labels do not cover what is moving.
+        const showName = labels === 'names' && (isActive || (!demo && parts.length <= 8 && !hiddenNames.includes(k)));
         return (
           <Animated.View
             key={k}
             pointerEvents="box-none"
-            style={[styles.pinAnchor, { opacity: pinOpacity[i], zIndex: isActive ? 5 : 2, transform: pinXY[i].getTranslateTransform() }]}
+            style={[styles.pinAnchor, { opacity: demo && !isActive ? 0.55 : pinOpacity[i], zIndex: isActive ? 5 : 2, transform: pinXY[i].getTranslateTransform() }]}
           >
             <Pressable
               accessibilityRole="button"
@@ -357,4 +390,5 @@ const styles = StyleSheet.create({
   ping: { position: 'absolute', width: 32, height: 32, borderRadius: 16, borderWidth: 3, borderColor: '#4fdbc8' },
   label: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.92)', maxWidth: 150 },
   labelOn: { backgroundColor: '#1c4ea3' },
+  token: { position: 'absolute', left: 12, top: -30, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, backgroundColor: 'rgba(255,248,225,0.95)', borderWidth: 1, borderColor: '#f2b200', maxWidth: 170 },
 });

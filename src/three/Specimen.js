@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react';
 import { useFrame } from './r3f';
 import * as THREE from 'three';
 import { pose } from './anim';
+import Demo from './Demo';
 
 const GEO = {
   sphere: 'sphereGeometry',
@@ -22,24 +23,32 @@ function register(movers, obj, an, base, seed) {
   else movers.push(entry);
 }
 
-function Mesh({ m, xray, active, movers, seed }) {
+// dim: see-through, so what moves inside (food, blood, air) can be followed.
+function Mesh({ m, xray, active, movers, seed, dim, onShell }) {
   const Geo = GEO[m.g];
-  const transparent = m.o != null && m.o < 1;
+  const op = dim ? Math.min(m.o ?? 1, 0.24) : m.o;
+  const transparent = op != null && op < 1;
   const p = m.p || [0, 0, 0];
   return (
     <mesh
-      ref={(o) => register(movers, o, m.an, { p, r: m.r || [0, 0, 0], s: m.s || [1, 1, 1] }, seed)}
+      ref={(o) => {
+        register(movers, o, m.an, { p, r: m.r || [0, 0, 0], s: m.s || [1, 1, 1] }, seed);
+        if (m.key && onShell && o) onShell(m.key, o);
+      }}
       position={p}
       rotation={m.r || [0, 0, 0]}
       scale={m.s || [1, 1, 1]}
     >
       <Geo args={m.a} />
+      {/* A new material when it turns see-through: three.js builds opaque
+          materials without opacity, so changing the flag alone has no effect. */}
       <meshStandardMaterial
+        key={transparent || xray ? 'see' : 'solid'}
         color={m.c}
         roughness={0.45}
         metalness={0.05}
         transparent={transparent || xray}
-        opacity={xray ? 0.9 : m.o ?? 1}
+        opacity={xray ? 0.9 : op ?? 1}
         wireframe={xray}
         depthWrite={!transparent}
         emissive={active ? m.c : '#000000'}
@@ -51,11 +60,12 @@ function Mesh({ m, xray, active, movers, seed }) {
 
 // One part of a real anatomy model. In x-ray mode everything except the selected
 // part turns see-through, so the selected structure shows inside the organ.
-function RealMesh({ geometry, color, opacity = 1, active, dim }) {
-  const see = dim ? 0.18 : opacity;
+function RealMesh({ geometry, color, opacity = 1, active, dim, mref }) {
+  const see = dim ? Math.min(opacity, dim === 'focus' ? 0.22 : 0.18) : opacity;
   return (
-    <mesh geometry={geometry}>
+    <mesh geometry={geometry} ref={mref}>
       <meshStandardMaterial
+        key={see < 1 ? 'see' : 'solid'}
         color={color}
         roughness={0.62}
         metalness={0}
@@ -117,49 +127,71 @@ function useExplode(spec, explodeRef, partRefs) {
  * `geos` holds the downloaded geometries, the real anatomy model.
  * `explodeRef.current` (0..1) pushes parts outward; `partRefs` receives each
  * part's group so pins can be projected from the live transform;
- * `motionRef.current` turns the model's movement on and off.
+ * `motionRef.current` turns the model's movement on and off. `demoRef` carries
+ * what the model acts out while the teacher explains it (Demo.js); `focus`
+ * makes every part but the one being explained see-through meanwhile.
  */
-export default function Specimen({ spec, geos, active, xray, explodeRef, partRefs, motionRef }) {
+export default function Specimen({ spec, geos, active, xray, explodeRef, partRefs, motionRef, demoRef, focus }) {
   const keys = useExplode(spec, explodeRef, partRefs);
   const movers = useRef([]).current;
+  const innerRefs = useRef({});
+  const shellRefs = useRef({});
   useMotion(movers, motionRef);
-  // A part that moves as a whole (a beating chamber, a turning coil) sits in an
-  // inner group, so its label stays still while the part moves.
+  // Each part sits in an inner group, so a part can move as a whole (a beating
+  // chamber, a turning coil, a forearm bending) while its label stays still.
   const inner = (k, children) => {
     const an = spec.parts[k].an;
-    if (!an) return children;
-    return <group ref={(g) => register(movers, g, an, { p: [0, 0, 0], r: [0, 0, 0], s: [1, 1, 1] }, k.length)}>{children}</group>;
+    return (
+      <group
+        ref={(g) => {
+          innerRefs.current[k] = g;
+          if (an) register(movers, g, an, { p: [0, 0, 0], r: [0, 0, 0], s: [1, 1, 1] }, k.length);
+        }}
+      >
+        {children}
+      </group>
+    );
   };
+  const onShell = (k, o) => {
+    shellRefs.current[k] = o;
+  };
+  const demo = demoRef ? <Demo demoRef={demoRef} innerRefs={innerRefs} shellRefs={shellRefs} /> : null;
   if (spec.real && geos) {
     return (
       <group>
         {spec.shell.map((s) =>
-          geos[s.key] ? <RealMesh key={s.key} geometry={geos[s.key]} color={s.color} opacity={s.opacity} dim={xray} /> : null
+          geos[s.key] ? (
+            <RealMesh key={s.key} geometry={geos[s.key]} color={s.color} opacity={s.opacity} dim={xray || (focus && 'focus')} mref={(o) => onShell(s.key, o)} />
+          ) : null
         )}
         {keys.map((k) => (
           <group key={k} ref={(g) => (partRefs.current[k] = g)}>
             {inner(
               k,
-              geos[k] && <RealMesh geometry={geos[k]} color={spec.parts[k].color} opacity={spec.parts[k].opacity} active={active === k} dim={xray && active !== k} />
+              geos[k] && (
+                <RealMesh geometry={geos[k]} color={spec.parts[k].color} opacity={spec.parts[k].opacity} active={active === k} dim={active !== k && (xray || (focus && 'focus'))} />
+              )
             )}
           </group>
         ))}
+        {demo}
       </group>
     );
   }
   return (
     <group>
       {spec.shell.map((m, i) => (
-        <Mesh key={`s${i}`} m={m} xray={xray} movers={movers} seed={i + 0.5} />
+        <Mesh key={`s${i}`} m={m} xray={xray} movers={movers} seed={i + 0.5} dim={focus} onShell={onShell} />
       ))}
       {keys.map((k, pi) => (
         <group key={k} ref={(g) => (partRefs.current[k] = g)}>
           {inner(
             k,
-            spec.parts[k].meshes.map((m, i) => <Mesh key={i} m={m} xray={xray} active={active === k} movers={movers} seed={pi * 100 + i + 1} />)
+            spec.parts[k].meshes.map((m, i) => <Mesh key={i} m={m} xray={xray} active={active === k} movers={movers} seed={pi * 100 + i + 1} dim={focus && active !== k} />)
           )}
         </group>
       ))}
+      {demo}
     </group>
   );
 }
