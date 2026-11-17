@@ -1,0 +1,18 @@
+{
+  "name": "Klass8",
+  "short_name": "Klass8",
+  "description": "Lessons, labelled diagrams, 3D models, practicals and past papers for Cameroon secondary schools, from Form 1 to Upper Sixth.",
+  "id": "/app/",
+  "start_url": "/app/?source=installed",
+  "scope": "/app",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#02287B",
+  "lang": "en",
+  "categories": ["education"],
+  "icons": [
+    { "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

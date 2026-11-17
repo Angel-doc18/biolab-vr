@@ -12,6 +12,7 @@ import { LangContext } from './src/i18n';
 import AppNavigator from './src/navigation/AppNavigator';
 import { OfflineBanner } from './src/ui/Offline';
 import WebUpdate from './src/ui/WebUpdate';
+import InstallApp from './src/ui/InstallApp';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -40,6 +41,7 @@ function Root() {
       <AppNavigator />
       <OfflineBanner />
       <WebUpdate />
+      <InstallApp />
       <StatusBar style="dark" />
     </LangContext.Provider>
   );
