@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { useL } from '../i18n';
-import { useOnline } from '../lib/online';
+import { configureNet, useOnline } from '../lib/online';
 import { Ic, T, V } from './kit';
 
 export function OfflineBanner() {
@@ -22,6 +22,7 @@ export function OfflineBanner() {
       timer.current = setTimeout(() => Animated.timing(y, { toValue: -80, duration: 200, useNativeDriver: true }).start(() => setMsg(null)), state === 'offline' ? 5000 : 2600);
     };
     let unsub = () => {};
+    configureNet();
     try {
       unsub = NetInfo.addEventListener((s) => {
         const off = s.isConnected === false || s.isInternetReachable === false;

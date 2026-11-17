@@ -5,16 +5,43 @@
 import { useEffect, useState } from 'react';
 import NetInfo from '@react-native-community/netinfo';
 
+const API = (process.env.EXPO_PUBLIC_API_URL || 'https://klass8.ebenesaid.com').replace(/\/+$/, '');
+let configured = false;
+
+// NetInfo's own internet check asks a Google page, which many networks block or
+// answer slowly, so the app said "offline" while it was working. It asks the
+// Klass8 server instead, and only the server's own answer counts.
+export function configureNet() {
+  if (configured) return;
+  configured = true;
+  try {
+    NetInfo.configure({
+      reachabilityUrl: `${API}/v1/health`,
+      reachabilityMethod: 'GET',
+      reachabilityTest: async (r) => r.status === 200,
+      reachabilityShortTimeout: 15 * 1000,
+      reachabilityLongTimeout: 60 * 1000,
+      reachabilityRequestTimeout: 15 * 1000,
+      useNativeReachability: false,
+    });
+  } catch {
+    // older NetInfo: keep its default check
+  }
+}
+
 let last = null; // true, false, or null while not known yet
 let kind = null; // 'wifi', 'cellular', ...
 const listeners = new Set();
 let started = false;
 
-const reachable = (s) => (s.isConnected === false || s.isInternetReachable === false ? false : s.isConnected == null ? null : true);
+// Offline means no network at all. A slow or failed reachability check is not
+// enough to stop the app from trying: the request itself may well succeed.
+const reachable = (s) => (s.isConnected === false ? false : s.isConnected == null ? null : true);
 
 function start() {
   if (started) return;
   started = true;
+  configureNet();
   try {
     NetInfo.addEventListener((s) => {
       kind = s.type || null;
