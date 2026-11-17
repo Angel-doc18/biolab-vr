@@ -1,9 +1,12 @@
 // Extra end-of-lesson questions for the Mathematics lessons, by lesson id.
 // The correct option is written first; options are shuffled when shown.
 
+import { QUESTIONS_1 } from './lessonQuestions1';
+
 const Q = (q, a, why) => ({ q, a, why });
 
 export const LESSON_QUESTIONS = {
+  ...QUESTIONS_1,
   // ---------- Form 4, term 1 ----------
   'ma-realsets-4': [
     Q('Which of these is an integer but not a natural number?', ['−6', '6', '0', '1/2'], 'Integers include the negative whole numbers; ℕ does not.'),
