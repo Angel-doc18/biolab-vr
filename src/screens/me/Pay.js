@@ -127,6 +127,8 @@ export default function Pay({ navigation, route }) {
         return;
       }
       const link = r.payment.link || null;
+      // The server may move a phone prompt to Fapshi's page (Direct Pay refused).
+      if (link) setCheckout('link');
       setPayment({ id: r.payment.id, status: 'PENDING', amount: r.payment.amount, link });
       // A browser only opens a new tab straight from a tap, so on the web the
       // student taps "Open the payment page" in the next sheet.

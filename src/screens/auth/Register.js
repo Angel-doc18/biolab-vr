@@ -15,7 +15,6 @@ export default function Register({ navigation }) {
   const [password, setPassword] = useState('');
   const [agree, setAgree] = useState(false);
   const [promo, setPromo] = useState('');
-  const [showPromo, setShowPromo] = useState(false);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -100,24 +99,30 @@ export default function Register({ navigation }) {
               maxLength={128}
             />
           </V>
-          {showPromo ? (
+          {/* Always in view: whoever invited this person gets their share only
+              if the code is typed here. */}
+          <V c="rounded-xl p-space-md gap-space-sm" style={{ backgroundColor: '#fff6dc', borderWidth: 1, borderColor: '#f5c451' }}>
+            <V c="flex-row items-center gap-2">
+              <V c="w-9 h-9 rounded-lg items-center justify-center" style={{ backgroundColor: '#fbac02' }}>
+                <Ic n="redeem" s={20} c="on-primary" />
+              </V>
+              <V c="flex-1">
+                <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('Did someone give you a promo code?', 'Quelqu’un vous a donné un code promo ?')}
+                </T>
+                <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Type it here so they get their share. You can leave it empty.', 'Tapez-le ici pour qu’il reçoive sa part. Vous pouvez le laisser vide.')}</T>
+              </V>
+            </V>
             <Field
               label={L('Promo code', 'Code promo')}
               right={<T c="font-label-sm text-label-sm text-on-surface-variant">{L('Optional', 'Facultatif')}</T>}
-              placeholder={L('The code someone gave you', 'Le code qu’on vous a donné')}
+              placeholder={L('For example GRAC6457', 'Par exemple GRAC6457')}
               value={promo}
               onChangeText={(t) => setPromo(t.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12))}
               autoCapitalize="characters"
               maxLength={12}
             />
-          ) : (
-            <P c="flex-row items-center gap-2 py-1" onPress={() => setShowPromo(true)} hitSlop={6} accessibilityRole="button">
-              <Ic n="redeem" s={18} c="primary-container" />
-              <T c="font-body-md text-body-md text-primary" style={{ fontWeight: '700' }}>
-                {L('I have a promo code', 'J’ai un code promo')}
-              </T>
-            </P>
-          )}
+          </V>
           <Check on={agree} onPress={() => setAgree((a) => !a)}>
             <T c={`font-body-sm text-body-sm ${errors.agree ? 'text-error' : 'text-on-surface-variant'}`} style={{ lineHeight: 18 }}>
               {L('I agree to the ', 'J’accepte les ')}

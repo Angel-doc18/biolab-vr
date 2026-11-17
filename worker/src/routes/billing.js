@@ -95,11 +95,21 @@ export async function initiatePayment(request, env) {
   await env.DB.prepare('UPDATE payments SET phone = ?, operator = ? WHERE id = ?').bind(ph, medium, id).run();
   const ask = { amount: cash, userId: plain(user.id), externalId: plain(id), message: `Klass8 ${label}` };
   let result;
+  let used = mode;
+  const page = () => payLink(env, { ...ask, redirectUrl: `${publicBase(request, env)}/v1/billing/return` });
   try {
-    result =
-      mode === 'prompt'
-        ? await directPay(env, { ...ask, phone: ph, medium, name: user.name })
-        : await payLink(env, { ...ask, redirectUrl: `${publicBase(request, env)}/v1/billing/return` });
+    if (mode === 'prompt') {
+      try {
+        result = await directPay(env, { ...ask, phone: ph, medium, name: user.name });
+      } catch (e) {
+        // Fapshi refused the prompt on the phone (Direct Pay not switched on for
+        // this service yet, or this number cannot get it): its own payment page
+        // always works, so the payment carries on there instead of failing.
+        if (e?.code === 'payment_timeout') throw e;
+        used = 'link';
+        result = await page();
+      }
+    } else result = await page();
   } catch (e) {
     // Refused outright: nothing was made at Fapshi. A time-out stays pending
     // and is looked up by reconcilePayments.
@@ -112,7 +122,7 @@ export async function initiatePayment(request, env) {
   }
   await env.DB.prepare('UPDATE payments SET reference = ?, updated_at = ? WHERE id = ?').bind(result.transId, now(), id).run();
   return created({
-    payment: { id, reference: result.transId, plan: planId, months, amount: total, credit, cash, accounts: accounts.length, status: 'PENDING', checkout: mode, link: mode === 'link' ? result.link : undefined },
+    payment: { id, reference: result.transId, plan: planId, months, amount: total, credit, cash, accounts: accounts.length, status: 'PENDING', checkout: used, link: used === 'link' ? result.link : undefined },
   });
 }
 
