@@ -4,8 +4,9 @@
 // quizzes, Paper 1 and anything already downloaded keep working offline.
 import { useEffect, useState } from 'react';
 import NetInfo from '@react-native-community/netinfo';
+import { API_BASE } from '../api/base';
 
-const API = (process.env.EXPO_PUBLIC_API_URL || 'https://klass8.ebenesaid.com').replace(/\/+$/, '');
+const API = API_BASE;
 let configured = false;
 
 // NetInfo's own internet check asks a Google page, which many networks block or

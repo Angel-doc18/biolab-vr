@@ -4,7 +4,9 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { knownOffline } from '../lib/online';
 
-export const API_BASE = (process.env.EXPO_PUBLIC_API_URL || 'https://klass8.ebenesaid.com').replace(/\/+$/, '');
+import { API_BASE } from './base';
+
+export { API_BASE };
 
 const KEY = 'biospatial.session';
 const memory = { session: null };
