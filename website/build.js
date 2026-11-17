@@ -1,4 +1,4 @@
-// Builds the public Klass8 website (klass8.ebenesaid.com) into website/dist.
+// Builds the public Klass8 website (klass8.com) into website/dist.
 //
 //   node website/build.js
 //

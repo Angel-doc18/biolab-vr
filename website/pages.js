@@ -46,8 +46,8 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
 <meta property="og:site_name" content="Klass8">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="https://klass8.ebenesaid.com${url}">
-<link rel="canonical" href="https://klass8.ebenesaid.com${url}">
+<meta property="og:url" content="https://klass8.com${url}">
+<link rel="canonical" href="https://klass8.com${url}">
 <link rel="icon" href="/img/mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

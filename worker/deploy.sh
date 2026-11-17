@@ -6,7 +6,7 @@
 #   sh worker/deploy.sh voice    the voice server (worker/voice) on 127.0.0.1:8880
 #
 # Both run in Docker on the network "klass8"; nginx (site "klass8") passes
-# https://klass8.ebenesaid.com/v1/ to the API. Secrets stay in
+# https://klass8.com/v1/ (and the older klass8.ebenesaid.com/v1/) to the API. Secrets stay in
 # /opt/klass8-api/.env and /opt/klass8-voice/.env on the server (chmod 600).
 set -eu
 HOST=${KLASS8_HOST:-root@72.61.177.234}

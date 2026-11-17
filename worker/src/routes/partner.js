@@ -48,7 +48,7 @@ export async function myPartner(request, env) {
   const ref = await env.DB.prepare('SELECT r.code, u.name FROM referrals r LEFT JOIN users u ON u.id = r.referrer_id WHERE r.user_id = ?').bind(user.id).first();
   return ok({
     code,
-    link: `https://klass8.ebenesaid.com/download/?code=${code}`,
+    link: `https://klass8.com/download/?code=${code}`,
     paused: Boolean(user.ref_paused),
     programme: { ...p, rate: rateOf(user), usualRate: p.rate },
     balance: await balance(env, user.id),

@@ -110,7 +110,7 @@ export function requireAccess(user, env) {
 // the server says, so once it is on they must update. Newer builds send
 // x-klass8-client with their level.
 const CLIENT_LEVEL = 2;
-export const UPDATE_MESSAGE = 'This version of Klass8 is out of date. Install the new one from klass8.ebenesaid.com/download to continue.';
+export const UPDATE_MESSAGE = 'This version of Klass8 is out of date. Install the new one from klass8.com/download to continue.';
 export const outdatedApp = (request, env) => paywallOn(env) && !(Number(request.headers.get('x-klass8-client')) >= CLIENT_LEVEL);
 
 // Public shape of a user. Never includes hashes or internal flags.

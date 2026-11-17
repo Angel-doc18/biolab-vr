@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds the public website and puts it live at https://klass8.ebenesaid.com/
+# Builds the public website and puts it live at https://klass8.com/
 # (files in /var/www/klass8/site on Klass8's server; the web app is at /app).
 #
 #   sh website/deploy.sh

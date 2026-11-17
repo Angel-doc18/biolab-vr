@@ -6,7 +6,7 @@
 # Nothing is saved unless Fapshi accepts the keys.
 set -eu
 ENV_FILE=/opt/klass8-api/.env
-WEBHOOK_URL=https://klass8.ebenesaid.com/v1/billing/fapshi-webhook
+WEBHOOK_URL=https://klass8.com/v1/billing/fapshi-webhook
 
 ask_yes() { # question, default (yes|no)
   local a

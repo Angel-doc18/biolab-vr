@@ -21,7 +21,7 @@ async function appVersion() {
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 3000);
-    const r = await fetch('https://klass8.ebenesaid.com/download/version.json', { signal: ctrl.signal });
+    const r = await fetch('https://klass8.com/download/version.json', { signal: ctrl.signal });
     clearTimeout(timer);
     latestApp.value = r.ok ? await r.json() : null;
   } catch {
