@@ -25,7 +25,7 @@ Play Console > **Create app**
 
 | Field | Choose |
 |---|---|
-| App name | `Klass8: GCE Lessons & Revision` |
+| App name | `Klass8: Learn, Practise, Excel` |
 | Default language | English (United Kingdom) – en-GB |
 | App or game | App |
 | Free or paid | Free |

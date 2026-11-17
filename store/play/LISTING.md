@@ -11,13 +11,13 @@ payments policy). Nothing below does.
 **App name** (max 30)
 
 ```
-Klass8: GCE Lessons & Revision
+Klass8: Learn, Practise, Excel
 ```
 
 **Short description** (max 80)
 
 ```
-Lessons, labelled diagrams, 3D models, practicals and past papers for the GCE.
+Lessons, diagrams, 3D models and past papers, Form 1 to Upper Sixth in Cameroon.
 ```
 
 **Full description** (max 4000)
@@ -66,13 +66,13 @@ Klass8 is made in Cameroon for Cameroonian students.
 **App name** (max 30)
 
 ```
-Klass8 : cours et révision GCE
+Klass8 : apprendre et réussir
 ```
 
 **Short description** (max 80)
 
 ```
-Cours, schémas légendés, modèles 3D, TP et épreuves pour le GCE.
+Leçons, schémas, modèles 3D et épreuves, de la Form 1 à l’Upper Sixth.
 ```
 
 **Full description** (max 4000)
