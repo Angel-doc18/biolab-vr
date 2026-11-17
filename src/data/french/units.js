@@ -2,6 +2,7 @@
 // national harmonised schemes of work for the English-speaking sub-system,
 // organised around the five domains of life. Each topic carries the term and
 // sequence in which it is taught.
+import { UNITS_1 } from './units1';
 import { UNITS_4 } from './units4';
 import { UNITS_5 } from './units5';
 
@@ -14,4 +15,4 @@ export const GROUPS = [
   { id: 'exam', en: 'Examination practice', fr: 'Préparation aux examens' },
 ];
 
-export const units = [...UNITS_4, ...UNITS_5];
+export const units = [...UNITS_1, ...UNITS_4, ...UNITS_5];
