@@ -23,8 +23,7 @@ $ks = Join-Path $dir 'klass8-upload.keystore'
 
 if (-not (Test-Path $openssl)) { throw "OpenSSL was not found at $openssl (it comes with Git for Windows)." }
 if (-not $KeyOnly) {
-  gh auth status *> $null
-  if ($LASTEXITCODE -ne 0) { throw 'Sign in to GitHub first with: gh auth login' }
+  if ((Invoke-Quiet gh @('auth', 'status')) -ne 0) { throw 'Sign in to GitHub first with: gh auth login' }
   $admin = gh api "repos/$repo" --jq '.permissions.admin'
   if ($admin -ne 'true') { throw "The GitHub account signed in here cannot add secrets to $repo (only its owner can). Run this again with -KeyOnly and give the owner the file it makes." }
 }
@@ -32,6 +31,17 @@ if (-not $KeyOnly) {
 New-Item -ItemType Directory -Force $dir | Out-Null
 if (Test-Path $ks) {
   Write-Host "A Klass8 upload key already exists at $ks. It is kept; only the GitHub secrets are set again."
+}
+
+# Runs a program and judges it by its exit code only: Windows PowerShell 5 would
+# otherwise treat its normal progress messages (OpenSSL's dots, gh's "Set secret")
+# as errors and stop.
+function Invoke-Quiet {
+  param([string]$exe, [string[]]$argv)
+  $old = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try { & $exe @argv 2>&1 | Out-Null } finally { $ErrorActionPreference = $old }
+  return $LASTEXITCODE
 }
 
 function Read-Secret($prompt) {
@@ -53,14 +63,13 @@ try {
     Write-Host 'Making the upload key...'
     $key = Join-Path $dir 'key.pem'
     $cert = Join-Path $dir 'cert.pem'
-    & $openssl req -x509 -newkey rsa:2048 -keyout $key -out $cert -days 10000 -subj '/CN=Klass8/O=Klass8/C=CM' -passout env:K8_KEY_PASS 2>$null
-    & $openssl pkcs12 -export -in $cert -inkey $key -passin env:K8_KEY_PASS -name klass8 -out $ks -passout env:K8_KEY_PASS
-    Remove-Item $key -Force   # the private key now lives only inside the password-protected keystore
+    if ((Invoke-Quiet $openssl @('req', '-x509', '-newkey', 'rsa:2048', '-keyout', $key, '-out', $cert, '-days', '10000', '-subj', '/CN=Klass8/O=Klass8/C=CM', '-passout', 'env:K8_KEY_PASS')) -ne 0) { throw 'OpenSSL could not make the key.' }
+    if ((Invoke-Quiet $openssl @('pkcs12', '-export', '-in', $cert, '-inkey', $key, '-passin', 'env:K8_KEY_PASS', '-name', 'klass8', '-out', $ks, '-passout', 'env:K8_KEY_PASS')) -ne 0) { throw 'OpenSSL could not make the keystore.' }
+    Remove-Item $key, $cert -Force   # the private key now lives only inside the password-protected keystore
     if (-not (Test-Path $ks)) { throw 'The key file was not made.' }
   }
   # Check the password opens the key before sending anything to GitHub.
-  & $openssl pkcs12 -in $ks -passin env:K8_KEY_PASS -noout 2>$null
-  if ($LASTEXITCODE -ne 0) { throw 'This password does not open the existing key file. Nothing was sent to GitHub.' }
+  if ((Invoke-Quiet $openssl @('pkcs12', '-in', $ks, '-passin', 'env:K8_KEY_PASS', '-noout')) -ne 0) { throw 'This password does not open the key file. Nothing was sent to GitHub.' }
 
   if ($KeyOnly) {
     $out = Join-Path $dir 'keystore-base64.txt'
@@ -73,10 +82,9 @@ try {
   }
   Write-Host 'Adding the 4 secrets to GitHub...'
   $b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($ks))
-  gh secret set KLASS8_UPLOAD_KEYSTORE --repo $repo --body $b64
-  gh secret set KLASS8_UPLOAD_KEY_ALIAS --repo $repo --body 'klass8'
-  gh secret set KLASS8_UPLOAD_STORE_PASSWORD --repo $repo --body $p1
-  gh secret set KLASS8_UPLOAD_KEY_PASSWORD --repo $repo --body $p1
+  foreach ($pair in @(@('KLASS8_UPLOAD_KEYSTORE', $b64), @('KLASS8_UPLOAD_KEY_ALIAS', 'klass8'), @('KLASS8_UPLOAD_STORE_PASSWORD', $p1), @('KLASS8_UPLOAD_KEY_PASSWORD', $p1))) {
+    if ((Invoke-Quiet gh @('secret', 'set', $pair[0], '--repo', $repo, '--body', $pair[1])) -ne 0) { throw "GitHub did not accept the secret $($pair[0])." }
+  }
 } finally {
   Remove-Item Env:K8_KEY_PASS -ErrorAction SilentlyContinue
   $p1 = $null; $p2 = $null
