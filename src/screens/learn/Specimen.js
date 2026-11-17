@@ -102,7 +102,7 @@ function ModelScreen({ unit }) {
   // The teacher explains the process from start to finish while the model acts
   // it out: food moving down the gut, blood through the heart, air into the
   // lungs. One button, no stopping between steps.
-  const demo = useMemo(() => demoFor(model.spec?.real || modelOf(unit.id)), [model.spec, unit.id]);
+  const demo = useMemo(() => demoFor(model.spec?.real || modelOf(unit.id), model.spec), [model.spec, unit.id]);
   // When the real model arrives during a run, the same steps carry on with its
   // own points (the built-in and the real model share the teacher's words).
   const [run, setRun] = useState(null); // { key, list }

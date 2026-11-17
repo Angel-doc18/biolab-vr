@@ -13,14 +13,42 @@
 //
 // Models with a real anatomy version have two sets of points: the downloaded
 // model and the built-in one have different shapes.
+//   raw    the points are in the model's own units, before it was shrunk to fit
+//          the screen (chemModels.js fit): they are scaled by the model's k.
+//   paint  { part: [from colour, to colour] }: that part's meshes of the first
+//          colour change to the second, and stay so until the demonstration ends
 import { BIOLOGY_DEMOS } from './demosBiology';
+import { CHEMISTRY_DEMOS } from './demosChemistry';
+import { scaleAnim } from './anim';
 
-const ALL = { ...BIOLOGY_DEMOS };
+const ALL = { ...BIOLOGY_DEMOS, ...CHEMISTRY_DEMOS };
+
+const v = (p, k) => p && p.map((x) => x * k);
+function scaled(demo, k) {
+  return {
+    ...demo,
+    steps: demo.steps.map((s) => ({
+      ...s,
+      ...(s.path && { path: s.path.map((p) => v(p, k)) }),
+      ...(s.from && { from: v(s.from, k) }),
+      ...(s.r != null && { r: s.r * k }),
+      ...(s.flows && { flows: s.flows.map((f) => ({ ...f, pts: f.pts.map((p) => v(p, k)), r: (f.r ?? 0.035) * k })) }),
+      ...(s.act && { act: Object.fromEntries(Object.entries(s.act).map(([key, an]) => [key, scaleAnim(an, k)])) }),
+    })),
+  };
+}
+const memo = new Map();
 
 // The demonstration for a model ('digestive' for the real anatomy, 'nutrition'
-// for the built-in one, 'ch-acids', ...), or null.
-export function demoFor(name) {
-  return (name && ALL[name]) || null;
+// for the built-in one, 'ch-acids', ...), or null. spec: the model shown.
+export function demoFor(name, spec) {
+  const d = name && ALL[name];
+  if (!d) return null;
+  const k = d.raw ? spec?.k ?? 1 : 1;
+  if (k === 1) return d;
+  const id = `${name}:${k}`;
+  if (!memo.has(id)) memo.set(id, scaled(d, k));
+  return memo.get(id);
 }
 
 // About how long the teacher takes to say a step, in seconds.

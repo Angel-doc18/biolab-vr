@@ -127,9 +127,11 @@ export function fit(model, reach = 1.4) {
     })
   );
   const k = Math.min(1, reach / extent);
-  if (k === 1) return model;
+  // k is kept so a demonstration written in the model's own units can be scaled the same way.
+  if (k === 1) return { ...model, k };
   return {
     ...model,
+    k,
     shell: model.shell.map((m) => scaleMesh(m, k)),
     parts: Object.fromEntries(Object.entries(model.parts).map(([key, q]) => [key, { ...q, anchor: q.anchor.map((v) => v * k), meshes: q.meshes.map((m) => scaleMesh(m, k)), ...(q.an && { an: scaleAnim(q.an, k) }) }])),
   };

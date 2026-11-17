@@ -1,7 +1,8 @@
 // What a model acts out while the teacher explains it (see demos.js): a marker
 // for the thing that moves (food, blood, air, a nerve impulse) with a fading
 // trail, streams of small dots (bile, oxygen, heat lost), and parts that move
-// only at their own step (a forearm bending, a vacuole filling).
+// only at their own step (a forearm bending, a vacuole filling), and colours that
+// change (an indicator at the end point) and stay changed until the end.
 //
 // demoRef.current: { on, key, steps, step, dur }. The marker goes from wherever
 // it is along the step's path in about the time the teacher takes to say it.
@@ -60,7 +61,7 @@ export default function Demo({ demoRef, innerRefs, shellRefs }) {
   const world = useMemo(() => new THREE.Vector3(), []);
   const s = useRef(null);
   if (!s.current) {
-    s.current = { key: null, step: -1, t: 0, t0: 0, move: 3, path: null, has: false, pos: new THREE.Vector3(), col: new THREE.Color('#ffd54f'), cFrom: new THREE.Color(), cTo: new THREE.Color(), r: 0.07, rFrom: 0.07, rTo: 0.07, hist: [], acted: new Map() };
+    s.current = { key: null, step: -1, t: 0, t0: 0, move: 3, path: null, has: false, pos: new THREE.Vector3(), col: new THREE.Color('#ffd54f'), cFrom: new THREE.Color(), cTo: new THREE.Color(), r: 0.07, rFrom: 0.07, rTo: 0.07, hist: [], acted: new Map(), painted: new Map(), paintTo: new THREE.Color() };
   }
   const st = s.current;
 
@@ -73,6 +74,11 @@ export default function Demo({ demoRef, innerRefs, shellRefs }) {
     }
     st.acted.clear();
   };
+  // Colours changed by the demonstration go back when it ends.
+  const unpaint = () => {
+    for (const [mat, c] of st.painted) mat.color.copy(c);
+    st.painted.clear();
+  };
 
   useFrame((_, dt) => {
     const d = demoRef.current;
@@ -82,6 +88,7 @@ export default function Demo({ demoRef, innerRefs, shellRefs }) {
       if (g.visible || st.key) {
         g.visible = false;
         restore();
+        unpaint();
         st.key = null;
         st.step = -1;
         st.has = false;
@@ -95,6 +102,7 @@ export default function Demo({ demoRef, innerRefs, shellRefs }) {
     if (st.key !== d.key) {
       // a new run from the start
       restore();
+      unpaint();
       st.key = d.key;
       st.step = -1;
       st.has = false;
@@ -175,6 +183,25 @@ export default function Demo({ demoRef, innerRefs, shellRefs }) {
       }
     }
     for (; n < DOTS; n++) if (dots.current[n]) dots.current[n].visible = false;
+
+    // Colours that change at this step (and stay changed).
+    if (step.paint) {
+      for (const [k, [from, to]] of Object.entries(step.paint)) {
+        const obj = innerRefs.current[k];
+        if (!obj) continue;
+        const want = from.replace('#', '').toLowerCase();
+        st.paintTo.set(to);
+        obj.traverse((o) => {
+          const mat = o.material;
+          if (!mat?.color) return;
+          if (!st.painted.has(mat)) {
+            if (mat.color.getHexString() !== want) return;
+            st.painted.set(mat, mat.color.clone());
+          }
+          mat.color.copy(st.painted.get(mat)).lerp(st.paintTo, e);
+        });
+      }
+    }
 
     // Parts that move only at this step.
     if (step.act) {
