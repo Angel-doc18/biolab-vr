@@ -312,6 +312,8 @@ export async function deleteUser(request, env, id) {
     env.DB.prepare('DELETE FROM payment_for WHERE user_id = ?').bind(id),
     env.DB.prepare('DELETE FROM commissions WHERE referrer_id = ?').bind(id),
     env.DB.prepare("UPDATE commissions SET referred_id = 'deleted' WHERE referred_id = ?").bind(id),
+    // screenshots of payments show the person's number: they go with the account
+    env.DB.prepare('DELETE FROM withdrawal_proofs WHERE withdrawal_id IN (SELECT id FROM withdrawals WHERE user_id = ?)').bind(id),
     env.DB.prepare("DELETE FROM withdrawals WHERE user_id = ? AND status != 'paid'").bind(id),
     env.DB.prepare("UPDATE withdrawals SET user_id = 'deleted', phone = '' WHERE user_id = ?").bind(id),
     env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id),

@@ -12,6 +12,7 @@ import { Field, PhoneField, Toggle } from '../../ui/form';
 import { useL } from '../../i18n';
 import { post } from '../../api/client';
 import { loadPartner, shareMessage } from '../../ui/InviteCard';
+import ProofView from '../../ui/ProofView';
 
 const money = (n) => `${Math.round(Number(n) || 0).toLocaleString('en-US')} FCFA`;
 const day = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -72,6 +73,7 @@ export function InviteBody({ header = null }) {
   const [code, setCode] = useState('');
   const [codeBusy, setCodeBusy] = useState(false);
   const [codeError, setCodeError] = useState(null);
+  const [proofOf, setProofOf] = useState(null);
   const switchAutopay = async () => {
     const on = !p.autopay;
     setP((x) => ({ ...x, autopay: on }));
@@ -267,6 +269,14 @@ export function InviteBody({ header = null }) {
                             {w.reference ? `, ${L('transaction', 'transaction')} ${w.reference}` : ''}
                             {w.reason ? `. ${w.reason}` : ''}
                           </T>
+                          {w.status === 'paid' && !!w.hasProof && (
+                            <P c="flex-row items-center gap-1.5" onPress={() => setProofOf(w.id)} hitSlop={8} accessibilityRole="button">
+                              <Ic n="receipt_long" s={18} c="primary-container" />
+                              <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                                {L('See the payment screenshot', 'Voir la capture du paiement')}
+                              </T>
+                            </P>
+                          )}
                           {w.status === 'requested' && (
                             <P onPress={() => cancel(w)} hitSlop={8}>
                               <T c="font-label-md text-label-md text-error">{L('Cancel this request', 'Annuler cette demande')}</T>
@@ -337,6 +347,7 @@ export function InviteBody({ header = null }) {
           )}
         </V>
       </Screen>
+      {!!proofOf && <ProofView path={`/v1/partner/withdrawals/${proofOf}/proof`} onClose={() => setProofOf(null)} />}
       {toast}
     </V>
   );

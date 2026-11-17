@@ -3,9 +3,11 @@
 // the people who joined with their code, each earning and each withdrawal.
 import { useState } from 'react';
 import { Input, T, V } from '../../ui/kit';
+import { pickReceiptPhoto } from '../../lib/photo';
+import ProofView from '../../ui/ProofView';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
 import { useL } from '../../i18n';
-import { patch, post } from '../../api/adminClient';
+import { patch, post, put } from '../../api/adminClient';
 import { Card, Figure, Loading, Pill, Row, Section, Sheet, date, money, phoneText, roleName, useAdminCan, useAdminLoad } from './kit';
 
 const W_STATUS = { requested: ['Waiting', 'En attente', 'warn'], paid: ['Paid', 'Payé', 'ok'], rejected: ['Turned down', 'Refusé', 'bad'], cancelled: ['Cancelled', 'Annulé', 'muted'], spent: ['Paid Klass8', 'Payé Klass8', 'info'], held: ['Held', 'Réservé', 'warn'] };
@@ -14,7 +16,24 @@ export default function AdminPartner({ navigation, route }) {
   const { id } = route.params;
   const L = useL();
   const can = useAdminCan();
-  const { data, error, busy, setData } = useAdminLoad(`/v1/admin/partners/${id}`);
+  const { data, error, busy, setData, reload } = useAdminLoad(`/v1/admin/partners/${id}`);
+  // A paid withdrawal: see its payment screenshot, or (founder, CTO) add one.
+  const [proofOf, setProofOf] = useState(null);
+  const [adding, setAdding] = useState(null);
+  const addProof = async (w) => {
+    try {
+      const shot = await pickReceiptPhoto();
+      if (!shot) return;
+      setAdding(w.id);
+      await put(`/v1/admin/withdrawals/${w.id}/proof`, { mediaType: shot.mediaType, base64: shot.base64 });
+      showToast(L('Screenshot added. The partner was told.', 'Capture ajoutée. Le partenaire est averti.'));
+      reload();
+    } catch (e) {
+      showToast(e?.message || L('The screenshot was not added.', 'La capture n’a pas été ajoutée.'), 'error');
+    } finally {
+      setAdding(null);
+    }
+  };
   const [toast, showToast] = useToast();
   const [rate, setRate] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -161,7 +180,10 @@ export default function AdminPartner({ navigation, route }) {
                   <Card>
                     {data.withdrawals.map((w, i) => {
                       const st = W_STATUS[w.status] || [w.status, w.status, 'muted'];
-                      return <Row key={w.id} first={i === 0} icon="account_balance_wallet" title={money(w.amount)} sub={[phoneText(w.phone), date(w.createdAt), w.reference, w.reason].filter(Boolean).join(', ')} right={<Pill text={L(st[0], st[1])} tone={st[2]} />} />;
+                      const paid = w.status === 'paid';
+                      const shot = paid ? (w.hasProof ? L('Screenshot: tap to see', 'Capture : touchez pour voir') : can.owner ? (adding === w.id ? L('Adding the screenshot...', 'Ajout de la capture...') : L('Tap to add the payment screenshot', 'Touchez pour ajouter la capture')) : null) : null;
+                      const open = paid && (w.hasProof ? () => setProofOf(w.id) : can.owner && !adding ? () => addProof(w) : undefined);
+                      return <Row key={w.id} first={i === 0} icon="account_balance_wallet" title={money(w.amount)} sub={[phoneText(w.phone), date(w.createdAt), w.reference, w.reason, shot].filter(Boolean).join(', ')} right={<Pill text={L(st[0], st[1])} tone={st[2]} />} onPress={open || undefined} />;
                     })}
                   </Card>
                 </Section>
@@ -201,6 +223,7 @@ export default function AdminPartner({ navigation, route }) {
         )}
         <ErrorNote error={actError} />
       </Sheet>
+      {!!proofOf && <ProofView admin path={`/v1/admin/withdrawals/${proofOf}/proof`} onClose={() => setProofOf(null)} />}
       {toast}
     </V>
   );

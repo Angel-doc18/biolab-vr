@@ -41,7 +41,7 @@ export async function myPartner(request, env) {
     .bind(user.id)
     .all();
   const { results: withdrawals } = await env.DB.prepare(
-    'SELECT id, amount, phone, status, reason, reference, created_at AS createdAt, decided_at AS decidedAt FROM withdrawals WHERE user_id = ? ORDER BY created_at DESC LIMIT 50'
+    'SELECT id, amount, phone, status, reason, reference, created_at AS createdAt, decided_at AS decidedAt, EXISTS(SELECT 1 FROM withdrawal_proofs p WHERE p.withdrawal_id = withdrawals.id) AS hasProof FROM withdrawals WHERE user_id = ? ORDER BY created_at DESC LIMIT 50'
   )
     .bind(user.id)
     .all();
@@ -113,4 +113,17 @@ export async function cancelWithdrawal(request, env, id) {
   if (!r.meta.changes) throw new HttpError(400, 'This withdrawal can no longer be cancelled.', 'not_open');
   await env.DB.prepare("UPDATE alerts SET resolved_at = ?, resolved_by = 'cancelled' WHERE key = ? AND resolved_at IS NULL").bind(now(), `partner:withdraw:${id}`).run();
   return ok({ balance: await balance(env, user.id) });
+}
+
+// GET /v1/partner/withdrawals/:id/proof  the screenshot of the payment, for the
+// partner it was paid to: { mediaType, base64 }.
+export async function withdrawalProof(request, env, id) {
+  const user = await requireUser(request, env);
+  const row = await env.DB.prepare(
+    'SELECT p.mime, p.data FROM withdrawal_proofs p JOIN withdrawals w ON w.id = p.withdrawal_id WHERE p.withdrawal_id = ? AND w.user_id = ?'
+  )
+    .bind(id, user.id)
+    .first();
+  if (!row) throw new HttpError(404, 'There is no screenshot for this withdrawal.', 'not_found');
+  return ok({ mediaType: row.mime, base64: row.data });
 }

@@ -94,7 +94,7 @@ export async function getPartner(request, env, id) {
   )
     .bind(id)
     .all();
-  const { results: withdrawals } = await env.DB.prepare('SELECT id, amount, phone, status, reason, reference, created_at AS createdAt, decided_at AS decidedAt FROM withdrawals WHERE user_id = ? ORDER BY created_at DESC LIMIT 50').bind(id).all();
+  const { results: withdrawals } = await env.DB.prepare('SELECT id, amount, phone, status, reason, reference, created_at AS createdAt, decided_at AS decidedAt, EXISTS(SELECT 1 FROM withdrawal_proofs p WHERE p.withdrawal_id = withdrawals.id) AS hasProof FROM withdrawals WHERE user_id = ? ORDER BY created_at DESC LIMIT 50').bind(id).all();
   return ok({
     partner: { id: u.id, name: u.name, role: u.role, partnerKind: u.partner_kind, phone: u.phone, email: u.email, code: u.ref_code, rate: rateOf(u), ownRate: u.ref_rate != null ? Number(u.ref_rate) : null, paused: Boolean(u.ref_paused), createdAt: u.created_at },
     programme: programme(),
@@ -144,7 +144,8 @@ export async function listWithdrawals(request, env) {
   await requireAdmin(request, env);
   const s = new URL(request.url).searchParams.get('status') || 'requested';
   const { results } = await env.DB.prepare(
-    `SELECT w.id, w.amount, w.phone, w.status, w.reason, w.reference, w.created_at AS createdAt, w.decided_at AS decidedAt, u.id AS userId, u.name, u.role
+    `SELECT w.id, w.amount, w.phone, w.status, w.reason, w.reference, w.created_at AS createdAt, w.decided_at AS decidedAt, u.id AS userId, u.name, u.role,
+            EXISTS(SELECT 1 FROM withdrawal_proofs p WHERE p.withdrawal_id = w.id) AS hasProof
      FROM withdrawals w LEFT JOIN users u ON u.id = w.user_id WHERE (? = 'all' OR w.status = ?) ORDER BY w.created_at ${s === 'requested' ? 'ASC' : 'DESC'} LIMIT 200`
   )
     .bind(s, s)
@@ -159,15 +160,62 @@ async function openWithdrawal(env, id) {
   return w;
 }
 
-// POST /v1/admin/withdrawals/:id/paid { reference }  after sending the money by mobile money.
+// ---------- the screenshot of the payment ----------
+// The founder or the CTO can add a screenshot of the mobile money payment, when
+// marking a withdrawal paid or later, so the partner sees the money was sent.
+const PROOF_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_PROOF = 1_200_000; // base64 characters, about 900 KB of image
+const isOwner = (a) => a.role === 'ceo' || a.role === 'cto' || a.id === null;
+
+function readProof(p) {
+  if (p == null) return null;
+  const mime = typeof p.mediaType === 'string' ? p.mediaType : '';
+  const data = typeof p.base64 === 'string' ? p.base64.replace(/\s+/g, '') : '';
+  if (!PROOF_TYPES.includes(mime)) throw new HttpError(400, 'The screenshot must be a JPEG, PNG or WebP picture.', 'invalid_input');
+  if (!data || !/^[A-Za-z0-9+/]+={0,2}$/.test(data)) throw new HttpError(400, 'The screenshot could not be read. Choose it again.', 'invalid_input');
+  if (data.length > MAX_PROOF) throw new HttpError(413, 'The screenshot is too large. Crop it to the payment message.', 'too_large');
+  return { mime, data };
+}
+
+const saveProof = (env, id, proof, admin) =>
+  env.DB.prepare('INSERT OR REPLACE INTO withdrawal_proofs (withdrawal_id, mime, data, added_by, created_at) VALUES (?, ?, ?, ?, ?)')
+    .bind(id, proof.mime, proof.data, admin.id || 'operator', now())
+    .run();
+
+// PUT /v1/admin/withdrawals/:id/proof { mediaType, base64 }  for a withdrawal already paid.
+export async function putProof(request, env, id) {
+  const admin = await requireAdminCan(request, env, 'owner');
+  const b = await readJson(request, MAX_PROOF + 4096);
+  const proof = readProof(b);
+  if (!proof) throw new HttpError(400, 'Choose the screenshot first.', 'invalid_input');
+  const w = await env.DB.prepare('SELECT * FROM withdrawals WHERE id = ?').bind(id).first();
+  if (!w) throw new HttpError(404, 'This withdrawal no longer exists.', 'not_found');
+  if (w.status !== 'paid') throw new HttpError(400, 'Add the screenshot once the withdrawal is marked as paid.', 'not_paid');
+  await saveProof(env, id, proof, admin);
+  await notify(env, w.user_id, 'partner', 'Payment screenshot added', `Klass8 added the screenshot of the payment of ${fcfa(w.amount)} to your withdrawals. Open Invite and earn to see it.`);
+  return ok({ saved: true });
+}
+
+// GET /v1/admin/withdrawals/:id/proof -> { mediaType, base64 }
+export async function getProof(request, env, id) {
+  await requireAdmin(request, env);
+  const row = await env.DB.prepare('SELECT mime, data FROM withdrawal_proofs WHERE withdrawal_id = ?').bind(id).first();
+  if (!row) throw new HttpError(404, 'There is no screenshot for this withdrawal.', 'not_found');
+  return ok({ mediaType: row.mime, base64: row.data });
+}
+
+// POST /v1/admin/withdrawals/:id/paid { reference, proof? }  after sending the money by mobile money.
 export async function markPaid(request, env, id) {
   const admin = await requireAdmin(request, env);
-  const b = await readJson(request);
+  const b = await readJson(request, MAX_PROOF + 4096);
   const reference = str(b.reference, 'Transaction number', { min: 3, max: 60 });
+  const proof = readProof(b.proof);
+  if (proof && !isOwner(admin)) throw new HttpError(403, 'Only the founder or the CTO can add the payment screenshot.', 'forbidden');
   const w = await openWithdrawal(env, id);
   await env.DB.prepare("UPDATE withdrawals SET status = 'paid', reference = ?, decided_at = ?, decided_by = ? WHERE id = ? AND status = 'requested'").bind(reference, now(), admin.id || 'operator', id).run();
+  if (proof) await saveProof(env, id, proof, admin);
   await env.DB.prepare("UPDATE alerts SET resolved_at = ?, resolved_by = ? WHERE key = ? AND resolved_at IS NULL").bind(now(), admin.id || 'operator', `partner:withdraw:${id}`).run();
-  await notify(env, w.user_id, 'partner', 'Withdrawal sent', `Klass8 sent ${fcfa(w.amount)} to ${w.phone.replace(/^237/, '+237 ')} by mobile money. Transaction number: ${reference}. If it has not arrived within a day, contact Klass8 with this number.`);
+  await notify(env, w.user_id, 'partner', 'Withdrawal sent', `Klass8 sent ${fcfa(w.amount)} to ${w.phone.replace(/^237/, '+237 ')} by mobile money. Transaction number: ${reference}. If it has not arrived within a day, contact Klass8 with this number.${proof ? ' The screenshot of the payment is in your withdrawals.' : ''}`);
   return ok({ paid: true });
 }
 

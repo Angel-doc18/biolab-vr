@@ -75,3 +75,29 @@ export async function pickProfilePhoto(source = 'library') {
   if (small.base64.length > MAX_AVATAR_B64) throw new Error('The picture is too large. Crop it closer to your face or choose a smaller one.');
   return { base64: small.base64, mediaType: 'image/jpeg' };
 }
+
+// A screenshot of a mobile money payment, for a partner's withdrawal: kept whole
+// (no crop), shrunk to at most 1280 pixels on its longer side and saved as a
+// JPEG, so the message stays readable and the upload stays small.
+const MAX_RECEIPT_B64 = 1_100_000;
+const RECEIPT_SIDE = 1280;
+export async function pickReceiptPhoto() {
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) throw new Error('Photo library permission is needed to choose the screenshot.');
+  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.85, allowsEditing: false, exif: false });
+  if (res.canceled || !res.assets?.[0]) return null;
+  const a = res.assets[0];
+  let out;
+  try {
+    const ctx = ImageManipulator.manipulate(a.uri);
+    const long = Math.max(a.width || 0, a.height || 0);
+    if (long > RECEIPT_SIDE) ctx.resize((a.width || 0) >= (a.height || 0) ? { width: RECEIPT_SIDE } : { height: RECEIPT_SIDE });
+    const image = await ctx.renderAsync();
+    out = await image.saveAsync({ compress: 0.7, format: SaveFormat.JPEG, base64: true });
+  } catch {
+    throw new Error('The screenshot could not be read. Choose another one.');
+  }
+  if (!out?.base64) throw new Error('The screenshot could not be read. Choose another one.');
+  if (out.base64.length > MAX_RECEIPT_B64) throw new Error('The screenshot is too large. Crop it to the payment message.');
+  return { uri: out.uri, base64: out.base64, mediaType: 'image/jpeg' };
+}

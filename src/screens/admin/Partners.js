@@ -2,8 +2,9 @@
 // them), the totals, withdrawals waiting to be paid, and who brings the most
 // people, sorted by sign-ups, paying people or earnings.
 import { useState } from 'react';
-import { RefreshControl } from 'react-native';
-import { Input, T, V } from '../../ui/kit';
+import { Image, RefreshControl } from 'react-native';
+import { Ic, Input, P, T, V } from '../../ui/kit';
+import { pickReceiptPhoto } from '../../lib/photo';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
 import { Field, Toggle } from '../../ui/form';
 import { useL } from '../../i18n';
@@ -85,17 +86,29 @@ export default function AdminPartners({ navigation }) {
   const [note, setNote] = useState('');
   const [acting, setActing] = useState(false);
   const [actError, setActError] = useState(null);
+  // The founder or the CTO can attach the screenshot of the payment.
+  const [proof, setProof] = useState(null);
+  const chooseProof = async () => {
+    setActError(null);
+    try {
+      const shot = await pickReceiptPhoto();
+      if (shot) setProof(shot);
+    } catch (e) {
+      setActError(e);
+    }
+  };
   const d = list.data;
 
   const act = async () => {
     setActing(true);
     setActError(null);
     try {
-      if (sheet.mode === 'pay') await post(`/v1/admin/withdrawals/${sheet.w.id}/paid`, { reference: note.trim() });
+      if (sheet.mode === 'pay') await post(`/v1/admin/withdrawals/${sheet.w.id}/paid`, { reference: note.trim(), ...(proof && { proof: { mediaType: proof.mediaType, base64: proof.base64 } }) });
       else await post(`/v1/admin/withdrawals/${sheet.w.id}/reject`, { reason: note.trim() });
       showToast(sheet.mode === 'pay' ? L('Marked as paid. The partner was told.', 'Marqué payé. Le partenaire est averti.') : L('Turned down. The partner was told why.', 'Refusé. Le partenaire sait pourquoi.'));
       setSheet(null);
       setNote('');
+      setProof(null);
       queue.reload();
       list.reload();
     } catch (e) {
@@ -211,7 +224,7 @@ export default function AdminPartners({ navigation }) {
       </Screen>
       <Sheet
         visible={!!sheet}
-        onClose={() => !acting && setSheet(null)}
+        onClose={() => !acting && (setSheet(null), setProof(null))}
         icon={sheet?.mode === 'pay' ? 'payments' : 'block'}
         danger={sheet?.mode === 'reject'}
         busy={acting}
@@ -229,6 +242,25 @@ export default function AdminPartners({ navigation }) {
           maxLength={sheet?.mode === 'pay' ? 60 : 300}
           autoCapitalize={sheet?.mode === 'pay' ? 'characters' : 'sentences'}
         />
+        {sheet?.mode === 'pay' && can.owner && (
+          <P c="flex-row items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-low" onPress={chooseProof} accessibilityRole="button">
+            {proof ? (
+              <Image source={{ uri: proof.uri || `data:${proof.mediaType};base64,${proof.base64}` }} style={{ width: 44, height: 44, borderRadius: 8 }} />
+            ) : (
+              <V c="w-11 h-11 rounded-lg bg-surface-container-lowest items-center justify-center">
+                <Ic n="add_photo_alternate" s={22} c="primary-container" />
+              </V>
+            )}
+            <V c="flex-1 gap-0.5">
+              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                {proof ? L('Screenshot added', 'Capture ajoutée') : L('Add the payment screenshot', 'Ajouter la capture du paiement')}
+              </T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant">
+                {proof ? L('Tap to choose another. The partner will see it.', 'Touchez pour en choisir une autre. Le partenaire la verra.') : L('Optional. The partner sees it with this withdrawal.', 'Facultatif. Le partenaire la voit avec ce retrait.')}
+              </T>
+            </V>
+          </P>
+        )}
         <ErrorNote error={actError} />
       </Sheet>
       {toast}
