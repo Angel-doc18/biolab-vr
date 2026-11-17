@@ -1,7 +1,10 @@
-// Every Mathematics lesson written so far: Forms 4 and 5.
+// Every Mathematics lesson written so far: Forms 1, 4 and 5.
+import { LESSONS_1A } from './lessons1a';
+import { LESSONS_1B } from './lessons1b';
+import { LESSONS_1C } from './lessons1c';
 import { LESSONS_4A } from './lessons4a';
 import { LESSONS_4B } from './lessons4b';
 import { LESSONS_4C } from './lessons4c';
 import { LESSONS_5 } from './lessons5';
 
-export const LESSONS = [...LESSONS_4A, ...LESSONS_4B, ...LESSONS_4C, ...LESSONS_5];
+export const LESSONS = [...LESSONS_1A, ...LESSONS_1B, ...LESSONS_1C, ...LESSONS_4A, ...LESSONS_4B, ...LESSONS_4C, ...LESSONS_5];
