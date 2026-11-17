@@ -3,9 +3,10 @@
 // they sign in with, and their password. Changes to the email or password are
 // confirmed with the current password and noted in their account notices.
 import { HttpError, now, ok, readJson } from '../lib/http.js';
-import { hashPassword, uuid, verifyPassword } from '../lib/crypto.js';
-import { bool, phone, str } from '../lib/validate.js';
-import { ROLE_TITLES, adminLogin, adminNotice, publicAdmin, requireAdmin } from '../lib/adminAuth.js';
+import { hashPassword, randomToken, uuid, verifyPassword } from '../lib/crypto.js';
+import { bool, oneOf, phone, str } from '../lib/validate.js';
+import { ROLE_TITLES, adminLogin, adminNotice, publicAdmin, requireAdmin, requireAdminCan } from '../lib/adminAuth.js';
+import { issueSession, publicUser } from '../lib/auth.js';
 import { securityEvent } from '../lib/monitor.js';
 
 const SORT = { ceo: -20, cto: -10 };
@@ -145,4 +146,67 @@ export async function listAdmins(request, env) {
   await requireAdmin(request, env);
   const { results } = await env.DB.prepare('SELECT * FROM admins ORDER BY created_at').all();
   return ok({ items: results.map((a) => ({ ...publicAdmin(a), disabled: Boolean(a.disabled), lastLoginAt: a.last_login_at || null, createdAt: a.created_at })) });
+}
+
+// ---------- seeing the app as each kind of account ----------
+// The founder and the CTO each have a student, a teacher, a parent and a partner
+// account of their own, made the first time they are opened. They are always
+// free (is_admin), nobody can sign into them with a password, and they are left
+// out of the figures and lists. The parent is linked to the preview student and
+// the teacher has a class the preview student has joined, so every screen has
+// something in it.
+const PREVIEW_ROLES = ['student', 'teacher', 'parent', 'partner'];
+const examYear = () => {
+  const d = new Date();
+  return d.getUTCMonth() >= 6 ? d.getUTCFullYear() + 1 : d.getUTCFullYear();
+};
+
+async function previewUser(env, admin, role) {
+  const found = await env.DB.prepare('SELECT * FROM users WHERE preview_of = ? AND role = ? AND deleted_at IS NULL').bind(admin.id, role).first();
+  if (found) return found;
+  const id = uuid();
+  const t = now();
+  // No password works: the hash is of a random secret nobody keeps.
+  const { hash, salt } = await hashPassword(randomToken(24));
+  const extra = {
+    student: { level: 'O', class_name: 'Form 5', exam_year: examYear(), subjects: 'biology,chemistry,physics,maths,english', school_type: 'general' },
+    teacher: { subjects: 'biology,chemistry,physics', school_name: 'Klass8 preview school' },
+    parent: {},
+    partner: { partner_kind: 'individual' },
+  }[role];
+  const cols = ['id', 'role', 'name', 'phone', 'password_hash', 'password_salt', 'phone_verified', 'lang', 'onboarded', 'is_admin', 'preview_of', 'created_at', 'updated_at', ...Object.keys(extra)];
+  const vals = [id, role, admin.name, `preview-${admin.id}-${role}`, hash, salt, 1, 'en', 1, 1, admin.id, t, t, ...Object.values(extra)];
+  await env.DB.prepare(`INSERT INTO users (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`).bind(...vals).run();
+  if (role === 'parent' || role === 'teacher') {
+    const child = await previewUser(env, admin, 'student');
+    if (role === 'parent') {
+      await env.DB.prepare('INSERT OR IGNORE INTO parent_links (parent_id, student_id, created_at) VALUES (?, ?, ?)').bind(id, child.id, t).run();
+    } else {
+      const classId = uuid();
+      await env.DB.batch([
+        env.DB.prepare('INSERT INTO classes (id, school_id, teacher_id, name, join_code, subject, created_at) VALUES (?, NULL, ?, ?, ?, ?, ?)').bind(
+          classId,
+          id,
+          'Form 5 Biology (preview)',
+          `PREV-${randomToken(6).replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase()}`,
+          'biology',
+          t
+        ),
+        env.DB.prepare('INSERT OR IGNORE INTO class_members (class_id, student_id, joined_at) VALUES (?, ?, ?)').bind(classId, child.id, t),
+      ]);
+    }
+  }
+  return env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+}
+
+// POST /v1/admin/preview { role }: a user session for the admin's own account of
+// that kind. The admin's console session is untouched.
+export async function previewAs(request, env) {
+  const admin = await requireAdminCan(request, env, 'owner');
+  if (!admin.id) throw new HttpError(403, 'Sign in with your own admin account to use this.', 'forbidden');
+  const body = await readJson(request);
+  const role = oneOf(body.role, 'Account type', PREVIEW_ROLES);
+  const user = await previewUser(env, admin, role);
+  const session = await issueSession(env, user);
+  return ok({ kind: 'user', user: publicUser(user, env), ...session, preview: true });
 }

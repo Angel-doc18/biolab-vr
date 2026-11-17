@@ -8,6 +8,7 @@ import { useL } from '../../i18n';
 import { API_BASE } from '../../api/client';
 import { adminSignOut } from '../../api/adminClient';
 import { AdminHeader, Card, Pill, Row, Section, useAdminCan, useAdminLoad } from './kit';
+import { ViewAsButtons, useViewAs } from '../../ui/ViewAs';
 
 export default function AdminMore({ navigation }) {
   const L = useL();
@@ -21,6 +22,9 @@ export default function AdminMore({ navigation }) {
     (navigation.getParent() || navigation).reset({ index: 0, routes: [{ name: 'Welcome' }] });
   };
   const title = p?.title || can.admin?.title || L('Admin', 'Admin');
+  // The founder and the CTO can open the app as each kind of user.
+  const look = useViewAs(navigation);
+  const canLook = can.owner && !!can.admin?.id;
   return (
     <Screen header={<AdminHeader title={L('More', 'Plus')} subtitle={L('Your account and the other tools', 'Votre compte et les autres outils')} />}>
       <V c="gap-space-lg pt-space-md pb-space-xl">
@@ -38,6 +42,22 @@ export default function AdminMore({ navigation }) {
           </V>
           <Row icon="notifications" title={L('Notices about your account', 'Avis sur votre compte')} sub={L('Sign-ins, password and email changes', 'Connexions, mot de passe, e-mail')} badge={d?.unreadNotices || 0} onPress={() => go('AdminNotices')} />
         </Card>
+        {canLook && (
+          <Card>
+            <V c="p-space-md gap-space-sm">
+              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                {L('See the app as', 'Voir l’application comme')}
+              </T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                {L(
+                  'Opens the app exactly as that kind of user sees it, with your own account of that kind. It is always free and not counted in the figures. Your admin console stays signed in.',
+                  'Ouvre l’application exactement comme ce type d’utilisateur la voit, avec votre propre compte de ce type. Il est toujours gratuit et non compté dans les chiffres. Votre console reste connectée.'
+                )}
+              </T>
+              <ViewAsButtons busy={look.busy} error={look.error} onPick={look.viewAs} />
+            </V>
+          </Card>
+        )}
 
         <Section title={L('Running Klass8', 'Gérer Klass8')}>
           <Card>

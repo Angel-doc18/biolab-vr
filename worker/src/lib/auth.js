@@ -146,6 +146,8 @@ export function publicUser(u, env) {
     trialUntil: paywallOn(env) && !u.is_admin ? trialUntil(u) : null, // the free month, once charges apply
     isAdmin: Boolean(u.is_admin),
     partnerKind: u.partner_kind || null,
+    // an admin's own account for seeing the app as this kind of user
+    preview: Boolean(u.preview_of),
     createdAt: u.created_at,
   };
 }

@@ -257,7 +257,7 @@ export async function myChildren(request, env) {
     try {
       const report = await buildReport(env, r.student_id);
       const u = await env.DB.prepare('SELECT role, created_at, pro_until, is_admin FROM users WHERE id = ?').bind(r.student_id).first();
-      report.access = { open: isPro(u, env), until: accessEnd(u) || null, paidUntil: u.pro_until && u.pro_until > now() ? u.pro_until : null, charging: paywallOn(env) };
+      report.access = { open: isPro(u, env), until: accessEnd(u) || null, paidUntil: u.pro_until && u.pro_until > now() ? u.pro_until : null, charging: paywallOn(env) && !u.is_admin }; // staff and preview accounts are always free
       reports.push(report);
     } catch {
       // deleted student: skip

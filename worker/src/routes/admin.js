@@ -26,8 +26,8 @@ const startOfMonth = () => {
 export async function overview(request, env) {
   const admin = await requireAdmin(request, env);
   const t = now();
-  const { results: roles } = await env.DB.prepare('SELECT role, COUNT(*) AS n FROM users WHERE deleted_at IS NULL GROUP BY role').all();
-  const recent = await env.DB.prepare('SELECT COUNT(*) AS n FROM users WHERE deleted_at IS NULL AND created_at > ?').bind(t - 7 * DAY).first();
+  const { results: roles } = await env.DB.prepare('SELECT role, COUNT(*) AS n FROM users WHERE deleted_at IS NULL AND preview_of IS NULL GROUP BY role').all();
+  const recent = await env.DB.prepare('SELECT COUNT(*) AS n FROM users WHERE deleted_at IS NULL AND preview_of IS NULL AND created_at > ?').bind(t - 7 * DAY).first();
   const students = await env.DB.prepare(
     `SELECT
        SUM(CASE WHEN pro_until > ? THEN 1 ELSE 0 END) AS paid,
@@ -108,7 +108,7 @@ export async function listUsers(request, env) {
   const role = r ? oneOf(r, 'Role', ['student', 'parent', 'teacher', 'partner']) : '';
   const { results } = await env.DB.prepare(
     `SELECT u.*, p.last_active FROM users u LEFT JOIN progress p ON p.user_id = u.id
-     WHERE u.deleted_at IS NULL AND (? = '' OR u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?) AND (? = '' OR u.role = ?)
+     WHERE u.deleted_at IS NULL AND u.preview_of IS NULL AND (? = '' OR u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?) AND (? = '' OR u.role = ?)
      ORDER BY u.created_at DESC LIMIT 60`
   )
     .bind(q, like, like, phoneLike, role, role)
@@ -468,7 +468,7 @@ export async function money(request, env) {
     .bind(from, to)
     .first();
   const share = await env.DB.prepare('SELECT COALESCE(SUM(amount), 0) AS amount, COUNT(*) AS n FROM commissions WHERE cancelled_at IS NULL AND created_at >= ? AND created_at < ?').bind(from, to).first();
-  const joined = await env.DB.prepare("SELECT COUNT(*) AS n, SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) AS students FROM users WHERE created_at >= ? AND created_at < ?").bind(from, to).first();
+  const joined = await env.DB.prepare("SELECT COUNT(*) AS n, SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) AS students FROM users WHERE preview_of IS NULL AND created_at >= ? AND created_at < ?").bind(from, to).first();
   // Bars: by hour for up to 2 days, by day up to 62 days, by week up to a year, then by month.
   const span = to - from;
   const step = span <= 2 * DAY ? 'hour' : span <= 62 * DAY ? 'day' : span <= 366 * DAY ? 'week' : 'month';

@@ -114,6 +114,7 @@ const routes = [
   ['POST', '/v1/admin/account/password', adminAccount.changeAdminPassword],
   ['GET', '/v1/admin/notices', adminAccount.listNotices],
   ['GET', '/v1/admin/admins', adminAccount.listAdmins],
+  ['POST', '/v1/admin/preview', adminAccount.previewAs],
   // the partner programme
   ['GET', '/v1/partner/programme', partner.publicProgramme],
   ['GET', '/v1/partner', partner.myPartner],

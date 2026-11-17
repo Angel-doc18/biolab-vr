@@ -17,8 +17,8 @@ export async function listPartners(request, env) {
   const sort = new URL(request.url).searchParams.get('sort') || 'signups';
   const items = await leaderboard(env, sort, 100);
   const totals = await env.DB.prepare(
-    `SELECT (SELECT COUNT(*) FROM users WHERE ref_code IS NOT NULL AND deleted_at IS NULL) AS withCode,
-            (SELECT COUNT(*) FROM users WHERE role = 'partner' AND deleted_at IS NULL) AS partners,
+    `SELECT (SELECT COUNT(*) FROM users WHERE ref_code IS NOT NULL AND deleted_at IS NULL AND preview_of IS NULL) AS withCode,
+            (SELECT COUNT(*) FROM users WHERE role = 'partner' AND deleted_at IS NULL AND preview_of IS NULL) AS partners,
             (SELECT COUNT(*) FROM referrals) AS signups,
             (SELECT COUNT(DISTINCT referred_id) FROM commissions WHERE cancelled_at IS NULL) AS paying,
             (SELECT COALESCE(SUM(amount), 0) FROM commissions WHERE cancelled_at IS NULL) AS earned,

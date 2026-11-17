@@ -75,7 +75,7 @@ export async function systemStatus(request, env) {
     .bind(now() - DAY)
     .first();
   const events = await env.DB.prepare("SELECT COUNT(*) AS n FROM security_events WHERE created_at > ? AND kind IN ('login_failed', 'admin_login_failed')").bind(now() - DAY).first();
-  const users = await env.DB.prepare('SELECT COUNT(*) AS n FROM users WHERE deleted_at IS NULL').first();
+  const users = await env.DB.prepare('SELECT COUNT(*) AS n FROM users WHERE deleted_at IS NULL AND preview_of IS NULL').first();
   const { results: blocks } = await env.DB.prepare('SELECT ip, reason, created_at AS createdAt, until FROM ip_blocks ORDER BY created_at DESC').all();
   return ok({
     now: {

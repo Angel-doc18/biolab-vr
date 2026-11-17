@@ -66,7 +66,7 @@ export async function applyCode(env, user, raw) {
   if (!p.on) throw new HttpError(400, 'Promo codes are paused at the moment.', 'programme_off');
   const code = cleanCode(raw);
   if (code.length < 4) throw new HttpError(400, 'Enter the promo code you were given.', 'invalid_input');
-  const owner = await env.DB.prepare('SELECT id, name, blocked_at, ref_paused FROM users WHERE ref_code = ? AND deleted_at IS NULL').bind(code).first();
+  const owner = await env.DB.prepare('SELECT id, name, blocked_at, ref_paused FROM users WHERE ref_code = ? AND deleted_at IS NULL AND preview_of IS NULL').bind(code).first();
   if (!owner || owner.blocked_at || owner.ref_paused) throw new HttpError(400, 'This promo code does not exist. Check it with the person who gave it to you.', 'invalid_code');
   if (owner.id === user.id) throw new HttpError(400, 'You cannot use your own promo code.', 'own_code');
   const already = await env.DB.prepare('SELECT referrer_id FROM referrals WHERE user_id = ?').bind(user.id).first();
@@ -164,7 +164,7 @@ export async function leaderboard(env, sort = 'signups', limit = 100) {
             (SELECT COUNT(DISTINCT c.referred_id) FROM commissions c WHERE c.referrer_id = u.id AND c.cancelled_at IS NULL) AS paying,
             (SELECT COALESCE(SUM(c.amount), 0) FROM commissions c WHERE c.referrer_id = u.id AND c.cancelled_at IS NULL) AS earned,
             (SELECT COALESCE(SUM(w.amount), 0) FROM withdrawals w WHERE w.user_id = u.id AND w.status = 'paid') AS paidOut
-     FROM users u WHERE u.deleted_at IS NULL AND u.ref_code IS NOT NULL
+     FROM users u WHERE u.deleted_at IS NULL AND u.preview_of IS NULL AND u.ref_code IS NOT NULL
      ORDER BY ${order} LIMIT ?`
   )
     .bind(limit)
