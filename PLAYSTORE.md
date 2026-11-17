@@ -17,23 +17,24 @@ What is ready in the code, and what only the owner can do.
 ## Only the owner can do
 
 1. **Developer account.** Create a Google Play Console developer account (one-time fee) and verify the identity it asks for.
-2. **App ID.** Decide it before the first upload, because it can never change afterwards. Today it is `com.sciaid.app`; a new one would be something like `com.klass8.app`. Tell Claude the choice so it can be changed in `app.json`.
-3. **Upload key.** Make it on your own computer and keep the file and passwords safe. If they are lost, a key reset has to be requested from Google.
+2. **App ID: decided, `com.klass8.app`** (2026-11-17). `app.config.js` gives it to the Play build only; the APK on klass8.com/download keeps `com.sciaid.app`, so its installs keep updating. The two are separate apps on a phone.
+3. **Upload key.** Make it on your own computer and keep the file and password safe (if they are lost, Google can reset the upload key on request). Without Java, Git's OpenSSL makes a PKCS12 keystore that Android and Play accept. In PowerShell, in a folder you back up:
 
    ```
-   keytool -genkeypair -v -keystore klass8-upload.keystore -alias klass8 -keyalg RSA -keysize 2048 -validity 10000
+   & "C:\Program Files\Git\usr\bin\openssl.exe" req -x509 -newkey rsa:2048 -keyout klass8-upload-key.pem -out klass8-upload-cert.pem -days 10000 -subj "/CN=Klass8/O=Klass8/C=CM"
+   & "C:\Program Files\Git\usr\bin\openssl.exe" pkcs12 -export -in klass8-upload-cert.pem -inkey klass8-upload-key.pem -name klass8 -out klass8-upload.keystore
    ```
 
-   Then add four repository secrets (GitHub > Settings > Secrets and variables > Actions):
+   The first asks for a temporary pass phrase; the second asks for it again, then for the keystore password (the same password is used for the key). Only the OWNER of Angel-doc18/biolab-vr can add repository secrets: on GitHub (Settings > Secrets and variables > Actions), or with the GitHub CLI signed in as the owner:
 
-   | Secret | Value |
-   |---|---|
-   | `KLASS8_UPLOAD_KEYSTORE` | output of `base64 -w0 klass8-upload.keystore` |
-   | `KLASS8_UPLOAD_STORE_PASSWORD` | the keystore password |
-   | `KLASS8_UPLOAD_KEY_ALIAS` | `klass8` |
-   | `KLASS8_UPLOAD_KEY_PASSWORD` | the key password |
+   ```
+   [Convert]::ToBase64String([IO.File]::ReadAllBytes("klass8-upload.keystore")) | gh secret set KLASS8_UPLOAD_KEYSTORE --repo Angel-doc18/biolab-vr
+   gh secret set KLASS8_UPLOAD_KEY_ALIAS --repo Angel-doc18/biolab-vr --body klass8
+   gh secret set KLASS8_UPLOAD_STORE_PASSWORD --repo Angel-doc18/biolab-vr
+   gh secret set KLASS8_UPLOAD_KEY_PASSWORD --repo Angel-doc18/biolab-vr
+   ```
 
-   Turn on Play App Signing when creating the app, so Google keeps the final signing key.
+   The last two ask for the keystore password without showing it. Turn on Play App Signing when creating the app, so Google keeps the final signing key.
 4. **Build and upload.** Run "Google Play bundle" and download the `.aab` from the run. Upload it to an internal testing track first, then closed testing.
    - New personal developer accounts must run a closed test with at least 12 testers for 14 days before production.
 5. **Store listing.**
