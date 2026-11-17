@@ -21,6 +21,7 @@ case "${1:-}" in
         install -m 700 /opt/klass8-api/build/server/set-fapshi-keys.sh /opt/klass8-api/set-fapshi-keys.sh
         install -m 700 /opt/klass8-api/build/server/make-admin.sh /opt/klass8-api/make-admin.sh
         install -m 700 /opt/klass8-api/build/server/play-review.sh /opt/klass8-api/play-review.sh
+        install -m 700 /opt/klass8-api/build/server/fapshi-sandbox-test.sh /opt/klass8-api/fapshi-sandbox-test.sh
         cd /opt/klass8-api/build && docker build -q -t klass8-api . >/dev/null
         docker network inspect klass8 >/dev/null 2>&1 || docker network create klass8 >/dev/null
         docker rm -f klass8-api >/dev/null 2>&1 || true
