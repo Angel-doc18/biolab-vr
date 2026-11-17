@@ -66,28 +66,23 @@
       <p class="label">Get the app</p>
       <h2 id="dl-title">Klass8 on your phone.</h2>
       <div class="dl__ways" data-stagger>
-        <article class="way way--main">
-          <span class="way__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></span>
-          <h3>Android app</h3>
-          <p>For Android phones.</p>
-          <a class="btn btn--amber btn--sm" href="/download/">Download for Android</a>
-        </article>
-        <article class="way">
-          <span class="way__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v11m0 0-4-4m4 4 4-4"/><path d="M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg></span>
-          <h3>Web app</h3>
-          <p>Any phone or computer.</p>
-          <a class="btn btn--ghost btn--sm" href="/app">Open Klass8</a>
-        </article>
-        <article class="way way--soon">
-          <span class="way__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></svg></span>
-          <h3>Google Play</h3>
-          <span class="soon">Coming soon</span>
-        </article>
+        <a class="badge badge--main" href="/download/">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
+          <span><small>Download for</small><b>Android</b></span>
+        </a>
+        <a class="badge" href="/app">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"/></svg>
+          <span><small>Open the</small><b>Web app</b></span>
+        </a>
+        <span class="badge badge--soon" aria-label="Google Play, coming soon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+          <span><small>Coming soon on</small><b>Google Play</b></span>
+        </span>
       </div>
     </div>
     <figure class="dl__qr" data-reveal="zoom">
-      <img src="/img/qr-download.svg" alt="QR code that opens klass8.com/download on a phone" width="200" height="200" loading="lazy" decoding="async">
-      <figcaption><strong>Scan to download</strong></figcaption>
+      <img src="/img/qr-download.svg" alt="QR code that opens klass8.com/download on a phone" width="132" height="132" loading="lazy" decoding="async">
+      <figcaption>Scan to download</figcaption>
     </figure>
   </div>
 </section>
