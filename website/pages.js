@@ -37,7 +37,7 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
 <link rel="preload" as="image" href="${photoUrl(id)}" media="(min-width: 701px)" fetchpriority="high">`
       : '';
 
-  const head = (title, desc, url, lcp) => `<meta charset="utf-8">
+  const head = (title, desc, url, lcp, ld) => `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
@@ -47,7 +47,17 @@ function make({ B, terms, privacy, priceMonth, priceYear, mark }) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="https://klass8.com${url}">
+<meta property="og:image" content="https://klass8.com/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Klass8: GCE lessons, labelled diagrams and 3D models">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(desc)}">
+<meta name="twitter:image" content="https://klass8.com/img/og.png">
 <link rel="canonical" href="https://klass8.com${url}">
+<link rel="apple-touch-icon" href="/img/logo-180.png">${ld ? `\n<script type="application/ld+json">${ld}</script>` : ''}
 <link rel="icon" href="/img/mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

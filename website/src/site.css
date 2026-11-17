@@ -1246,3 +1246,19 @@ a.badge--main:hover { background: #ffb928; border-color: #ffb928; box-shadow: 0 
   .badge { flex: 1 1 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .badge, a.badge:hover { transition: none; transform: none; } }
+
+/* ---------- Subject pages and the list of subjects ---------- */
+.subj-links__head { margin: 36px 0 14px; font-size: 1.05rem; color: var(--muted); }
+.subj-links__head:first-child { margin-top: 0; }
+.subj-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.subj-links a { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 18px; border: 1px solid var(--line); border-radius: var(--r); background: var(--white); color: var(--navy); font-weight: 700; text-decoration: none; transition: border-color 0.3s var(--ease), transform 0.3s var(--ease); }
+.subj-links a:hover { border-color: var(--navy); transform: translateY(-1px); }
+.subj-links small { color: var(--soft); font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
+.subject .syl { list-style: none; counter-reset: t; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.subject .syl li { counter-increment: t; display: flex; align-items: baseline; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.subject .syl li::before { content: counter(t); flex: none; width: 26px; color: var(--soft); font-variant-numeric: tabular-nums; font-weight: 700; }
+.subject .syl li span { flex: 1; min-width: 0; color: var(--ink); }
+.subject .syl li small { flex: none; color: var(--soft); font-size: 0.85rem; }
+.subject__go { display: flex; flex-wrap: wrap; gap: 12px; }
+.subject__more { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.subject__more a { font-weight: 700; }

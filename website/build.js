@@ -63,6 +63,7 @@ const PAGES = require('./pages.js');
 const SCREEN = require('./screens.js');
 const INTRO = require('./intro.js');
 const { readMp3 } = require('./mp3len.js');
+const SEO = require('./seo.js');
 
 // Who sells Klass8. The business name, email and phone are shown wherever they
 // are filled in; without them the contact page offers only its form.
@@ -199,10 +200,10 @@ const fillIn = (html) =>
     .replace(/\{\{(\w+)\}\}/g, (m, k) => (k in fill ? fill[k] : m));
 
 // A page: the shared head, header and footer around its own content.
-const shell = ({ title, desc, url, body, lcp }) => `<!doctype html>
+const shell = ({ title, desc, url, body, lcp, ld }) => `<!doctype html>
 <html lang="en">
 <head>
-${site.head(title, desc, url, lcp)}
+${site.head(title, desc, url, lcp, ld)}
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -231,6 +232,8 @@ for (const file of fs.readdirSync(path.join(SRC, 'pages')).filter((f) => f.endsW
   pages.push({ file, title: meta.title, desc: meta.desc, url: slug === 'index' ? '/' : slug === 'download' ? '/download/' : `/${slug}`, body: raw.slice(m[0].length) });
 }
 for (const pol of site.policies) pages.push({ file: `${pol.slug}.html`, title: `${pol.title} | Klass8`, desc: pol.desc, url: `/${pol.slug}`, body: pol.body });
+SEO.addSubjectPages(pages, fill);
+SEO.addStructuredData(pages, fill);
 
 // Each page names its files with a fingerprint, so browsers keep them until they change.
 const stamp = (file) => crypto.createHash('sha1').update(fs.readFileSync(path.join(DIST, file))).digest('hex').slice(0, 10);
@@ -241,7 +244,9 @@ for (const pg of pages) {
   out = out.replace(/(href|src)="(\/?)([\w/.-]+\.(?:css|js))"/g, (m, attr, slash, file) => `${attr}="${slash}${file}?v=${stamp(file)}"`);
   const left = out.match(/\{\{[^}]+\}\}/);
   if (left) throw new Error(`${pg.file}: ${left[0]} was not filled`);
+  fs.mkdirSync(path.dirname(path.join(DIST, pg.file)), { recursive: true });
   write(pg.file, out);
 }
+SEO.writeIndexes(pages, write);
 console.log('website/dist:', pages.map((p) => p.file).join(', '));
 console.log(stats);
