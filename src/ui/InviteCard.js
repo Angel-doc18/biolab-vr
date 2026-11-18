@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ic, P, T, V } from './kit';
 import { useL } from '../i18n';
 import { get } from '../api/client';
+import { STORE_BUILD } from '../lib/payments';
 
 // The last answer is kept while the app is open, so Home does not ask each time.
 let cached = null;
@@ -28,7 +29,14 @@ export function shareMessage(code, link, L) {
   );
 }
 
-export default function InviteCard({ navigation, compact = false }) {
+// Not in the Google Play version: the programme pays cash for other people's
+// payments made outside Google Play (Play's payments policy). It stays on
+// klass8.com/app and the website APK.
+export default function InviteCard(props) {
+  return STORE_BUILD ? null : <InviteCardShown {...props} />;
+}
+
+function InviteCardShown({ navigation, compact = false }) {
   const L = useL();
   const [p, setP] = useState(cached);
   useFocusEffect(

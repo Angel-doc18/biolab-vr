@@ -13,6 +13,7 @@ import { useL } from '../../i18n';
 import { post } from '../../api/client';
 import { loadPartner, shareMessage } from '../../ui/InviteCard';
 import ProofView from '../../ui/ProofView';
+import { STORE_BUILD } from '../../lib/payments';
 
 const money = (n) => `${Math.round(Number(n) || 0).toLocaleString('en-US')} FCFA`;
 const day = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -353,6 +354,22 @@ export function InviteBody({ header = null }) {
   );
 }
 
+// The Google Play version has no Invite and earn (see InviteCard): a partner
+// account signed in there sees this instead of its earnings.
+export function StoreNote({ header = null }) {
+  const L = useL();
+  return (
+    <Screen header={header || <StackHeader title={L('Partner account', 'Compte partenaire')} avatar={false} />}>
+      <V c="px-space-md py-space-lg gap-space-sm">
+        <T c="font-headline-sm text-headline-sm text-on-surface">{L('Partner accounts', 'Comptes partenaires')}</T>
+        <T c="font-body-md text-body-md text-on-surface-variant">
+          {L('The partner programme is not part of this version of the app. Your promo code and everything you earned are kept on your account.', 'Le programme partenaire ne fait pas partie de cette version de l’application. Votre code promo et vos gains restent sur votre compte.')}
+        </T>
+      </V>
+    </Screen>
+  );
+}
+
 export default function Invite() {
-  return <InviteBody />;
+  return STORE_BUILD ? <StoreNote /> : <InviteBody />;
 }
