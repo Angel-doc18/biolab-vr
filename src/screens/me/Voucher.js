@@ -4,7 +4,7 @@ import { Cta, ErrorNote, Screen, StackHeader } from '../../ui/chrome';
 import { post } from '../../api/client';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
-import { longDate } from '../../lib/payments';
+import { STORE_BUILD, longDate } from '../../lib/payments';
 
 // A code from the student's school opens Klass8 for the days it carries.
 export default function Voucher({ navigation }) {
@@ -65,7 +65,7 @@ export default function Voucher({ navigation }) {
             <V c="gap-space-xs">
               <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Enter your school’s code', 'Entrez le code de votre école')}</T>
               <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-                {L('Your school gives each student a code of 12 letters and numbers. It opens Klass8 for the time your school paid for.', 'Votre école donne à chaque élève un code de 12 lettres et chiffres. Il ouvre Klass8 pour la durée payée par l’école.')}
+                {STORE_BUILD ? L('Your school gives each student a code of 12 letters and numbers. It opens Klass8 for the time your school chose.', 'Votre école donne à chaque élève un code de 12 lettres et chiffres. Il ouvre Klass8 pour la durée choisie par l’école.') : L('Your school gives each student a code of 12 letters and numbers. It opens Klass8 for the time your school paid for.', 'Votre école donne à chaque élève un code de 12 lettres et chiffres. Il ouvre Klass8 pour la durée payée par l’école.')}
               </T>
             </V>
             <Input

@@ -122,7 +122,75 @@ function WhoFor({ L, kids, selfOn, setSelfOn, picked, toggle }) {
 // children, themselves). route.params:
 //   start  right after setting up the account: the free month comes first
 //   gate   the account is locked (AppNavigator); there is no way back
-export default function Paywall({ navigation, route }) {
+// The Google Play version sells nothing in the app and never talks about
+// paying (Play's payments policy): this screen takes the place of the plans.
+// It shows the account's access and opens it with a school voucher.
+function StoreAccess({ navigation, gate, start }) {
+  const { user, pro, logout } = useApp();
+  const L = useL();
+  const focused = useIsFocused();
+  const [now] = useState(() => Date.now());
+  const { paidUntil, freeUntil, hadFree } = accessState(user, now);
+  useEffect(() => {
+    if (gate && pro && focused) navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+  }, [gate, pro, focused, navigation]);
+  const enter = () => (start || gate || !navigation.canGoBack() ? navigation.reset({ index: 0, routes: [{ name: 'Main' }] }) : navigation.goBack());
+  const full = user?.isAdmin || !['student', 'parent', 'teacher'].includes(user?.role);
+  const title = full
+    ? L('Full access', 'Accès complet')
+    : paidUntil
+    ? `${L('Full access until', 'Accès complet jusqu’au')} ${longDate(paidUntil)}`
+    : freeUntil
+    ? `${L('Free month until', 'Mois gratuit jusqu’au')} ${longDate(freeUntil)}`
+    : hadFree
+    ? L('Your free month has ended', 'Votre mois gratuit est terminé')
+    : L('Enter a voucher to continue', 'Entrez un code pour continuer');
+  const intro = full
+    ? L('Every subject, lesson, practical, 3D model and paper is open on this account.', 'Toutes les matières, leçons, TP, modèles 3D et épreuves sont ouverts sur ce compte.')
+    : L('A voucher from your school opens every subject, lesson, practical, 3D model and paper, with the tutor and marking. Everything you have done so far is kept.', 'Un code de votre école ouvre toutes les matières, leçons, TP, modèles 3D et épreuves, avec le tuteur et la correction. Tout ce que vous avez fait est conservé.');
+  const canGoOn = full || !gate || !!paidUntil || !!freeUntil;
+  return (
+    <Screen
+      bg="bg-surface"
+      header={<StackHeader close noBack={gate || start} title={L('Access', 'Accès')} avatar={false} />}
+      footer={
+        <V c="px-margin pt-space-sm gap-space-xs" style={{ paddingBottom: 12 }}>
+          {!full && <Cta variant="dark" icon={null} label={L('Enter a voucher', 'Entrer un code')} onPress={() => navigation.navigate('Voucher')} />}
+          {canGoOn && (
+            <P c="items-center py-space-sm" onPress={enter} hitSlop={8}>
+              <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>{L('Continue', 'Continuer')}</T>
+            </P>
+          )}
+        </V>
+      }
+    >
+      <V c="pb-space-xl gap-space-lg pt-space-md">
+        <V c="gap-space-xs">
+          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{title}</T>
+          <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
+            {intro}
+          </T>
+        </V>
+        {gate && (
+          <V c="flex-row gap-space-md">
+            <P c="py-space-xs" onPress={() => navigation.navigate('Settings')} hitSlop={8}>
+              <T c="font-label-md text-label-md text-primary-container">{L('Settings', 'Paramètres')}</T>
+            </P>
+            <P c="py-space-xs" onPress={logout} hitSlop={8}>
+              <T c="font-label-md text-label-md text-primary-container">{L('Sign out', 'Se déconnecter')}</T>
+            </P>
+          </V>
+        )}
+      </V>
+    </Screen>
+  );
+}
+
+export default function Paywall(props) {
+  return STORE_BUILD ? <StoreAccess navigation={props.navigation} gate={!!props.route.params?.gate} start={!!props.route.params?.start} /> : <PlansScreen {...props} />;
+}
+
+function PlansScreen({ navigation, route }) {
   const { user, pro, logout } = useApp();
   const gate = !!route.params?.gate;
   const start = !!route.params?.start;

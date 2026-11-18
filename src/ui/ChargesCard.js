@@ -48,14 +48,14 @@ export default function ChargesCard({ user, onPress }) {
         c="p-space-md rounded-xl bg-surface-container-low border border-outline-variant flex-row items-center gap-space-sm"
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={L('Platform charges', 'Frais de plateforme')}
+        accessibilityLabel={STORE_BUILD ? L('Access', 'Accès') : L('Platform charges', 'Frais de plateforme')}
       >
         <Ic n="verified" s={22} c="primary-container" fill />
         <V c="flex-1 gap-0.5">
           <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
-            {L('Paid until', 'Payé jusqu’au')} {longDate(paidUntil)}
+            {STORE_BUILD ? L('Full access until', 'Accès complet jusqu’au') : L('Paid until', 'Payé jusqu’au')} {longDate(paidUntil)}
           </T>
-          <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Pay again at any time to add days.', 'Payez à nouveau quand vous voulez pour ajouter des jours.')}</T>
+          <T c="font-body-sm text-body-sm text-on-surface-variant">{STORE_BUILD ? L('Every subject, lesson and paper is open.', 'Toutes les matières, leçons et épreuves sont ouvertes.') : L('Pay again at any time to add days.', 'Payez à nouveau quand vous voulez pour ajouter des jours.')}</T>
         </V>
         <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
           {STORE_BUILD ? L('Voucher', 'Code') : L('Add time', 'Prolonger')}
@@ -74,6 +74,8 @@ export default function ChargesCard({ user, onPress }) {
       ? L('Your free month ends tomorrow', 'Votre mois gratuit se termine demain')
       : hadFree
       ? L('Your free month has ended', 'Votre mois gratuit est terminé')
+      : STORE_BUILD
+      ? L('Enter a voucher to continue', 'Entrez un code pour continuer')
       : L('Payment due', 'Paiement à faire');
   const body = STORE_BUILD
     ? L('Ask your school for a voucher to keep every subject, lesson and paper open.', 'Demandez un code à votre école pour garder toutes les matières, leçons et épreuves ouvertes.')
@@ -82,7 +84,7 @@ export default function ChargesCard({ user, onPress }) {
   return (
     <V c="bg-primary-container rounded-xl p-space-md gap-space-sm">
       <V c="flex-row items-center gap-space-sm">
-        <Ic n="payments" s={22} c="on-primary" />
+        <Ic n={STORE_BUILD ? 'redeem' : 'payments'} s={22} c="on-primary" />
         <T c="font-headline-sm text-headline-sm text-on-primary flex-1" style={{ fontWeight: '700' }}>
           {title}
         </T>
