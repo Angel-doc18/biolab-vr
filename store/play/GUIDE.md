@@ -96,7 +96,7 @@ app to install Klass8 from Google Play.
 
 ## What the Play version does about payment
 
-Nothing is sold inside it (Google's rules for education subscriptions). Students pay with Mobile
+Nothing is sold inside it (Google's rules for education subscriptions), and it has no Invite and earn (cash earned from other people's payments); partners use klass8.com/app. Students pay with Mobile
 Money at **klass8.com/app**, which can also be installed on the phone from the browser; the same
 account is then unlocked in the Play app. The Play app and its listing must never tell students to
 pay on the website.
