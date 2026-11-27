@@ -28,7 +28,9 @@ export default function Exams({ navigation }) {
   const load = useCallback(async () => {
     try {
       const r = await get('/v1/me/assignments');
-      setAssignments(r.items.filter((a) => !a.doneAt && a.dueAt > Date.now()));
+      // open work, and tests handed in during the last two weeks (to see the marks)
+      const isTest = (a) => String(a.ref).startsWith('t-');
+      setAssignments(r.items.filter((a) => (!a.doneAt && a.dueAt > Date.now()) || (isTest(a) && a.doneAt > Date.now() - 14 * 86400000)));
     } catch {
       // no connection: keep the last list
     }
@@ -41,6 +43,7 @@ export default function Exams({ navigation }) {
 
   const days = daysToExam(user?.examYear);
   const openAssignment = (a) => {
+    if (a.kind === 'quiz' && String(a.ref).startsWith('t-')) return navigation.navigate('ClassTest', { assignmentId: a.id });
     if (a.kind === 'mock') {
       const s = mockSubject(a.ref) || subject;
       if (s !== subject) setSubject(s);
@@ -82,7 +85,7 @@ export default function Exams({ navigation }) {
                         {a.title}
                       </T>
                       <T c="font-body-sm text-body-sm text-on-surface-variant">
-                        {a.className}, {L('due in', 'dans')} {d} {d === 1 ? L('day', 'jour') : L('days', 'jours')}
+                        {a.doneAt ? `${a.className}, ${L('handed in', 'rendu')}${a.score != null ? `: ${a.score}%` : ''}` : `${a.className}, ${L('due in', 'dans')} ${d} ${d === 1 ? L('day', 'jour') : L('days', 'jours')}`}
                       </T>
                     </V>
                     <Ic n="chevron_right" s={20} c="outline" />

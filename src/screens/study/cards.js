@@ -642,7 +642,7 @@ export function Marked({ body, L }) {
   );
 }
 
-export function Quiz({ body, marks, busyN, onMark, L }) {
+export function Quiz({ body, marks, busyN, onMark, onGive, L }) {
   return (
     <V c="rounded-2xl border border-surface-container bg-surface-container-lowest p-space-md gap-space-md">
       <V c="gap-0.5">
@@ -656,6 +656,7 @@ export function Quiz({ body, marks, busyN, onMark, L }) {
       {body.questions.map((q) =>
         q.type === 'mcq' ? <McqItem key={q.n} q={q} L={L} /> : <StructuredItem key={q.n} q={q} L={L} marked={marks.get(q.n)} busy={busyN === q.n} onMark={onMark} />
       )}
+      {!!onGive && <Cta variant="dark" icon={null} lead="send" h="h-11" label={L('Give to a class', 'Donner à une classe')} onPress={onGive} />}
     </V>
   );
 }

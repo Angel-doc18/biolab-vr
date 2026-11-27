@@ -25,6 +25,7 @@ import * as system from './routes/system.js';
 import * as community from './routes/community.js';
 import * as keys from './routes/keys.js';
 import * as study from './routes/study.js';
+import * as tests from './routes/tests.js';
 import { isBlocked, loadBlocks, securityEvent, serverProblem, track } from './lib/monitor.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
@@ -69,6 +70,10 @@ const routes = [
   ['GET', `/v1/classes/${ID}`, school.classDetail],
   ['POST', `/v1/classes/${ID}/assignments`, school.createAssignment],
   ['POST', `/v1/assignments/${ID}/complete`, school.completeAssignment],
+  ['POST', `/v1/classes/${ID}/tests`, tests.giveTest],
+  ['GET', `/v1/assignments/${ID}/test`, tests.getTest],
+  ['POST', `/v1/assignments/${ID}/test`, tests.submitTest],
+  ['GET', `/v1/classes/${ID}/assignments/${ID}/results`, tests.testResults],
   ['POST', '/v1/parent/link-code', school.createLinkCode],
   ['POST', '/v1/parent/link', school.linkChild],
   ['GET', '/v1/parent/children', school.myChildren],

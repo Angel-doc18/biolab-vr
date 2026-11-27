@@ -4,7 +4,7 @@
 // Everything is kept, so the student (or teacher) can come back and go on, and
 // download it all as a clean PDF.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
@@ -49,6 +49,8 @@ export default function StudyChat({ navigation, route }) {
   const [error, setError] = useState(null);
   const [sheet, setSheet] = useState(null); // 'attach' | 'rename' | 'more'
   const [minutes, setMinutes] = useState(40); // a lesson plan's length
+  // giving a test to a class: { quiz, classes, classId, days, sending }
+  const [give, setGive] = useState(null);
   const [title, setTitle] = useState('');
   const [toast, showToast] = useToast();
   const scroll = useRef(null);
@@ -299,6 +301,30 @@ export default function StudyChat({ navigation, route }) {
       navigation.goBack();
     } catch (e) {
       setError(e);
+    }
+  };
+  const openGive = async (quiz) => {
+    setGive({ quiz, classes: null, classId: null, days: 7, sending: false });
+    setSheet('give');
+    try {
+      const r = await get('/v1/classes');
+      setGive((g) => g && { ...g, classes: r.items, classId: r.items[0]?.id || null });
+    } catch (e) {
+      setSheet(null);
+      setError(e);
+    }
+  };
+  const sendTest = async () => {
+    const cls = give.classes.find((c) => c.id === give.classId);
+    setGive((g) => ({ ...g, sending: true }));
+    try {
+      const r = await post(`/v1/classes/${give.classId}/tests`, { chatId: chat.id, quizId: give.quiz.quizId, dueInDays: give.days });
+      setSheet(null);
+      setGive(null);
+      showToast(L(`Sent to ${cls.name}: ${r.students} ${r.students === 1 ? 'student' : 'students'}`, `Envoyé à ${cls.name} : ${r.students} élève${r.students === 1 ? '' : 's'}`));
+    } catch (e) {
+      setGive((g) => ({ ...g, sending: false }));
+      showToast(e.message, 'error');
     }
   };
   const pdf = async (variant = 'full') => {
@@ -558,7 +584,7 @@ export default function StudyChat({ navigation, route }) {
             if (m.kind === 'lessonNotes') return <LessonNotesCard key={m.id} body={m.body} L={L} />;
             if (m.kind === 'lessonPlan') return <LessonPlanCard key={m.id} body={m.body} L={L} />;
             if (m.kind === 'summary') return <SummaryCard key={m.id} body={m.body} L={L} />;
-            if (m.kind === 'quiz') return <Quiz key={m.id} body={m.body} marks={marksOf(m.body.quizId)} busyN={typeof busyN === 'string' && busyN.startsWith(m.body.quizId) ? Number(busyN.split(':')[1]) : null} onMark={(n, a) => mark(m.body.quizId, n, a)} L={L} />;
+            if (m.kind === 'quiz') return <Quiz key={m.id} body={m.body} marks={marksOf(m.body.quizId)} busyN={typeof busyN === 'string' && busyN.startsWith(m.body.quizId) ? Number(busyN.split(':')[1]) : null} onMark={(n, a) => mark(m.body.quizId, n, a)} onGive={teacher && !String(m.id).startsWith('local-') ? () => openGive(m.body) : undefined} L={L} />;
             return null;
           })}
 
@@ -586,6 +612,41 @@ export default function StudyChat({ navigation, route }) {
         {hasWork && <SheetRow icon="download" title={L('Download as PDF', 'Télécharger en PDF')} sub={L('Every solution, explanation and quiz', 'Chaque solution, explication et quiz')} onPress={teacher && hasQuestions ? () => setSheet('pdf') : () => pdf()} />}
         {!!chat?.id && <SheetRow icon="edit" title={L('Rename', 'Renommer')} onPress={() => (setTitle(chat.title || ''), setSheet('rename'))} />}
         <SheetRow icon="delete" title={L('Delete this chat', 'Supprimer cette discussion')} danger onPress={remove} />
+      </BottomSheet>
+
+      <BottomSheet visible={sheet === 'give'} onClose={() => (setSheet(null), setGive(null))} insets={insets}>
+        <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>{L('Give this test to a class', 'Donner ce devoir à une classe')}</T>
+        {!give?.classes ? (
+          <ActivityIndicator style={{ marginVertical: 16 }} />
+        ) : !give.classes.length ? (
+          <>
+            <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>{L('You have no class yet. Create one, share its code with your students, then give them the test.', 'Vous n’avez pas encore de classe. Créez-en une, partagez son code, puis donnez-leur le devoir.')}</T>
+            <Cta variant="dark" icon={null} label={L('Create a class', 'Créer une classe')} onPress={() => (setSheet(null), setGive(null), navigation.navigate('CreateClass', { fromPortal: true }))} />
+          </>
+        ) : (
+          <>
+            {give.classes.map((c) => (
+              <P key={c.id} c={`flex-row items-center gap-space-sm px-space-sm py-2.5 rounded-xl border ${give.classId === c.id ? 'border-primary-container bg-surface-container-low' : 'border-surface-container'}`} onPress={() => setGive((g) => ({ ...g, classId: c.id }))} accessibilityRole="radio" accessibilityState={{ selected: give.classId === c.id }}>
+                <Ic n={give.classId === c.id ? 'radio_button_checked' : 'radio_button_unchecked'} s={20} c={give.classId === c.id ? 'primary-container' : 'outline'} />
+                <V c="flex-1">
+                  <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>{c.name}</T>
+                  <T c="font-body-sm text-body-sm text-on-surface-variant">{c.students} {c.students === 1 ? L('student', 'élève') : L('students', 'élèves')}</T>
+                </V>
+              </P>
+            ))}
+            <V c="flex-row items-center gap-1.5 pt-space-xs">
+              <T c="font-label-md text-label-md text-on-surface-variant">{L('Hand in within', 'À rendre sous')}</T>
+              {[3, 7, 14].map((n) => (
+                <P key={n} c={`h-9 px-3 rounded-full border items-center justify-center ${give.days === n ? 'bg-primary-container border-primary-container' : 'border-surface-container'}`} onPress={() => setGive((g) => ({ ...g, days: n }))} accessibilityRole="radio" accessibilityState={{ selected: give.days === n }}>
+                  <T c={`font-label-md text-label-md ${give.days === n ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
+                    {n} {L('days', 'jours')}
+                  </T>
+                </P>
+              ))}
+            </V>
+            <Cta variant="dark" icon={null} label={give.sending ? L('Sending...', 'Envoi...') : L('Send to the class', 'Envoyer à la classe')} disabled={give.sending || !give.classId} onPress={sendTest} />
+          </>
+        )}
       </BottomSheet>
 
       <BottomSheet visible={sheet === 'pdf'} onClose={() => setSheet(null)} insets={insets}>

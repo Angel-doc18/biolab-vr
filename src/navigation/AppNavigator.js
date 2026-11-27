@@ -36,6 +36,8 @@ import Specimen from '../screens/learn/Specimen';
 import LabRun from '../screens/lab/LabRun';
 import Workbook from '../screens/lab/Workbook';
 import Quiz from '../screens/exams/Quiz';
+import ClassTest from '../screens/exams/ClassTest';
+import TestResults from '../screens/exams/TestResults';
 import Paper1 from '../screens/exams/Paper1';
 import Paper2 from '../screens/exams/Paper2';
 import Results from '../screens/exams/Results';
@@ -208,6 +210,8 @@ export default function AppNavigator() {
         <Stack.Screen name="LabRun" component={LabRun} options={{ gestureEnabled: false }} />
         <Stack.Screen name="Workbook" component={Workbook} />
         <Stack.Screen name="Quiz" component={Quiz} />
+        <Stack.Screen name="ClassTest" component={ClassTest} />
+        <Stack.Screen name="TestResults" component={TestResults} />
         <Stack.Screen name="Paper1" component={Paper1} options={{ gestureEnabled: false }} />
         <Stack.Screen name="Paper2" component={Paper2} options={{ gestureEnabled: false }} />
         <Stack.Screen name="Results" component={Results} />

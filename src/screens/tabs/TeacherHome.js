@@ -258,6 +258,8 @@ export function TeacherPortal({ navigation, route, standalone, tab }) {
                               key={a.id}
                               first={i === 0}
                               title={a.title}
+                              right={String(a.ref).startsWith('t-') ? L('Results', 'Résultats') : null}
+                              onPress={String(a.ref).startsWith('t-') ? () => navigation.navigate('TestResults', { classId: detail.class.id, assignmentId: a.id, title: a.title }) : undefined}
                               sub={`${a.done}/${students.length} ${L('done', 'faits')}. ${left > 0 ? `${L('Due in', 'Dans')} ${left} ${left === 1 ? L('day', 'jour') : L('days', 'jours')}` : L('Closed', 'Terminé')}`}
                             />
                           );
@@ -267,6 +269,18 @@ export function TeacherPortal({ navigation, route, standalone, tab }) {
                   )}
 
                   <Section title={L('Set new work', 'Donner du travail')}>
+                    <P c="rounded-xl border border-surface-container p-space-md flex-row items-center gap-space-sm" onPress={() => navigation.navigate('StudyChat', { intent: 'quiz' })}>
+                      <Ic n="quiz" s={22} c="primary-container" />
+                      <V c="flex-1 gap-0.5">
+                        <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                          {L('A test from your own notes', 'Un devoir à partir de vos notes')}
+                        </T>
+                        <T c="font-body-sm text-body-sm text-on-surface-variant">
+                          {L('The Assistant writes it with the marking scheme; then tap Give to a class. Answers are marked for you.', 'L’Assistant le rédige avec le barème ; touchez ensuite Donner à une classe. Les réponses sont corrigées pour vous.')}
+                        </T>
+                      </V>
+                      <Ic n="chevron_right" s={20} c="outline" />
+                    </P>
                     <V c="bg-surface-container-lowest rounded-xl shadow-sm">
                       <Row
                         first
