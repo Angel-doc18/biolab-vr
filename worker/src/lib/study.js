@@ -109,17 +109,23 @@ export async function findQuestions(env, { text, images = [], subject, className
 const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
 
 // ---------- 2. one question, solved step by step (checked by an examiner) ----------
-const SOLVE_SYSTEM = (mode) => `${who(mode)} You solve one question on the board, step by step, the way a good teacher does in class.
-- "interpretation": first, in two or three simple sentences, say what the question is really asking and what kind of answer it wants (a definition, a calculation, an explanation, a choice), and any key word to notice.
-- "steps": between 3 and 8 steps in order: what we are given, the idea, law or formula needed, each stage of the working, and the final answer. "board" is what is written on the board for that step (at most 5 short lines separated by \\n). "say" is what the teacher says aloud while writing it: two to four short sentences explaining why, written as words for a speech engine ("v equals u plus a t", "metres per second", "H two O"), no symbols.
-- A step may carry a "graph" when the question asks for a graph or sketch, or when a graph makes the answer clear: {"title": string, "xLabel": string, "yLabel": string, "functions": [{"expr": string, "label": string}], "points": [{"x": number, "y": number, "label": string}], "xMin": number, "xMax": number, "yMin": number, "yMax": number}. "expr" uses x with + - * / ^, parentheses and sqrt, sin, cos, tan, log, ln, exp, abs, pi (for example "2*x^2 - 3*x + 1"). Use points for plotted data. Omit "graph" otherwise.
-- Multiple choice: work out the answer, give the letter and the option, then say in one short step why each other option is wrong.
-- Definitions, explanations and essays are also taught in steps: the key idea, the explanation, an example, then how to write it in the examination for full marks.
+const SOLVE_SYSTEM = (mode) => `${who(mode)} You solve one question on the board and teach it completely, the way the best teacher in Cameroon does in class: not only the working, but the theory and the reasons behind every step, so that every ${mode === 'teacher' ? 'teacher can teach it and every student' : 'student, even a weak one,'} truly understands why it is done that way.
+- "interpretation": first, in two to four simple sentences, what the question is really asking, the kind of answer it wants (a definition, a calculation, an explanation, a choice, a diagram) and the key words to notice (state, explain, calculate, describe, compare).
+- "concepts": the one to four theories, laws, principles, definitions or formulas the question rests on. For each: its exact name, and a full explanation in simple words: what it says (with the formula and the meaning and unit of each symbol), why it is true or where it comes from, and when it applies. A student who did not know it before must understand it from what you write.
+- "steps": between 3 and 10 steps in order: what we are given, which idea or law we use, each stage of the working, and the final answer.
+  - "board": what is written on the board for that step (at most 5 short lines separated by \\n).
+  - "why": one sentence naming the theory, law or reason that justifies this step ("Because the acceleration is uniform, the equations of motion apply.").
+  - "say": what the teacher says aloud while writing it: three to six sentences explaining the reasoning, the meaning of each quantity, and how it links to the theory. Written as words for a speech engine ("v equals u plus a t", "metres per second", "H two O"), no symbols.
+  - "graph" (only when the question asks for a graph or sketch, or a graph makes the idea clear): {"title": string, "xLabel": string, "yLabel": string, "functions": [{"expr": string, "label": string}], "points": [{"x": number, "y": number, "label": string}], "xMin": number, "xMax": number, "yMin": number, "yMax": number}. "expr" uses x with + - * / ^, parentheses and sqrt, sin, cos, tan, log, ln, exp, abs, pi (for example "2*x^2 - 3*x + 1").
+- Multiple choice: work out the answer from the theory, give the letter and the option, and in one step explain why each other option is wrong.
+- Definitions, explanations and essays: the key idea and its theory, the explanation with reasons, an example, then exactly how to write it in the examination for full marks.
 - "answer": the final answer in one or two short lines, with units (for multiple choice: the letter and the option).
-- "check": one sentence: how to check the answer, or the mistake most often made in this kind of question.
+- "mistakes": two or three mistakes students often make on this kind of question, each with how to avoid it.
+- "realLife": one or two sentences linking the idea to everyday life, preferably in Cameroon (omit it if nothing natural fits).
+- "check": one sentence: how to check that the answer is right.
 - "similar": one new practice question of the same kind, with different numbers or examples. Do not answer it.${mode === 'teacher' ? '\n- "markingGuide": how marks are earned for this question, as short points with their marks (use the printed marks if shown), the way a GCE marking guide is written.' : ''}
 ${RULES}
-Reply with JSON only: {"interpretation": string, "steps": [{"board": string, "say": string, "graph"?: object}], "answer": string, "check": string, "similar": string${mode === 'teacher' ? ', "markingGuide": [{"point": string, "marks": number}]' : ''}}`;
+Reply with JSON only: {"interpretation": string, "concepts": [{"name": string, "explanation": string}], "steps": [{"board": string, "why": string, "say": string, "graph"?: object}], "answer": string, "mistakes": [string], "realLife": string, "check": string, "similar": string${mode === 'teacher' ? ', "markingGuide": [{"point": string, "marks": number}]' : ''}}`;
 
 const Graph = z
   .object({
@@ -136,12 +142,15 @@ const Graph = z
   .refine((g) => g.functions.length || g.points.length);
 
 const Solved = z.object({
-  interpretation: s(1200).default(''),
+  interpretation: s(1500).default(''),
+  concepts: z.array(z.object({ name: s(160), explanation: s(2500) })).max(6).catch([]).default([]),
   steps: z
-    .array(z.object({ board: z.coerce.string(), say: z.coerce.string().default(''), graph: Graph.optional().catch(undefined) }))
+    .array(z.object({ board: z.coerce.string(), why: s(500).default(''), say: z.coerce.string().default(''), graph: Graph.optional().catch(undefined) }))
     .min(2)
-    .max(10),
+    .max(12),
   answer: z.coerce.string(),
+  mistakes: z.array(s(500)).max(5).catch([]).default([]),
+  realLife: s(600).default(''),
   check: s(600).default(''),
   similar: s(1200).default(''),
   markingGuide: z.array(z.object({ point: s(400), marks: z.coerce.number().catch(1) })).default([]),
@@ -155,11 +164,14 @@ export async function solveOne(env, { question, subject, className, lang, mode, 
   let best = null;
   for (let attempt = 0; attempt < 2; attempt++) {
     const prompt = `${ctx}\n\nQuestion:\n"""\n${question}\n"""${note ? `\n\nA first solution was checked by an examiner and was wrong: ${note}\nSolve it again from the start and get it right.` : ''}`;
-    const r = await task(env, { system: SOLVE_SYSTEM(mode), prompt, images, schema: Solved, maxTokens: 7000, reasoning: 'high' });
+    const r = await task(env, { system: SOLVE_SYSTEM(mode), prompt, images, schema: Solved, maxTokens: 10000, reasoning: 'high' });
     const sol = {
       interpretation: r.interpretation,
-      steps: r.steps.map((st) => ({ board: plainBoard(st.board), say: spoken(st.say), ...(st.graph ? { graph: st.graph } : {}) })).filter((st) => st.board || st.say),
+      concepts: r.concepts.filter((c) => c.name && c.explanation),
+      steps: r.steps.map((st) => ({ board: plainBoard(st.board), why: st.why, say: spoken(st.say), ...(st.graph ? { graph: st.graph } : {}) })).filter((st) => st.board || st.say),
       answer: plainBoard(r.answer),
+      mistakes: r.mistakes.filter(Boolean),
+      realLife: r.realLife,
       check: r.check,
       similar: r.similar,
       ...(mode === 'teacher' ? { markingGuide: r.markingGuide.slice(0, 15).map((p) => ({ point: p.point, marks: Math.max(0.5, Math.min(20, p.marks)) })) } : {}),

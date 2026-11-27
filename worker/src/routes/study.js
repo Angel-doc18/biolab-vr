@@ -159,7 +159,9 @@ export async function ask(request, env, id) {
   const out = [];
   // The person's message is saved only once the AI has answered, so a failed
   // attempt leaves nothing half done in the chat.
-  const said = async (t, files) => t && out.push(await addMessage(env, chat.id, 'user', 'text', { text: t, files: fileIds.length ? files.list : [] }));
+  // A question about one step of a solution: kept with that step.
+  const stepOf = b.stepOf && typeof b.stepOf === 'object' ? { id: str(b.stepOf.id, 'Solution', { max: 64 }), step: int(b.stepOf.step, 'Step', { min: 0, max: 20 }) } : null;
+  const said = async (t, files) => t && out.push(await addMessage(env, chat.id, 'user', 'text', { text: t, files: fileIds.length ? files.list : [], ...(stepOf ? { stepOf } : {}) }));
 
   // The first message names the chat.
   const first = !(await env.DB.prepare('SELECT 1 FROM study_messages WHERE chat_id = ? LIMIT 1').bind(chat.id).first());
@@ -177,7 +179,7 @@ export async function ask(request, env, id) {
     const all = await filesOf(env, chat.id, null);
     // Asked in the middle of a spoken explanation: what was being explained.
     const during = b.context ? str(b.context, 'Context', { max: 3000 }) : '';
-    if (!during && looksLikeQuestion(text)) {
+    if (!during && !stepOf && looksLikeQuestion(text)) {
       // A real question (a problem, a definition, an explanation to give):
       // solved and explained step by step, not just answered in a line.
       const sol = await solveOne(env, { question: text, images: fileIds.length ? files.images.slice(0, 2) : [], ...opts });
@@ -189,7 +191,7 @@ export async function ask(request, env, id) {
         : text || 'Explain what is in the file I just shared.';
       const reply = await chatReply(env, { history, message, material: all.text, images: fileIds.length ? files.images.slice(0, 4) : [], ...opts });
       await said(text || '…', files);
-      out.push(await addMessage(env, chat.id, 'assistant', 'text', { text: reply }));
+      out.push(await addMessage(env, chat.id, 'assistant', 'text', { text: reply, ...(stepOf ? { stepOf } : {}) }));
     }
     if (first && text) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(text), chat.id).run();
   } else if (action === 'find') {
