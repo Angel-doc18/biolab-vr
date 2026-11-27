@@ -156,6 +156,8 @@ const Solved = z.object({
   markingGuide: z.array(z.object({ point: s(400), marks: z.coerce.number().catch(1) })).default([]),
 });
 
+// On the board a multiplication is written as a teacher writes it: 2 × 5.
+const times = (t) => String(t || '').replace(/(?<=[\d)²³½a-z])\s*\*\s*(?=[\d(½a-z])/gi, ' × ');
 const spoken = (t) => clean(t).replace(/\*\*|[#`$]/g, '').replace(/\s+/g, ' ').trim();
 
 export async function solveOne(env, { question, subject, className, lang, mode, images = [] }) {
@@ -168,8 +170,8 @@ export async function solveOne(env, { question, subject, className, lang, mode, 
     const sol = {
       interpretation: r.interpretation,
       concepts: r.concepts.filter((c) => c.name && c.explanation),
-      steps: r.steps.map((st) => ({ board: plainBoard(st.board), why: st.why, say: spoken(st.say), ...(st.graph ? { graph: st.graph } : {}) })).filter((st) => st.board || st.say),
-      answer: plainBoard(r.answer),
+      steps: r.steps.map((st) => ({ board: times(plainBoard(st.board)), why: st.why, say: spoken(st.say), ...(st.graph ? { graph: st.graph } : {}) })).filter((st) => st.board || st.say),
+      answer: times(plainBoard(r.answer)),
       mistakes: r.mistakes.filter(Boolean),
       realLife: r.realLife,
       check: r.check,

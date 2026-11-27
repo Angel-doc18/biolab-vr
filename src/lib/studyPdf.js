@@ -20,6 +20,8 @@ h2{font-size:15px;color:#02287b;margin:22px 0 6px;border-bottom:2px solid #e5ebf
 .n{position:absolute;left:0;top:0;width:20px;height:20px;border-radius:10px;background:#02287b;color:#fff;font-size:11px;font-weight:700;text-align:center;line-height:20px}
 .board{font-family:'Courier New',monospace;background:#fff;border:1px solid #dfe5ee;border-radius:6px;padding:6px 8px;margin-bottom:3px}
 .say{color:#33405c}
+.why{color:#02287b;font-weight:600;margin:2px 0}
+.concept{background:#fff;border:1px solid #dfe5ee;border-radius:8px;padding:8px 10px;margin:5px 0;page-break-inside:avoid}
 .ans{border:2px solid #02287b;border-radius:8px;padding:8px 10px;margin:10px 0;font-weight:700;page-break-inside:avoid}
 .tip{color:#4e5b77;font-size:11.5px;margin:4px 0}
 .graph{margin:6px 0;page-break-inside:avoid}
@@ -31,7 +33,7 @@ function solutionHtml(b, L) {
   const steps = (b.steps || [])
     .map(
       (s, i) =>
-        `<div class="step"><div class="n">${i + 1}</div><div class="board">${lines(s.board)}</div>${s.say ? `<div class="say">${esc(s.say)}</div>` : ''}${s.graph ? `<div class="graph">${graphSvg(s.graph)}</div>` : ''}</div>`
+        `<div class="step"><div class="n">${i + 1}</div><div class="board">${lines(s.board)}</div>${s.why ? `<div class="why">${L('Because', 'Parce que')}: ${esc(s.why.replace(/^because[:,]?\s*/i, ''))}</div>` : ''}${s.say ? `<div class="say">${esc(s.say)}</div>` : ''}${s.graph ? `<div class="graph">${graphSvg(s.graph)}</div>` : ''}</div>`
     )
     .join('');
   const guide = b.markingGuide?.length
@@ -40,9 +42,12 @@ function solutionHtml(b, L) {
   return `<h2>${b.label ? `${L('Question', 'Question')} ${esc(b.label)}` : L('Question', 'Question')}</h2>
 <div class="q">${lines(b.question)}</div>
 ${b.interpretation ? `<div class="lbl">${L('What the question asks', 'Ce que demande la question')}</div><div>${esc(b.interpretation)}</div>` : ''}
+${b.concepts?.length ? `<div class="lbl">${L('The ideas behind it', 'Les notions en jeu')}</div>${b.concepts.map((c) => `<div class="concept"><b>${esc(c.name)}</b><br/>${lines(c.explanation)}</div>`).join('')}` : ''}
 <div class="lbl">${L('Working', 'Résolution')}</div>${steps}
 <div class="ans">${L('Answer', 'Réponse')}: ${lines(b.answer)}</div>
-${b.check ? `<div class="tip"><b>${L('Check', 'Vérification')}:</b> ${esc(b.check)}</div>` : ''}
+${b.mistakes?.length ? `<div class="lbl">${L('Mistakes to avoid', 'Erreurs à éviter')}</div><ul>${b.mistakes.map((m) => `<li>${esc(m)}</li>`).join('')}</ul>` : ''}
+${b.realLife ? `<div class="tip"><b>${L('In real life', 'Dans la vie courante')}:</b> ${esc(b.realLife)}</div>` : ''}
+${b.check ? `<div class="tip"><b>${L('Check', 'Vérification')}:</b> ${esc(b.check.replace(/^check[:,]?\s*/i, ''))}</div>` : ''}
 ${guide}
 ${b.similar ? `<div class="tip"><b>${L('Practice', 'Entraînement')}:</b> ${esc(b.similar)}</div>` : ''}`;
 }

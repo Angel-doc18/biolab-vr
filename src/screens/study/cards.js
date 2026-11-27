@@ -130,29 +130,97 @@ export function QuestionSet({ body, solved, busyN, onSolve, onSolveAll, running,
   );
 }
 
-// ---------- one solution ----------
-// The parts read aloud for a solution: what it asks, each step, the answer.
-export const solutionParts = (sol, lang) => [sol.interpretation, ...sol.steps.map((s) => s.say || s.board), sol.answer ? `${lang === 'fr' ? 'Donc la réponse est :' : 'So the answer is:'} ${sol.answer}` : null].filter(Boolean);
+// ---------- one solution, taught on the board ----------
+const BOARD = '#fbfaf5';
+const INK = '#1f2a37';
 
-// Follows the shared voice (lib/talk): which step of this solution is being
-// read now, and whether it was paused for a question.
-function useTalk(id, sol) {
-  const [st, setSt] = useState({ id: null, index: -1, playing: false, pausedId: null, pausedIndex: -1 });
-  useEffect(() => subscribe(setSt), []);
-  const offset = sol.interpretation ? 1 : 0;
-  return {
-    playing: st.id === id && st.playing,
-    cursor: st.id === id ? st.index - offset : -1,
-    paused: st.pausedId === id,
-  };
+// What is read aloud, in order: what it asks, the ideas behind it, each step
+// (its explanation and the reason), then the answer. stepPart(sol, i) is the
+// index of step i in that list (so "Explain again" can start there).
+export const solutionParts = (sol, lang) => [
+  sol.interpretation || '',
+  ...(sol.concepts || []).map((c) => `${c.name}. ${c.explanation}`),
+  ...sol.steps.map((s) => [s.say || s.board, s.why].filter(Boolean).join(' ')),
+  sol.answer ? `${lang === 'fr' ? 'Donc la réponse est :' : 'So the answer is:'} ${sol.answer}` : '',
+];
+const stepPart = (sol, i) => 1 + (sol.concepts || []).length + i;
+
+// A step's lines appearing as if written while it is being explained.
+function Written({ text, writing, style }) {
+  const [n, setN] = useState(writing ? 0 : text.length);
+  useEffect(() => {
+    if (!writing) {
+      setN(text.length);
+      return undefined;
+    }
+    setN(0);
+    const per = Math.max(1, Math.ceil(text.length / 70));
+    const t = setInterval(() => setN((x) => (x + per >= text.length ? (clearInterval(t), text.length) : x + per)), 28);
+    return () => clearInterval(t);
+  }, [text, writing]);
+  return (
+    <T c="font-body-lg text-body-lg" style={style} selectable>
+      {text.slice(0, n)}
+    </T>
+  );
 }
 
-export function Solution({ id, body, L, lang, teacher }) {
-  const [showQ, setShowQ] = useState(false);
-  const v = useTalk(id, body);
-  const toggle = () => (v.playing ? stopTalking() : explain(id, solutionParts(body, lang), { lang }));
+// Follows the shared voice (lib/talk): which part of this solution is being
+// read now, and whether it was paused for a question.
+function useTalk(id) {
+  const [st, setSt] = useState({ id: null, index: -1, playing: false, pausedId: null, pausedIndex: -1 });
+  useEffect(() => subscribe(setSt), []);
+  return { playing: st.id === id && st.playing, part: st.id === id ? st.index : -1, paused: st.pausedId === id };
+}
+
+function Label({ children }) {
   return (
-    <V c="rounded-2xl border border-surface-container bg-surface-container-lowest overflow-hidden">
+    <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+      {children}
+    </T>
+  );
+}
+
+// One question asked about a step, and the answer, under that step.
+function StepAsk({ ask, L }) {
+  return (
+    <V c="gap-1 pl-space-sm border-l-2 border-primary-container">
+      <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '700' }}>
+        {ask.q}
+      </T>
+      {ask.a ? (
+        <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }} selectable>
+          {ask.a}
+        </T>
+      ) : (
+        <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Thinking...', 'Réflexion...')}</T>
+      )}
+    </V>
+  );
+}
+
+export function Solution({ id, body, L, lang, teacher, asks = [], onAsk }) {
+  const [showQ, setShowQ] = useState(false);
+  const [ideasOpen, setIdeasOpen] = useState(true);
+  const [asking, setAsking] = useState(null); // the step being asked about
+  const [draft, setDraft] = useState('');
+  const v = useTalk(id);
+  const parts = () => solutionParts(body, lang);
+  const playFrom = (from) => explain(id, parts(), { lang, from });
+  const toggle = () => (v.playing ? stopTalking() : playFrom(0));
+  const concepts = body.concepts || [];
+  const conceptAt = v.part - 1; // which idea is being explained
+  const stepAt = v.part - stepPart(body, 0);
+  const send = (i) => {
+    const q = draft.trim();
+    if (q.length < 2) return;
+    setDraft('');
+    setAsking(null);
+    onAsk?.(i, q);
+  };
+  return (
+    <V c="rounded-2xl border border-surface-container overflow-hidden" style={{ backgroundColor: BOARD }}>
+      {/* the question */}
       <P c="p-space-md gap-1 bg-surface-container-low" onPress={() => setShowQ((x) => !x)}>
         <V c="flex-row items-center gap-2">
           <T c="font-label-md text-label-md text-primary-container flex-1" style={{ fontWeight: '700' }}>
@@ -162,7 +230,7 @@ export function Solution({ id, body, L, lang, teacher }) {
             <V c="flex-row items-center gap-1">
               <Ic n="verified" s={15} c="secondary" fill />
               <T c="font-label-sm text-label-sm text-secondary" style={{ fontWeight: '700' }}>
-                {L('Checked', 'Vérifiée')}
+                {L('Checked by an examiner', 'Vérifiée par un correcteur')}
               </T>
             </V>
           )}
@@ -171,68 +239,146 @@ export function Solution({ id, body, L, lang, teacher }) {
           {body.question}
         </T>
       </P>
-      <V c="p-space-md gap-space-sm">
+
+      <V c="p-space-md gap-space-md">
+        <V c="flex-row items-center flex-wrap gap-2">
+          <ListenButton size="sm" label={L('Explain it to me', 'Expliquez-moi')} stopLabel={L('Stop', 'Arrêter')} playing={v.playing} onPress={toggle} />
+          {v.paused && <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Paused for your question', 'En pause pour votre question')}</T>}
+        </V>
+
         {!!body.interpretation && (
-          <V c="gap-0.5">
-            <T c="font-label-sm text-label-sm text-on-surface-variant" style={{ fontWeight: '700' }}>
-              {L('What it asks', 'Ce que ça demande')}
-            </T>
-            <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+          <V c={`gap-1 rounded-lg ${v.part === 0 ? 'bg-surface-container-low p-space-sm' : ''}`}>
+            <Label>{L('What the question asks', 'Ce que demande la question')}</Label>
+            <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 23 }} selectable>
               {body.interpretation}
             </T>
           </V>
         )}
-        <V c="flex-row items-center flex-wrap gap-2">
-          <ListenButton size="sm" label={L('Explain it to me', 'Expliquez-moi')} stopLabel={L('Stop', 'Arrêter')} playing={v.playing} onPress={toggle} />
-          {v.paused && (
-            <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Paused for your question', 'En pause pour votre question')}</T>
-          )}
-        </V>
-        {body.steps.map((s, i) => (
-          <V key={i} c="flex-row gap-space-sm">
-            <V c={`w-6 h-6 rounded-full items-center justify-center mt-0.5 ${v.cursor === i ? 'bg-tertiary' : 'bg-primary-container'}`}>
-              <T c="font-label-sm text-label-sm text-on-primary" style={{ fontWeight: '700' }}>
-                {i + 1}
-              </T>
-            </V>
-            <V c="flex-1 gap-1">
-              <V c={`px-3 py-2 rounded-lg ${v.cursor === i ? 'bg-surface-container' : 'bg-surface-container-low'}`}>
-                <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 23, fontFamily: 'monospace' }} selectable>
-                  {s.board}
-                </T>
-              </V>
-              {!!s.say && (
-                <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
-                  {s.say}
-                </T>
-              )}
-              {!!s.graph && (
-                <V c="rounded-lg border border-surface-container p-1 gap-1">
-                  {!!s.graph.title && <T c="font-label-md text-label-md text-on-surface px-1 pt-1">{s.graph.title}</T>}
-                  <FunctionGraph graph={s.graph} />
+
+        {/* the theory behind it */}
+        {!!concepts.length && (
+          <V c="gap-space-xs">
+            <P c="flex-row items-center justify-between" onPress={() => setIdeasOpen((x) => !x)} hitSlop={6}>
+              <Label>{L('The ideas behind it', 'Les notions en jeu')}</Label>
+              <Ic n={ideasOpen ? 'expand_less' : 'expand_more'} s={20} c="primary-container" />
+            </P>
+            {ideasOpen &&
+              concepts.map((c, i) => (
+                <V key={i} c={`gap-0.5 rounded-xl p-space-sm border ${conceptAt === i ? 'border-primary-container bg-surface-container-low' : 'border-surface-container bg-surface-container-lowest'}`}>
+                  <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                    {c.name}
+                  </T>
+                  <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 21 }} selectable>
+                    {c.explanation}
+                  </T>
                 </V>
-              )}
-            </V>
+              ))}
           </V>
-        ))}
-        <V c="rounded-xl border-2 border-primary-container px-space-md py-space-sm">
-          <T c="font-label-sm text-label-sm text-primary-container" style={{ fontWeight: '700' }}>
-            {L('Answer', 'Réponse')}
-          </T>
+        )}
+
+        {/* the board: each step written, with the reason and the explanation */}
+        <V c="gap-space-sm">
+          <Label>{L('On the board', 'Au tableau')}</Label>
+          {body.steps.map((s, i) => {
+            const now = v.playing && stepAt === i;
+            const mine = asks.filter((a) => a.step === i);
+            return (
+              <V key={i} c={`flex-row gap-space-sm rounded-xl ${now ? 'bg-surface-container-low' : ''}`} style={{ padding: now ? 6 : 0 }}>
+                <P c={`w-8 h-8 rounded-full items-center justify-center ${now ? 'bg-primary-container' : 'border border-outline-variant'}`} onPress={() => playFrom(stepPart(body, i))} accessibilityLabel={`${L('Explain step', 'Expliquer l’étape')} ${i + 1}`}>
+                  <T c={`font-label-md text-label-md ${now ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
+                    {i + 1}
+                  </T>
+                </P>
+                <V c="flex-1 gap-1">
+                  <Written text={s.board} writing={now} style={{ color: INK, lineHeight: 28, fontWeight: '600' }} />
+                  {!!s.why && (
+                    <T c="font-body-sm text-body-sm text-primary-container" style={{ lineHeight: 20, fontWeight: '600' }}>
+                      {L('Because', 'Parce que')}: {s.why.replace(/^because[:,]?\s*/i, '')}
+                    </T>
+                  )}
+                  {!!s.say && (
+                    <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                      {s.say}
+                    </T>
+                  )}
+                  {!!s.graph && (
+                    <V c="rounded-lg border border-surface-container p-1 gap-1 bg-surface-container-lowest">
+                      {!!s.graph.title && <T c="font-label-md text-label-md text-on-surface px-1 pt-1">{s.graph.title}</T>}
+                      <FunctionGraph graph={s.graph} />
+                    </V>
+                  )}
+                  {mine.map((a, k) => (
+                    <StepAsk key={k} ask={a} L={L} />
+                  ))}
+                  {!now && (
+                    <V c="flex-row gap-space-md">
+                      <P onPress={() => playFrom(stepPart(body, i))} hitSlop={6}>
+                        <T c="font-label-md text-label-md text-primary-container">{L('Explain again', 'Réexpliquer')}</T>
+                      </P>
+                      {!!onAsk && (
+                        <P onPress={() => setAsking(asking === i ? null : i)} hitSlop={6}>
+                          <T c="font-label-md text-label-md text-primary-container">{asking === i ? L('Close', 'Fermer') : L('Ask about this step', 'Question sur cette étape')}</T>
+                        </P>
+                      )}
+                    </V>
+                  )}
+                  {asking === i && (
+                    <V c="flex-row items-end gap-space-xs">
+                      <Input
+                        c="flex-1 min-h-[44px] max-h-[110px] bg-surface-container-lowest border border-outline-variant px-3 py-2.5 rounded-xl text-body-md"
+                        placeholder={L('What is not clear in this step?', 'Qu’est-ce qui n’est pas clair ?')}
+                        value={draft}
+                        onChangeText={setDraft}
+                        multiline
+                        maxLength={600}
+                      />
+                      <P c={`w-11 h-11 rounded-xl items-center justify-center ${draft.trim() ? 'bg-primary-container' : 'bg-surface-container'}`} onPress={() => send(i)} disabled={!draft.trim()}>
+                        <Ic n="arrow_upward" s={20} c={draft.trim() ? 'on-primary' : 'outline'} />
+                      </P>
+                    </V>
+                  )}
+                </V>
+              </V>
+            );
+          })}
+        </V>
+
+        <V c="rounded-xl border-2 border-primary-container px-space-md py-space-sm bg-surface-container-lowest">
+          <Label>{L('Answer', 'Réponse')}</Label>
           <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }} selectable>
             {body.answer}
           </T>
         </V>
+
+        {!!body.mistakes?.length && (
+          <V c="gap-1">
+            <Label>{L('Mistakes to avoid', 'Erreurs à éviter')}</Label>
+            {body.mistakes.map((m, i) => (
+              <V key={i} c="flex-row gap-2">
+                <Ic n="error" s={16} c="error" />
+                <T c="font-body-sm text-body-sm text-on-surface flex-1" style={{ lineHeight: 20 }}>
+                  {m}
+                </T>
+              </V>
+            ))}
+          </V>
+        )}
+        {!!body.realLife && (
+          <V c="gap-1">
+            <Label>{L('In real life', 'Dans la vie courante')}</Label>
+            <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
+              {body.realLife}
+            </T>
+          </V>
+        )}
         {!!body.check && (
           <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
-            {body.check}
+            {L('Check', 'Vérification')}: {body.check.replace(/^check[:,]?\s*/i, '')}
           </T>
         )}
         {teacher && !!body.markingGuide?.length && (
           <V c="gap-1">
-            <T c="font-label-sm text-label-sm text-on-surface-variant" style={{ fontWeight: '700' }}>
-              {L('Marking guide', 'Guide de correction')}
-            </T>
+            <Label>{L('Marking guide', 'Guide de correction')}</Label>
             {body.markingGuide.map((p, i) => (
               <V key={i} c="flex-row gap-2">
                 <T c="font-body-sm text-body-sm text-on-surface flex-1">{p.point}</T>
@@ -245,9 +391,7 @@ export function Solution({ id, body, L, lang, teacher }) {
         )}
         {!!body.similar && (
           <V c="rounded-lg bg-surface-container-low p-space-sm gap-0.5">
-            <T c="font-label-sm text-label-sm text-on-surface-variant" style={{ fontWeight: '700' }}>
-              {L('Try one yourself', 'À vous')}
-            </T>
+            <Label>{L('Try one yourself', 'À vous')}</Label>
             <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
               {body.similar}
             </T>

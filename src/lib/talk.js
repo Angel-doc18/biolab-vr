@@ -29,6 +29,7 @@ function play(ex, from) {
       ex.onEnd?.();
       return;
     }
+    if (!ex.parts[i]) return go(i + 1); // nothing to say for this part
     current = { ...current, index: i };
     emit();
     speak(ex.parts[i], { lang: ex.lang, session, quick: i === from, next: ex.parts[i + 1], onDone: () => go(i + 1), onError: () => go(i + 1) });
@@ -36,10 +37,11 @@ function play(ex, from) {
   go(from);
 }
 
-// parts: what to say, in order (e.g. the interpretation, then each step).
-export function explain(id, parts, { lang = 'en', onEnd } = {}) {
+// parts: what to say, in order (e.g. the interpretation, then each step);
+// from: the part to start at ("Explain again" on one step).
+export function explain(id, parts, { lang = 'en', onEnd, from = 0 } = {}) {
   paused = null;
-  play({ id, parts: parts.filter(Boolean), lang, onEnd }, 0);
+  play({ id, parts, lang, onEnd }, Math.max(0, Math.min(from, parts.length - 1)));
 }
 
 export function stopTalking() {

@@ -22,6 +22,13 @@ import { AiText, FileChips, NotesCard, Quiz, QuestionSet, Solution, UserBubble, 
 // step; small talk and follow-ups get a conversational answer.
 const SMALL_TALK = /^(hi|hello|hey|thanks|thank you|ok|okay|good|great|nice|cool|yes|no|bye|merci|bonjour|salut|d'accord|oui|non)\b[\s!.?]*$/i;
 const FOLLOW_UP = /\b(step \d+|this step|that step|previous|above|you said|again|repeat|slower|simpler|what do you mean|i don'?t understand|je ne comprends pas|encore|l'étape)\b/i;
+// What was being explained (for a question asked in the middle of it).
+const stepContext = (sol, k) => {
+  const st = k >= 0 ? sol.steps[k] : null;
+  return `Question: ${sol.question}
+${st ? `Step ${k + 1} on the board: ${st.board}${st.why ? `
+Reason given: ${st.why}` : ''}` : 'The beginning of the solution (what the question asks and the ideas behind it).'}`;
+};
 const looksLikeQuestion = (t) => String(t || '').trim().length >= 12 && !SMALL_TALK.test(String(t).trim()) && !FOLLOW_UP.test(String(t));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -308,15 +315,19 @@ export default function StudyChat({ navigation, route }) {
       setWorking([L('Listening to what you said...', 'Écoute de ce que vous avez dit...')]);
       const audio = await recordingData(recorder.uri);
       const heard = await post('/v1/study/transcribe', audio, { timeout: 60000 });
-      // What was being explained when the question came, for the AI.
+      // What was being explained when the question came, for the AI; a
+      // question in the middle of a step is kept under that step.
       const p = pausedNow();
       let context;
+      let stepOf;
       const sol = p && messages.find((x) => x.id === p.id);
       if (sol) {
-        const k = p.index - (sol.body.interpretation ? 1 : 0);
-        context = `Question: ${sol.body.question}\n${k >= 0 && sol.body.steps[k] ? `You were at step ${k + 1}: ${sol.body.steps[k].board}` : 'You were at the beginning of the solution.'}`;
+        const k = p.index - 1 - (sol.body.concepts || []).length;
+        const st = k >= 0 ? sol.body.steps[k] : null;
+        context = stepContext(sol.body, k);
+        if (st) stepOf = { id: sol.id, step: k };
       }
-      const r = await run(!context && looksLikeQuestion(heard.text) ? S.solve() : S.chat, { action: 'chat', text: heard.text, context, spoken: true }, { text: heard.text, files: [] });
+      const r = await run(!context && looksLikeQuestion(heard.text) ? S.solve() : S.chat, { action: 'chat', text: heard.text, context, stepOf, spoken: true }, { text: heard.text, files: [], ...(stepOf ? { stepOf } : {}) });
       const answer = r?.filter((m) => m.role === 'assistant' && m.kind === 'text').pop();
       if (answer) reply(answer.body.text, { lang });
     } catch (e) {
@@ -325,6 +336,28 @@ export default function StudyChat({ navigation, route }) {
     }
   };
   const clock = (ms = 0) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, '0')}`;
+
+  // A typed question about one step of a solution: answered under that step
+  // (and aloud when Read aloud is on).
+  const askStep = async (sol, step, q) => {
+    const stepOf = { id: sol.id, step };
+    const r = await run(S.chat, { action: 'chat', text: q, context: stepContext(sol.body, step), stepOf }, { text: q, files: [], stepOf });
+    const answer = r?.filter((m) => m.role === 'assistant' && m.kind === 'text').pop();
+    if (answer && aloudRef.current) reply(answer.body.text, { lang });
+  };
+  // The questions asked about each solution's steps, with their answers.
+  const asksOf = (id) => {
+    const out = [];
+    for (const m of messages) {
+      if (m.body?.stepOf?.id !== id) continue;
+      if (m.role === 'user') out.push({ step: m.body.stepOf.step, q: m.body.text, a: null });
+      else {
+        const open = [...out].reverse().find((x) => x.step === m.body.stepOf.step && !x.a);
+        if (open) open.a = m.body.text;
+      }
+    }
+    return out;
+  };
 
   // what each set, quiz and solution look like now
   const solvedOf = (setId) => new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === setId).map((m) => m.body.n));
@@ -449,10 +482,11 @@ export default function StudyChat({ navigation, route }) {
           )}
 
           {messages.map((m) => {
+            if (m.body?.stepOf) return null; // shown under its step
             if (m.role === 'user') return <UserBubble key={m.id} body={m.body} L={L} />;
             if (m.kind === 'text') return <AiText key={m.id} body={m.body} />;
             if (m.kind === 'questions') return <QuestionSet key={m.id} body={m.body} solved={solvedOf(m.body.setId)} busyN={busyN} running={running || !!working} onSolve={(n) => solve(m.body, n)} onSolveAll={() => solveAll(m.body)} L={L} />;
-            if (m.kind === 'solution') return <Solution key={m.id} id={m.id} body={m.body} L={L} lang={lang} teacher={teacher} />;
+            if (m.kind === 'solution') return <Solution key={m.id} id={m.id} body={m.body} L={L} lang={lang} teacher={teacher} asks={asksOf(m.id)} onAsk={String(m.id).startsWith('local-') ? undefined : (step, q) => askStep(m, step, q)} />;
             if (m.kind === 'notes') return <NotesCard key={m.id} body={m.body} L={L} />;
             if (m.kind === 'quiz') return <Quiz key={m.id} body={m.body} marks={marksOf(m.body.quizId)} busyN={typeof busyN === 'string' && busyN.startsWith(m.body.quizId) ? Number(busyN.split(':')[1]) : null} onMark={(n, a) => mark(m.body.quizId, n, a)} L={L} />;
             return null;
