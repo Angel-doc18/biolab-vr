@@ -8,6 +8,8 @@ import { useL } from '../i18n';
 export const TABS = [
   { name: 'Home', icon: 'home', en: 'Home', fr: 'Accueil' },
   { name: 'Learn', icon: 'menu_book', en: 'Learn', fr: 'Cours' },
+  // the AI study space: a raised button in the middle of the bar
+  { name: 'Study', icon: 'auto_awesome', en: 'Study', fr: 'Étude', center: true },
   { name: 'Lab', icon: 'biotech', en: 'Lab', fr: 'Labo' },
   { name: 'Exams', icon: 'assignment', en: 'Exams', fr: 'Examens' },
   { name: 'Me', icon: 'account_circle', en: 'Me', fr: 'Moi' },
@@ -15,7 +17,7 @@ export const TABS = [
 
 // Bottom navigation (h-16). The active pill glides between tabs. `tabs` is the
 // student set by default; the admin console passes its own.
-export function TabBarView({ activeIndex, onSelect, tabs = TABS }) {
+export function TabBarView({ activeIndex, onSelect, tabs = TABS, centerLabel }) {
   const insets = useSafeAreaInsets();
   const L = useL();
   const [w, setW] = useState(0);
@@ -37,7 +39,7 @@ export function TabBarView({ activeIndex, onSelect, tabs = TABS }) {
       }}
     >
       <View style={{ height: 64, paddingHorizontal: 4 }} onLayout={(e) => setW(e.nativeEvent.layout.width - 8)}>
-        {w > 0 && activeIndex >= 0 && (
+        {w > 0 && activeIndex >= 0 && !tabs[activeIndex]?.center && (
           <Animated.View
             pointerEvents="none"
             style={{
@@ -53,7 +55,7 @@ export function TabBarView({ activeIndex, onSelect, tabs = TABS }) {
           />
         )}
         {/* a small amber mark, the colour of the 8 in the logo, over the active tab */}
-        {w > 0 && activeIndex >= 0 && (
+        {w > 0 && activeIndex >= 0 && !tabs[activeIndex]?.center && (
           <Animated.View
             pointerEvents="none"
             style={{
@@ -72,6 +74,43 @@ export function TabBarView({ activeIndex, onSelect, tabs = TABS }) {
         <V c="flex-1 flex-row items-center justify-around">
           {tabs.map((t, i) => {
             const on = i === activeIndex;
+            if (t.center) {
+              const label = centerLabel || L(t.en, t.fr);
+              return (
+                <Pressable
+                  key={t.name}
+                  onPress={() => onSelect(t.name, i)}
+                  accessibilityRole="tab"
+                  accessibilityLabel={label}
+                  accessibilityState={{ selected: on }}
+                  style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 4 }}
+                >
+                  <View
+                    style={{
+                      width: 54,
+                      height: 54,
+                      marginTop: -22,
+                      borderRadius: 27,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#02287B',
+                      borderWidth: 4,
+                      borderColor: '#ffffff',
+                      shadowColor: '#02287B',
+                      shadowOpacity: 0.28,
+                      shadowRadius: 10,
+                      shadowOffset: { width: 0, height: 4 },
+                      elevation: 6,
+                    }}
+                  >
+                    <Ic n={t.icon} s={26} c="#FBAC02" fill />
+                  </View>
+                  <T c={`font-label-sm text-label-sm mt-0.5 ${on ? 'text-primary-container' : 'text-outline'}`} style={{ fontWeight: '700' }}>
+                    {label}
+                  </T>
+                </Pressable>
+              );
+            }
             return (
               <Pressable
                 key={t.name}
@@ -97,10 +136,11 @@ export function TabBarView({ activeIndex, onSelect, tabs = TABS }) {
 }
 
 // Adapter for @react-navigation/bottom-tabs.
-export default function TabBar({ state, navigation, tabs }) {
+export default function TabBar({ state, navigation, tabs, centerLabel }) {
   return (
     <TabBarView
       tabs={tabs}
+      centerLabel={centerLabel}
       activeIndex={state.index}
       onSelect={(name, i) => {
         const route = state.routes[i];

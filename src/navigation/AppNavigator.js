@@ -54,6 +54,8 @@ import AdminAnnounce from '../screens/admin/Announce';
 import AdminTeam from '../screens/admin/Team';
 import AdminCommunity from '../screens/admin/Community';
 import AdminKeys from '../screens/admin/Keys';
+import StudyHome from '../screens/study/StudyHome';
+import StudyChat from '../screens/study/StudyChat';
 import AdminProblems from '../screens/admin/Problems';
 import AdminAccount from '../screens/admin/Account';
 import AdminNotices from '../screens/admin/Notices';
@@ -108,7 +110,7 @@ function MainTabs() {
   return (
     <Tabs.Navigator
       key={partner ? 'partner' : 'all'}
-      tabBar={(props) => <TabBar {...props} tabs={partner ? PARTNER_TABS : undefined} />}
+      tabBar={(props) => <TabBar {...props} tabs={partner ? PARTNER_TABS : undefined} centerLabel={user?.role === 'teacher' ? (user?.lang === 'fr' ? 'Assistant' : 'Assistant') : undefined} />}
       screenOptions={{
         headerShown: false,
         // A short fade between tabs, left out on entry-level phones.
@@ -120,6 +122,7 @@ function MainTabs() {
     >
       <Tabs.Screen name="Home" component={Home} />
       {!partner && <Tabs.Screen name="Learn" component={Learn} />}
+      {!partner && <Tabs.Screen name="Study" component={StudyHome} />}
       {!partner && <Tabs.Screen name="Lab" component={Lab} />}
       {!partner && <Tabs.Screen name="Exams" component={Exams} />}
       <Tabs.Screen name="Me" component={Me} />
@@ -228,6 +231,7 @@ export default function AppNavigator() {
         <Stack.Screen name="AdminAnnounce" component={AdminAnnounce} />
         <Stack.Screen name="AdminCommunity" component={AdminCommunity} />
         <Stack.Screen name="AdminKeys" component={AdminKeys} />
+        <Stack.Screen name="StudyChat" component={StudyChat} />
         <Stack.Screen name="AdminTeam" component={AdminTeam} />
         <Stack.Screen name="AdminProblems" component={AdminProblems} />
         <Stack.Screen name="AdminAccount" component={AdminAccount} />

@@ -146,7 +146,12 @@ export async function ask(request, env, id) {
   const opts = settingsOf(user, chat);
   const fileIds = Array.isArray(b.fileIds) ? b.fileIds.filter((x) => typeof x === 'string').slice(0, 20) : [];
   const text = b.text ? str(b.text, 'Message', { max: 8000 }) : '';
+  // What the person asked, shown in the chat (find, notes and quiz)
+  const note = b.note ? str(b.note, 'Note', { max: 300 }) : '';
   const out = [];
+  // The person's message is saved only once the AI has answered, so a failed
+  // attempt leaves nothing half done in the chat.
+  const said = async (t, files) => t && out.push(await addMessage(env, chat.id, 'user', 'text', { text: t, files: fileIds.length ? files.list : [] }));
 
   // The first message names the chat.
   const first = !(await env.DB.prepare('SELECT 1 FROM study_messages WHERE chat_id = ? LIMIT 1').bind(chat.id).first());
@@ -155,24 +160,25 @@ export async function ask(request, env, id) {
     if (!text && !fileIds.length) throw new HttpError(400, 'Write a message or add a file.', 'invalid_input');
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
-    out.push(await addMessage(env, chat.id, 'user', 'text', { text, files: fileIds.length ? files.list : [] }));
     const { results } = await env.DB.prepare("SELECT role, kind, body FROM study_messages WHERE chat_id = ? AND kind = 'text' ORDER BY created_at DESC LIMIT 12").bind(chat.id).all();
     const history = results
       .reverse()
-      .slice(0, -1)
       .map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(JSON.parse(m.body).text || '').slice(0, 4000) }))
       .filter((m) => m.content);
     while (history.length && history[0].role !== 'user') history.shift();
     const all = await filesOf(env, chat.id, null);
     const reply = await chatReply(env, { history, message: text || 'Explain what is in the file I just shared.', material: all.text, images: fileIds.length ? files.images.slice(0, 4) : [], ...opts });
+    await said(text || '…', files);
     out.push(await addMessage(env, chat.id, 'assistant', 'text', { text: reply }));
+    if (first && text) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(text), chat.id).run();
   } else if (action === 'find') {
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
     const source = text ? `${text}\n\n${files.text}` : files.text;
     if (!source.trim() && !files.images.length) throw new HttpError(400, 'Add a photo or a document with the questions first.', 'invalid_input');
     const found = await findQuestions(env, { text: source, images: files.images.slice(0, 12), ...opts });
-    if (!found.questions.length) throw new HttpError(422, 'No questions were found in this material. If it is notes, choose "Explain my notes" instead.', 'no_questions');
+    if (!found.questions.length) throw new HttpError(422, 'No questions were found in this material. If it is notes, choose "Explain these notes" instead.', 'no_questions');
+    await said(note, files);
     out.push(await addMessage(env, chat.id, 'assistant', 'questions', { setId: uuid(), title: found.title, fileIds: files.list.map((f) => f.id), questions: found.questions }));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(found.title), chat.id).run();
   } else if (action === 'solve') {
@@ -191,20 +197,22 @@ export async function ask(request, env, id) {
   } else if (action === 'solve_text') {
     if (!text) throw new HttpError(400, 'Write the question to solve.', 'invalid_input');
     await useOne(env, user);
-    out.push(await addMessage(env, chat.id, 'user', 'text', { text }));
     const sol = await solveOne(env, { question: text, ...opts });
+    await said(text, { list: [] });
     out.push(await addMessage(env, chat.id, 'assistant', 'solution', { question: text, ...sol }));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(text), chat.id).run();
   } else if (action === 'notes') {
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
     const r = await explainNotes(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, ...opts });
+    await said(note, files);
     out.push(await addMessage(env, chat.id, 'assistant', 'notes', r));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
   } else if (action === 'quiz') {
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
     const r = await makeQuestions(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, mcq: b.mcq ?? 5, structured: b.structured ?? 3, ...opts });
+    await said(note, files);
     out.push(await addMessage(env, chat.id, 'assistant', 'quiz', { quizId: uuid(), ...r }));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
   } else if (action === 'mark') {
