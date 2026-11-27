@@ -9,6 +9,7 @@ import { useL } from '../../i18n';
 import { firstName, greeting } from '../../state/selectors';
 import { Section, Shortcut } from './Home';
 import ChargesCard from '../../ui/ChargesCard';
+import { STORE_BUILD } from '../../lib/payments';
 
 const DAY = 86400000;
 const longDay = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -43,16 +44,20 @@ export function ChildAccess({ r, L, onPay }) {
       <Ic n={due ? 'lock' : a.paidUntil ? 'verified' : 'schedule'} s={20} c={due ? 'error' : a.paidUntil ? 'secondary' : 'primary-container'} fill={!due} />
       <T c="flex-1 font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 19 }}>
         {due
-          ? L('Platform charges due: lessons are locked.', 'Frais à payer : les leçons sont bloquées.')
+          ? STORE_BUILD
+            ? L('Access has ended: lessons are locked.', 'L’accès est terminé : les leçons sont bloquées.')
+            : L('Platform charges due: lessons are locked.', 'Frais à payer : les leçons sont bloquées.')
           : a.paidUntil
-            ? `${L('Paid until', 'Payé jusqu’au')} ${longDay(a.paidUntil)}`
+            ? `${STORE_BUILD ? L('Full access until', 'Accès complet jusqu’au') : L('Paid until', 'Payé jusqu’au')} ${longDay(a.paidUntil)}`
             : `${L('Free month until', 'Mois gratuit jusqu’au')} ${longDay(a.until)}`}
       </T>
-      <P c={`h-9 px-3 rounded-lg items-center justify-center ${due ? 'bg-primary' : 'bg-surface-container-lowest'}`} onPress={onPay} accessibilityLabel={`${L('Pay for', 'Payer pour')} ${r.student.name}`}>
-        <T c={`font-label-md text-label-md ${due ? 'text-on-primary' : 'text-primary-container'}`} style={{ fontWeight: '700' }}>
-          {due ? L('Pay now', 'Payer') : L('Add time', 'Prolonger')}
-        </T>
-      </P>
+      {!STORE_BUILD && (
+        <P c={`h-9 px-3 rounded-lg items-center justify-center ${due ? 'bg-primary' : 'bg-surface-container-lowest'}`} onPress={onPay} accessibilityLabel={`${L('Pay for', 'Payer pour')} ${r.student.name}`}>
+          <T c={`font-label-md text-label-md ${due ? 'text-on-primary' : 'text-primary-container'}`} style={{ fontWeight: '700' }}>
+            {due ? L('Pay now', 'Payer') : L('Add time', 'Prolonger')}
+          </T>
+        </P>
+      )}
     </V>
   );
 }
@@ -106,7 +111,7 @@ function ChildCard({ r, L, onOpen }) {
       </V>
       {(due || late.length > 0 || open.length > 0 || !!test) && (
         <V c="flex-row items-center gap-1.5 flex-wrap">
-          {due && <Tag icon="lock" text={L('Charges due', 'Frais à payer')} warn />}
+          {due && <Tag icon="lock" text={STORE_BUILD ? L('Access ended', 'Accès terminé') : L('Charges due', 'Frais à payer')} warn />}
           {late.length > 0 && <Tag icon="schedule" text={`${late.length} ${L('late', 'en retard')}`} warn />}
           {open.length > 0 && <Tag icon="assignment" text={`${open.length} ${L('to do', 'à faire')}`} />}
           {!!test && <Tag icon="grading" text={`${L('Last test', 'Dernier devoir')} ${test.score}%`} />}
@@ -156,7 +161,7 @@ export default function ParentHome({ navigation }) {
           <T c="font-body-md text-body-md text-on-surface-variant">{L('Your children’s school work, updated as they study.', 'Le travail scolaire de vos enfants, mis à jour pendant qu’ils étudient.')}</T>
         </V>
         <ChargesCard user={user} quiet onPress={() => navigation.navigate('Paywall')} />
-        {!!due.length && (
+        {!!due.length && !STORE_BUILD && (
           <V c="p-space-md rounded-xl gap-space-sm" style={{ backgroundColor: '#fff3d6' }}>
             <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
               {due.length === 1
