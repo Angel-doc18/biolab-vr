@@ -34,7 +34,7 @@ export default function CreateClass({ navigation, route }) {
   };
 
   return (
-    <Screen keyboard header={<OnbHeader />}>
+    <Screen keyboard header={<OnbHeader onSkip={fromPortal ? undefined : () => navigation.navigate('SetupDone')} />}>
       {!fromPortal && <StepBar screen="CreateClass" />}
       <V c="gap-space-xs mb-space-lg pt-space-sm">
         <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Create a class', 'Créer une classe')}</T>

@@ -6,9 +6,11 @@ export function routeAfterAuth(user) {
 }
 
 // Onboarding step order per role, after "Who are you". A student answers one
-// question per screen.
+// question per screen, and every step can be skipped. The exam year comes with
+// the class (the usual year for it); the study plan (target grade, daily time,
+// reminder) is set later from Me, so signing up stays short.
 export const ONBOARDING = {
-  student: ['SchoolKind', 'ClassPick', 'ExamYear', 'Series', 'Subjects', 'School', 'Grade', 'StudyTime', 'Reminder', 'SetupDone'],
+  student: ['SchoolKind', 'ClassPick', 'Series', 'Subjects', 'School', 'SetupDone'],
   parent: ['LinkChild', 'SetupDone'],
   teacher: ['School', 'CreateClass', 'SetupDone'],
   partner: ['PartnerKind', 'SetupDone'],

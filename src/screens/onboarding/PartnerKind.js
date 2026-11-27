@@ -37,7 +37,7 @@ export default function PartnerKind({ navigation }) {
   return (
     <Screen
       keyboard
-      header={<OnbHeader />}
+      header={<OnbHeader onSkip={() => navigation.navigate('SetupDone')} />}
       footer={
         <V c="px-margin pt-space-sm" style={{ paddingBottom: 12 }}>
           <ErrorNote error={error} c="mb-space-sm" />

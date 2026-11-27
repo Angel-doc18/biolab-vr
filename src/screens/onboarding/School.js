@@ -166,7 +166,7 @@ export default function School({ navigation, route }) {
 
   return (
     <V c="flex-1">
-      <Screen keyboard header={<OnbHeader />}>
+      <Screen keyboard header={<OnbHeader onSkip={fromSettings ? undefined : () => advance()} />}>
         {!fromSettings && <StepBar screen="School" />}
         <V c="gap-space-xs mb-space-md">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Your school', 'Votre école')}</T>

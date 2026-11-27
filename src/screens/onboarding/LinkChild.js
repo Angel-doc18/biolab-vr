@@ -31,7 +31,7 @@ export default function LinkChild({ navigation, route }) {
   };
 
   return (
-    <Screen keyboard header={<OnbHeader />}>
+    <Screen keyboard header={<OnbHeader onSkip={fromHome ? undefined : () => navigation.navigate('SetupDone')} />}>
       {!fromHome && <StepBar screen="LinkChild" />}
       <V c="gap-space-xs mb-space-lg pt-space-sm">
         <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Link your child', 'Liez votre enfant')}</T>

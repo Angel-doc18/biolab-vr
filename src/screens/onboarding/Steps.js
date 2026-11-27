@@ -8,9 +8,11 @@ import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { nextStep, stepsFor } from '../../navigation/routes';
 
-export function OnbHeader({ label, canBack = true }) {
+// onSkip: a Skip button on the right, to leave a question for later.
+export function OnbHeader({ label, canBack = true, onSkip }) {
   const insets = useSafeAreaInsets();
   const nav = useNavigation();
+  const L = useL();
   return (
     <View style={{ paddingTop: insets.top, backgroundColor: 'rgba(255,255,255,0.96)', zIndex: 50, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, shadowOffset: { width: 0, height: 1 }, elevation: 2 }}>
       <V c="h-14 px-margin flex-row items-center justify-between">
@@ -26,7 +28,15 @@ export function OnbHeader({ label, canBack = true }) {
             <V c="w-1" />
           )}
         </V>
-        {!!label && <T c="font-label-md text-label-md text-on-surface-variant">{label}</T>}
+        {onSkip ? (
+          <P c="h-11 px-3 -mr-2 items-center justify-center rounded-xl" onPress={onSkip} accessibilityRole="button" accessibilityLabel={L('Skip this step', 'Passer cette étape')} hitSlop={6}>
+            <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+              {L('Skip', 'Passer')}
+            </T>
+          </P>
+        ) : (
+          !!label && <T c="font-label-md text-label-md text-on-surface-variant">{label}</T>
+        )}
       </V>
     </View>
   );
@@ -140,12 +150,15 @@ export function useStepNav(screen) {
 export function StepScreen({ screen, flow, title, sub, children, onContinue, busy, error, label, keyboard }) {
   const L = useL();
   const { user } = useApp();
+  const navigation = useNavigation();
+  // While signing up, any question can be left for later (Me changes it).
+  const skip = flow ? undefined : () => navigation.navigate(nextStep(user?.role || 'student', screen, user));
   // In a short run the last step saves and returns; the others go on.
   const last = !!flow && !nextStep(user?.role || 'student', screen, user, flow);
   return (
     <Screen
       keyboard={keyboard}
-      header={<OnbHeader />}
+      header={<OnbHeader onSkip={skip} />}
       footer={
         <V c="px-margin pt-space-sm" style={{ paddingBottom: 12 }}>
           <ErrorNote error={error} c="mb-space-sm" />
