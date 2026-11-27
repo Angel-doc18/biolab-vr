@@ -160,6 +160,10 @@ function SolutionAnswer({ id, body, L, lang, teacher, live, onFollow }) {
     }
     return undefined;
   }, [v.playing, shown]);
+  // the call ended: all of it shows
+  useEffect(() => {
+    if (!live) setShown(Infinity);
+  }, [live]);
   const sees = (p) => p < shown;
   const all = shown === Infinity;
   const writing = (p) => v.playing && v.part === p && !all;

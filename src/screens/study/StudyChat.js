@@ -15,14 +15,25 @@ import { useL, useLang } from '../../i18n';
 import { del, get, patch, post } from '../../api/client';
 import { pickStudyDocuments, pickStudyPhotos } from '../../lib/studyFiles';
 import { shareStudyPdf } from '../../lib/studyPdf';
-import { stopTalking } from '../../lib/talk';
-import { AssistantMessage, Thinking, UserMessage } from './messages';
+import { explain, interrupt, isTalking, pausedNow, reply, stopTalking } from '../../lib/talk';
+import { AssistantMessage, Thinking, UserMessage, solutionParts } from './messages';
+import { CallBar, useCall } from './call';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const FILE_ICON = { image: 'image', pdf: 'picture_as_pdf', docx: 'description', text: 'description' };
 const when = (t, L) => {
   const d = new Date(t);
   return new Date().toDateString() === d.toDateString() ? d.toTimeString().slice(0, 5) : d.toLocaleDateString(L('en-GB', 'fr-FR'), { day: 'numeric', month: 'short' });
+};
+
+// What was being explained when the person cut in, for the AI's answer.
+const contextOf = (m, part) => {
+  if (!m) return undefined;
+  if (m.kind !== 'solution') return String(m.body?.text || m.body?.title || '').slice(0, 2000);
+  const sol = m.body;
+  const k = part - 1 - (sol.concepts || []).length;
+  const st = k >= 0 ? sol.steps[k] : null;
+  return `Question: ${sol.question}\n${st ? `Step ${k + 1} on the board: ${st.board}${st.why ? `\nReason given: ${st.why}` : ''}` : 'The beginning of the solution (what the question asks and the ideas behind it).'}`;
 };
 
 export default function StudyChat({ navigation, route }) {
@@ -52,12 +63,25 @@ export default function StudyChat({ navigation, route }) {
   const previews = useRef({}); // file id -> photo shown in the person's message
   const listY = useRef(0);
   const cardY = useRef({});
+  // the call: answers waiting to be spoken, solutions written as they are said
+  const [liveIds, setLiveIds] = useState(() => new Set());
+  const queue = useRef([]);
+  const solving = useRef(false);
+  const chatRef = useRef(null);
+  const messagesRef = useRef([]);
+  useEffect(() => {
+    chatRef.current = chat;
+  }, [chat]);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const toEnd = () => setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 80);
   const follow = (id, y) => scroll.current?.scrollTo({ y: Math.max(0, listY.current + (cardY.current[id] || 0) + y - 110), animated: true });
 
   // ---------- which chat ----------
   const open = useCallback(async (id) => {
+    endCallRef.current?.();
     stopTalking();
     stopAll.current = true;
     setError(null);
@@ -95,12 +119,13 @@ export default function StudyChat({ navigation, route }) {
     if (p.chatId || p.intent) navigation.setParams({ chatId: undefined, intent: undefined });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.params?.chatId, route.params?.intent]);
-  // Leaving the chat stops the voice.
-  useEffect(() => () => stopTalking(), []);
+  // Leaving the chat stops the voice and the call.
+  useEffect(() => () => (endCallRef.current?.(), stopTalking()), []);
 
   const ensureChat = async () => {
-    if (chat?.id) return chat.id;
+    if (chatRef.current?.id) return chatRef.current.id;
     const r = await post('/v1/study/chats', {});
+    chatRef.current = r.chat;
     setChat(r.chat);
     return r.chat.id;
   };
@@ -108,7 +133,7 @@ export default function StudyChat({ navigation, route }) {
   // ---------- talking to the AI ----------
   // One request, with its status line, and one quiet retry when every AI key
   // is briefly busy. local: the person's message, shown at once.
-  const run = async (steps, body, local) => {
+  const run = async (steps, body, local, { quiet = false } = {}) => {
     setError(null);
     setWorking(steps);
     if (local) setMessages((m) => [...m, { id: `local-${Date.now()}`, role: 'user', kind: 'text', body: local }]);
@@ -124,8 +149,18 @@ export default function StudyChat({ navigation, route }) {
         await sleep(8000);
         r = await post(`/v1/study/chats/${id}/ask`, body, { timeout: 175000 });
       }
+      const fresh = r.messages.filter((x) => x.role === 'assistant');
+      const onCall = callRef.current?.active() && !quiet;
+      // on a call, solutions start empty and are written as they are explained
+      if (onCall && fresh.some((x) => x.kind === 'solution')) setLiveIds((s) => new Set([...s, ...fresh.filter((x) => x.kind === 'solution').map((x) => x.id)]));
       setMessages((m) => [...m.filter((x) => !String(x.id).startsWith('local-')), ...r.messages]);
       toEnd();
+      if (onCall) {
+        // a paper's questions: they are solved next, so it does not listen yet
+        if (fresh.some((x) => x.kind === 'questions')) solving.current = true;
+        queue.current.push(...fresh);
+        playNext();
+      }
       return r.messages;
     } catch (e) {
       setMessages((m) => m.filter((x) => !String(x.id).startsWith('local-')));
@@ -150,6 +185,7 @@ export default function StudyChat({ navigation, route }) {
   // A paper's questions, solved and explained one after another at once.
   const solveSet = async (set, done = new Set()) => {
     stopAll.current = false;
+    solving.current = true;
     setRunning(true);
     const list = set.questions.filter((q) => !done.has(q.n));
     for (let i = 0; i < list.length; i += 1) {
@@ -159,7 +195,9 @@ export default function StudyChat({ navigation, route }) {
       const r = await run(S.solve(k + 1, set.questions.length), { action: 'solve', setId: set.setId, n: q.n });
       if (!r) break;
     }
+    solving.current = false;
     setRunning(false);
+    playNext(); // on a call: when all is said, it listens again
   };
   const solvedOf = (setId) => new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === setId).map((m) => m.body.n));
 
@@ -173,6 +211,93 @@ export default function StudyChat({ navigation, route }) {
     const r = await run(files.length ? S.files : S.text, { action: 'auto', text: t || undefined, fileIds: files.map((f) => f.id) }, local);
     const set = r?.find((m) => m.kind === 'questions');
     if (set) await solveSet(set.body);
+  };
+
+  // ---------- the call ----------
+  // What is said aloud for each answer.
+  const speechOf = (m) => {
+    const b = m.body || {};
+    switch (m.kind) {
+      case 'solution':
+        return solutionParts(b, lang);
+      case 'text':
+        return String(b.text || '').split(/\n{2,}/);
+      case 'questions':
+        return [L(`I found ${b.questions.length} questions. I will solve and explain them one by one.`, `J’ai trouvé ${b.questions.length} questions. Je vais les résoudre et les expliquer une par une.`)];
+      case 'quiz':
+        return teacher
+          ? [L(`Here is the test: ${b.questions.length} questions with the marking scheme, on your screen.`, `Voici le devoir : ${b.questions.length} questions avec le barème, à l’écran.`)]
+          : [b.title, ...b.questions.map((q) => (q.type === 'mcq' ? `${q.n}. ${q.text} ${q.options.join('. ')}` : `${q.n}. ${q.text}`)), L('Answer when you are ready, and I will mark your answers.', 'Répondez quand vous êtes prêt, et je corrigerai vos réponses.')];
+      case 'marked_all':
+        return [
+          L(`You scored ${b.got} out of ${b.total}.`, `Vous avez ${b.got} sur ${b.total}.`),
+          ...b.marks.filter((x) => x.awarded < x.total).map((x) => (x.type === 'mcq' ? `${L('Question', 'Question')} ${x.n}: ${L('the answer is', 'la réponse est')} ${x.correct}. ${x.explanation || ''}` : `${L('Question', 'Question')} ${x.n}: ${x.feedback || ''}`)),
+        ];
+      case 'notes':
+      case 'lessonNotes':
+      case 'lessonPlan':
+      case 'summary':
+        return [`${b.title}.`, String(b.summary || b.introduction || '').slice(0, 700), L('All of it is on your screen, and you can download it as a PDF.', 'Tout est à l’écran, et vous pouvez le télécharger en PDF.')];
+      default:
+        return [];
+    }
+  };
+  // The next answer is spoken; when nothing is left, it listens again.
+  const playNext = () => {
+    const c = callRef.current;
+    if (!c?.active() || isTalking()) return;
+    const m = queue.current.shift();
+    if (!m) {
+      if (!solving.current && !['listening', 'thinking'].includes(c.phaseNow())) c.listen();
+      return;
+    }
+    const parts = speechOf(m).map((x) => String(x || '').trim()).filter(Boolean);
+    if (!parts.length) return playNext();
+    c.speaking();
+    explain(m.id, parts, { lang, onEnd: playNext });
+  };
+  // What the person said on the call.
+  const onHeard = async (said) => {
+    const paused = pausedNow();
+    if (paused) {
+      // a question in the middle of an explanation: answered, then back to it
+      const m = messagesRef.current.find((x) => x.id === paused.id);
+      const r = await run(S.text, { action: 'chat', text: said, context: contextOf(m, paused.index), spoken: true }, { text: said }, { quiet: true });
+      const ans = r?.filter((x) => x.role === 'assistant' && x.kind === 'text').pop();
+      if (ans && callRef.current?.active()) {
+        callRef.current.speaking();
+        reply(ans.body.text, { lang, onEnd: playNext });
+      } else playNext();
+      return;
+    }
+    const r = await run(S.text, { action: 'auto', text: said, spoken: true }, { text: said });
+    if (!r) return callRef.current?.listen();
+    const set = r.find((m) => m.kind === 'questions');
+    if (set) solveSet(set.body);
+  };
+  const call = useCall({ onHeard, onError: setError });
+  const callRef = useRef(null);
+  callRef.current = { ...call, phaseNow: () => call.phaseNow() };
+  const endCall = () => {
+    call.end();
+    stopTalking();
+    queue.current = [];
+    setLiveIds(new Set());
+  };
+  const endCallRef = useRef(null);
+  endCallRef.current = endCall;
+  const startCall = async () => {
+    stopTalking();
+    setError(null);
+    queue.current = [];
+    await call.start();
+  };
+  // A tap on the call bar: cut in while the AI speaks, or send now while listening.
+  const tapCall = () => {
+    if (call.phase === 'speaking') {
+      interrupt();
+      call.listen();
+    } else if (call.phase === 'listening') call.finish(true);
   };
 
   // ---------- adding files ----------
@@ -334,15 +459,16 @@ export default function StudyChat({ navigation, route }) {
             maxLength={8000}
             style={{ maxHeight: 140, minHeight: 40 }}
           />
-          <P
-            c={`w-10 h-10 rounded-full items-center justify-center ${(text.trim() || attached.length) && !busy ? 'bg-primary-container' : 'bg-surface-container'}`}
-            onPress={send}
-            disabled={(!text.trim() && !attached.length) || busy}
-            accessibilityRole="button"
-            accessibilityLabel={L('Send', 'Envoyer')}
-          >
-            <Ic n="arrow_upward" s={22} c={(text.trim() || attached.length) && !busy ? 'on-primary' : 'outline'} />
-          </P>
+          {text.trim() || attached.length ? (
+            <P c={`w-10 h-10 rounded-full items-center justify-center ${busy ? 'bg-surface-container' : 'bg-primary-container'}`} onPress={send} disabled={busy} accessibilityRole="button" accessibilityLabel={L('Send', 'Envoyer')}>
+              <Ic n="arrow_upward" s={22} c={busy ? 'outline' : 'on-primary'} />
+            </P>
+          ) : (
+            // nothing typed: a voice call with the AI
+            <P c={`w-10 h-10 rounded-full items-center justify-center ${busy ? 'bg-surface-container' : 'bg-primary-container'}`} onPress={startCall} disabled={busy} accessibilityRole="button" accessibilityLabel={L('Talk with the AI by voice', 'Parler avec l’IA')}>
+              <Ic n="graphic_eq" s={22} c={busy ? 'outline' : 'on-primary'} />
+            </P>
+          )}
         </V>
       </V>
     </V>
@@ -350,7 +476,7 @@ export default function StudyChat({ navigation, route }) {
 
   return (
     <V c="flex-1" style={{ backgroundColor: '#ffffff' }}>
-      <Screen keyboard scrollRef={scroll} header={header} footer={composer}>
+      <Screen keyboard scrollRef={scroll} header={header} footer={call.phase === 'off' ? composer : <CallBar phase={call.phase} level={call.level} onTap={tapCall} onEnd={endCall} L={L} />}>
         <V c="gap-space-lg pt-space-md pb-space-lg" onLayout={(e) => (listY.current = e.nativeEvent.layout.y)}>
           {!messages.length && !working && (
             <V c="pt-space-xl gap-space-sm items-center">
@@ -375,6 +501,7 @@ export default function StudyChat({ navigation, route }) {
                   L={L}
                   lang={lang}
                   teacher={teacher}
+                  live={liveIds.has(m.id)}
                   solved={m.kind === 'questions' ? solvedOf(m.body.setId) : null}
                   running={busy}
                   onContinue={m.kind === 'questions' ? () => solveSet(m.body, solvedOf(m.body.setId)) : undefined}

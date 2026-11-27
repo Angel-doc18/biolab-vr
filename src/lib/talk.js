@@ -9,9 +9,13 @@ let current = null; // { id, parts, index, lang, playing }
 let paused = null; // the explanation that was interrupted
 let turn = 0;
 
-const emit = () => listeners.forEach((fn) => fn({ id: current?.id || null, index: current?.index ?? -1, playing: !!current?.playing, pausedId: paused?.id || null, pausedIndex: paused?.index ?? -1 }));
+const snapshot = () => ({ id: current?.id || null, index: current?.index ?? -1, playing: !!current?.playing, pausedId: paused?.id || null, pausedIndex: paused?.index ?? -1 });
+const emit = () => listeners.forEach((fn) => fn(snapshot()));
+// A listener gets the state at once: a message shown just after its
+// explanation started still knows it is being explained.
 export function subscribe(fn) {
   listeners.add(fn);
+  fn(snapshot());
   return () => listeners.delete(fn);
 }
 
@@ -65,7 +69,7 @@ export const isTalking = () => !!current?.playing;
 
 // The AI's answer to a spoken question, read aloud; then back to the
 // interrupted explanation, from the step it was on.
-export function reply(text, { lang = 'en' } = {}) {
+export function reply(text, { lang = 'en', onEnd } = {}) {
   turn += 1;
   const mine = turn;
   const back = paused;
@@ -82,7 +86,7 @@ export function reply(text, { lang = 'en' } = {}) {
         onDone: () => mine === turn && play(back, back.index),
         onError: () => mine === turn && play(back, back.index),
       });
-    }
+    } else onEnd?.(); // nothing to go back to
   };
   speak(text, { lang, quick: true, onDone: resume, onError: resume });
 }
