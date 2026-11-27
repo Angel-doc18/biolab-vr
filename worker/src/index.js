@@ -24,6 +24,7 @@ import * as adminAccount from './routes/adminAccount.js';
 import * as system from './routes/system.js';
 import * as community from './routes/community.js';
 import * as keys from './routes/keys.js';
+import * as study from './routes/study.js';
 import { isBlocked, loadBlocks, securityEvent, serverProblem, track } from './lib/monitor.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
@@ -121,6 +122,13 @@ const routes = [
   ['POST', '/v1/admin/preview', adminAccount.previewAs],
   ['POST', '/v1/me/preview', adminAccount.previewAsPartner],
   ['GET', '/v1/community', community.getCommunity],
+  ['GET', '/v1/study/chats', study.listChats],
+  ['POST', '/v1/study/chats', study.createChat],
+  ['GET', `/v1/study/chats/${ID}`, study.getChat],
+  ['PATCH', `/v1/study/chats/${ID}`, study.patchChat],
+  ['DELETE', `/v1/study/chats/${ID}`, study.deleteChat],
+  ['POST', `/v1/study/chats/${ID}/files`, study.addFile],
+  ['POST', `/v1/study/chats/${ID}/ask`, study.ask],
   ['PUT', '/v1/admin/community', community.putCommunity],
   // the partner programme
   ['GET', '/v1/partner/programme', partner.publicProgramme],
@@ -188,7 +196,7 @@ function corsHeaders(request, env) {
 // Open during maintenance: admins, signing in (admins still can), payments
 // arriving from Fapshi, error reports and the public website's data.
 const OPEN_IN_MAINTENANCE = /^\/v1\/(health|admin\/|auth\/login|billing\/(fapshi-webhook|plans|return)|app\/errors|team|contact|partner\/programme)/;
-const AI_PATHS = /^\/v1\/ai\/(ask|mark|explain|solve|mark-any)$/;
+const AI_PATHS = /^\/v1\/(ai\/(ask|mark|explain|solve|mark-any)|study\/chats\/[A-Za-z0-9-]+\/ask)$/;
 const blockNoted = new Map();
 
 async function handle(request, env) {

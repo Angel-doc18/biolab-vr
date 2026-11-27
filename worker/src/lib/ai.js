@@ -49,7 +49,7 @@ const CLASS_GUIDE = {
   'Lower Sixth': 'The student is in Lower Sixth, the first year of the GCE Advanced Level course. Answer at A Level depth.',
   'Upper Sixth': 'The student is in Upper Sixth, the GCE Advanced Level examination class. Answer at full A Level standard, with exam technique.',
 };
-const classGuide = (className) => CLASS_GUIDE[className] || null;
+export const classGuide = (className) => CLASS_GUIDE[className] || null;
 
 // The lesson or topic the student has open: title and text, already trimmed by the route.
 const lessonNote = (lesson) => (lesson?.text ? `The student is studying this lesson. Base your answer on it:\n"""\n${lesson.title ? `${lesson.title}\n` : ''}${lesson.text}\n"""` : lesson?.title ? `The student is studying: ${lesson.title}.` : null);
@@ -400,7 +400,7 @@ const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶',
 const SUB = { 0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄', 5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉' };
 const GREEK = { alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', Delta: 'Δ', theta: 'θ', lambda: 'λ', mu: 'µ', rho: 'ρ', pi: 'π', omega: 'ω', Omega: 'Ω', sigma: 'σ', phi: 'φ', eta: 'η' };
 const fraction = (a, b) => (a === '1' && b === '2' ? '½' : a === '1' && b === '4' ? '¼' : `${/^\w+$/.test(a) ? a : `(${a})`}/${/^\w+$/.test(b) ? b : `(${b})`}`);
-const plainBoard = (t) =>
+export const plainBoard = (t) =>
   clean(t)
     .replace(/\*\*/g, '')
     .replace(/\\n/g, '\n')

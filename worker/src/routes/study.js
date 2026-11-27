@@ -1,0 +1,223 @@
+// The study space: chats a student (or a teacher) keeps and comes back to, with
+// photos and documents, questions found and solved one by one, notes explained,
+// revision quizzes and their marking. Everything belongs to the signed-in user.
+import { HttpError, created, limit, now, ok, readJson } from '../lib/http.js';
+import { isPro, requireAccess, requireUser } from '../lib/auth.js';
+import { int, oneOf, str } from '../lib/validate.js';
+import { uuid } from '../lib/crypto.js';
+import { today } from '../lib/notify.js';
+import { subjectOr } from '../lib/subjects.js';
+import { markAnswer } from '../lib/ai.js';
+import { KINDS, looksScanned, readDocument } from '../lib/docs.js';
+import { chatReply, explainNotes, findQuestions, makeQuestions, solveOne } from '../lib/study.js';
+
+// Daily study actions (each answer, solution, explanation, quiz or marking).
+export const STUDY_LIMIT = { pro: 150, free: 10 };
+const MAX_FILES = 40;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+
+const modeOf = (user) => (user.role === 'teacher' ? 'teacher' : 'student');
+const parse = (row) => ({ id: row.id, role: row.role, kind: row.kind, body: JSON.parse(row.body), createdAt: row.created_at });
+
+async function chatOf(env, user, id) {
+  const chat = await env.DB.prepare('SELECT * FROM study_chats WHERE id = ? AND user_id = ? AND deleted_at IS NULL').bind(id, user.id).first();
+  if (!chat) throw new HttpError(404, 'This chat was not found.', 'not_found');
+  return chat;
+}
+
+async function addMessage(env, chatId, role, kind, body) {
+  const id = uuid();
+  const t = now();
+  await env.DB.batch([
+    env.DB.prepare('INSERT INTO study_messages (id, chat_id, role, kind, body, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(id, chatId, role, kind, JSON.stringify(body), t),
+    env.DB.prepare('UPDATE study_chats SET updated_at = ? WHERE id = ?').bind(t, chatId),
+  ]);
+  return { id, role, kind, body, createdAt: t };
+}
+
+async function useOne(env, user) {
+  const tier = isPro(user, env) ? 'pro' : 'free';
+  const row = await env.DB.prepare('SELECT study FROM ai_usage WHERE user_id = ? AND day = ?').bind(user.id, today()).first();
+  if ((row?.study || 0) >= STUDY_LIMIT[tier]) throw new HttpError(402, 'You have reached today’s study limit. It starts again tomorrow.', 'quota');
+  await env.DB.prepare(
+    `INSERT INTO ai_usage (user_id, day, asks, marks, photos, study) VALUES (?, ?, 0, 0, 0, 1)
+     ON CONFLICT(user_id, day) DO UPDATE SET study = study + 1`
+  )
+    .bind(user.id, today())
+    .run();
+}
+
+const shortTitle = (t) => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 60) || 'New chat';
+const settingsOf = (user, chat) => ({ subject: chat.subject || null, className: user.class_name, lang: user.lang === 'fr' ? 'fr' : 'en', mode: modeOf(user) });
+
+// Files of a chat: their text joined (for context) and photos (for vision).
+async function filesOf(env, chatId, ids) {
+  const { results } = ids?.length
+    ? await env.DB.prepare(`SELECT * FROM study_files WHERE chat_id = ? AND id IN (${ids.map(() => '?').join(',')}) ORDER BY created_at`).bind(chatId, ...ids).all()
+    : await env.DB.prepare('SELECT * FROM study_files WHERE chat_id = ? ORDER BY created_at').bind(chatId).all();
+  return {
+    text: results.filter((f) => f.text).map((f) => `[${f.name}]\n${f.text}`).join('\n\n'),
+    images: results.filter((f) => f.kind === 'image' && f.image).map((f) => ({ mediaType: f.mime, data: f.image })),
+    list: results.map((f) => ({ id: f.id, name: f.name, kind: f.kind })),
+  };
+}
+
+// ---------- chats ----------
+export async function listChats(request, env) {
+  const user = await requireUser(request, env);
+  const { results } = await env.DB.prepare('SELECT id, title, subject, updated_at FROM study_chats WHERE user_id = ? AND deleted_at IS NULL ORDER BY updated_at DESC LIMIT 200').bind(user.id).all();
+  return ok({ chats: results.map((c) => ({ id: c.id, title: c.title, subject: c.subject, updatedAt: c.updated_at })) });
+}
+
+export async function createChat(request, env) {
+  const user = await requireUser(request, env);
+  const b = await readJson(request);
+  const id = uuid();
+  const t = now();
+  const subject = b.subject ? subjectOr(b.subject) : null;
+  await env.DB.prepare('INSERT INTO study_chats (id, user_id, title, mode, subject, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .bind(id, user.id, shortTitle(b.title || 'New chat'), modeOf(user), subject, t, t)
+    .run();
+  return created({ chat: { id, title: shortTitle(b.title || 'New chat'), subject, updatedAt: t } });
+}
+
+export async function getChat(request, env, id) {
+  const user = await requireUser(request, env);
+  const chat = await chatOf(env, user, id);
+  const { results } = await env.DB.prepare('SELECT * FROM study_messages WHERE chat_id = ? ORDER BY created_at').bind(chat.id).all();
+  const files = await env.DB.prepare('SELECT id, name, kind, pages, size FROM study_files WHERE chat_id = ? ORDER BY created_at').bind(chat.id).all();
+  return ok({ chat: { id: chat.id, title: chat.title, subject: chat.subject, updatedAt: chat.updated_at }, messages: results.map(parse), files: files.results });
+}
+
+export async function patchChat(request, env, id) {
+  const user = await requireUser(request, env);
+  const chat = await chatOf(env, user, id);
+  const b = await readJson(request);
+  const title = b.title !== undefined ? shortTitle(str(b.title, 'Title', { max: 80 })) : chat.title;
+  const subject = b.subject !== undefined ? (b.subject ? subjectOr(b.subject) : null) : chat.subject;
+  await env.DB.prepare('UPDATE study_chats SET title = ?, subject = ?, updated_at = ? WHERE id = ?').bind(title, subject, now(), chat.id).run();
+  return ok({ chat: { id: chat.id, title, subject } });
+}
+
+export async function deleteChat(request, env, id) {
+  const user = await requireUser(request, env);
+  const chat = await chatOf(env, user, id);
+  await env.DB.batch([
+    env.DB.prepare('UPDATE study_chats SET deleted_at = ? WHERE id = ?').bind(now(), chat.id),
+    env.DB.prepare('DELETE FROM study_files WHERE chat_id = ?').bind(chat.id),
+    env.DB.prepare('DELETE FROM study_messages WHERE chat_id = ?').bind(chat.id),
+  ]);
+  return ok({ deleted: true });
+}
+
+// ---------- files ----------
+// POST /v1/study/chats/:id/files { name, mime, base64 }
+export async function addFile(request, env, id) {
+  const user = await requireUser(request, env);
+  requireAccess(user, env);
+  const chat = await chatOf(env, user, id);
+  const b = await readJson(request, 7 * 1024 * 1024);
+  const name = str(b.name, 'File name', { min: 1, max: 160 });
+  const mime = oneOf(b.mime, 'File type', Object.keys(KINDS));
+  const data = String(b.base64 || '').replace(/^data:[^,]+,/, '');
+  const bytes = Uint8Array.from(Buffer.from(data, 'base64'));
+  if (!bytes.length) throw new HttpError(400, 'The file is empty.', 'invalid_input');
+  if (bytes.length > MAX_FILE_BYTES) throw new HttpError(413, 'This file is larger than 5 MB. Send a smaller file, or photos of the pages.', 'too_large');
+  const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM study_files WHERE chat_id = ?').bind(chat.id).first();
+  if ((count?.n || 0) >= MAX_FILES) throw new HttpError(400, 'This chat has many files already. Start a new chat for new material.', 'too_many');
+  const doc = await readDocument(mime, bytes);
+  const fid = uuid();
+  await env.DB.prepare('INSERT INTO study_files (id, chat_id, user_id, name, mime, kind, size, pages, text, image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(fid, chat.id, user.id, name, mime, doc.kind, bytes.length, doc.pages, doc.text, doc.kind === 'image' ? data : null, now())
+    .run();
+  const words = doc.text ? doc.text.split(/\s+/).filter(Boolean).length : 0;
+  return created({ file: { id: fid, name, kind: doc.kind, pages: doc.pages, words, scanned: looksScanned(doc) } });
+}
+
+// ---------- asking ----------
+// POST /v1/study/chats/:id/ask { action, text?, fileIds?, setId?, n?, quizId?, answer?, mcq?, structured? }
+export async function ask(request, env, id) {
+  const user = await requireUser(request, env);
+  requireAccess(user, env);
+  const chat = await chatOf(env, user, id);
+  const b = await readJson(request, 64 * 1024);
+  const action = oneOf(b.action || 'chat', 'Action', ['chat', 'find', 'solve', 'solve_text', 'notes', 'quiz', 'mark']);
+  await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are going too quickly. Wait a moment.');
+  const opts = settingsOf(user, chat);
+  const fileIds = Array.isArray(b.fileIds) ? b.fileIds.filter((x) => typeof x === 'string').slice(0, 20) : [];
+  const text = b.text ? str(b.text, 'Message', { max: 8000 }) : '';
+  const out = [];
+
+  // The first message names the chat.
+  const first = !(await env.DB.prepare('SELECT 1 FROM study_messages WHERE chat_id = ? LIMIT 1').bind(chat.id).first());
+
+  if (action === 'chat') {
+    if (!text && !fileIds.length) throw new HttpError(400, 'Write a message or add a file.', 'invalid_input');
+    await useOne(env, user);
+    const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
+    out.push(await addMessage(env, chat.id, 'user', 'text', { text, files: fileIds.length ? files.list : [] }));
+    const { results } = await env.DB.prepare("SELECT role, kind, body FROM study_messages WHERE chat_id = ? AND kind = 'text' ORDER BY created_at DESC LIMIT 12").bind(chat.id).all();
+    const history = results
+      .reverse()
+      .slice(0, -1)
+      .map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(JSON.parse(m.body).text || '').slice(0, 4000) }))
+      .filter((m) => m.content);
+    while (history.length && history[0].role !== 'user') history.shift();
+    const all = await filesOf(env, chat.id, null);
+    const reply = await chatReply(env, { history, message: text || 'Explain what is in the file I just shared.', material: all.text, images: fileIds.length ? files.images.slice(0, 4) : [], ...opts });
+    out.push(await addMessage(env, chat.id, 'assistant', 'text', { text: reply }));
+  } else if (action === 'find') {
+    await useOne(env, user);
+    const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
+    const source = text ? `${text}\n\n${files.text}` : files.text;
+    if (!source.trim() && !files.images.length) throw new HttpError(400, 'Add a photo or a document with the questions first.', 'invalid_input');
+    const found = await findQuestions(env, { text: source, images: files.images.slice(0, 12), ...opts });
+    if (!found.questions.length) throw new HttpError(422, 'No questions were found in this material. If it is notes, choose "Explain my notes" instead.', 'no_questions');
+    out.push(await addMessage(env, chat.id, 'assistant', 'questions', { setId: uuid(), title: found.title, fileIds: files.list.map((f) => f.id), questions: found.questions }));
+    if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(found.title), chat.id).run();
+  } else if (action === 'solve') {
+    const setId = str(b.setId, 'Question set', { max: 64 });
+    const n = int(b.n, 'Question', { min: 1, max: 200 });
+    const { results } = await env.DB.prepare("SELECT body FROM study_messages WHERE chat_id = ? AND kind = 'questions'").bind(chat.id).all();
+    const set = results.map((r) => JSON.parse(r.body)).find((x) => x.setId === setId);
+    const q = set?.questions.find((x) => x.n === n);
+    if (!q) throw new HttpError(404, 'This question was not found.', 'not_found');
+    await useOne(env, user);
+    // A question about a picture: show the model the photos it came from.
+    const imgs = /diagram|figure|graph|table|shown|below|above/i.test(q.text) ? (await filesOf(env, chat.id, set.fileIds || [])).images.slice(0, 2) : [];
+    const full = q.options?.length ? `${q.text}\n${q.options.join('\n')}` : q.text;
+    const sol = await solveOne(env, { question: full, images: imgs, ...opts });
+    out.push(await addMessage(env, chat.id, 'assistant', 'solution', { setId, n, label: q.label, type: q.type, question: full, ...sol }));
+  } else if (action === 'solve_text') {
+    if (!text) throw new HttpError(400, 'Write the question to solve.', 'invalid_input');
+    await useOne(env, user);
+    out.push(await addMessage(env, chat.id, 'user', 'text', { text }));
+    const sol = await solveOne(env, { question: text, ...opts });
+    out.push(await addMessage(env, chat.id, 'assistant', 'solution', { question: text, ...sol }));
+    if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(text), chat.id).run();
+  } else if (action === 'notes') {
+    await useOne(env, user);
+    const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
+    const r = await explainNotes(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, ...opts });
+    out.push(await addMessage(env, chat.id, 'assistant', 'notes', r));
+    if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
+  } else if (action === 'quiz') {
+    await useOne(env, user);
+    const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
+    const r = await makeQuestions(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, mcq: b.mcq ?? 5, structured: b.structured ?? 3, ...opts });
+    out.push(await addMessage(env, chat.id, 'assistant', 'quiz', { quizId: uuid(), ...r }));
+    if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
+  } else if (action === 'mark') {
+    const quizId = str(b.quizId, 'Quiz', { max: 64 });
+    const n = int(b.n, 'Question', { min: 1, max: 100 });
+    const { results } = await env.DB.prepare("SELECT body FROM study_messages WHERE chat_id = ? AND kind = 'quiz'").bind(chat.id).all();
+    const quiz = results.map((r) => JSON.parse(r.body)).find((x) => x.quizId === quizId);
+    const q = quiz?.questions.find((x) => x.n === n && x.type === 'structured');
+    if (!q) throw new HttpError(404, 'This question was not found.', 'not_found');
+    const answer = str(b.answer, 'Answer', { min: 1, max: 6000 });
+    await useOne(env, user);
+    const m = await markAnswer(env, { question: q.text, markScheme: q.scheme.map((p) => ({ point: p.point, marks: p.marks })), maxMarks: q.marks, answerText: answer, subject: opts.subject || 'biology' });
+    out.push(await addMessage(env, chat.id, 'assistant', 'marked', { quizId, n, answer, ...m, total: q.marks }));
+  }
+  return ok({ messages: out });
+}
