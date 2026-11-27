@@ -394,9 +394,10 @@ function ModelScreen({ navigation, unit }) {
                 {moves && <Tool icon={motion ? 'pause' : 'play_arrow'} label={L('Motion', 'Mouvement')} on={motion} onPress={() => setMotion((x) => !x)} />}
               </V>
 
+              <V c="flex-row flex-wrap items-center gap-space-xs">
               {!!demo && (
                 <ListenButton
-                  label={L('Watch it work: the teacher explains while the model shows it', 'Voir comment ça marche : le professeur explique pendant que le modèle le montre')}
+                  label={L('Watch it work', 'Voir comment ça marche')}
                   sub={L('The whole process from start to finish, with the model moving at every step', 'Tout le phénomène du début à la fin, le modèle bougeant à chaque étape')}
                   stopLabel={L('Stop', 'Arrêter')}
                   playing={!!run && voice.playing}
@@ -405,14 +406,15 @@ function ModelScreen({ navigation, unit }) {
               )}
               <ListenButton
                 size={demo ? 'sm' : undefined}
-                label={demo ? L('Each part, one by one', 'Chaque partie, une par une') : L('Listen: the teacher explains this model', 'Écouter : le professeur explique ce modèle')}
+                label={demo ? L('Each part', 'Chaque partie') : L('Explain this model', 'Expliquer ce modèle')}
                 sub={demo ? undefined : L('Each part, what it does and its role in the whole', 'Chaque partie, son rôle et sa place dans l’ensemble')}
-                stopLabel={L('Stop the teacher', 'Arrêter le professeur')}
-                busyLabel={L('The teacher is preparing the explanation', 'Le professeur prépare l’explication')}
+                stopLabel={L('Stop', 'Arrêter')}
+                busyLabel={L('Preparing', 'Préparation')}
                 playing={voice.playing && !run}
                 busy={busy}
                 onPress={teach}
               />
+              </V>
               {!!note && <T c="font-body-sm text-body-sm text-on-surface-variant">{note}</T>}
               {!!seg && (
                 <V c="p-space-sm rounded-lg bg-surface-container-low">

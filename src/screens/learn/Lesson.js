@@ -412,10 +412,10 @@ export default function Lesson({ navigation, route }) {
 
           <V c="gap-space-xs">
             <ListenButton
-              label={L('Listen: your teacher explains this lesson', 'Écouter : votre professeur explique cette leçon')}
+              label={L('Listen to the lesson', 'Écouter la leçon')}
               sub={L('Each paragraph explained in simple words, with examples', 'Chaque paragraphe expliqué simplement, avec des exemples')}
-              stopLabel={L('Pause the teacher', 'Mettre le professeur en pause')}
-              busyLabel={L('Your teacher is preparing the lesson', 'Votre professeur prépare la leçon')}
+              stopLabel={L('Pause', 'Pause')}
+              busyLabel={L('Preparing the lesson', 'Préparation de la leçon')}
               playing={voice.playing}
               busy={teachBusy}
               onPress={teach}

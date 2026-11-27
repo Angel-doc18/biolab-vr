@@ -216,6 +216,7 @@ export default function Me({ navigation }) {
               onPress={() => navigation.navigate('ParentReport')}
             />
           )}
+          {student && <MenuRow title={L('Your class', 'Votre classe')} sub={[user?.className, user?.schoolName].filter(Boolean).join(', ') || L('Not set', 'Non indiquée')} onPress={() => navigation.navigate('ClassPick', { flow: 'changeClass' })} />}
           {student && <MenuRow title={L('Lab workbook', 'Cahier de TP')} sub={`${progress.workbook.length} ${L('recorded results and drawings', 'résultats et dessins notés')}`} onPress={() => navigation.navigate('Workbook')} />}
           {student && <MenuRow title={L('Join a class', 'Rejoindre une classe')} sub={L('With the code from your teacher', 'Avec le code de votre enseignant')} onPress={() => navigation.navigate('JoinClass')} />}
           {user?.role === 'parent' && <MenuRow first title={L('Link a child', 'Lier un enfant')} sub={L('With the code shown in your child’s app', 'Avec le code affiché dans l’application de l’enfant')} onPress={() => navigation.navigate('LinkChild', { fromHome: true })} />}

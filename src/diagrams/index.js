@@ -220,10 +220,10 @@ export function Diagram({ id, caption = true, maxHeight, explain = false, subjec
       {teach && (
         <V c="gap-space-xs pt-space-xs">
           <ListenButton
-            label={L('Listen: the teacher explains this diagram', 'Écouter : le professeur explique ce schéma')}
+            label={L('Explain this diagram', 'Expliquer ce schéma')}
             sub={names.length ? L('Or tap a label to hear what that part does', 'Ou touchez une légende pour savoir à quoi sert cette partie') : L('Each part, what it means and why it matters', 'Chaque partie, ce qu’elle signifie et pourquoi elle compte')}
-            stopLabel={L('Stop listening', 'Arrêter l’écoute')}
-            busyLabel={L('The teacher is preparing the explanation', 'Le professeur prépare l’explication')}
+            stopLabel={L('Stop', 'Arrêter')}
+            busyLabel={L('Preparing', 'Préparation')}
             playing={voice.playing}
             busy={busy}
             onPress={start}

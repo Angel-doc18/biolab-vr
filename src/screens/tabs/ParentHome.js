@@ -10,7 +10,6 @@ import { unitById } from '../../data/units';
 import { subjectName } from '../../data/subjects';
 import { shareReportPdf } from '../../lib/report';
 import { Section } from './Home';
-import InviteCard from '../../ui/InviteCard';
 import ChargesCard from '../../ui/ChargesCard';
 
 const DAY = 86400000;
@@ -151,7 +150,7 @@ export default function ParentHome({ navigation }) {
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant">{L('Your children’s revision, updated as they study.', 'Les révisions de vos enfants, mises à jour pendant qu’ils travaillent.')}</T>
         </V>
-        <ChargesCard user={user} onPress={() => navigation.navigate('Paywall')} />
+        <ChargesCard user={user} quiet onPress={() => navigation.navigate('Paywall')} />
         {!!due.length && (
           <V c="p-space-md rounded-xl gap-space-sm" style={{ backgroundColor: '#fff3d6' }}>
             <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
@@ -162,7 +161,6 @@ export default function ParentHome({ navigation }) {
             <Cta variant="dark" icon={null} lead="payments" label={due.length === 1 ? `${L('Pay for', 'Payer pour')} ${due[0].student.name.split(' ')[0]}` : L('Pay for all of them at once', 'Payer pour tous en une fois')} onPress={() => payFor(due.map((r) => r.student.id))} />
           </V>
         )}
-        <InviteCard navigation={navigation} compact />
         <ErrorNote error={error} />
         {items === null ? (
           <Spinner />

@@ -34,13 +34,18 @@ function usePlans() {
   return plans;
 }
 
-export default function ChargesCard({ user, onPress }) {
+// quiet: only when something needs doing soon (Home): paid or free time
+// ending within a week, or nothing left.
+export default function ChargesCard({ user, onPress, quiet = false }) {
   const L = useL();
   // Read the clock once when the card appears; the screen re-mounts it when opened again.
   const [now] = useState(() => Date.now());
   const plans = usePlans();
   if (!user || !['student', 'parent', 'teacher'].includes(user.role) || user.isAdmin || user.trialUntil == null) return null;
   const paidUntil = user.proUntil && user.proUntil > now ? user.proUntil : null;
+  const WEEK = 7 * 86_400_000;
+  if (quiet && paidUntil && paidUntil - now > WEEK) return null;
+  if (quiet && !paidUntil && user.trialUntil - now > WEEK) return null;
 
   if (paidUntil) {
     return (
