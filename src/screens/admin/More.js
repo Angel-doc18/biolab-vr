@@ -61,6 +61,7 @@ export default function AdminMore({ navigation }) {
           <Section title={L('For the CTO', 'Pour le CTO')}>
             <Card>
               <Row first icon="bug_report" title={L('Problems on phones and the server', 'Problèmes sur téléphones et serveur')} sub={L('Most repeated first, copy in one tap', 'Les plus fréquents d’abord, copie en un geste')} onPress={() => go('AdminProblems')} />
+              <Row icon="key" title={L('AI keys and email', 'Clés IA et e-mail')} sub={L('5 AI keys with automatic switching, Brevo for reset emails', '5 clés IA avec relais automatique, Brevo pour les e-mails')} onPress={() => go('AdminKeys')} />
               <Row icon="shield" title={L('Security', 'Sécurité')} sub={L('Sign-in attempts, blocked addresses', 'Tentatives de connexion, adresses bloquées')} onPress={() => go('AdminSecurity')} />
               <Row icon="system_update" title={L('Tell everyone about an update', 'Annoncer une mise à jour')} sub={L('What a new version changed', 'Ce qu’une nouvelle version change')} onPress={() => go('AdminAnnounce', { mode: 'update' })} />
             </Card>

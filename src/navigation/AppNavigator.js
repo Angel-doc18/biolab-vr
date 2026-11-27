@@ -53,6 +53,7 @@ import AdminReports from '../screens/admin/Reports';
 import AdminAnnounce from '../screens/admin/Announce';
 import AdminTeam from '../screens/admin/Team';
 import AdminCommunity from '../screens/admin/Community';
+import AdminKeys from '../screens/admin/Keys';
 import AdminProblems from '../screens/admin/Problems';
 import AdminAccount from '../screens/admin/Account';
 import AdminNotices from '../screens/admin/Notices';
@@ -127,7 +128,7 @@ function MainTabs() {
 }
 
 // The admin console is here too: it follows the admin's own session, not the user's.
-const ADMIN = ['Admin', 'AdminPerson', 'AdminPrices', 'AdminMessages', 'AdminReports', 'AdminAnnounce', 'AdminTeam', 'AdminCommunity', 'AdminProblems', 'AdminAccount', 'AdminNotices', 'AdminPartners', 'AdminPartner', 'AdminSecurity', 'AdminSchoolsPage', ...ADMIN_TABS.map((t) => t.name)];
+const ADMIN = ['Admin', 'AdminPerson', 'AdminPrices', 'AdminMessages', 'AdminReports', 'AdminAnnounce', 'AdminTeam', 'AdminCommunity', 'AdminKeys', 'AdminProblems', 'AdminAccount', 'AdminNotices', 'AdminPartners', 'AdminPartner', 'AdminSecurity', 'AdminSchoolsPage', ...ADMIN_TABS.map((t) => t.name)];
 const PUBLIC = ['Splash', 'Welcome', 'Language', 'Register', 'Login', 'Otp', 'Forgot', 'Reset', 'Legal', ...ADMIN];
 // What a student whose free month has ended (and who has not paid) can still
 // open: signing in and out, setting up the account, the platform charges and
@@ -226,6 +227,7 @@ export default function AppNavigator() {
         <Stack.Screen name="AdminReports" component={AdminReports} />
         <Stack.Screen name="AdminAnnounce" component={AdminAnnounce} />
         <Stack.Screen name="AdminCommunity" component={AdminCommunity} />
+        <Stack.Screen name="AdminKeys" component={AdminKeys} />
         <Stack.Screen name="AdminTeam" component={AdminTeam} />
         <Stack.Screen name="AdminProblems" component={AdminProblems} />
         <Stack.Screen name="AdminAccount" component={AdminAccount} />

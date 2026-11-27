@@ -1,6 +1,6 @@
 import { HttpError, now, ok, readJson } from '../lib/http.js';
 import { publicUser, requireUser, isPro } from '../lib/auth.js';
-import { bool, int, oneOf, phone, str } from '../lib/validate.js';
+import { bool, email, int, oneOf, phone, str } from '../lib/validate.js';
 import { verifyPassword } from '../lib/crypto.js';
 import { MAX_SUBJECTS, cleanSubjects, isSubjectId, userSubjects } from '../lib/subjects.js';
 
@@ -22,6 +22,14 @@ export async function patchMe(request, env) {
   // A partner says who they invite for: themselves, a school or a business.
   if ('partnerKind' in b) fields.partner_kind = b.partnerKind === null ? null : oneOf(b.partnerKind, 'Partner type', ['person', 'school', 'business']);
   if ('name' in b) fields.name = str(b.name, 'Full name', { min: 2, max: 80 });
+  if ('email' in b) {
+    const em = b.email ? email(b.email, 'Email', { optional: false }) : null;
+    if (em) {
+      const taken = await env.DB.prepare('SELECT id FROM users WHERE email = ? AND id != ?').bind(em, user.id).first();
+      if (taken) throw new HttpError(409, 'Another account already uses this email.', 'exists');
+    }
+    fields.email = em;
+  }
   if ('lang' in b) fields.lang = oneOf(b.lang, 'Language', ['en', 'fr']);
   if ('level' in b) fields.level = oneOf(b.level, 'Level', ['O', 'A']);
   if ('examYear' in b) fields.exam_year = int(b.examYear, 'Exam year', { min: 2024, max: 2040 });

@@ -16,7 +16,9 @@ const mask = (p = '') => {
 export default function Otp({ navigation, route }) {
   const { refreshMe } = useApp();
   const L = useL();
-  const { purpose = 'verify', phone, next = 'Role', channel: firstChannel } = route.params || {};
+  const { purpose = 'verify', phone, email, next = 'Role', channel: firstChannel } = route.params || {};
+  // A reset code may come by email: show the address (partly hidden) instead of a number.
+  const where = email ? `${email.slice(0, 2)}•••${email.slice(email.indexOf('@'))}` : null;
   const input = useRef(null);
   const [digits, setDigits] = useState('');
   const [left, setLeft] = useState(60);
@@ -28,7 +30,7 @@ export default function Otp({ navigation, route }) {
   const send = async () => {
     setError(null);
     try {
-      const r = purpose === 'verify' ? await post('/v1/auth/otp/send') : await post('/v1/auth/password/forgot', { phone }, { auth: false });
+      const r = purpose === 'verify' ? await post('/v1/auth/otp/send') : await post('/v1/auth/password/forgot', email ? { email } : { phone }, { auth: false });
       setChannel(r?.channel || null);
       setSent(true);
       setLeft(60);
@@ -53,7 +55,7 @@ export default function Otp({ navigation, route }) {
       return;
     }
     if (purpose === 'reset') {
-      navigation.navigate('Reset', { phone, code });
+      navigation.navigate('Reset', email ? { email, code } : { phone, code });
       return;
     }
     setBusy(true);
@@ -76,7 +78,7 @@ export default function Otp({ navigation, route }) {
     if (d.length === 6) submit(d);
   };
 
-  const via = channel === 'whatsapp' ? L('on WhatsApp', 'sur WhatsApp') : channel === 'sms' ? L('by SMS', 'par SMS') : '';
+  const via = channel === 'whatsapp' ? L('on WhatsApp', 'sur WhatsApp') : channel === 'sms' ? L('by SMS', 'par SMS') : channel === 'email' ? L('by email', 'par e-mail') : '';
 
   return (
     <Screen keyboard header={<AuthHeader back={purpose === 'reset'} />}>
@@ -85,8 +87,8 @@ export default function Otp({ navigation, route }) {
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{purpose === 'reset' ? L('Enter your code', 'Entrez votre code') : L('Confirm your number', 'Confirmez votre numéro')}</T>
           <T c="font-body-md text-body-md text-on-surface-variant">
             {sent
-              ? `${L('We sent a 6 digit code', 'Nous avons envoyé un code à 6 chiffres')}${via ? ` ${via}` : ''} ${L('to', 'au')} ${mask(phone)}.`
-              : `${L('Sending a code to', 'Envoi d’un code au')} ${mask(phone)}...`}
+              ? `${L('We sent a 6 digit code', 'Nous avons envoyé un code à 6 chiffres')}${via ? ` ${via}` : ''} ${L('to', email ? 'à' : 'au')} ${where || mask(phone)}.`
+              : `${L('Sending a code to', 'Envoi d’un code au')} ${where || mask(phone)}...`}
           </T>
         </V>
 

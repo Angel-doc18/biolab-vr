@@ -197,7 +197,7 @@ export default function AdminSystem({ navigation }) {
           </Section>
 
           {!!s && (
-            <Section title={L('Services', 'Services')}>
+            <Section title={L('Services', 'Services')} action={L('AI keys and email', 'Clés IA et e-mail')} onAction={() => navigation.navigate('AdminKeys')}>
               <Card>
                 {[
                   ['record_voice_over', L('Natural voice', 'Voix naturelle'), s.services.voice, s.services.voice.ms ? `${s.services.voice.ms} ms${s.services.voice.waiting ? `, ${s.services.voice.waiting} ${L('waiting', 'en attente')}` : ''}` : ''],

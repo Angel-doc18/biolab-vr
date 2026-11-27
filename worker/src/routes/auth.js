@@ -6,6 +6,7 @@ import { countAuthFailure, securityEvent } from '../lib/monitor.js';
 import { applyCode, cleanCode } from '../lib/partners.js';
 import { email, oneOf, password, phone, str } from '../lib/validate.js';
 import { channels, messagingConfigured, sendCode } from '../lib/messaging.js';
+import { mailConfigured, sendEmail, simpleEmail } from '../lib/mail.js';
 import { adminLogin, adminSession } from '../lib/adminAuth.js';
 
 const GENERIC_LOGIN_ERROR = 'Phone number, email or password is incorrect.';
@@ -164,11 +165,50 @@ export async function verifyOtp(request, env) {
 }
 
 // Password reset: the response is identical whether or not the account exists.
+// A reset code by email (Brevo): kept in otp_codes under 'email:<address>'.
+async function storeAndSendEmailOtp(env, em, user) {
+  const code = randomDigits(6);
+  const key = `email:${em}`;
+  await env.DB.prepare(
+    `INSERT INTO otp_codes (phone, purpose, code_hash, expires_at, attempts) VALUES (?, ?, ?, ?, 0)
+     ON CONFLICT(phone, purpose) DO UPDATE SET code_hash = excluded.code_hash, expires_at = excluded.expires_at, attempts = 0`
+  )
+    .bind(key, 'reset', await sha256(`${key}:${code}`), now() + OTP_TTL)
+    .run();
+  const fr = user.lang === 'fr';
+  const first = String(user.name || '').split(' ')[0];
+  const m = simpleEmail({
+    title: fr ? 'Votre code Klass8' : 'Your Klass8 code',
+    lines: fr
+      ? [`Bonjour ${first},`, 'Utilisez ce code pour choisir un nouveau mot de passe. Il est valable 10 minutes.', 'Si vous ne l’avez pas demandé, ignorez cet e-mail : votre mot de passe ne change pas.']
+      : [`Hello ${first},`, 'Use this code to choose a new password. It works for 10 minutes.', 'If you did not ask for it, you can ignore this email: your password stays the same.'],
+    code,
+  });
+  await sendEmail(env, { to: em, toName: user.name, subject: fr ? 'Code pour votre mot de passe Klass8' : 'Your Klass8 password code', html: m.html, text: m.text });
+}
+
 export async function forgotPassword(request, env) {
   await limit(env.AUTH_LIMITER, `forgot:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
   const body = await readJson(request);
+  if (body.email) {
+    const em = email(body.email, 'Email', { optional: false });
+    if (!(await mailConfigured(env))) throw new HttpError(503, 'Password reset by email is not available yet. Contact support.', 'mail_unavailable');
+    await limit(env.OTP_LIMITER, `otp:email:${em}`, 'Please wait a minute before requesting another code.');
+    const user = await env.DB.prepare('SELECT id, name, lang FROM users WHERE email = ? AND deleted_at IS NULL').bind(em).first();
+    if (user) {
+      try {
+        await storeAndSendEmailOtp(env, em, user);
+      } catch (e) {
+        console.error('reset_email_failed', e?.code || e?.message);
+      }
+    }
+    return ok({ sent: true, channel: 'email' });
+  }
   const ph = phone(body.phone);
-  if (!messagingConfigured(env)) throw new HttpError(503, 'Password reset by code is not available yet. Contact support.', 'messaging_unavailable');
+  if (!messagingConfigured(env)) {
+    if (await mailConfigured(env)) throw new HttpError(503, 'Codes by SMS are not available yet. Use the email address on your account instead.', 'use_email');
+    throw new HttpError(503, 'Password reset by code is not available yet. Contact support.', 'messaging_unavailable');
+  }
   await limit(env.OTP_LIMITER, `otp:${ph}`, 'Please wait a minute before requesting another code.');
   const user = await env.DB.prepare('SELECT id, lang FROM users WHERE phone = ? AND deleted_at IS NULL').bind(ph).first();
   if (user) {
@@ -185,14 +225,21 @@ export async function forgotPassword(request, env) {
 export async function resetPassword(request, env) {
   await limit(env.AUTH_LIMITER, `reset:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
   const body = await readJson(request);
-  const ph = phone(body.phone);
   const pw = password(body.password);
-  await checkOtp(env, ph, 'reset', body.code);
-  const user = await env.DB.prepare('SELECT id FROM users WHERE phone = ? AND deleted_at IS NULL').bind(ph).first();
+  let user;
+  if (body.email) {
+    const em = email(body.email, 'Email', { optional: false });
+    await checkOtp(env, `email:${em}`, 'reset', body.code);
+    user = await env.DB.prepare('SELECT id FROM users WHERE email = ? AND deleted_at IS NULL').bind(em).first();
+  } else {
+    const ph = phone(body.phone);
+    await checkOtp(env, ph, 'reset', body.code);
+    user = await env.DB.prepare('SELECT id FROM users WHERE phone = ? AND deleted_at IS NULL').bind(ph).first();
+  }
   if (!user) throw new HttpError(400, 'This code has expired. Request a new one.', 'otp_expired');
   const { hash, salt } = await hashPassword(pw);
   await env.DB.batch([
-    env.DB.prepare('UPDATE users SET password_hash = ?, password_salt = ?, phone_verified = 1, updated_at = ? WHERE id = ?').bind(hash, salt, now(), user.id),
+    env.DB.prepare(`UPDATE users SET password_hash = ?, password_salt = ?, ${body.email ? '' : 'phone_verified = 1, '}updated_at = ? WHERE id = ?`).bind(hash, salt, now(), user.id),
     env.DB.prepare('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ?').bind(user.id),
   ]);
   return ok({ reset: true });

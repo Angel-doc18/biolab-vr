@@ -21,6 +21,7 @@ export default function Settings({ navigation }) {
   const { user, updateMe, logout, prefs } = useApp();
   const L = useL();
   const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [pwOpen, setPwOpen] = useState(false);
   const [delOpen, setDelOpen] = useState(false);
   const [payments, setPayments] = useState(null);
@@ -32,7 +33,7 @@ export default function Settings({ navigation }) {
     setBusy(true);
     setError(null);
     try {
-      await updateMe({ name: name.trim() });
+      await updateMe({ name: name.trim(), ...(email.trim().toLowerCase() !== (user?.email || '') ? { email: email.trim().toLowerCase() || null } : {}) });
       showToast(L('Saved', 'Enregistré'));
     } catch (e) {
       setError(e);
@@ -47,6 +48,17 @@ export default function Settings({ navigation }) {
         <V c="pt-space-md pb-space-xl gap-space-md">
           <Section title={L('Profile', 'Profil')}>
             <Field label={L('Full name', 'Nom complet')} value={name} onChangeText={setName} maxLength={80} autoCapitalize="words" />
+            <Field
+              label={L('Email address', 'Adresse e-mail')}
+              hint={L('Used to send you a code if you forget your password.', 'Pour vous envoyer un code si vous oubliez votre mot de passe.')}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="name@gmail.com"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              maxLength={254}
+            />
             <V c="gap-1">
               <T c="font-label-md text-label-md text-on-surface">{L('Phone number', 'Téléphone')}</T>
               <V c="flex-row items-center justify-between h-[52px] px-4 rounded-xl bg-surface-container-low">

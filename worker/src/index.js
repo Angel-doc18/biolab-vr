@@ -23,6 +23,7 @@ import * as adminPartners from './routes/adminPartners.js';
 import * as adminAccount from './routes/adminAccount.js';
 import * as system from './routes/system.js';
 import * as community from './routes/community.js';
+import * as keys from './routes/keys.js';
 import { isBlocked, loadBlocks, securityEvent, serverProblem, track } from './lib/monitor.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
@@ -149,6 +150,12 @@ const routes = [
   ['POST', '/v1/admin/ip-blocks', system.blockIp],
   ['DELETE', `/v1/admin/ip-blocks/${IP}`, system.unblockIp],
   ['PUT', '/v1/admin/system/switches', system.putSwitches],
+  ['GET', '/v1/admin/system/ai-keys', keys.listAiKeys],
+  ['PUT', `/v1/admin/system/ai-keys/(groq1|groq2|gemini1|gemini2|mistral)`, keys.putAiKey],
+  ['POST', `/v1/admin/system/ai-keys/(groq1|groq2|gemini1|gemini2|mistral)/test`, keys.testAiKey],
+  ['GET', '/v1/admin/system/email', keys.getEmailSettings],
+  ['PUT', '/v1/admin/system/email', keys.putEmailSettings],
+  ['POST', '/v1/admin/system/email/test', keys.testEmail],
   ['POST', '/v1/admin/system/sign-out', system.signOutEveryone],
   ['POST', '/v1/admin/system/backup', system.backupNow],
   ['POST', '/v1/admin/updates', system.announceUpdate],

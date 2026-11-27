@@ -17,7 +17,7 @@ function Rule({ ok, children }) {
 // Second step of password recovery: the new password, sent with the code from Otp.
 export default function Reset({ navigation, route }) {
   const L = useL();
-  const { phone, code } = route.params || {};
+  const { phone, email, code } = route.params || {};
   const [pw, setPw] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState(null);
@@ -30,7 +30,7 @@ export default function Reset({ navigation, route }) {
     setBusy(true);
     setError(null);
     try {
-      await post('/v1/auth/password/reset', { phone, code, password: pw }, { auth: false });
+      await post('/v1/auth/password/reset', email ? { email, code, password: pw } : { phone, code, password: pw }, { auth: false });
       setDone(true);
     } catch (e) {
       if (e.code === 'otp_invalid' || e.code === 'otp_expired') {

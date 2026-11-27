@@ -1,29 +1,45 @@
 import { useState } from 'react';
-import { T, V } from '../../ui/kit';
+import { P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
-import { PhoneField, validPhone } from '../../ui/form';
+import { Field, PhoneField, validPhone } from '../../ui/form';
 import { post } from '../../api/client';
 import { useL } from '../../i18n';
 
-// First step of password recovery: a code is sent to the account's phone.
+const validEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(s).trim());
+
+// First step of password recovery: a 6 digit code to the account's email (by
+// Brevo) or phone (by SMS or WhatsApp). When codes by phone are not available,
+// the screen moves to email by itself.
 export default function Forgot({ navigation }) {
   const L = useL();
+  const [byEmail, setByEmail] = useState(false);
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState(null);
+  const [note, setNote] = useState(null);
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
-    if (!validPhone(phone)) {
-      setError(L('Enter the 9 digit number you registered with.', 'Entrez le numéro à 9 chiffres utilisé à l’inscription.'));
+    setError(null);
+    if (byEmail ? !validEmail(email) : !validPhone(phone)) {
+      setError(byEmail ? L('Enter the email address on your account.', 'Entrez l’adresse e-mail de votre compte.') : L('Enter the 9 digit number you registered with.', 'Entrez le numéro à 9 chiffres utilisé à l’inscription.'));
       return;
     }
     setBusy(true);
-    setError(null);
     try {
-      const r = await post('/v1/auth/password/forgot', { phone: `237${phone}` }, { auth: false });
-      navigation.navigate('Otp', { purpose: 'reset', phone: `237${phone}`, channel: r?.channel });
+      if (byEmail) {
+        const em = email.trim().toLowerCase();
+        await post('/v1/auth/password/forgot', { email: em }, { auth: false });
+        navigation.navigate('Otp', { purpose: 'reset', email: em, channel: 'email' });
+      } else {
+        const r = await post('/v1/auth/password/forgot', { phone: `237${phone}` }, { auth: false });
+        navigation.navigate('Otp', { purpose: 'reset', phone: `237${phone}`, channel: r?.channel });
+      }
     } catch (e) {
-      setError(e);
+      if (e.code === 'use_email') {
+        setByEmail(true);
+        setNote(L('Codes by SMS are not available yet. Enter the email address on your account instead.', 'Les codes par SMS ne sont pas encore disponibles. Entrez plutôt l’adresse e-mail de votre compte.'));
+      } else setError(e);
     } finally {
       setBusy(false);
     }
@@ -35,12 +51,28 @@ export default function Forgot({ navigation }) {
         <V c="gap-space-xs">
           <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight">{L('Reset your password', 'Réinitialiser le mot de passe')}</T>
           <T c="font-body-md text-body-md text-on-surface-variant">
-            {L('Enter the number on your account. If it is registered, we send a 6 digit code to it.', 'Entrez le numéro de votre compte. S’il est enregistré, nous y envoyons un code à 6 chiffres.')}
+            {byEmail
+              ? L('Enter the email address on your account. If it is registered, we email you a 6 digit code.', 'Entrez l’adresse e-mail de votre compte. Si elle est enregistrée, nous vous envoyons un code à 6 chiffres.')
+              : L('Enter the number on your account. If it is registered, we send a 6 digit code to it.', 'Entrez le numéro de votre compte. S’il est enregistré, nous y envoyons un code à 6 chiffres.')}
           </T>
         </V>
-        <PhoneField label={L('Phone number', 'Numéro de téléphone')} value={phone} onChangeText={setPhone} />
+        {!!note && (
+          <V c="p-space-sm rounded-xl bg-surface-container-low">
+            <T c="font-body-sm text-body-sm text-on-surface">{note}</T>
+          </V>
+        )}
+        {byEmail ? (
+          <Field label={L('Email address', 'Adresse e-mail')} value={email} onChangeText={setEmail} placeholder="name@gmail.com" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" />
+        ) : (
+          <PhoneField label={L('Phone number', 'Numéro de téléphone')} value={phone} onChangeText={setPhone} />
+        )}
         <ErrorNote error={error} />
         <Cta variant="dark" icon={null} label={L('Send code', 'Envoyer le code')} loading={busy} onPress={submit} />
+        <P c="self-center py-space-xs" onPress={() => (setByEmail((x) => !x), setError(null), setNote(null))} hitSlop={8}>
+          <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+            {byEmail ? L('Use my phone number instead', 'Utiliser mon numéro de téléphone') : L('Use my email instead', 'Utiliser mon e-mail')}
+          </T>
+        </P>
       </V>
     </Screen>
   );
