@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BrandLogo, Ic, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
+import GoogleButton from '../../ui/GoogleButton';
 import { Field, Label } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
@@ -20,7 +21,7 @@ function normaliseIdentifier(v) {
 }
 
 export default function Login({ navigation }) {
-  const { login, auth } = useApp();
+  const { login, auth, startSession } = useApp();
   const L = useL();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -43,6 +44,10 @@ export default function Login({ navigation }) {
     } finally {
       setBusy(false);
     }
+  };
+  const google = async (r) => {
+    await startSession(r);
+    navigation.reset(r.created ? { index: 0, routes: [{ name: 'Role' }] } : routeAfterAuth(r.user));
   };
   // Back always leads somewhere: the previous page, or the welcome page when
   // the app opened here (after signing out, or on a return visit).
@@ -113,6 +118,9 @@ export default function Login({ navigation }) {
         <NeedsInternet what={{ en: 'log in', fr: 'vous connecter' }} />
         <ErrorNote error={error} />
         <Cta variant="dark" icon={null} label={L('Log in', 'Se connecter')} loading={busy} onPress={submit} c="mt-space-xs" />
+        <GoogleBlock L={L}>
+          <GoogleButton mode="signin" onSession={google} onError={setError} />
+        </GoogleBlock>
       </V>
 
       <V c="mt-space-xl gap-space-md pb-space-lg">
@@ -127,5 +135,19 @@ export default function Login({ navigation }) {
         </P>
       </V>
     </Screen>
+  );
+}
+
+// "or", then Google's button (nothing shows until Google sign-in is set up).
+function GoogleBlock({ L, children }) {
+  return (
+    <V c="gap-space-sm pt-space-xs">
+      <V c="flex-row items-center gap-space-sm">
+        <V c="flex-1 h-px bg-surface-container" />
+        <T c="font-label-md text-label-md text-on-surface-variant">{L('or', 'ou')}</T>
+        <V c="flex-1 h-px bg-surface-container" />
+      </V>
+      {children}
+    </V>
   );
 }

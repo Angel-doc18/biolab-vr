@@ -54,6 +54,12 @@ export async function patchMe(request, env) {
   if ('dailyMinutes' in b) fields.daily_minutes = int(b.dailyMinutes, 'Daily goal', { min: 5, max: 240 });
   if ('reminderTime' in b) fields.reminder_time = str(b.reminderTime, 'Reminder time', { pattern: /^([01]\d|2[0-3]):[0-5]\d$/ });
   if ('parentPhone' in b) fields.parent_phone = b.parentPhone === null ? null : phone(b.parentPhone, 'Parent phone');
+  // A Google account adds its own phone number once (others change it with support).
+  if ('phone' in b && String(user.phone).startsWith('g:')) {
+    const ph = phone(b.phone, 'Phone number');
+    if (await env.DB.prepare('SELECT 1 FROM users WHERE phone = ? AND id != ?').bind(ph, user.id).first()) throw new HttpError(409, 'Another account already uses this phone number.', 'exists');
+    fields.phone = ph;
+  }
   if ('parentReportFreq' in b) fields.parent_report_freq = oneOf(b.parentReportFreq, 'Report frequency', ['weekly', 'mocks', 'monthly']);
   if ('parentReportLang' in b) fields.parent_report_lang = oneOf(b.parentReportLang, 'Report language', ['en', 'fr']);
   if ('inactivityAlert' in b) fields.inactivity_alert = bool(b.inactivityAlert, 'Inactivity alert') ? 1 : 0;

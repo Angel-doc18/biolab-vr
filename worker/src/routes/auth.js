@@ -8,6 +8,7 @@ import { email, oneOf, password, phone, str } from '../lib/validate.js';
 import { channels, messagingConfigured, sendCode } from '../lib/messaging.js';
 import { mailConfigured, sendEmail, simpleEmail } from '../lib/mail.js';
 import { adminLogin, adminSession } from '../lib/adminAuth.js';
+import { googleClientIds, verifyGoogleToken } from '../lib/google.js';
 
 const GENERIC_LOGIN_ERROR = 'Phone number, email or password is incorrect.';
 const OTP_TTL = 10 * 60 * 1000;
@@ -151,6 +152,7 @@ async function checkOtp(env, ph, purpose, code) {
 // Sends a verification code to the logged-in user's own phone.
 export async function sendVerifyOtp(request, env) {
   const user = await requireUser(request, env);
+  if (String(user.phone).startsWith('g:')) throw new HttpError(400, 'Add your phone number in Settings first.', 'no_phone');
   await limit(env.OTP_LIMITER, `otp:${user.phone}`, 'Please wait a minute before requesting another code.');
   const channel = await storeAndSendOtp(env, user.phone, 'verify', user.lang);
   return ok({ sentTo: user.phone.slice(0, 5) + '••••' + user.phone.slice(-2), channel });
@@ -259,4 +261,92 @@ export async function changePassword(request, env) {
   ]);
   const session = await issueSession(env, user);
   return ok(session);
+}
+
+// ---------- Google ----------
+// GET /v1/auth/google/config: the public Client ID, or null while Google
+// sign-in is not set up (the app then hides the button).
+export async function googleConfig(request, env) {
+  return ok({ clientId: googleClientIds(env)[0] || null });
+}
+
+// The account for a Google user: the one linked to this Google account, or
+// the one with the same verified email (linked now), or a new one.
+async function googleAccount(env, request, g, { role, lang, referralCode }) {
+  let user = await env.DB.prepare('SELECT * FROM users WHERE google_sub = ? AND deleted_at IS NULL').bind(g.sub).first();
+  if (!user) {
+    user = await env.DB.prepare('SELECT * FROM users WHERE email = ? AND deleted_at IS NULL').bind(g.email).first();
+    if (user) {
+      await env.DB.prepare('UPDATE users SET google_sub = ?, updated_at = ? WHERE id = ?').bind(g.sub, now(), user.id).run();
+      await securityEvent(env, 'google_linked', request, `${user.id} linked to Google`);
+    }
+  }
+  if (user) return { user, created: false };
+  if (setting('lock_signups') === 'on') throw new HttpError(503, 'New accounts are paused for a short while. Please try again later.', 'signups_paused');
+  const promo = referralCode ? cleanCode(referralCode) : '';
+  // A Google account has no password: an unusable one is kept, so signing in
+  // with a password works only after the person sets one (forgot password).
+  const { hash, salt } = await hashPassword(`${uuid()}${uuid()}`);
+  const id = uuid();
+  const t = now();
+  await env.DB.prepare(
+    `INSERT INTO users (id, role, name, phone, email, password_hash, password_salt, lang, google_sub, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(id, role, g.name, `g:${g.sub}`, g.email, hash, salt, lang, g.sub, t, t)
+    .run();
+  user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+  if (promo) {
+    try {
+      await applyCode(env, user, promo);
+      user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+    } catch (e) {
+      console.error('promo_on_google_signup', e?.code || e?.message);
+    }
+  }
+  return { user, created: true };
+}
+
+// POST /v1/auth/google { credential, role?, lang?, referralCode?, challenge? }
+// credential: the ID token from "Sign in with Google". On the web the answer
+// is a session; from the phone app's sign-in page (challenge set) it is a
+// one-time code the app exchanges for its session.
+export async function googleSignIn(request, env) {
+  currentApp(request, env);
+  await limit(env.AUTH_LIMITER, `google:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
+  const b = await readJson(request);
+  const g = await verifyGoogleToken(env, str(b.credential, 'Google sign-in', { max: 4096 }));
+  const role = oneOf(b.role ?? 'student', 'Role', ['student', 'parent', 'teacher', 'partner']);
+  const lang = oneOf(b.lang ?? 'en', 'Language', ['en', 'fr']);
+  const { user, created: isNew } = await googleAccount(env, request, g, { role, lang, referralCode: b.referralCode });
+  if (user.blocked_at) throw new HttpError(403, blockedMessage(user), 'account_blocked');
+  if (setting('lock_logins') === 'on') throw new HttpError(503, 'Signing in is paused for a short while for maintenance. Please try again later.', 'logins_paused');
+  if (b.challenge) {
+    const challenge = str(b.challenge, 'Challenge', { min: 43, max: 128 });
+    const code = `${uuid()}${uuid()}`.replace(/-/g, '');
+    await env.DB.prepare('DELETE FROM oauth_codes WHERE expires_at < ?').bind(now()).run();
+    await env.DB.prepare('INSERT INTO oauth_codes (code, user_id, challenge, created, expires_at) VALUES (?, ?, ?, ?, ?)').bind(code, user.id, challenge, isNew ? 1 : 0, now() + 120_000).run();
+    return ok({ code });
+  }
+  const session = await issueSession(env, user);
+  return (isNew ? created : ok)({ user: publicUser(user, env), ...session, created: isNew });
+}
+
+// POST /v1/auth/google/exchange { code, verifier }: the phone app's session,
+// for the code its sign-in page received (once, within two minutes, and only
+// with the secret whose hash the app sent at the start).
+export async function googleExchange(request, env) {
+  currentApp(request, env);
+  await limit(env.AUTH_LIMITER, `google:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
+  const b = await readJson(request);
+  const code = str(b.code, 'Code', { max: 128 });
+  const verifier = str(b.verifier, 'Verifier', { min: 43, max: 128 });
+  const row = await env.DB.prepare('SELECT * FROM oauth_codes WHERE code = ?').bind(code).first();
+  await env.DB.prepare('DELETE FROM oauth_codes WHERE code = ?').bind(code).run();
+  const expect = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))).toString('base64url');
+  if (!row || row.expires_at < now() || !safeEqual(expect, row.challenge)) throw new HttpError(401, 'The Google sign-in has expired. Try again.', 'google_expired');
+  const user = await env.DB.prepare('SELECT * FROM users WHERE id = ? AND deleted_at IS NULL').bind(row.user_id).first();
+  if (!user) throw new HttpError(401, 'The Google sign-in has expired. Try again.', 'google_expired');
+  const session = await issueSession(env, user);
+  return ok({ user: publicUser(user, env), ...session, created: Boolean(row.created) });
 }

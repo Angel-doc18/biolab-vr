@@ -59,7 +59,7 @@ export async function myPartner(request, env) {
     invitedBy: ref ? { name: firstName(ref.name), code: ref.code } : null,
     canAddCode: !ref && now() - (user.created_at || 0) <= p.applyDays * DAY,
     autopay: Boolean(user.ref_autopay),
-    payoutPhone: user.phone,
+    payoutPhone: String(user.phone || '').startsWith('g:') ? null : user.phone,
   });
 }
 

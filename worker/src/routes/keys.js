@@ -5,7 +5,7 @@
 import { HttpError, ok, readJson } from '../lib/http.js';
 import { requireAdminCan } from '../lib/adminAuth.js';
 import { email as emailField, str } from '../lib/validate.js';
-import { saveSettings } from '../lib/settings.js';
+import { saveSettings, setting } from '../lib/settings.js';
 import { hint, setSecret } from '../lib/secrets.js';
 import { PROVIDERS, SLOTS, forgetHealth, keyOf, keyProblem, slotHealth, testKey, usageToday } from '../lib/llm.js';
 import { brevoKey, checkBrevoKey, mailFrom, sendEmail, simpleEmail } from '../lib/mail.js';
@@ -116,4 +116,27 @@ export async function testEmail(request, env) {
   const m = simpleEmail({ title: 'Klass8 email works', lines: ['This test message was sent from the CTO page of Klass8 through Brevo. Password reset codes will arrive the same way.'] });
   await sendEmail(env, { to, subject: 'Klass8: test email', html: m.html, text: m.text });
   return ok({ sent: true });
+}
+
+// ---------- Google sign-in ----------
+// The Google Client ID ("Web application" OAuth client) that "Sign in with
+// Google" uses. It is public (it is in every web page that shows the button),
+// so it is stored as a plain setting.
+const googleView = (env) => ({ clientId: setting('google_client_id') || env.GOOGLE_CLIENT_ID || null, from: setting('google_client_id') ? 'app' : env.GOOGLE_CLIENT_ID ? 'server' : null });
+
+// GET /v1/admin/system/google
+export async function getGoogleSettings(request, env) {
+  await requireAdminCan(request, env, 'system');
+  return ok({ google: googleView(env) });
+}
+
+// PUT /v1/admin/system/google { clientId }  (empty turns Google sign-in off)
+export async function putGoogleSettings(request, env) {
+  const admin = await requireAdminCan(request, env, 'system');
+  const b = await readJson(request);
+  const id = String(b.clientId || '').trim();
+  if (id && !/^\d{6,20}-[a-z0-9]{20,40}\.apps\.googleusercontent\.com$/.test(id)) throw new HttpError(400, 'That is not a Google Client ID. It looks like 1234567890-abc123def456.apps.googleusercontent.com (Google Cloud, Credentials, your Web application client).', 'invalid_input');
+  await saveSettings(env, { google_client_id: id }, admin.id || 'operator');
+  await securityEvent(env, 'google_settings', request, `${admin.name}: Google sign-in ${id ? 'set' : 'turned off'}`);
+  return ok({ google: googleView(env) });
 }

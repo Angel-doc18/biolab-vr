@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Ic, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
+import GoogleButton from '../../ui/GoogleButton';
+import { routeAfterAuth } from '../../navigation/routes';
 import { Check, Field, PhoneField, passwordValid, validPhone } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { NeedsInternet } from '../../ui/Offline';
 
 export default function Register({ navigation }) {
-  const { register } = useApp();
+  const { register, startSession } = useApp();
   const L = useL();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -44,6 +46,12 @@ export default function Register({ navigation }) {
     }
   };
 
+  // Google: a new account chooses its role next, as after creating one here.
+  const google = async (r) => {
+    await startSession(r);
+    navigation.reset(r.created ? { index: 0, routes: [{ name: 'Role' }] } : routeAfterAuth(r.user));
+  };
+
   return (
     <Screen keyboard header={<AuthHeader />}>
       <V c="pt-space-lg pb-space-xl gap-space-lg">
@@ -53,6 +61,7 @@ export default function Register({ navigation }) {
             {L('Your account keeps your progress, marks and class work in one place.', 'Votre compte garde vos progrès, vos notes et vos devoirs au même endroit.')}
           </T>
         </V>
+        <GoogleSignUp L={L} onSession={google} onError={setError} referralCode={promo.trim() || undefined} navigation={navigation} />
         <V c="gap-space-md">
           <Field
             label={L('Full name', 'Nom complet')}
@@ -149,5 +158,30 @@ export default function Register({ navigation }) {
         </V>
       </V>
     </Screen>
+  );
+}
+
+// Sign up with Google in one tap, then "or with your phone number".
+function GoogleSignUp({ L, onSession, onError, referralCode, navigation }) {
+  return (
+    <V c="gap-space-sm">
+      <GoogleButton mode="signup" referralCode={referralCode} onSession={onSession} onError={onError} />
+      <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 18, textAlign: 'center' }}>
+        {L('By continuing with Google you accept the ', 'En continuant avec Google vous acceptez les ')}
+        <T c="font-body-sm text-body-sm text-primary-container" onPress={() => navigation.navigate('Legal', { doc: 'terms' })}>
+          {L('Terms of Service', 'Conditions d’utilisation')}
+        </T>
+        {L(' and the ', ' et la ')}
+        <T c="font-body-sm text-body-sm text-primary-container" onPress={() => navigation.navigate('Legal', { doc: 'privacy' })}>
+          {L('Privacy Policy', 'Politique de confidentialité')}
+        </T>
+        .
+      </T>
+      <V c="flex-row items-center gap-space-sm">
+        <V c="flex-1 h-px bg-surface-container" />
+        <T c="font-label-md text-label-md text-on-surface-variant">{L('or with your phone number', 'ou avec votre numéro')}</T>
+        <V c="flex-1 h-px bg-surface-container" />
+      </V>
+    </V>
   );
 }

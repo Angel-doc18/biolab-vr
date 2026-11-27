@@ -130,6 +130,10 @@ export default function AdminKeys() {
   const L = useL();
   const ai = useAdminLoad('/v1/admin/system/ai-keys');
   const mail = useAdminLoad('/v1/admin/system/email');
+  const google = useAdminLoad('/v1/admin/system/google');
+  const [gId, setGId] = useState(null); // the Client ID being edited
+  const [gBusy, setGBusy] = useState(false);
+  const [gError, setGError] = useState(null);
   const [toast, showToast] = useToast();
   const [sheet, setSheet] = useState(null); // { slot, label } | { brevo: true }
   const [value, setValue] = useState('');
@@ -190,6 +194,20 @@ export default function AdminKeys() {
       showToast(L('Removed', 'Retirée'));
     } catch (e) {
       showToast(e.message);
+    }
+  };
+  const saveGoogle = async (id) => {
+    setGBusy(true);
+    setGError(null);
+    try {
+      const r = await put('/v1/admin/system/google', { clientId: id.trim() });
+      google.setData(() => r);
+      setGId(null);
+      showToast(id.trim() ? L('Google sign-in is on', 'La connexion Google est activée') : L('Google sign-in is off', 'La connexion Google est désactivée'));
+    } catch (e) {
+      setGError(e);
+    } finally {
+      setGBusy(false);
     }
   };
   const saveSender = async () => {
@@ -274,6 +292,47 @@ export default function AdminKeys() {
                     </V>
                   )}
                   <ErrorNote error={mailError} />
+                </V>
+              )}
+            </Card>
+          </Section>
+
+          <Section title={L('Sign in with Google', 'Connexion avec Google')}>
+            <Card>
+              {!google.data ? (
+                <Loading />
+              ) : (
+                <V c="p-space-md gap-space-sm">
+                  <V c="flex-row items-center gap-space-sm">
+                    <T c="font-label-lg text-label-lg text-on-surface flex-1" style={{ fontWeight: '700' }}>
+                      {L('Google Client ID', 'Client ID Google')}
+                    </T>
+                    <Pill text={google.data.google.clientId ? L('On', 'Activée') : L('Off', 'Désactivée')} tone={google.data.google.clientId ? 'ok' : 'muted'} />
+                  </V>
+                  <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                    {google.data.google.clientId
+                      ? `${google.data.google.clientId.slice(0, 18)}... ${L('People can sign up and log in with Google on the web and in the app.', 'On peut s’inscrire et se connecter avec Google sur le web et dans l’application.')}`
+                      : L('Create a "Web application" OAuth client in Google Cloud (APIs & Services, Credentials) with https://klass8.com as an authorised JavaScript origin, then paste its Client ID here. It is public, not a secret.', 'Créez un client OAuth « Application Web » dans Google Cloud (API et services, Identifiants) avec https://klass8.com comme origine JavaScript autorisée, puis collez son Client ID ici. Il est public, ce n’est pas un secret.')}
+                  </T>
+                  {gId === null ? (
+                    <V c="flex-row flex-wrap gap-space-xs">
+                      <Cta variant="soft" icon={null} lead={google.data.google.clientId ? 'edit' : 'add'} h="h-10" label={google.data.google.clientId ? L('Change', 'Modifier') : L('Add Client ID', 'Ajouter le Client ID')} onPress={() => setGId(google.data.google.clientId || '')} />
+                      {!!google.data.google.clientId && google.data.google.from === 'app' && <Cta variant="soft" icon={null} lead="block" h="h-10" label={L('Turn off', 'Désactiver')} loading={gBusy} onPress={() => saveGoogle('')} />}
+                    </V>
+                  ) : (
+                    <V c="gap-space-xs">
+                      <Field label={L('Client ID', 'Client ID')} value={gId} onChangeText={setGId} placeholder="1234567890-abc123.apps.googleusercontent.com" autoCapitalize="none" autoCorrect={false} />
+                      <V c="flex-row gap-space-xs">
+                        <V c="flex-1">
+                          <Cta variant="dark" icon={null} h="h-11" label={L('Save', 'Enregistrer')} loading={gBusy} onPress={() => saveGoogle(gId)} />
+                        </V>
+                        <V c="flex-1">
+                          <Cta variant="soft" icon={null} h="h-11" label={L('Cancel', 'Annuler')} onPress={() => (setGId(null), setGError(null))} />
+                        </V>
+                      </V>
+                    </V>
+                  )}
+                  <ErrorNote error={gError || google.error} />
                 </V>
               )}
             </Card>
