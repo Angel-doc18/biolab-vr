@@ -412,7 +412,7 @@ export async function decide(env, { text, files, role, quizOpen, lastAnswer, spo
     .filter(Boolean)
     .join('\n');
   try {
-    const { text: out } = await groqChat(env, { json: true, maxTokens: 400, temperature: 0, reasoning: 'low', patience: 20_000, messages: [{ role: 'system', content: DECIDE_SYSTEM }, { role: 'user', content: facts }] });
+    const { text: out } = await groqChat(env, { json: true, fast: true, maxTokens: 400, temperature: 0, reasoning: 'low', patience: 20_000, messages: [{ role: 'system', content: DECIDE_SYSTEM }, { role: 'user', content: facts }] });
     const r = parseJson(out);
     if (INTENTS.includes(r.intent)) return { intent: r.intent, mcq: num(r.mcq), structured: num(r.structured), minutes: num(r.minutes) };
   } catch (e) {

@@ -7,7 +7,7 @@ import { requireAdminCan } from '../lib/adminAuth.js';
 import { email as emailField, str } from '../lib/validate.js';
 import { saveSettings } from '../lib/settings.js';
 import { hint, setSecret } from '../lib/secrets.js';
-import { PROVIDERS, SLOTS, forgetHealth, keyOf, slotHealth, testKey } from '../lib/llm.js';
+import { PROVIDERS, SLOTS, forgetHealth, keyOf, keyProblem, slotHealth, testKey, usageToday } from '../lib/llm.js';
 import { brevoKey, checkBrevoKey, mailFrom, sendEmail, simpleEmail } from '../lib/mail.js';
 import { securityEvent } from '../lib/monitor.js';
 
@@ -17,15 +17,20 @@ const slotOf = (id) => {
   return s;
 };
 
-async function slotView(env, slot) {
+async function slotView(env, slot, usage) {
   const { value, from } = await keyOf(env, slot);
-  return { id: slot.id, label: slot.label, provider: slot.provider, providerName: PROVIDERS[slot.provider].name, set: Boolean(value), from, hint: hint(value), ...slotHealth(slot.id) };
+  const today = (usage || (await usageToday(env)))[slot.id] || null;
+  const h = slotHealth(slot.id);
+  // used up for the day or refused, even if the server restarted since
+  const out = !h.resting && today?.usedUpUntil ? { resting: true, restUntil: today.usedUpUntil, reason: today.reason } : {};
+  return { id: slot.id, label: slot.label, provider: slot.provider, providerName: PROVIDERS[slot.provider].name, set: Boolean(value), from, hint: hint(value), ...h, ...out, today };
 }
 
 // GET /v1/admin/system/ai-keys
 export async function listAiKeys(request, env) {
   await requireAdminCan(request, env, 'system');
-  return ok({ keys: await Promise.all(SLOTS.map((s) => slotView(env, s))) });
+  const usage = await usageToday(env);
+  return ok({ keys: await Promise.all(SLOTS.map((s) => slotView(env, s, usage))) });
 }
 
 // PUT /v1/admin/system/ai-keys/:slot { key }  (an empty key removes the one set in the app)
@@ -34,15 +39,25 @@ export async function putAiKey(request, env, id) {
   const slot = slotOf(id);
   const b = await readJson(request);
   const key = String(b.key || '').trim();
+  let test = null;
   if (key) {
-    if (key.length < 20 || key.length > 300 || /\s/.test(key)) throw new HttpError(400, 'That does not look like an API key. Copy it again from the provider.', 'invalid_input');
-    const t = await testKey(env, slot, key);
-    if (!t.ok) throw new HttpError(400, `${t.error} The key was not saved.`, 'key_refused');
+    if (key.length > 300 || /\s/.test(key)) throw new HttpError(400, 'That does not look like an API key. Copy it again from the provider, without spaces.', 'invalid_input');
+    const wrong = keyProblem(slot, key);
+    if (wrong) throw new HttpError(400, `${wrong} The key was not saved.`, 'invalid_input');
+    // the same key twice gives no extra allowance
+    for (const other of SLOTS) {
+      if (other.id !== slot.id && (await keyOf(env, other)).value === key) throw new HttpError(400, `This key is already saved in ${other.label}. Each place needs a different key (a new key from another account gives more free requests).`, 'invalid_input');
+    }
+    test = await testKey(env, slot, key);
+    if (!test.ok && test.definite) {
+      await securityEvent(env, 'ai_key', request, `${admin.name}: ${slot.label} refused (${test.error.slice(0, 120)})`);
+      throw new HttpError(400, `${test.error} The key was not saved.`, 'key_refused');
+    }
   }
   await setSecret(env, `ai_${slot.id}`, key, admin.id || 'operator');
-  forgetHealth(slot.id);
+  forgetHealth(env, slot.id);
   await securityEvent(env, 'ai_key', request, `${admin.name}: ${slot.label} ${key ? `set (${hint(key)})` : 'removed from the app'}`);
-  return ok({ key: await slotView(env, slot) });
+  return ok({ key: await slotView(env, slot), test });
 }
 
 // POST /v1/admin/system/ai-keys/:slot/test
@@ -52,7 +67,7 @@ export async function testAiKey(request, env, id) {
   const { value } = await keyOf(env, slot);
   if (!value) throw new HttpError(400, 'No key is set here yet.', 'invalid_input');
   const t = await testKey(env, slot, value);
-  if (t.ok) forgetHealth(slot.id);
+  if (t.ok) forgetHealth(env, slot.id);
   return ok({ test: t, key: await slotView(env, slot) });
 }
 

@@ -5,7 +5,7 @@
 // full: only its last 4 characters.
 import { useState } from 'react';
 import { Linking } from 'react-native';
-import { Ic, P, T, V } from '../../ui/kit';
+import { Bar, Ic, P, T, V } from '../../ui/kit';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
 import { Field } from '../../ui/form';
 import { useL } from '../../i18n';
@@ -18,16 +18,37 @@ const WHERE = {
   mistral: ['console.mistral.ai/api-keys', 'https://console.mistral.ai/api-keys'],
 };
 const time = (t) => new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+const num = (n) => Number(n || 0).toLocaleString('en-GB');
+const ago = (t, L) => {
+  const m = Math.round((Date.now() - t) / 60000);
+  return m < 1 ? L('just now', 'à l’instant') : m < 60 ? `${m} min ${L('ago', '')}`.trim() : `${L('at', 'à')} ${time(t)}`;
+};
+// Where to get a key, and what to know about a second one.
+const TIPS = {
+  groq: { en: 'A second Groq key must come from another Groq account to add free requests.', fr: 'Une deuxième clé Groq doit venir d’un autre compte Groq pour ajouter des requêtes gratuites.' },
+  gemini: {
+    en: 'Keys from the same Google project share one allowance: make the second key in a new project (AI Studio, Create API key, Create in new project) or with another Google account.',
+    fr: 'Les clés d’un même projet Google partagent une seule allocation : créez la deuxième dans un nouveau projet (AI Studio, Create API key, nouveau projet) ou avec un autre compte Google.',
+  },
+  mistral: { en: 'Choose the free Experiment plan; a new key can take a few minutes to start working.', fr: 'Choisissez le plan gratuit Experiment ; une nouvelle clé peut mettre quelques minutes à fonctionner.' },
+};
 
+// Each key: is it working, how much has it done today, how much is left.
 function KeyCard({ k, L, onSet, onTest, onRemove, testing }) {
-  const tone = !k.set ? 'muted' : k.resting ? (k.reason === 'refused' ? 'bad' : 'warn') : 'ok';
+  const t = k.today || {};
+  const lim = t.limits || {};
+  const tone = !k.set ? 'muted' : k.resting ? (k.reason === 'refused' || k.reason === 'used up' ? 'bad' : 'warn') : 'ok';
   const state = !k.set
-    ? L('Not set', 'Non défini')
+    ? L('Not set', 'Non définie')
     : k.resting
       ? k.reason === 'refused'
-        ? L('Refused by the provider', 'Refusée par le fournisseur')
-        : `${k.reason === 'used up' ? L('Used up, resting until', 'Épuisée, repos jusqu’à') : L('Busy, resting until', 'Occupée, repos jusqu’à')} ${time(k.restUntil)}`
-      : L('Ready', 'Prête');
+        ? L('Refused', 'Refusée')
+        : k.reason === 'used up'
+          ? `${L('Used up for today, back at', 'Épuisée pour aujourd’hui, retour à')} ${time(k.restUntil)}`
+          : `${L('Busy, back at', 'Occupée, retour à')} ${time(k.restUntil)}`
+      : L('Working', 'Fonctionne');
+  const left = lim['remaining-requests'] && lim['limit-requests'];
+  const tokensLeft = lim['remaining-tokens'] && lim['limit-tokens'];
   return (
     <Card>
       <V c="p-space-md gap-space-sm">
@@ -38,17 +59,51 @@ function KeyCard({ k, L, onSet, onTest, onRemove, testing }) {
           <Pill text={state} tone={tone} />
         </V>
         {k.set ? (
-          <T c="font-body-sm text-body-sm text-on-surface-variant">
-            {k.from === 'app' ? L('Set here', 'Définie ici') : L('Set on the server', 'Définie sur le serveur')} ({k.hint}).{' '}
-            {k.ok + k.failed > 0 ? `${k.ok} ${L('answers', 'réponses')}, ${k.failed} ${L('failures since the server started', 'échecs depuis le démarrage')}.` : ''}
-            {k.lastModel ? ` ${L('Last model', 'Dernier modèle')}: ${k.lastModel}.` : ''}
-          </T>
-        ) : (
-          <P onPress={() => Linking.openURL(WHERE[k.provider][1]).catch(() => {})} hitSlop={6}>
+          <>
             <T c="font-body-sm text-body-sm text-on-surface-variant">
-              {L('Get a free key at', 'Obtenez une clé gratuite sur')} <T c="font-body-sm text-body-sm text-primary-container" style={{ fontWeight: '700' }}>{WHERE[k.provider][0]}</T>
+              {k.from === 'app' ? L('Set here', 'Définie ici') : L('Set on the server', 'Définie sur le serveur')} ({k.hint})
+              {t.lastAt ? `. ${L('Last used', 'Dernière utilisation')} ${ago(t.lastAt, L)}` : ''}
+              {t.lastModel ? `, ${t.lastModel}` : ''}.
             </T>
-          </P>
+            <V c="flex-row flex-wrap gap-x-space-md gap-y-1">
+              <Stat value={num(t.requests)} label={L('requests today', 'requêtes aujourd’hui')} />
+              <Stat value={num(t.tokens)} label={L('tokens today', 'jetons aujourd’hui')} />
+              <Stat value={num(t.failures)} label={L('failures today', 'échecs aujourd’hui')} warn={t.failures > 0} />
+              {t.avgMs != null && <Stat value={`${(t.avgMs / 1000).toFixed(1)} s`} label={L('average answer', 'réponse moyenne')} />}
+            </V>
+            {!!left && (
+              <V c="gap-1">
+                <T c="font-body-sm text-body-sm text-on-surface">
+                  {L('Requests left today', 'Requêtes restantes aujourd’hui')}: <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '700' }}>{num(lim['remaining-requests'])}</T> {L('of', 'sur')} {num(lim['limit-requests'])}
+                </T>
+                <Bar pct={(100 * Number(lim['remaining-requests'])) / Number(lim['limit-requests'])} c="h-1.5 bg-surface-container" fill={Number(lim['remaining-requests']) / Number(lim['limit-requests']) < 0.15 ? 'bg-error' : 'bg-secondary'} />
+              </V>
+            )}
+            {!!tokensLeft && (
+              <T c="font-body-sm text-body-sm text-on-surface-variant">
+                {L('Tokens left this minute', 'Jetons restants cette minute')}: {num(lim['remaining-tokens'])} {L('of', 'sur')} {num(lim['limit-tokens'])}
+              </T>
+            )}
+            {!left && k.provider === 'gemini' && t.requests > 0 && (
+              <T c="font-body-sm text-body-sm text-on-surface-variant">{L('Google does not report what is left; when the day’s allowance runs out it shows here as used up.', 'Google n’indique pas ce qui reste ; quand l’allocation du jour est épuisée, elle s’affiche ici.')}</T>
+            )}
+            {!!(k.lastError || t.lastError) && (k.resting || t.failures > 0) && (
+              <T c="font-body-sm text-body-sm text-error" style={{ lineHeight: 19 }}>
+                {L('Last problem', 'Dernier problème')}: {k.lastError || t.lastError}
+              </T>
+            )}
+          </>
+        ) : (
+          <V c="gap-1">
+            <P onPress={() => Linking.openURL(WHERE[k.provider][1]).catch(() => {})} hitSlop={6}>
+              <T c="font-body-sm text-body-sm text-on-surface-variant">
+                {L('Get a free key at', 'Obtenez une clé gratuite sur')} <T c="font-body-sm text-body-sm text-primary-container" style={{ fontWeight: '700' }}>{WHERE[k.provider][0]}</T>
+              </T>
+            </P>
+            <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
+              {L(TIPS[k.provider].en, TIPS[k.provider].fr)}
+            </T>
+          </V>
         )}
         <V c="flex-row flex-wrap gap-space-xs">
           <Cta variant="soft" icon={null} lead={k.set ? 'autorenew' : 'add'} h="h-10" label={k.set ? L('Replace', 'Remplacer') : L('Add key', 'Ajouter')} onPress={onSet} />
@@ -57,6 +112,17 @@ function KeyCard({ k, L, onSet, onTest, onRemove, testing }) {
         </V>
       </V>
     </Card>
+  );
+}
+
+function Stat({ value, label, warn }) {
+  return (
+    <V c="flex-row items-baseline gap-1">
+      <T c={`font-label-lg text-label-lg ${warn ? 'text-error' : 'text-on-surface'}`} style={{ fontWeight: '800' }}>
+        {value}
+      </T>
+      <T c="font-body-sm text-body-sm text-on-surface-variant">{label}</T>
+    </V>
   );
 }
 
@@ -89,6 +155,12 @@ export default function AdminKeys() {
       } else {
         const r = await put(`/v1/admin/system/ai-keys/${sheet.slot}`, { key: value.trim() });
         replaceKey(r.key);
+        if (r.test && !r.test.ok) {
+          setSheet(null);
+          setValue('');
+          showToast(`${L('Saved. The test could not finish', 'Enregistrée. Le test n’a pas pu finir')}: ${r.test.error}`);
+          return;
+        }
       }
       setSheet(null);
       setValue('');
@@ -154,8 +226,8 @@ export default function AdminKeys() {
           <Section title={L('AI keys', 'Clés IA')}>
             <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
               {L(
-                'The tutor tries these keys in this order (photos and documents start with Gemini). When a key is used up or refused, the next one answers at once, so the AI keeps working while any key is ready.',
-                'Le tuteur essaie ces clés dans cet ordre (photos et documents d’abord avec Gemini). Quand une clé est épuisée ou refusée, la suivante répond aussitôt.'
+                'The AI spreads its work over every key that works (Groq first for speed, Gemini first for photos and documents). If a key is slow, another is asked at the same time and the first answer is used. A key that is used up for the day or refused rests while the others answer. The counts below are for today and start again at midnight (UTC).',
+                'L’IA répartit son travail sur toutes les clés qui fonctionnent (Groq d’abord pour la vitesse, Gemini d’abord pour les photos et documents). Si une clé est lente, une autre est interrogée en même temps et la première réponse est utilisée. Une clé épuisée pour la journée ou refusée se repose pendant que les autres répondent. Les chiffres ci-dessous sont ceux d’aujourd’hui et repartent à zéro à minuit (UTC).'
               )}
             </T>
             {ai.busy && !ai.data ? (

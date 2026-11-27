@@ -222,7 +222,16 @@ export async function ask(request, env, id) {
     const files = fileIds.length ? await filesOf(env, chat.id, fileIds) : null;
     const quizRow = await env.DB.prepare("SELECT body FROM study_messages WHERE chat_id = ? AND kind = 'quiz' ORDER BY created_at DESC LIMIT 1").bind(chat.id).first();
     const quizOpen = quizRow ? JSON.parse(quizRow.body).title || 'Revision questions' : null;
-    plan = (await decide(env, { text, files, role: user.role, quizOpen, lastAnswer: lastBody?.text || lastBody?.title || lastBody?.question, spoken: !!b.spoken })) || {
+    // obvious messages are routed at once (no extra AI call): a greeting or
+    // thanks, or an exercise with numbers to work out
+    const quick = !files && !quizOpen
+      ? /^(hi|hello|hey|thanks|thank you|ok|okay|good morning|good evening|bonjour|salut|merci)\b[\s!.?,]*$/i.test(text)
+        ? { intent: 'chat' }
+        : /^\s*(solve|calculate|work out|find|simplify|factori[sz]e|expand|evaluate|differentiate|integrate|résou|calcul)/i.test(text) && /\d/.test(text) && text.length < 600
+          ? { intent: 'solve_text' }
+          : null
+      : null;
+    plan = quick || (await decide(env, { text, files, role: user.role, quizOpen, lastAnswer: lastBody?.text || lastBody?.title || lastBody?.question, spoken: !!b.spoken })) || {
       intent: files ? (/note|explain|summar/i.test(text) ? 'notes' : 'solve') : looksLikeQuestion(text) ? 'solve_text' : 'chat',
     };
     // an exercise to work out (solve, calculate, find... with numbers) goes on the board
