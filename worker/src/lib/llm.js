@@ -111,18 +111,24 @@ export async function aiConfigured(env) {
 // Returns { text, model, provider, slot }.
 // How long a provider asks us to wait after a per-minute limit: the
 // retry-after header, or "try again in 7.5s" / "in 1m2s" in the message.
+// The shorter of the two wins: Groq's header can say a round minute while its
+// message gives the real time ("try again in 7.71s").
 function waitFrom(res, body) {
   const h = Number(res.headers.get('retry-after'));
-  if (Number.isFinite(h) && h > 0) return h * 1000;
   const m = /try again in (?:(\d+)m)?(\d+(?:\.\d+)?)s/i.exec(body);
-  return m ? ((Number(m[1]) || 0) * 60 + Number(m[2])) * 1000 : null;
+  const fromBody = m ? ((Number(m[1]) || 0) * 60 + Number(m[2])) * 1000 : null;
+  const fromHeader = Number.isFinite(h) && h > 0 ? h * 1000 : null;
+  if (fromBody != null && fromHeader != null) return Math.min(fromBody, fromHeader);
+  return fromBody ?? fromHeader;
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export async function aiChat(env, opts, retried = false) {
+// until: the time after which a busy key is no longer waited for.
+export async function aiChat(env, opts, until = null) {
   // patience: how long to wait for a briefly busy key before failing (study
   // tasks, which show progress, wait longer than a quick question).
   const { messages, vision = false, json = false, maxTokens = 2000, temperature = 0.4, reasoning = null, patience = 25_000 } = opts;
+  const deadline = until ?? Date.now() + patience;
   const order = vision ? VISION_ORDER.map((id) => SLOTS.find((s) => s.id === id)) : SLOTS;
   let anyKey = false;
   let busy = false;
@@ -179,7 +185,7 @@ export async function aiChat(env, opts, retried = false) {
         continue;
       }
       const body = await res.text().catch(() => '');
-      console.error('ai_error', slot.id, model, res.status, body.slice(0, 300));
+      console.error('ai_error', slot.id, model, res.status, res.status === 429 ? `retry-after=${res.headers.get('retry-after')}` : '', body.slice(0, 300));
       st.failed += 1;
       st.lastError = `${res.status} ${body.slice(0, 120)}`;
       if (res.status === 401 || res.status === 403) {
@@ -187,9 +193,15 @@ export async function aiChat(env, opts, retried = false) {
         break; // the key itself is refused: no other model of it will work
       }
       if (res.status === 429) {
-        // per-minute limit (try the next model, which has its own) or the day's quota
-        if (/quota|exhaust|per day|daily|billing/i.test(body)) {
-          rest(slot.id, 30 * 60_000, 'used up');
+        // per-minute limit (try the next model, which has its own) or the day's
+        // quota. Only a limit that names the day counts as used up: Groq's
+        // per-minute message links to its billing page, and Gemini calls its
+        // per-minute limit a "quota" too.
+        const perMinute = /per ?minute|\bTPM\b|\bRPM\b/i.test(body);
+        const perDay = /per ?day|\bTPD\b|\bRPD\b|daily/i.test(body);
+        if (perDay && !perMinute) {
+          const w = waitFrom(res, body);
+          rest(slot.id, Math.min(6 * 3_600_000, Math.max(60_000, w ?? 30 * 60_000)), 'used up');
           slotBusy = true;
           break;
         }
@@ -208,8 +220,8 @@ export async function aiChat(env, opts, retried = false) {
   }
   if (!anyKey) throw new HttpError(503, 'The AI tutor is not available yet.', 'ai_unavailable');
   // Every key only briefly busy (a per-minute limit): wait for the first one
-  // to be free (up to `patience`) and try once more, rather than failing.
-  if (busy && !retried) {
+  // to be free and try again, until `patience` runs out, rather than failing.
+  if (busy) {
     let soonest = Infinity;
     for (const slot of SLOTS) {
       if (!(await keyOf(env, slot)).value) continue;
@@ -217,9 +229,9 @@ export async function aiChat(env, opts, retried = false) {
       if (st.reason === 'busy' && st.restUntil > Date.now()) soonest = Math.min(soonest, st.restUntil);
     }
     const ms = soonest - Date.now();
-    if (ms > 0 && ms <= patience) {
+    if (ms > 0 && Date.now() + ms <= deadline) {
       await sleep(ms + 300);
-      return aiChat(env, opts, true);
+      return aiChat(env, opts, deadline);
     }
   }
   console.error('ai_all_keys_failed', lastError?.message || (busy ? 'busy' : 'none'));

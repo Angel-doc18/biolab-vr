@@ -9,7 +9,7 @@ import { today } from '../lib/notify.js';
 import { subjectOr } from '../lib/subjects.js';
 import { markAnswer } from '../lib/ai.js';
 import { KINDS, looksScanned, readDocument } from '../lib/docs.js';
-import { chatReply, explainNotes, findQuestions, makeQuestions, solveOne } from '../lib/study.js';
+import { chatReply, explainNotes, findQuestions, lessonNotes, lessonPlan, makeQuestions, solveOne, summarise } from '../lib/study.js';
 import { AUDIO_TYPES, transcribe } from '../lib/llm.js';
 
 // Daily study actions (each answer, solution, explanation, quiz or marking).
@@ -149,7 +149,8 @@ export async function ask(request, env, id) {
   requireAccess(user, env);
   const chat = await chatOf(env, user, id);
   const b = await readJson(request, 64 * 1024);
-  const action = oneOf(b.action || 'chat', 'Action', ['chat', 'find', 'solve', 'solve_text', 'notes', 'quiz', 'mark']);
+  const action = oneOf(b.action || 'chat', 'Action', ['chat', 'find', 'solve', 'solve_text', 'notes', 'quiz', 'mark', 'lesson_notes', 'lesson_plan', 'summary']);
+  if (action === 'lesson_plan' && user.role !== 'teacher') throw new HttpError(403, 'Lesson plans are for teachers.', 'forbidden');
   await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are going too quickly. Wait a moment.');
   const opts = settingsOf(user, chat);
   const fileIds = Array.isArray(b.fileIds) ? b.fileIds.filter((x) => typeof x === 'string').slice(0, 20) : [];
@@ -237,6 +238,24 @@ export async function ask(request, env, id) {
     const r = await makeQuestions(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, mcq: b.mcq ?? 5, structured: b.structured ?? 3, ...opts });
     await said(note, files);
     out.push(await addMessage(env, chat.id, 'assistant', 'quiz', { quizId: uuid(), ...r }));
+    if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
+  } else if (action === 'lesson_notes' || action === 'lesson_plan') {
+    await useOne(env, user);
+    const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
+    const topic = text || '';
+    const r =
+      action === 'lesson_notes'
+        ? await lessonNotes(env, { topic, text: fileIds.length ? files.text : '', ...opts })
+        : await lessonPlan(env, { topic, text: fileIds.length ? files.text : '', minutes: int(b.minutes ?? 40, 'Lesson length', { min: 20, max: 180 }), ...opts });
+    await said(note || topic, files);
+    out.push(await addMessage(env, chat.id, 'assistant', action === 'lesson_notes' ? 'lessonNotes' : 'lessonPlan', r));
+    if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
+  } else if (action === 'summary') {
+    await useOne(env, user);
+    const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
+    const r = await summarise(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, ...opts });
+    await said(note, files);
+    out.push(await addMessage(env, chat.id, 'assistant', 'summary', r));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
   } else if (action === 'mark') {
     const quizId = str(b.quizId, 'Quiz', { max: 64 });

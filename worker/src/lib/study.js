@@ -251,6 +251,106 @@ export async function makeQuestions(env, { text, images = [], subject, className
   };
 }
 
+// ---------- 6. for teachers: lesson notes, lesson plans, summaries ----------
+// The depth that fits each class: notes for Form 3 must not drift into A Level.
+const LEVELS = `Levels in Cameroonian secondary schools: Forms 1 and 2 (6e, 5e) learn the basic ideas in simple words; Forms 3 to 5 (4e, 3e, 2nde) follow the GCE Ordinary Level course, with the examination in Form 5; Lower and Upper Sixth (1ère, Terminale) follow the GCE Advanced Level course. Write at the depth of the class named and no deeper: an O Level class never gets A Level content (for example, O Level photosynthesis is the word and symbol equation, the leaf and where photosynthesis happens in it, the conditions needed, the starch test and limiting factors, not photosystems, NADP or the Calvin cycle). If no class is named, write for Form 4.`;
+
+// The level of the class named in the request ("Photosynthesis, Form 3").
+const levelOf = (t) => {
+  const x = String(t).toLowerCase();
+  if (/(upper|lower) sixth|\bu6\b|\bl6\b|terminale|\btle\b|1(è|e)re|premi(è|e)re/.test(x)) return 'Level: GCE Advanced Level. Write at A Level depth.';
+  if (/form\s*[345]\b|\b(4e|3e|2nde|seconde)\b/.test(x)) return 'Level: GCE Ordinary Level. Keep strictly to O Level content: nothing that is only taught at A Level.';
+  if (/form\s*[12]\b|\b(6e|5e)\b/.test(x)) return 'Level: first cycle (Forms 1 and 2). Basic ideas in simple words only.';
+  return 'Level: no class named, so write for Form 4 (GCE Ordinary Level).';
+};
+
+const NOTES_WRITE_SYSTEM = () => `You are an expert Cameroonian secondary school teacher writing the lesson notes for your class.
+Write complete lesson notes on the topic given, as a teacher gives them to the class to copy and revise from, following the Cameroon GCE (MINESEC) syllabus for the class named. The notes speak to the students: no mark allocations, marking instructions or remarks to the teacher.
+${LEVELS}
+- "objectives": 3 to 5 things the students will be able to do after the lesson, each starting with an action verb ("define ...", "explain ...", "calculate ..."), without "By the end of the lesson".
+- "introduction": a short, engaging start that links to what students know (an everyday Cameroonian example helps).
+- "sections": the content in teaching order (headings without numbers), usually 4 to 7 sections covering the whole topic as the syllabus sets it for that class (no more advanced than that class, nothing left out). For each: a heading, the full content in clear sentences, 120 to 250 words (definitions in the exact wording examiners expect, explanations that give the reasons and the theory behind each idea, laws and formulas with the meaning and unit of each symbol), the key points, and one worked example or illustration.
+- "diagrams": the diagrams the teacher should draw on the board for this topic, each with a title and a precise description of what to draw and label.
+- "summary": the main ideas in four to six short sentences.
+- "exercises": three to five questions for the end of the lesson, from simple to exam standard, each with its short answer.
+${RULES}
+First, in "scope", list the points the syllabus of this class covers for this topic, and the more advanced points it leaves for a higher class (start those with "Not at this level:"). Then write the notes covering exactly the points in scope.
+Reply with JSON only: {"scope": [string], "title": string, "objectives": [string], "introduction": string, "sections": [{"heading": string, "content": string, "keyPoints": [string], "example": string}], "diagrams": [{"title": string, "description": string}], "summary": string, "exercises": [{"question": string, "answer": string}]}`;
+
+const LessonNotes = z.object({
+  scope: z.array(s(300)).default([]),
+  title: s(160),
+  objectives: z.array(s(300)).default([]),
+  introduction: s(1500).default(''),
+  sections: z.array(z.object({ heading: s(160), content: s(5000), keyPoints: z.array(s(400)).default([]), example: s(1500).default('') })).min(1),
+  diagrams: z.array(z.object({ title: s(160), description: s(1000) })).default([]),
+  summary: s(1500).default(''),
+  exercises: z.array(z.object({ question: s(800), answer: s(1200) })).default([]),
+});
+
+export async function lessonNotes(env, { topic, text = '', subject, className, lang, mode }) {
+  const ctx = context({ subject, className, lang, mode });
+  if (!String(topic || '').trim() && !String(text).trim()) throw new HttpError(400, 'Say the topic for the notes, for example "Photosynthesis, Form 3".', 'invalid_input');
+  const prompt = `${ctx}\n\nTopic: ${topic || '(the material below)'}\n${levelOf(`${className || ''} ${topic || ''}`)}${text ? `\n\nBase the notes on this material:\n"""\n${String(text).slice(0, 40_000)}\n"""` : ''}`;
+  const { scope: _scope, ...notes } = await task(env, { system: NOTES_WRITE_SYSTEM(mode), prompt, schema: LessonNotes, maxTokens: 12000, reasoning: 'medium' });
+  return notes;
+}
+
+const PLAN_SYSTEM = `You are an experienced Cameroonian secondary school teacher and pedagogic inspector. Write a lesson plan for a colleague, in the format used in Cameroonian secondary schools, for the topic, class and length given, following the MINESEC syllabus.
+- "objectives": 3 to 5 specific, measurable objectives, each starting with an action verb ("state ...", "calculate ...", "draw ..."), without the words "By the end of the lesson, students should be able to" (the plan adds them once).
+- "prerequisites": what students should already know.
+- "materials": the teaching aids and materials (simple ones found in Cameroonian schools; improvised where useful).
+- "stages": the lesson in order: Introduction (revision of prerequisites and motivation), Development (the main teaching, usually two or three stages), Conclusion (summary) and Evaluation. For each stage: its name, the minutes (adding up to the lesson length), what the teacher does, what the students do, and short notes (board summary points, questions to ask, common misconceptions).
+- "evaluation": 3 to 5 questions to check the objectives were reached, with their expected answers.
+- "homework": one short assignment.
+- "boardSummary": the summary the students copy from the board at the end.
+${LEVELS}
+${RULES}
+Reply with JSON only: {"title": string, "objectives": [string], "prerequisites": string, "materials": [string], "stages": [{"name": string, "minutes": number, "teacher": string, "students": string, "notes": string}], "evaluation": [{"question": string, "answer": string}], "homework": string, "boardSummary": string}`;
+
+const Plan = z.object({
+  title: s(160),
+  objectives: z.array(s(300)).min(1),
+  prerequisites: s(1000).default(''),
+  materials: z.array(s(200)).default([]),
+  stages: z.array(z.object({ name: s(80), minutes: z.coerce.number().catch(10), teacher: s(1500), students: s(1000).default(''), notes: s(1200).default('') })).min(2),
+  evaluation: z.array(z.object({ question: s(600), answer: s(800) })).default([]),
+  homework: s(800).default(''),
+  boardSummary: s(2000).default(''),
+});
+
+export async function lessonPlan(env, { topic, text = '', subject, className, lang, minutes = 40 }) {
+  if (!String(topic || '').trim() && !String(text).trim()) throw new HttpError(400, 'Say the topic of the lesson, for example "Ohm\'s law, Form 4".', 'invalid_input');
+  const ctx = context({ subject, className, lang, mode: 'teacher' });
+  const prompt = `${ctx}\n\nTopic: ${topic || '(the material below)'}\n${levelOf(`${className || ''} ${topic || ''}`)}\nLesson length: ${minutes} minutes.${text ? `\n\nBase it on this material:\n"""\n${String(text).slice(0, 30_000)}\n"""` : ''}`;
+  const r = await task(env, { system: PLAN_SYSTEM, prompt, schema: Plan, maxTokens: 9000, reasoning: 'medium' });
+  return { ...r, minutes };
+}
+
+const SUMMARY_SYSTEM = (mode) => `${who(mode)}
+Summarise the material given (notes, a chapter, a document) for ${mode === 'teacher' ? 'a teacher preparing a lesson' : 'a student revising'}: the essentials only, correct and clear.
+- "summary": the whole material in one short paragraph.
+- "keyPoints": the 6 to 12 points that matter most, each one sentence.
+- "keyTerms": the important terms with their exact meanings.
+- "examFocus": what examiners usually ask on this material.
+${RULES}
+Reply with JSON only: {"title": string, "summary": string, "keyPoints": [string], "keyTerms": [{"term": string, "meaning": string}], "examFocus": [string]}`;
+
+const Summary = z.object({
+  title: s(160).default('Summary'),
+  summary: s(3000),
+  keyPoints: z.array(s(500)).min(1),
+  keyTerms: z.array(z.object({ term: s(80), meaning: s(600) })).default([]),
+  examFocus: z.array(s(500)).default([]),
+});
+
+export async function summarise(env, { text, images = [], subject, className, lang, mode }) {
+  const ctx = context({ subject, className, lang, mode });
+  const body = String(text || '').slice(0, 60_000);
+  if (!body.trim() && !images.length) throw new HttpError(400, 'Add the material to summarise: a photo, a document or the text.', 'invalid_input');
+  return task(env, { system: SUMMARY_SYSTEM(mode), prompt: `${ctx}\n\n${body ? `Material:\n"""\n${body}\n"""` : 'The material is in the photos.'}`, images: images.slice(0, 6), schema: Summary, maxTokens: 6000, reasoning: 'low' });
+}
+
 // ---------- 5. a conversation about the material ----------
 const CHAT_SYSTEM = (mode) => `${who(mode)}
 ${mode === 'teacher' ? 'Answer the teacher' : 'Answer the student'} in a natural conversation. Use the material they shared (shown below when there is some) as your main reference. Answer the actual question first, then explain why, briefly and clearly, then offer the next useful step. Keep answers short unless asked for detail. If a question is outside school subjects, say kindly that you help with school work.

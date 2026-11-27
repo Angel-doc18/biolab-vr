@@ -61,10 +61,12 @@ export default function StudyHome({ navigation }) {
 
   const starters = teacher
     ? [
+        ['menu_book', L('Lesson notes', 'Notes de cours'), L('Full notes on any topic, for your class', 'Notes complètes sur un sujet, pour votre classe'), 'lesson_notes'],
+        ['event_note', L('Lesson plan', 'Fiche de préparation'), L('Objectives, stages, evaluation', 'Objectifs, étapes, évaluation'), 'lesson_plan'],
         ['task_alt', L('Solve a past paper', 'Résoudre une épreuve'), L('Every question worked out, with a marking guide', 'Chaque question résolue, avec un guide de correction'), 'solve'],
-        ['description', L('Explain my notes', 'Expliquer mes notes'), L('Explained, summarised, with teaching tips', 'Expliquées, résumées, avec des conseils', ), 'notes'],
         ['quiz', L('Make a test', 'Préparer un devoir'), L('Questions from your notes, with the marking scheme', 'Questions de vos notes, avec le barème'), 'quiz'],
-        ['forum', L('Ask', 'Demander'), L('Plan a lesson, check an answer, anything', 'Préparer un cours, vérifier une réponse', ), 'ask'],
+        ['description', L('Explain or summarise', 'Expliquer ou résumer'), L('Notes, a chapter, a document', 'Notes, un chapitre, un document'), 'notes'],
+        ['forum', L('Ask', 'Demander'), L('Check an answer, talk it through', 'Vérifier une réponse, en discuter'), 'ask'],
       ]
     : [
         ['photo_camera', L('Solve questions', 'Résoudre des questions'), L('Snap or upload a paper, homework, a worksheet', 'Photo ou fichier : épreuve, devoir, exercices'), 'solve'],

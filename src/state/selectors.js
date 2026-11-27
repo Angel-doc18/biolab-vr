@@ -95,4 +95,9 @@ export function greeting(L) {
   return L('Good evening', 'Bonsoir');
 }
 
-export const firstName = (name = '') => name.trim().split(/\s+/)[0] || '';
+// A title (Mr, Mrs, Dr, Mme...) is kept with the next word: "Mr Tabe", not "Mr".
+const TITLES = /^(mr|mrs|ms|miss|dr|prof|mme|mlle|m|sr|rev|pastor|fr)\.?$/i;
+export const firstName = (name = '') => {
+  const w = String(name || '').trim().split(/\s+/);
+  return (TITLES.test(w[0]) && w[1] ? `${w[0]} ${w[1]}` : w[0]) || '';
+};

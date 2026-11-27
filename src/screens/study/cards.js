@@ -659,3 +659,245 @@ export function Quiz({ body, marks, busyN, onMark, L }) {
     </V>
   );
 }
+
+// ---------- for teachers: lesson notes, lesson plans, summaries ----------
+// The AI sometimes numbers its own headings ("1. ...") and starts every
+// objective with "By the end of the lesson, students should be able to".
+const plainHeading = (h) => String(h || '').replace(/^\s*(\d+|[ivx]+)[.)]\s+/i, '');
+const objective = (o) => {
+  const t = String(o || '').replace(/^\s*by the end of (the|this) lesson,?\s*(the )?(students|learners) (should|will) be able to:?\s*/i, '');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+function Bullets({ items, numbered }) {
+  return items.map((t, i) => (
+    <V key={i} c="flex-row gap-2 pl-1">
+      <T c="font-body-sm text-body-sm text-primary-container" style={{ fontWeight: '700', minWidth: 14 }}>
+        {numbered ? `${i + 1}.` : '•'}
+      </T>
+      <T c="font-body-sm text-body-sm text-on-surface flex-1" style={{ lineHeight: 20 }} selectable>
+        {t}
+      </T>
+    </V>
+  ));
+}
+
+function Head({ kicker, title, sub }) {
+  return (
+    <V c="gap-0.5">
+      <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+        {kicker}
+      </T>
+      <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+        {title}
+      </T>
+      {!!sub && <T c="font-body-sm text-body-sm text-on-surface-variant">{sub}</T>}
+    </V>
+  );
+}
+
+function QA({ items, L }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <V c="gap-1.5">
+      {items.map((x, i) => (
+        <V key={i} c="gap-0.5">
+          <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20, fontWeight: '600' }}>
+            {i + 1}. {x.question}
+          </T>
+          {open && (
+            <T c="font-body-sm text-body-sm text-secondary" style={{ lineHeight: 20 }}>
+              {x.answer}
+            </T>
+          )}
+        </V>
+      ))}
+      <P c="self-start" onPress={() => setOpen((v) => !v)} hitSlop={6}>
+        <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+          {open ? L('Hide the answers', 'Masquer les réponses') : L('Show the answers', 'Voir les réponses')}
+        </T>
+      </P>
+    </V>
+  );
+}
+
+export function LessonNotesCard({ body, L }) {
+  return (
+    <V c="rounded-2xl border border-surface-container bg-surface-container-lowest p-space-md gap-space-md">
+      <Head kicker={L('Lesson notes', 'Notes de cours')} title={body.title} />
+      {!!body.objectives?.length && (
+        <V c="gap-1">
+          <Label>{L('By the end of the lesson, students can', 'À la fin du cours, les élèves savent')}</Label>
+          <Bullets items={body.objectives.map(objective)} numbered />
+        </V>
+      )}
+      {!!body.introduction && (
+        <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 23 }}>
+          {body.introduction}
+        </T>
+      )}
+      {body.sections.map((s, i) => (
+        <V key={i} c="gap-1">
+          <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+            {i + 1}. {plainHeading(s.heading)}
+          </T>
+          <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 23 }} selectable>
+            {s.content}
+          </T>
+          {!!s.keyPoints?.length && <Bullets items={s.keyPoints} />}
+          {!!s.example && (
+            <V c="rounded-lg bg-surface-container-low px-space-sm py-2">
+              <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
+                {L('Example', 'Exemple')}: {s.example}
+              </T>
+            </V>
+          )}
+        </V>
+      ))}
+      {!!body.diagrams?.length && (
+        <V c="gap-1">
+          <Label>{L('Diagrams to draw on the board', 'Schémas à faire au tableau')}</Label>
+          {body.diagrams.map((d, i) => (
+            <V key={i} c="rounded-lg border border-surface-container p-space-sm gap-0.5">
+              <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {d.title}
+              </T>
+              <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                {d.description}
+              </T>
+            </V>
+          ))}
+        </V>
+      )}
+      {!!body.summary && (
+        <V c="gap-1">
+          <Label>{L('Summary', 'Résumé')}</Label>
+          <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 23 }}>
+            {body.summary}
+          </T>
+        </V>
+      )}
+      {!!body.exercises?.length && (
+        <V c="gap-1">
+          <Label>{L('Exercises', 'Exercices')}</Label>
+          <QA items={body.exercises} L={L} />
+        </V>
+      )}
+    </V>
+  );
+}
+
+export function LessonPlanCard({ body, L }) {
+  return (
+    <V c="rounded-2xl border border-surface-container bg-surface-container-lowest p-space-md gap-space-md">
+      <Head kicker={L('Lesson plan', 'Fiche de préparation')} title={body.title} sub={`${body.minutes} ${L('minutes', 'minutes')}`} />
+      <V c="gap-1">
+        <Label>{L('By the end of the lesson, students should be able to', 'À la fin du cours, les élèves devront savoir')}</Label>
+        <Bullets items={body.objectives.map(objective)} numbered />
+      </V>
+      {!!body.prerequisites && (
+        <V c="gap-1">
+          <Label>{L('Prerequisites', 'Prérequis')}</Label>
+          <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
+            {body.prerequisites}
+          </T>
+        </V>
+      )}
+      {!!body.materials?.length && (
+        <V c="gap-1">
+          <Label>{L('Teaching aids', 'Matériel didactique')}</Label>
+          <Bullets items={body.materials} />
+        </V>
+      )}
+      <V c="gap-space-sm">
+        <Label>{L('The lesson, stage by stage', 'Le déroulement')}</Label>
+        {body.stages.map((st, i) => (
+          <V key={i} c="rounded-xl border border-surface-container p-space-sm gap-1">
+            <V c="flex-row items-center justify-between">
+              <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                {st.name}
+              </T>
+              <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>
+                {st.minutes} min
+              </T>
+            </V>
+            <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
+              <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {L('Teacher', 'Enseignant')}:{' '}
+              </T>
+              {st.teacher}
+            </T>
+            {!!st.students && (
+              <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
+                <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('Students', 'Élèves')}:{' '}
+                </T>
+                {st.students}
+              </T>
+            )}
+            {!!st.notes && (
+              <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                {st.notes}
+              </T>
+            )}
+          </V>
+        ))}
+      </V>
+      {!!body.evaluation?.length && (
+        <V c="gap-1">
+          <Label>{L('Evaluation', 'Évaluation')}</Label>
+          <QA items={body.evaluation} L={L} />
+        </V>
+      )}
+      {!!body.homework && (
+        <V c="gap-1">
+          <Label>{L('Homework', 'Devoir')}</Label>
+          <T c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
+            {body.homework}
+          </T>
+        </V>
+      )}
+      {!!body.boardSummary && (
+        <V c="rounded-xl p-space-sm gap-1" style={{ backgroundColor: BOARD }}>
+          <Label>{L('Board summary', 'Résumé au tableau')}</Label>
+          <T c="font-body-md text-body-md" style={{ color: INK, lineHeight: 24, fontWeight: '600' }} selectable>
+            {body.boardSummary}
+          </T>
+        </V>
+      )}
+    </V>
+  );
+}
+
+export function SummaryCard({ body, L }) {
+  return (
+    <V c="rounded-2xl border border-surface-container bg-surface-container-lowest p-space-md gap-space-md">
+      <Head kicker={L('Summary', 'Résumé')} title={body.title} />
+      <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 23 }} selectable>
+        {body.summary}
+      </T>
+      <V c="gap-1">
+        <Label>{L('Key points', 'Points clés')}</Label>
+        <Bullets items={body.keyPoints} />
+      </V>
+      {!!body.keyTerms?.length && (
+        <V c="gap-1">
+          <Label>{L('Key terms', 'Termes clés')}</Label>
+          {body.keyTerms.map((k, i) => (
+            <T key={i} c="font-body-sm text-body-sm text-on-surface" style={{ lineHeight: 20 }}>
+              <T c="font-body-sm text-body-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {k.term}:{' '}
+              </T>
+              {k.meaning}
+            </T>
+          ))}
+        </V>
+      )}
+      {!!body.examFocus?.length && (
+        <V c="gap-1">
+          <Label>{L('What examiners ask', 'Ce que demandent les examinateurs')}</Label>
+          <Bullets items={body.examFocus} />
+        </V>
+      )}
+    </V>
+  );
+}

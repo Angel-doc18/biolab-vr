@@ -16,7 +16,7 @@ import { shareStudyPdf } from '../../lib/studyPdf';
 import { useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import { VOICE_RECORDING, micAllowed, micDone, recordingData } from '../../lib/recordVoice';
 import { explain, interrupt, isTalking, pausedNow, reply, stopTalking } from '../../lib/talk';
-import { AiText, FileChips, NotesCard, Quiz, QuestionSet, Solution, UserBubble, Working, solutionParts } from './cards';
+import { AiText, FileChips, LessonNotesCard, LessonPlanCard, NotesCard, Quiz, QuestionSet, Solution, SummaryCard, UserBubble, Working, solutionParts } from './cards';
 
 // Same rule as the server: a real question is solved and explained step by
 // step; small talk and follow-ups get a conversational answer.
@@ -48,6 +48,7 @@ export default function StudyChat({ navigation, route }) {
   const [running, setRunning] = useState(false); // "Solve all" in progress
   const [error, setError] = useState(null);
   const [sheet, setSheet] = useState(null); // 'attach' | 'rename' | 'more'
+  const [minutes, setMinutes] = useState(40); // a lesson plan's length
   const [title, setTitle] = useState('');
   const [toast, showToast] = useToast();
   const scroll = useRef(null);
@@ -107,7 +108,7 @@ export default function StudyChat({ navigation, route }) {
   // A new chat opened from a starter: straight to adding the material.
   useEffect(() => {
     if (route.params?.chatId) return;
-    if (intent === 'ask') setTimeout(() => input.current?.focus(), 400);
+    if (intent === 'ask' || intent === 'lesson_notes' || intent === 'lesson_plan') setTimeout(() => input.current?.focus(), 400);
     else if (intent) setSheet('attach');
   }, [intent, route.params?.chatId]);
 
@@ -172,6 +173,9 @@ export default function StudyChat({ navigation, route }) {
     mark: [L('Reading your answer...', 'Lecture de votre réponse...'), L('Marking it against the scheme...', 'Correction avec le barème...')],
     chat: [L('Thinking...', 'Réflexion...'), L('Writing the answer...', 'Rédaction de la réponse...')],
     upload: [L('Uploading...', 'Envoi...'), L('Reading the document...', 'Lecture du document...')],
+    lessonNotes: [L('Checking the syllabus for this class...', 'Vérification du programme de la classe...'), L('Writing the notes, part by part...', 'Rédaction des notes, partie par partie...'), L('Adding examples, diagrams and exercises...', 'Ajout d’exemples, de schémas et d’exercices...'), L('Almost done...', 'Presque terminé...')],
+    lessonPlan: [L('Setting the objectives...', 'Définition des objectifs...'), L('Planning each stage of the lesson...', 'Préparation de chaque étape du cours...'), L('Writing the evaluation and board summary...', 'Rédaction de l’évaluation et du résumé...'), L('Almost done...', 'Presque terminé...')],
+    summary: [L('Reading the material...', 'Lecture du contenu...'), L('Picking out what matters...', 'Sélection de l’essentiel...'), L('Writing the summary...', 'Rédaction du résumé...')],
   };
 
   // ---------- adding material ----------
@@ -227,9 +231,26 @@ export default function StudyChat({ navigation, route }) {
     setText('');
     await run(S.quiz, { action: 'quiz', fileIds: ids, note, text: extra || undefined, mcq: teacher ? 10 : 6, structured: teacher ? 5 : 3 }, { text: note, files });
   };
+  const summarise = async () => {
+    const { ids, files } = take();
+    const note = L('Summarise this.', 'Résumez ceci.');
+    const extra = text.trim();
+    setText('');
+    await run(S.summary, { action: 'summary', fileIds: ids, note, text: extra || undefined }, { text: note, files });
+  };
+  // Lesson notes or a lesson plan: from the topic typed, or the files added.
+  const lesson = async (kind, topic) => {
+    const { ids, files } = take();
+    const t = (topic ?? text).trim();
+    setText('');
+    const note = t || (kind === 'lesson_plan' ? L('A lesson plan from this.', 'Une fiche de préparation à partir de ceci.') : L('Lesson notes from this.', 'Des notes de cours à partir de ceci.'));
+    await run(kind === 'lesson_plan' ? S.lessonPlan : S.lessonNotes, { action: kind, text: t || undefined, fileIds: ids, note, ...(kind === 'lesson_plan' ? { minutes } : {}) }, { text: note, files });
+  };
   const send = async () => {
     const t = text.trim();
     if (!t && !attached.length) return;
+    // The first message of a "lesson notes" or "lesson plan" chat is its topic.
+    if ((intent === 'lesson_notes' || intent === 'lesson_plan') && !messages.length) return lesson(intent, t);
     // A typed question in a new "solve" chat with nothing attached: solve it.
     const solveTyped = intent === 'solve' && !attached.length && !messages.length;
     const { ids, files } = take();
@@ -280,10 +301,10 @@ export default function StudyChat({ navigation, route }) {
       setError(e);
     }
   };
-  const pdf = async () => {
+  const pdf = async (variant = 'full') => {
     setSheet(null);
     try {
-      await shareStudyPdf({ title: chat?.title || L('Study notes', 'Notes d’étude'), messages, who: user?.name, lang });
+      await shareStudyPdf({ title: chat?.title || L('Study notes', 'Notes d’étude'), messages, who: user?.name, lang, variant });
     } catch (e) {
       setError(e);
     }
@@ -370,23 +391,48 @@ export default function StudyChat({ navigation, route }) {
   // what each set, quiz and solution look like now
   const solvedOf = (setId) => new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === setId).map((m) => m.body.n));
   const marksOf = (quizId) => new Map(messages.filter((m) => m.kind === 'marked' && m.body.quizId === quizId).map((m) => [m.body.n, m.body]));
-  const hasWork = messages.some((m) => ['solution', 'notes', 'quiz'].includes(m.kind));
+  const hasWork = messages.some((m) => ['solution', 'notes', 'quiz', 'lessonNotes', 'lessonPlan', 'summary'].includes(m.kind));
+  // what a teacher can hand out: questions to answer, and their marking
+  const hasQuestions = messages.some((m) => ['solution', 'quiz'].includes(m.kind) || (m.kind === 'lessonNotes' && m.body.exercises?.length));
+  const lessonIntent = (intent === 'lesson_notes' || intent === 'lesson_plan') && !messages.length;
 
-  const starters = [
-    ['photo_camera', L('Solve questions', 'Résoudre des questions'), L('A paper, homework or worksheet', 'Épreuve, devoir ou exercice'), () => setSheet('attach')],
-    ['description', L('Explain notes', 'Expliquer des notes'), L('Your notes, made clear', 'Vos notes, rendues claires'), () => setSheet('attach')],
-    ['quiz', L('Revision questions', 'Questions de révision'), L('From your notes, marked', 'De vos notes, corrigées'), () => setSheet('attach')],
-  ];
+  const starters = teacher
+    ? [
+        ['menu_book', L('Lesson notes', 'Notes de cours'), L('On any topic, for your class', 'Sur un sujet, pour votre classe'), () => navigation.setParams({ intent: 'lesson_notes' })],
+        ['event_note', L('Lesson plan', 'Fiche de préparation'), L('Objectives, stages, evaluation', 'Objectifs, étapes, évaluation'), () => navigation.setParams({ intent: 'lesson_plan' })],
+        ['task_alt', L('Solve a past paper', 'Résoudre une épreuve'), L('With a marking guide', 'Avec un guide de correction'), () => setSheet('attach')],
+        ['quiz', L('Make a test', 'Préparer un devoir'), L('From your notes, with the marking scheme', 'De vos notes, avec le barème'), () => setSheet('attach')],
+      ]
+    : [
+        ['photo_camera', L('Solve questions', 'Résoudre des questions'), L('A paper, homework or worksheet', 'Épreuve, devoir ou exercice'), () => setSheet('attach')],
+        ['description', L('Explain notes', 'Expliquer des notes'), L('Your notes, made clear', 'Vos notes, rendues claires'), () => setSheet('attach')],
+        ['quiz', L('Revision questions', 'Questions de révision'), L('From your notes, marked', 'De vos notes, corrigées'), () => setSheet('attach')],
+      ];
 
   const composer = (
     <V c="px-space-sm pt-space-xs gap-space-xs" style={{ paddingBottom: 8 }}>
+      {lessonIntent && intent === 'lesson_plan' && (
+        <V c="flex-row items-center gap-1.5">
+          <T c="font-label-md text-label-md text-on-surface-variant">{L('Length', 'Durée')}</T>
+          {[40, 60, 80, 120].map((n) => (
+            <P key={n} c={`h-9 px-3 rounded-full border items-center justify-center ${minutes === n ? 'bg-primary-container border-primary-container' : 'border-surface-container'}`} onPress={() => setMinutes(n)} accessibilityRole="radio" accessibilityState={{ selected: minutes === n }}>
+              <T c={`font-label-md text-label-md ${minutes === n ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
+                {n} min
+              </T>
+            </P>
+          ))}
+        </V>
+      )}
       {!!attached.length && (
         <V c="gap-space-xs">
           <FileChips files={attached} L={L} />
           <V c="flex-row flex-wrap gap-1.5">
             <Chip icon="task_alt" label={L('Solve the questions', 'Résoudre les questions')} onPress={find} disabled={!!working} />
             <Chip icon="lightbulb" label={L('Explain these notes', 'Expliquer ces notes')} onPress={explain} disabled={!!working} />
-            <Chip icon="quiz" label={L('Revision questions', 'Questions de révision')} onPress={quiz} disabled={!!working} />
+            <Chip icon="quiz" label={teacher ? L('Make a test', 'Préparer un devoir') : L('Revision questions', 'Questions de révision')} onPress={quiz} disabled={!!working} />
+            <Chip icon="short_text" label={L('Summarise', 'Résumer')} onPress={summarise} disabled={!!working} />
+            {teacher && <Chip icon="menu_book" label={L('Lesson notes', 'Notes de cours')} onPress={() => lesson('lesson_notes')} disabled={!!working} />}
+            {teacher && <Chip icon="event_note" label={L('Lesson plan', 'Fiche de préparation')} onPress={() => lesson('lesson_plan')} disabled={!!working} />}
           </V>
         </V>
       )}
@@ -414,7 +460,7 @@ export default function StudyChat({ navigation, route }) {
             <Input
               ref={input}
               c="py-2.5 text-body-md font-body-md text-on-surface"
-              placeholder={attached.length ? L('Ask about it, or choose above', 'Posez une question, ou choisissez ci-dessus') : teacher ? L('Ask, or add your notes and papers', 'Demandez, ou ajoutez notes et épreuves') : L('Ask anything, or add a photo', 'Demandez, ou ajoutez une photo')}
+              placeholder={lessonIntent ? L('Topic and class, e.g. Photosynthesis, Form 3', 'Sujet et classe, ex. La photosynthèse, 3e') : attached.length ? L('Ask about it, or choose above', 'Posez une question, ou choisissez ci-dessus') : teacher ? L('Ask, or add your notes and papers', 'Demandez, ou ajoutez notes et épreuves') : L('Ask anything, or add a photo', 'Demandez, ou ajoutez une photo')}
               value={text}
               onChangeText={setText}
               multiline
@@ -471,10 +517,18 @@ export default function StudyChat({ navigation, route }) {
                     ? L('Add your notes: photos, a PDF or a Word document.', 'Ajoutez vos notes : photos, PDF ou document Word.')
                     : intent === 'quiz'
                       ? L('Add the notes to make questions from.', 'Ajoutez les notes pour en faire des questions.')
-                      : L('What shall we work on?', 'Sur quoi travaillons-nous ?')}
+                      : intent === 'lesson_notes'
+                        ? L('Which topic, for which class?', 'Quel sujet, pour quelle classe ?')
+                        : intent === 'lesson_plan'
+                          ? L('Which lesson, for which class, and how long?', 'Quel cours, pour quelle classe, et quelle durée ?')
+                          : L('What shall we work on?', 'Sur quoi travaillons-nous ?')}
               </T>
               <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-                {L('You can add many pages at once, even a whole year of papers. Then I read them, find every question and work through them with you, step by step.', 'Vous pouvez ajouter beaucoup de pages, même une année d’épreuves. Je les lis, trouve chaque question et les résous avec vous, étape par étape.')}
+                {lessonIntent
+                  ? intent === 'lesson_plan'
+                    ? L('I write the plan in the format used in our schools: objectives, each stage with what you and the students do, the evaluation and the board summary. You can also add your own notes to base it on.', 'J’écris la fiche au format de nos établissements : objectifs, chaque étape avec ce que vous et les élèves faites, l’évaluation et le résumé au tableau. Vous pouvez aussi ajouter vos notes.')
+                    : L('I write the full notes for the class to copy, following the MINESEC syllabus: objectives, each part explained with examples, the diagrams to draw, a summary and exercises with answers.', 'J’écris les notes complètes à faire copier, selon le programme du MINESEC : objectifs, chaque partie expliquée avec des exemples, les schémas, un résumé et des exercices corrigés.')
+                  : L('You can add many pages at once, even a whole year of papers. Then I read them, find every question and work through them with you, step by step.', 'Vous pouvez ajouter beaucoup de pages, même une année d’épreuves. Je les lis, trouve chaque question et les résous avec vous, étape par étape.')}
               </T>
               {!intent &&
                 starters.map(([icon, t1, t2, go]) => (
@@ -501,6 +555,9 @@ export default function StudyChat({ navigation, route }) {
                 </V>
               );
             if (m.kind === 'notes') return <NotesCard key={m.id} body={m.body} L={L} />;
+            if (m.kind === 'lessonNotes') return <LessonNotesCard key={m.id} body={m.body} L={L} />;
+            if (m.kind === 'lessonPlan') return <LessonPlanCard key={m.id} body={m.body} L={L} />;
+            if (m.kind === 'summary') return <SummaryCard key={m.id} body={m.body} L={L} />;
             if (m.kind === 'quiz') return <Quiz key={m.id} body={m.body} marks={marksOf(m.body.quizId)} busyN={typeof busyN === 'string' && busyN.startsWith(m.body.quizId) ? Number(busyN.split(':')[1]) : null} onMark={(n, a) => mark(m.body.quizId, n, a)} L={L} />;
             return null;
           })}
@@ -513,7 +570,7 @@ export default function StudyChat({ navigation, route }) {
           )}
           <ErrorNote error={error} />
           {hasWork && !working && (
-            <Cta variant="soft" icon={null} lead="download" h="h-11" label={L('Download as PDF', 'Télécharger en PDF')} onPress={pdf} />
+            <Cta variant="soft" icon={null} lead="download" h="h-11" label={L('Download as PDF', 'Télécharger en PDF')} onPress={teacher && hasQuestions ? () => setSheet('pdf') : () => pdf()} />
           )}
         </V>
       </Screen>
@@ -526,9 +583,16 @@ export default function StudyChat({ navigation, route }) {
       </BottomSheet>
 
       <BottomSheet visible={sheet === 'more'} onClose={() => setSheet(null)} insets={insets}>
-        {hasWork && <SheetRow icon="download" title={L('Download as PDF', 'Télécharger en PDF')} sub={L('Every solution, explanation and quiz', 'Chaque solution, explication et quiz')} onPress={pdf} />}
+        {hasWork && <SheetRow icon="download" title={L('Download as PDF', 'Télécharger en PDF')} sub={L('Every solution, explanation and quiz', 'Chaque solution, explication et quiz')} onPress={teacher && hasQuestions ? () => setSheet('pdf') : () => pdf()} />}
         {!!chat?.id && <SheetRow icon="edit" title={L('Rename', 'Renommer')} onPress={() => (setTitle(chat.title || ''), setSheet('rename'))} />}
         <SheetRow icon="delete" title={L('Delete this chat', 'Supprimer cette discussion')} danger onPress={remove} />
+      </BottomSheet>
+
+      <BottomSheet visible={sheet === 'pdf'} onClose={() => setSheet(null)} insets={insets}>
+        <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>{L('Download as PDF', 'Télécharger en PDF')}</T>
+        <SheetRow icon="article" title={L('Everything', 'Tout')} sub={L('The full solving and explanations, notes and plans', 'Toute la résolution et les explications, notes et fiches')} onPress={() => pdf('full')} />
+        <SheetRow icon="fact_check" title={L('The marking guide only', 'Le guide de correction seul')} sub={L('Each question with its answer and marks', 'Chaque question avec sa réponse et ses points')} onPress={() => pdf('guide')} />
+        <SheetRow icon="assignment" title={L('The questions for students', 'Les questions pour les élèves')} sub={L('No answers: to print or share with the class', 'Sans réponses : à imprimer ou partager')} onPress={() => pdf('test')} />
       </BottomSheet>
 
       <BottomSheet visible={sheet === 'rename'} onClose={() => setSheet(null)} insets={insets}>
