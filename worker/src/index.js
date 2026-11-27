@@ -22,6 +22,7 @@ import * as partner from './routes/partner.js';
 import * as adminPartners from './routes/adminPartners.js';
 import * as adminAccount from './routes/adminAccount.js';
 import * as system from './routes/system.js';
+import * as community from './routes/community.js';
 import { isBlocked, loadBlocks, securityEvent, serverProblem, track } from './lib/monitor.js';
 
 const ID = '([A-Za-z0-9-]{8,64})';
@@ -117,6 +118,9 @@ const routes = [
   ['GET', '/v1/admin/notices', adminAccount.listNotices],
   ['GET', '/v1/admin/admins', adminAccount.listAdmins],
   ['POST', '/v1/admin/preview', adminAccount.previewAs],
+  ['POST', '/v1/me/preview', adminAccount.previewAsPartner],
+  ['GET', '/v1/community', community.getCommunity],
+  ['PUT', '/v1/admin/community', community.putCommunity],
   // the partner programme
   ['GET', '/v1/partner/programme', partner.publicProgramme],
   ['GET', '/v1/partner', partner.myPartner],

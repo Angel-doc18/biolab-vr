@@ -6,7 +6,7 @@ import { HttpError, now, ok, readJson } from '../lib/http.js';
 import { hashPassword, randomToken, uuid, verifyPassword } from '../lib/crypto.js';
 import { bool, oneOf, phone, str } from '../lib/validate.js';
 import { ROLE_TITLES, adminLogin, adminNotice, publicAdmin, requireAdmin, requireAdminCan } from '../lib/adminAuth.js';
-import { issueSession, publicUser } from '../lib/auth.js';
+import { issueSession, publicUser, requireUser } from '../lib/auth.js';
 import { securityEvent } from '../lib/monitor.js';
 
 const SORT = { ceo: -20, cto: -10 };
@@ -161,7 +161,9 @@ const examYear = () => {
   return d.getUTCMonth() >= 6 ? d.getUTCFullYear() + 1 : d.getUTCFullYear();
 };
 
-async function previewUser(env, admin, role) {
+// owner: an admin ({ id, name }) or a special partner (a user row); prefix keeps
+// the two kinds apart ('preview' for admins, 'ppreview' for special partners).
+async function previewUser(env, admin, role, prefix = 'preview') {
   const found = await env.DB.prepare('SELECT * FROM users WHERE preview_of = ? AND role = ? AND deleted_at IS NULL').bind(admin.id, role).first();
   if (found) return found;
   const id = uuid();
@@ -175,10 +177,10 @@ async function previewUser(env, admin, role) {
     partner: { partner_kind: 'individual' },
   }[role];
   const cols = ['id', 'role', 'name', 'phone', 'password_hash', 'password_salt', 'phone_verified', 'lang', 'onboarded', 'is_admin', 'preview_of', 'created_at', 'updated_at', ...Object.keys(extra)];
-  const vals = [id, role, admin.name, `preview-${admin.id}-${role}`, hash, salt, 1, 'en', 1, 1, admin.id, t, t, ...Object.values(extra)];
+  const vals = [id, role, admin.name, `${prefix}-${admin.id}-${role}`, hash, salt, 1, 'en', 1, 1, admin.id, t, t, ...Object.values(extra)];
   await env.DB.prepare(`INSERT INTO users (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`).bind(...vals).run();
   if (role === 'parent' || role === 'teacher') {
-    const child = await previewUser(env, admin, 'student');
+    const child = await previewUser(env, admin, 'student', prefix);
     if (role === 'parent') {
       await env.DB.prepare('INSERT OR IGNORE INTO parent_links (parent_id, student_id, created_at) VALUES (?, ?, ?)').bind(id, child.id, t).run();
     } else {
@@ -207,6 +209,30 @@ export async function previewAs(request, env) {
   const body = await readJson(request);
   const role = oneOf(body.role, 'Account type', PREVIEW_ROLES);
   const user = await previewUser(env, admin, role);
+  const session = await issueSession(env, user);
+  return ok({ kind: 'user', user: publicUser(user, env), ...session, preview: true });
+}
+
+// POST /v1/me/preview { role }: a special partner sees the app as a student, a
+// teacher or a parent with always-free accounts of their own, and comes back
+// with role 'partner'. Works from the partner account and from those previews.
+export async function previewAsPartner(request, env) {
+  const me = await requireUser(request, env);
+  const body = await readJson(request);
+  const role = oneOf(body.role, 'Account type', ['student', 'teacher', 'parent', 'partner']);
+  let owner = null;
+  if (me.role === 'partner' && me.special_partner) owner = me;
+  else if (me.preview_of && String(me.phone || '').startsWith('ppreview-')) {
+    owner = await env.DB.prepare('SELECT * FROM users WHERE id = ? AND deleted_at IS NULL').bind(me.preview_of).first();
+  }
+  if (!owner) throw new HttpError(403, 'Only special partners can switch accounts.', 'forbidden');
+  if (role === 'partner') {
+    const session = await issueSession(env, owner);
+    return ok({ kind: 'user', user: publicUser(owner, env), ...session });
+  }
+  // A partner who is no longer special can still go back, but not switch.
+  if (!owner.special_partner) throw new HttpError(403, 'Your special partner access has ended. Go back to your partner account.', 'forbidden');
+  const user = await previewUser(env, { id: owner.id, name: owner.name }, role, 'ppreview');
   const session = await issueSession(env, user);
   return ok({ kind: 'user', user: publicUser(user, env), ...session, preview: true });
 }

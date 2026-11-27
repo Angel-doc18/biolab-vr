@@ -148,6 +148,10 @@ export function publicUser(u, env) {
     partnerKind: u.partner_kind || null,
     // an admin's own account for seeing the app as this kind of user
     preview: Boolean(u.preview_of),
+    // ...or a special partner's (they switch from the app, not the admin console)
+    previewBy: u.preview_of ? (String(u.phone || '').startsWith('ppreview-') ? 'partner' : 'admin') : null,
+    // a partner the founder or the CTO lets see every kind of account
+    special: u.role === 'partner' && Boolean(u.special_partner),
     createdAt: u.created_at,
   };
 }

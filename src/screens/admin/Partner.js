@@ -3,6 +3,7 @@
 // the people who joined with their code, each earning and each withdrawal.
 import { useState } from 'react';
 import { Input, T, V } from '../../ui/kit';
+import { Toggle } from '../../ui/form';
 import { pickReceiptPhoto } from '../../lib/photo';
 import ProofView from '../../ui/ProofView';
 import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
@@ -59,6 +60,21 @@ export default function AdminPartner({ navigation, route }) {
       setSaving(false);
     }
   };
+  // A special partner can see the app as a student, a teacher and a parent.
+  const [specialBusy, setSpecialBusy] = useState(false);
+  const setSpecial = async (on) => {
+    setSpecialBusy(true);
+    setSaveError(null);
+    try {
+      const r = await patch(`/v1/admin/partners/${id}`, { special: on });
+      setData(() => r);
+      showToast(on ? L('Now a special partner. They were told.', 'Désormais partenaire spécial. La personne est avertie.') : L('No longer a special partner.', 'N’est plus partenaire spécial.'));
+    } catch (e) {
+      setSaveError(e);
+    } finally {
+      setSpecialBusy(false);
+    }
+  };
   const act = async () => {
     setActing(true);
     setActError(null);
@@ -104,6 +120,24 @@ export default function AdminPartner({ navigation, route }) {
                   <Row first icon="person" title={L('Open their account', 'Ouvrir son compte')} onPress={() => navigation.navigate('AdminPerson', { id: x.id, name: x.name })} />
                 </V>
               </Card>
+
+              {can.owner && (
+                <Section title={L('Special partner', 'Partenaire spécial')}>
+                  <Card>
+                    <V c="p-space-md flex-row items-center gap-space-sm">
+                      <V c="flex-1 gap-0.5">
+                        <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                          {x.special ? L('Special partner', 'Partenaire spécial') : L('Make them a special partner', 'En faire un partenaire spécial')}
+                        </T>
+                        <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                          {L('They can see the app as a student, a teacher and a parent, free, to advertise every part of Klass8.', 'La personne peut voir l’application comme un élève, un enseignant et un parent, gratuitement, pour présenter tout Klass8.')}
+                        </T>
+                      </V>
+                      <Toggle on={!!x.special} onPress={() => !specialBusy && setSpecial(!x.special)} accessibilityLabel={L('Special partner', 'Partenaire spécial')} />
+                    </V>
+                  </Card>
+                </Section>
+              )}
 
               <Section title={L('Their share', 'Sa part')}>
                 <Card>

@@ -8,6 +8,7 @@ import { ErrorNote } from './chrome';
 import { useL } from '../i18n';
 import { useApp } from '../state/store';
 import { post as adminPost } from '../api/adminClient';
+import { post as userPost } from '../api/client';
 
 export const VIEW_AS = [
   ['student', 'school', 'Student', 'Élève'],
@@ -46,9 +47,33 @@ export function useViewAs(navigation) {
   return { viewAs, backToAdmin, busy, error };
 }
 
-// Four buttons, two by two. `current`: the kind being seen now (no button for it).
-export function ViewAsButtons({ current, busy, error, onPick }) {
+// A special partner does the same from their partner account (or from one of
+// their previews), with their own user session; role 'partner' comes back.
+export function usePartnerViewAs(navigation) {
+  const { startSession } = useApp();
+  const [busy, setBusy] = useState(null);
+  const [error, setError] = useState(null);
+  const viewAs = async (role) => {
+    setBusy(role);
+    setError(null);
+    try {
+      const r = await userPost('/v1/me/preview', { role });
+      await startSession(r);
+      rootOf(navigation).reset({ index: 0, routes: [{ name: 'Main', params: { screen: 'Home' } }] });
+    } catch (e) {
+      setError(e);
+    } finally {
+      setBusy(null);
+    }
+  };
+  return { viewAs, busy, error };
+}
+
+// Buttons two by two. `current`: the kind being seen now; `roles`: which kinds
+// to offer (all four by default).
+export function ViewAsButtons({ current, busy, error, onPick, roles }) {
   const L = useL();
+  const list = roles ? VIEW_AS.filter(([r]) => roles.includes(r)) : VIEW_AS;
   const one = ([role, icon, en, fr]) => {
     const on = role === current;
     return (
@@ -70,8 +95,8 @@ export function ViewAsButtons({ current, busy, error, onPick }) {
   };
   return (
     <V c="gap-2">
-      <V c="flex-row gap-2">{VIEW_AS.slice(0, 2).map(one)}</V>
-      <V c="flex-row gap-2">{VIEW_AS.slice(2).map(one)}</V>
+      <V c="flex-row gap-2">{list.slice(0, 2).map(one)}</V>
+      {list.length > 2 && <V c="flex-row gap-2">{list.slice(2).map(one)}</V>}
       <ErrorNote error={error} />
     </V>
   );

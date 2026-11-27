@@ -52,6 +52,7 @@ export default function AdminMore({ navigation }) {
             <Row icon="mail" title={L('Messages from the website', 'Messages du site')} sub={L('What visitors wrote on the contact page', 'Ce que les visiteurs ont écrit')} badge={d?.newMessages || 0} onPress={() => go('AdminMessages')} />
             <Row icon="flag" title={L('Reports on AI answers', 'Signalements de réponses IA')} sub={L('Answers students said were wrong', 'Réponses jugées fausses par les élèves')} badge={d?.openReports || 0} onPress={() => go('AdminReports')} />
             <Row icon="campaign" title={L('Send an announcement', 'Envoyer une annonce')} sub={L('A message in the app for everyone', 'Un message dans l’application pour tous')} onPress={() => go('AdminAnnounce')} />
+            {(can.owner || can.system) && <Row icon="diversity_3" title={L('Community links', 'Liens de la communauté')} sub={L('Social media buttons on every profile', 'Boutons des réseaux sociaux sur chaque profil')} onPress={() => go('AdminCommunity')} />}
             <Row icon="badge" title={L('The team on the website', 'L’équipe sur le site')} sub={L('The people on the About page', 'Les personnes de la page À propos')} onPress={() => go('AdminTeam')} />
           </Card>
         </Section>

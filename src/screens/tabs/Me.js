@@ -12,7 +12,8 @@ import { Section } from './Home';
 import { VOICES, setVoice, speak } from '../../lib/voice';
 import { get } from '../../api/client';
 import { pickProfilePhoto } from '../../lib/photo';
-import { ViewAsButtons, useViewAs } from '../../ui/ViewAs';
+import { ViewAsButtons, usePartnerViewAs, useViewAs } from '../../ui/ViewAs';
+import CommunityLinks from '../../ui/CommunityLinks';
 import { STORE_BUILD } from '../../lib/payments';
 
 function MenuRow({ title, sub, onPress, first }) {
@@ -113,7 +114,8 @@ export default function Me({ navigation }) {
   return (
     <Screen bg="bg-surface" header={<TabHeader title={L('Me', 'Moi')} subtitle={user?.name || ''} />}>
       <V c="pb-space-lg gap-space-lg pt-space-md">
-        {!!user?.preview && <PreviewCard navigation={navigation} role={user.role} />}
+        {!!user?.preview && (user.previewBy === 'partner' ? <PartnerPreviewCard navigation={navigation} role={user.role} /> : <PreviewCard navigation={navigation} role={user.role} />)}
+        {user?.role === 'partner' && user?.special && !user?.preview && <SpecialPartnerCard navigation={navigation} />}
         <V c="flex-row items-center gap-space-md">
           <P onPress={() => setPhotoMenu((x) => !x)} accessibilityRole="button" accessibilityLabel={L('Change profile picture', 'Changer la photo de profil')} hitSlop={6}>
             <Avatar name={user?.name} size={64} uri={avatar} />
@@ -229,6 +231,8 @@ export default function Me({ navigation }) {
           <MenuRow title={L('Help, terms and privacy', 'Aide, conditions et confidentialité')} onPress={() => navigation.navigate('Legal', { doc: 'help' })} />
         </V>
 
+        <CommunityLinks />
+
         <P c="self-center px-space-md py-space-sm" onPress={logout} hitSlop={8}>
           <T c="font-label-lg text-label-lg text-error">{L('Log out', 'Se déconnecter')}</T>
         </P>
@@ -253,6 +257,48 @@ function PreviewCard({ navigation, role }) {
         <Ic n="admin_panel_settings" s={20} c="on-primary" />
         <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
           {L('Back to the admin console', 'Retour à la console')}
+        </T>
+      </P>
+    </V>
+  );
+}
+
+// A special partner (chosen by the founder or the CTO) sees the app as a
+// student, a teacher or a parent with free accounts of their own, to show
+// people every part of Klass8.
+function SpecialPartnerCard({ navigation }) {
+  const L = useL();
+  const look = usePartnerViewAs(navigation);
+  return (
+    <V c="rounded-2xl bg-surface-container-lowest border border-surface-container p-space-md gap-space-sm">
+      <V c="gap-0.5">
+        <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+          {L('Special partner: see the app as', 'Partenaire spécial : voir l’application comme')}
+        </T>
+        <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+          {L('Opens Klass8 exactly as each kind of user sees it, free. Come back from its Me page.', 'Ouvre Klass8 exactement comme chaque type d’utilisateur le voit, gratuitement. Revenez depuis sa page Moi.')}
+        </T>
+      </V>
+      <ViewAsButtons roles={['student', 'teacher', 'parent']} busy={look.busy} error={look.error} onPick={look.viewAs} />
+    </V>
+  );
+}
+
+// On a special partner's preview account: switch to another kind, or go back.
+function PartnerPreviewCard({ navigation, role }) {
+  const L = useL();
+  const look = usePartnerViewAs(navigation);
+  const NAME = { student: L('a student', 'un élève'), teacher: L('a teacher', 'un enseignant'), parent: L('a parent', 'un parent') };
+  return (
+    <V c="rounded-2xl bg-surface-container-lowest border border-surface-container p-space-md gap-space-sm">
+      <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+        {L('You are seeing the app as', 'Vous voyez l’application comme')} {NAME[role] || role}
+      </T>
+      <ViewAsButtons roles={['student', 'teacher', 'parent']} current={role} busy={look.busy} error={look.error} onPick={look.viewAs} />
+      <P c="h-12 rounded-xl bg-primary flex-row items-center justify-center gap-2" onPress={() => look.viewAs('partner')} disabled={!!look.busy} accessibilityRole="button">
+        <Ic n="handshake" s={20} c="on-primary" />
+        <T c="font-label-lg text-label-lg text-on-primary" style={{ fontWeight: '700' }}>
+          {look.busy === 'partner' ? L('Opening...', 'Ouverture...') : L('Back to my partner account', 'Retour à mon compte partenaire')}
         </T>
       </P>
     </V>

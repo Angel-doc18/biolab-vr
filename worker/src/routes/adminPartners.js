@@ -96,7 +96,7 @@ export async function getPartner(request, env, id) {
     .all();
   const { results: withdrawals } = await env.DB.prepare('SELECT id, amount, phone, status, reason, reference, created_at AS createdAt, decided_at AS decidedAt, EXISTS(SELECT 1 FROM withdrawal_proofs p WHERE p.withdrawal_id = withdrawals.id) AS hasProof FROM withdrawals WHERE user_id = ? ORDER BY created_at DESC LIMIT 50').bind(id).all();
   return ok({
-    partner: { id: u.id, name: u.name, role: u.role, partnerKind: u.partner_kind, phone: u.phone, email: u.email, code: u.ref_code, rate: rateOf(u), ownRate: u.ref_rate != null ? Number(u.ref_rate) : null, paused: Boolean(u.ref_paused), createdAt: u.created_at },
+    partner: { id: u.id, name: u.name, role: u.role, partnerKind: u.partner_kind, phone: u.phone, email: u.email, code: u.ref_code, rate: rateOf(u), ownRate: u.ref_rate != null ? Number(u.ref_rate) : null, paused: Boolean(u.ref_paused), special: Boolean(u.special_partner), createdAt: u.created_at },
     programme: programme(),
     balance: await balance(env, id),
     people,
@@ -132,6 +132,22 @@ export async function patchPartner(request, env, id) {
         'partner',
         paused ? 'Your earnings are on hold' : 'Your earnings are open again',
         paused ? `Klass8 put your promo code and earnings on hold: ${reason} Your code does not work and you cannot withdraw until this is sorted out. Contact Klass8.` : 'Your promo code works again and you can withdraw what you have earned.'
+      );
+    }
+  }
+  if (b.special !== undefined) {
+    await requireAdminCan(request, env, 'owner');
+    const special = bool(b.special, 'Special partner');
+    await env.DB.prepare('UPDATE users SET special_partner = ?, updated_at = ? WHERE id = ?').bind(special ? 1 : 0, now(), id).run();
+    if (special !== Boolean(u.special_partner)) {
+      await notify(
+        env,
+        id,
+        'partner',
+        special ? 'You are now a special partner' : 'Special partner access ended',
+        special
+          ? 'You can now see Klass8 as a student, a teacher and a parent, to show people every part of the app. Open Me and choose an account type.'
+          : 'You can no longer switch to the student, teacher and parent views. Your promo code and earnings are unchanged.'
       );
     }
   }
