@@ -1,118 +1,102 @@
-// One study chat, like ChatGPT or Claude: photos and documents in, then the AI
-// finds the questions and solves them one by one (or all), explains notes,
-// writes revision questions and marks answers, or simply talks it through.
-// Everything is kept, so the student (or teacher) can come back and go on, and
-// download it all as a clean PDF.
+// The study chat: one conversation that does everything, like ChatGPT or
+// Claude. The person writes, or adds photos and documents, and the AI works
+// out what is wanted: it solves and explains questions step by step (a whole
+// paper, one after another, without being asked again), explains notes,
+// summarises, makes revision questions and marks the answers, and for
+// teachers writes lesson notes, lesson plans and tests. Files sent with no
+// instruction get a question back first. Past chats are in the side panel.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ic, Input, P, T, V } from '../../ui/kit';
-import { Cta, ErrorNote, Screen, StackHeader, useToast } from '../../ui/chrome';
+import { Cta, ErrorNote, Screen, useToast } from '../../ui/chrome';
 import { useApp } from '../../state/store';
 import { useL, useLang } from '../../i18n';
 import { del, get, patch, post } from '../../api/client';
 import { pickStudyDocuments, pickStudyPhotos } from '../../lib/studyFiles';
 import { shareStudyPdf } from '../../lib/studyPdf';
-import { useAudioRecorder, useAudioRecorderState } from 'expo-audio';
-import { VOICE_RECORDING, micAllowed, micDone, recordingData } from '../../lib/recordVoice';
-import { explain, interrupt, isTalking, pausedNow, reply, stopTalking } from '../../lib/talk';
-import { AiText, FileChips, LessonNotesCard, LessonPlanCard, NotesCard, Quiz, QuestionSet, Solution, SummaryCard, UserBubble, Working, solutionParts } from './cards';
-
-// Same rule as the server: a real question is solved and explained step by
-// step; small talk and follow-ups get a conversational answer.
-const SMALL_TALK = /^(hi|hello|hey|thanks|thank you|ok|okay|good|great|nice|cool|yes|no|bye|merci|bonjour|salut|d'accord|oui|non)\b[\s!.?]*$/i;
-const FOLLOW_UP = /\b(step \d+|this step|that step|previous|above|you said|again|repeat|slower|simpler|what do you mean|i don'?t understand|je ne comprends pas|encore|l'étape)\b/i;
-// What was being explained (for a question asked in the middle of it).
-const stepContext = (sol, k) => {
-  const st = k >= 0 ? sol.steps[k] : null;
-  return `Question: ${sol.question}
-${st ? `Step ${k + 1} on the board: ${st.board}${st.why ? `
-Reason given: ${st.why}` : ''}` : 'The beginning of the solution (what the question asks and the ideas behind it).'}`;
-};
-const looksLikeQuestion = (t) => String(t || '').trim().length >= 12 && !SMALL_TALK.test(String(t).trim()) && !FOLLOW_UP.test(String(t));
+import { stopTalking } from '../../lib/talk';
+import { AssistantMessage, Thinking, UserMessage } from './messages';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const FILE_ICON = { image: 'image', pdf: 'picture_as_pdf', docx: 'description', text: 'description' };
+const when = (t, L) => {
+  const d = new Date(t);
+  return new Date().toDateString() === d.toDateString() ? d.toTimeString().slice(0, 5) : d.toLocaleDateString(L('en-GB', 'fr-FR'), { day: 'numeric', month: 'short' });
+};
 
 export default function StudyChat({ navigation, route }) {
   const { user } = useApp();
   const L = useL();
   const lang = useLang();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const tab = route.name === 'Study'; // the Study / Assistant tab itself
   const teacher = user?.role === 'teacher';
-  const [chat, setChat] = useState(route.params?.chatId ? { id: route.params.chatId, title: '' } : null);
+  const parent = user?.role === 'parent';
+  const [chat, setChat] = useState(null); // { id, title }
   const [messages, setMessages] = useState([]);
-  const [attached, setAttached] = useState([]); // files uploaded, not yet used in a message
+  const [attached, setAttached] = useState([]); // uploaded, sent with the next message
   const [text, setText] = useState('');
   const [working, setWorking] = useState(null); // status lines while the AI works
-  const [busyN, setBusyN] = useState(null);
-  const [running, setRunning] = useState(false); // "Solve all" in progress
+  const [running, setRunning] = useState(false); // solving a paper, question after question
   const [error, setError] = useState(null);
-  const [sheet, setSheet] = useState(null); // 'attach' | 'rename' | 'more'
-  const [minutes, setMinutes] = useState(40); // a lesson plan's length
-  // giving a test to a class: { quiz, classes, classId, days, sending }
-  const [give, setGive] = useState(null);
+  const [sheet, setSheet] = useState(null); // 'attach' | 'more' | 'rename' | 'pdf' | 'give' | 'history'
   const [title, setTitle] = useState('');
+  const [chats, setChats] = useState(null);
+  const [give, setGive] = useState(null);
   const [toast, showToast] = useToast();
   const scroll = useRef(null);
   const input = useRef(null);
   const stopAll = useRef(false);
-  const recorder = useAudioRecorder(VOICE_RECORDING);
-  const recState = useAudioRecorderState(recorder, 250);
-  const [listening, setListening] = useState(false);
-  // Read aloud: solutions are explained by voice as they arrive, one after
-  // another (on by default; the speaker button in the header turns it off).
-  const [aloud, setAloud] = useState(true);
-  const aloudRef = useRef(true);
-  const queue = useRef([]);
-  const [liveIds, setLiveIds] = useState(() => new Set()); // solutions taught live
-  const playNext = () => {
-    if (isTalking()) return;
-    const m = queue.current.shift();
-    if (m) explain(m.id, solutionParts(m.body, lang), { lang, onEnd: playNext });
-  };
-  // spoken: the person asked by voice, so the answer is spoken even when off
-  const speakSolutions = (sols, spoken) => {
-    if (!aloudRef.current && !spoken) return;
-    setLiveIds((s) => new Set([...s, ...sols.map((m) => m.id)]));
-    queue.current.push(...sols);
-    playNext();
-  };
-  const toggleAloud = () => {
-    const on = !aloudRef.current;
-    aloudRef.current = on;
-    setAloud(on);
-    if (!on) {
-      queue.current = [];
-      stopTalking();
-    }
-  };
-  // Leaving the chat stops the voice.
-  useEffect(() => () => stopTalking(), []);
-  const intent = route.params?.intent;
-
-  const toEnd = () => setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 80);
-  // Following the board while it is written: each card's place in the list.
+  const previews = useRef({}); // file id -> photo shown in the person's message
   const listY = useRef(0);
   const cardY = useRef({});
+
+  const toEnd = () => setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 80);
   const follow = (id, y) => scroll.current?.scrollTo({ y: Math.max(0, listY.current + (cardY.current[id] || 0) + y - 110), animated: true });
 
-  useEffect(() => {
-    if (!route.params?.chatId) return;
-    get(`/v1/study/chats/${route.params.chatId}`)
-      .then((r) => {
-        setChat(r.chat);
-        setMessages(r.messages);
-        toEnd();
-      })
-      .catch(setError);
-  }, [route.params?.chatId]);
+  // ---------- which chat ----------
+  const open = useCallback(async (id) => {
+    stopTalking();
+    stopAll.current = true;
+    setError(null);
+    setAttached([]);
+    setSheet(null);
+    if (!id) {
+      setChat(null);
+      setMessages([]);
+      return;
+    }
+    try {
+      const r = await get(`/v1/study/chats/${id}`);
+      setChat(r.chat);
+      setMessages(r.messages);
+      toEnd();
+    } catch (e) {
+      setError(e);
+    }
+  }, []);
 
-  // A new chat opened from a starter: straight to adding the material.
+  // Opened on a given chat, or with something to start (from Home).
   useEffect(() => {
-    if (route.params?.chatId) return;
-    if (intent === 'ask' || intent === 'lesson_notes' || intent === 'lesson_plan') setTimeout(() => input.current?.focus(), 400);
-    else if (intent) setSheet('attach');
-  }, [intent, route.params?.chatId]);
+    const p = route.params || {};
+    if (p.chatId) open(p.chatId);
+    else if (p.intent) {
+      open(null);
+      const draft = {
+        lesson_notes: L('Write lesson notes on ', 'Rédigez des notes de cours sur '),
+        lesson_plan: L('Write a 40 minute lesson plan on ', 'Rédigez une fiche de préparation de 40 minutes sur '),
+      }[p.intent];
+      if (draft) setText(draft);
+      if (['solve', 'notes', 'quiz'].includes(p.intent)) setTimeout(() => setSheet('attach'), 350);
+      else setTimeout(() => input.current?.focus(), 400);
+    }
+    if (p.chatId || p.intent) navigation.setParams({ chatId: undefined, intent: undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.chatId, route.params?.intent]);
+  // Leaving the chat stops the voice.
+  useEffect(() => () => stopTalking(), []);
 
   const ensureChat = async () => {
     if (chat?.id) return chat.id;
@@ -121,66 +105,77 @@ export default function StudyChat({ navigation, route }) {
     return r.chat.id;
   };
 
-  // One request to the AI, with the status lines, and one quiet retry when
-  // every AI key is briefly busy.
-  // local: { text, files } shown at once as the person's message, until the
-  // server's saved copy replaces it.
-  const run = useCallback(
-    async (steps, body, local) => {
-      setError(null);
-      setWorking(steps);
-      if (local) setMessages((m) => [...m, { id: `local-${Date.now()}`, role: 'user', kind: 'text', body: local }]);
-      toEnd();
+  // ---------- talking to the AI ----------
+  // One request, with its status line, and one quiet retry when every AI key
+  // is briefly busy. local: the person's message, shown at once.
+  const run = async (steps, body, local) => {
+    setError(null);
+    setWorking(steps);
+    if (local) setMessages((m) => [...m, { id: `local-${Date.now()}`, role: 'user', kind: 'text', body: local }]);
+    toEnd();
+    try {
+      const id = await ensureChat();
+      let r;
       try {
-        const id = await ensureChat();
-        let r;
-        try {
-          r = await post(`/v1/study/chats/${id}/ask`, body, { timeout: 175000 });
-        } catch (e) {
-          if (e.code !== 'ai_busy') throw e;
-          setWorking([L('Many people are studying right now. Trying again...', 'Beaucoup de monde étudie en ce moment. Nouvel essai...')]);
-          await sleep(8000);
-          r = await post(`/v1/study/chats/${id}/ask`, body, { timeout: 175000 });
-        }
-        // Each solution is explained aloud as it arrives, one after another
-        // (marked live first, so its board starts empty and is written as it goes).
-        const sols = r.messages.filter((x) => x.kind === 'solution');
-        if (sols.length && (aloudRef.current || body.spoken)) setLiveIds((s) => new Set([...s, ...sols.map((m) => m.id)]));
-        setMessages((m) => [...m.filter((x) => !String(x.id).startsWith('local-')), ...r.messages]);
-        toEnd();
-        if (sols.length) speakSolutions(sols, body.spoken);
-        return r.messages;
+        r = await post(`/v1/study/chats/${id}/ask`, body, { timeout: 175000 });
       } catch (e) {
-        setMessages((m) => m.filter((x) => !String(x.id).startsWith('local-')));
-        setError(e);
-        return null;
-      } finally {
-        setWorking(null);
+        if (e.code !== 'ai_busy') throw e;
+        setWorking([L('Many people are studying right now. Trying again...', 'Beaucoup de monde étudie en ce moment. Nouvel essai...')]);
+        await sleep(8000);
+        r = await post(`/v1/study/chats/${id}/ask`, body, { timeout: 175000 });
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chat?.id]
-  );
-
-  const S = {
-    read: [L('Reading the document...', 'Lecture du document...'), L('Finding the questions...', 'Recherche des questions...'), L('Putting them in order...', 'Mise en ordre...')],
-    solve: (n, of) => [
-      of ? `${L('Question', 'Question')} ${n} ${L('of', 'sur')} ${of}: ${L('reading it...', 'lecture...')}` : L('Reading the question...', 'Lecture de la question...'),
-      L('Working it out step by step...', 'Résolution étape par étape...'),
-      L('Checking the working...', 'Vérification de la résolution...'),
-      L('Almost done...', 'Presque terminé...'),
-    ],
-    notes: [L('Reading your notes...', 'Lecture de vos notes...'), L('Explaining each part...', 'Explication de chaque partie...'), L('Adding examples and exam tips...', 'Ajout d’exemples et de conseils...')],
-    quiz: [L('Reading the material...', 'Lecture du contenu...'), L('Writing the questions...', 'Rédaction des questions...'), L('Preparing the marking scheme...', 'Préparation du barème...')],
-    mark: [L('Reading your answer...', 'Lecture de votre réponse...'), L('Marking it against the scheme...', 'Correction avec le barème...')],
-    chat: [L('Thinking...', 'Réflexion...'), L('Writing the answer...', 'Rédaction de la réponse...')],
-    upload: [L('Uploading...', 'Envoi...'), L('Reading the document...', 'Lecture du document...')],
-    lessonNotes: [L('Checking the syllabus for this class...', 'Vérification du programme de la classe...'), L('Writing the notes, part by part...', 'Rédaction des notes, partie par partie...'), L('Adding examples, diagrams and exercises...', 'Ajout d’exemples, de schémas et d’exercices...'), L('Almost done...', 'Presque terminé...')],
-    lessonPlan: [L('Setting the objectives...', 'Définition des objectifs...'), L('Planning each stage of the lesson...', 'Préparation de chaque étape du cours...'), L('Writing the evaluation and board summary...', 'Rédaction de l’évaluation et du résumé...'), L('Almost done...', 'Presque terminé...')],
-    summary: [L('Reading the material...', 'Lecture du contenu...'), L('Picking out what matters...', 'Sélection de l’essentiel...'), L('Writing the summary...', 'Rédaction du résumé...')],
+      setMessages((m) => [...m.filter((x) => !String(x.id).startsWith('local-')), ...r.messages]);
+      toEnd();
+      return r.messages;
+    } catch (e) {
+      setMessages((m) => m.filter((x) => !String(x.id).startsWith('local-')));
+      setError(e);
+      return null;
+    } finally {
+      setWorking(null);
+    }
   };
 
-  // ---------- adding material ----------
+  const S = {
+    files: [L('Reading your files...', 'Lecture de vos fichiers...'), L('Studying the questions...', 'Étude des questions...'), L('Working on it...', 'Je m’en occupe...'), L('Almost there...', 'Presque fini...')],
+    text: [L('Thinking...', 'Réflexion...'), L('Working it out step by step...', 'Résolution étape par étape...'), L('Checking the working...', 'Vérification...'), L('Almost there...', 'Presque fini...')],
+    solve: (n, of) => [
+      `${L('Question', 'Question')} ${n} ${L('of', 'sur')} ${of}: ${L('reading it...', 'lecture...')}`,
+      L('Working it out step by step...', 'Résolution étape par étape...'),
+      L('Checking the working...', 'Vérification...'),
+    ],
+    upload: [L('Adding your file...', 'Ajout du fichier...'), L('Reading it...', 'Lecture...')],
+  };
+
+  // A paper's questions, solved and explained one after another at once.
+  const solveSet = async (set, done = new Set()) => {
+    stopAll.current = false;
+    setRunning(true);
+    const list = set.questions.filter((q) => !done.has(q.n));
+    for (let i = 0; i < list.length; i += 1) {
+      if (stopAll.current) break;
+      const q = list[i];
+      const k = set.questions.indexOf(q);
+      const r = await run(S.solve(k + 1, set.questions.length), { action: 'solve', setId: set.setId, n: q.n });
+      if (!r) break;
+    }
+    setRunning(false);
+  };
+  const solvedOf = (setId) => new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === setId).map((m) => m.body.n));
+
+  const send = async () => {
+    const t = text.trim();
+    if ((!t && !attached.length) || working || running) return;
+    const files = attached;
+    setAttached([]);
+    setText('');
+    const local = { text: t, files: files.map((f) => ({ id: f.id, name: f.name, kind: f.kind, preview: previews.current[f.id] })) };
+    const r = await run(files.length ? S.files : S.text, { action: 'auto', text: t || undefined, fileIds: files.map((f) => f.id) }, local);
+    const set = r?.find((m) => m.kind === 'questions');
+    if (set) await solveSet(set.body);
+  };
+
+  // ---------- adding files ----------
   const addFiles = async (how) => {
     setSheet(null);
     setError(null);
@@ -189,14 +184,13 @@ export default function StudyChat({ navigation, route }) {
       if (!picked.length) return;
       setWorking(S.upload);
       const id = await ensureChat();
-      const added = [];
       for (const f of picked) {
         const r = await post(`/v1/study/chats/${id}/files`, { name: f.name, mime: f.mime, base64: f.base64 }, { timeout: 120000 });
-        added.push(r.file);
-        if (r.file.scanned) showToast(L('This PDF is a scan: if the AI cannot read it, send photos of the pages instead.', 'Ce PDF est une image : si l’IA ne peut pas le lire, envoyez plutôt des photos des pages.'), 'info');
+        if (f.uri && r.file.kind === 'image') previews.current[r.file.id] = f.uri;
+        setAttached((a) => [...a, r.file]);
+        if (r.file.scanned) showToast(L('This PDF is a scan: if it cannot be read, send photos of the pages instead.', 'Ce PDF est une image : s’il ne peut pas être lu, envoyez plutôt des photos des pages.'), 'info');
       }
-      setAttached((a) => [...a, ...added]);
-      toEnd();
+      setTimeout(() => input.current?.focus(), 200);
     } catch (e) {
       setError(e);
     } finally {
@@ -204,88 +198,16 @@ export default function StudyChat({ navigation, route }) {
     }
   };
 
-  // The files just added are used by the next request, then cleared.
-  const take = () => {
-    const files = attached;
-    setAttached([]);
-    return { ids: files.map((f) => f.id), files };
-  };
-
-  // Find the questions, then solve and explain them one after another, at once.
-  const find = async () => {
-    const { ids, files } = take();
-    const note = L('Find the questions and solve them with me.', 'Trouvez les questions et résolvons-les ensemble.');
-    const r = await run(S.read, { action: 'find', fileIds: ids, note }, { text: note, files });
-    const set = r?.find((m) => m.kind === 'questions');
-    if (set) await solveAll(set.body, new Set());
-  };
-  const explain = async () => {
-    const { ids, files } = take();
-    const note = L('Explain these notes to me.', 'Expliquez-moi ces notes.');
-    const extra = text.trim();
-    setText('');
-    await run(S.notes, { action: 'notes', fileIds: ids, note, text: extra || undefined }, { text: note, files });
-  };
-  const quiz = async () => {
-    const { ids, files } = take();
-    const note = L('Make revision questions from this.', 'Faites des questions de révision à partir de ceci.');
-    const extra = text.trim();
-    setText('');
-    await run(S.quiz, { action: 'quiz', fileIds: ids, note, text: extra || undefined, mcq: teacher ? 10 : 6, structured: teacher ? 5 : 3 }, { text: note, files });
-  };
-  const summarise = async () => {
-    const { ids, files } = take();
-    const note = L('Summarise this.', 'Résumez ceci.');
-    const extra = text.trim();
-    setText('');
-    await run(S.summary, { action: 'summary', fileIds: ids, note, text: extra || undefined }, { text: note, files });
-  };
-  // Lesson notes or a lesson plan: from the topic typed, or the files added.
-  const lesson = async (kind, topic) => {
-    const { ids, files } = take();
-    const t = (topic ?? text).trim();
-    setText('');
-    const note = t || (kind === 'lesson_plan' ? L('A lesson plan from this.', 'Une fiche de préparation à partir de ceci.') : L('Lesson notes from this.', 'Des notes de cours à partir de ceci.'));
-    await run(kind === 'lesson_plan' ? S.lessonPlan : S.lessonNotes, { action: kind, text: t || undefined, fileIds: ids, note, ...(kind === 'lesson_plan' ? { minutes } : {}) }, { text: note, files });
-  };
-  const send = async () => {
-    const t = text.trim();
-    if (!t && !attached.length) return;
-    // The first message of a "lesson notes" or "lesson plan" chat is its topic.
-    if ((intent === 'lesson_notes' || intent === 'lesson_plan') && !messages.length) return lesson(intent, t);
-    // A typed question in a new "solve" chat with nothing attached: solve it.
-    const solveTyped = intent === 'solve' && !attached.length && !messages.length;
-    const { ids, files } = take();
-    setText('');
-    await run(solveTyped || looksLikeQuestion(t) ? S.solve() : S.chat, solveTyped ? { action: 'solve_text', text: t } : { action: 'chat', text: t, fileIds: ids }, { text: t, files });
-  };
-
-  const solve = async (set, n) => {
-    setBusyN(n);
-    const k = set.questions.findIndex((q) => q.n === n);
-    await run(S.solve(k + 1, set.questions.length), { action: 'solve', setId: set.setId, n });
-    setBusyN(null);
-  };
-  const solveAll = async (set, solvedAlready) => {
-    setRunning(true);
-    stopAll.current = false;
-    const done = solvedAlready || new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === set.setId).map((m) => m.body.n));
-    for (const q of set.questions) {
-      if (stopAll.current) break;
-      if (done.has(q.n)) continue;
-      setBusyN(q.n);
-      const r = await run(S.solve(q.n, set.questions.length), { action: 'solve', setId: set.setId, n: q.n });
-      if (!r) break;
+  // ---------- the chat's own actions ----------
+  const pdfOf = async (list, name, variant = 'full') => {
+    setSheet(null);
+    try {
+      await shareStudyPdf({ title: name || chat?.title || L('Study', 'Étude'), messages: list, who: user?.name, lang, variant });
+    } catch (e) {
+      setError(e);
     }
-    setBusyN(null);
-    setRunning(false);
   };
-  const mark = async (quizId, n, answer) => {
-    setBusyN(`${quizId}:${n}`);
-    await run(S.mark, { action: 'mark', quizId, n, answer });
-    setBusyN(null);
-  };
-
+  const pdfOne = (m) => pdfOf([m], m.kind === 'solution' ? `${chat?.title || L('Question', 'Question')}${m.body.label ? ` ${m.body.label}` : ''}` : m.body.title || chat?.title);
   const rename = async () => {
     try {
       const r = await patch(`/v1/study/chats/${chat.id}`, { title });
@@ -298,11 +220,23 @@ export default function StudyChat({ navigation, route }) {
   const remove = async () => {
     try {
       if (chat?.id) await del(`/v1/study/chats/${chat.id}`);
-      navigation.goBack();
+      setSheet(null);
+      open(null);
     } catch (e) {
       setError(e);
     }
   };
+  const showHistory = async () => {
+    setSheet('history');
+    try {
+      setChats((await get('/v1/study/chats')).chats);
+    } catch (e) {
+      setChats([]);
+      setError(e);
+    }
+  };
+
+  // giving a test to a class (teachers)
   const openGive = async (quiz) => {
     setGive({ quiz, classes: null, classId: null, days: 7, sending: false });
     setSheet('give');
@@ -327,294 +261,171 @@ export default function StudyChat({ navigation, route }) {
       showToast(e.message, 'error');
     }
   };
-  const pdf = async (variant = 'full') => {
-    setSheet(null);
-    try {
-      await shareStudyPdf({ title: chat?.title || L('Study notes', 'Notes d’étude'), messages, who: user?.name, lang, variant });
-    } catch (e) {
-      setError(e);
-    }
-  };
 
-  // ---------- talking ----------
-  // Tap the microphone: the AI stops speaking (remembering where it was), the
-  // phone listens; tap send: Whisper writes it down, the AI answers aloud, then
-  // goes back to the explanation it was giving.
-  const startTalk = async () => {
-    setError(null);
-    try {
-      interrupt();
-      await micAllowed();
-      await recorder.prepareToRecordAsync();
-      recorder.record();
-      setListening(true);
-    } catch (e) {
-      setError(e);
-    }
-  };
-  const cancelTalk = async () => {
-    setListening(false);
-    try {
-      await recorder.stop();
-    } catch {
-      // already stopped
-    }
-    await micDone();
-  };
-  const sendTalk = async () => {
-    setListening(false);
-    try {
-      await recorder.stop();
-      await micDone();
-      if (!recorder.uri) throw new Error(L('Nothing was recorded. Try again.', 'Rien n’a été enregistré. Réessayez.'));
-      setWorking([L('Listening to what you said...', 'Écoute de ce que vous avez dit...')]);
-      const audio = await recordingData(recorder.uri);
-      const heard = await post('/v1/study/transcribe', audio, { timeout: 60000 });
-      // What was being explained when the question came, for the AI; a
-      // question in the middle of a step is kept under that step.
-      const p = pausedNow();
-      let context;
-      let stepOf;
-      const sol = p && messages.find((x) => x.id === p.id);
-      if (sol) {
-        const k = p.index - 1 - (sol.body.concepts || []).length;
-        const st = k >= 0 ? sol.body.steps[k] : null;
-        context = stepContext(sol.body, k);
-        if (st) stepOf = { id: sol.id, step: k };
-      }
-      const r = await run(!context && looksLikeQuestion(heard.text) ? S.solve() : S.chat, { action: 'chat', text: heard.text, context, stepOf, spoken: true }, { text: heard.text, files: [], ...(stepOf ? { stepOf } : {}) });
-      const answer = r?.filter((m) => m.role === 'assistant' && m.kind === 'text').pop();
-      if (answer) reply(answer.body.text, { lang });
-    } catch (e) {
-      setWorking(null);
-      setError(e);
-    }
-  };
-  const clock = (ms = 0) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, '0')}`;
-
-  // A typed question about one step of a solution: answered under that step
-  // (and aloud when Read aloud is on).
-  const askStep = async (sol, step, q) => {
-    const stepOf = { id: sol.id, step };
-    const r = await run(S.chat, { action: 'chat', text: q, context: stepContext(sol.body, step), stepOf }, { text: q, files: [], stepOf });
-    const answer = r?.filter((m) => m.role === 'assistant' && m.kind === 'text').pop();
-    if (answer && aloudRef.current) reply(answer.body.text, { lang });
-  };
-  // The questions asked about each solution's steps, with their answers.
-  const asksOf = (id) => {
-    const out = [];
-    for (const m of messages) {
-      if (m.body?.stepOf?.id !== id) continue;
-      if (m.role === 'user') out.push({ step: m.body.stepOf.step, q: m.body.text, a: null });
-      else {
-        const open = [...out].reverse().find((x) => x.step === m.body.stepOf.step && !x.a);
-        if (open) open.a = m.body.text;
-      }
-    }
-    return out;
-  };
-
-  // what each set, quiz and solution look like now
-  const solvedOf = (setId) => new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === setId).map((m) => m.body.n));
-  const marksOf = (quizId) => new Map(messages.filter((m) => m.kind === 'marked' && m.body.quizId === quizId).map((m) => [m.body.n, m.body]));
   const hasWork = messages.some((m) => ['solution', 'notes', 'quiz', 'lessonNotes', 'lessonPlan', 'summary'].includes(m.kind));
-  // what a teacher can hand out: questions to answer, and their marking
-  const hasQuestions = messages.some((m) => ['solution', 'quiz'].includes(m.kind) || (m.kind === 'lessonNotes' && m.body.exercises?.length));
-  const lessonIntent = (intent === 'lesson_notes' || intent === 'lesson_plan') && !messages.length;
+  const hasQuestions = messages.some((m) => ['solution', 'quiz'].includes(m.kind));
+  const markedQuiz = (quizId) => messages.some((m) => m.kind === 'marked_all' && m.body.quizId === quizId);
+  const busy = !!working || running;
 
-  const starters = teacher
-    ? [
-        ['menu_book', L('Lesson notes', 'Notes de cours'), L('On any topic, for your class', 'Sur un sujet, pour votre classe'), () => navigation.setParams({ intent: 'lesson_notes' })],
-        ['event_note', L('Lesson plan', 'Fiche de préparation'), L('Objectives, stages, evaluation', 'Objectifs, étapes, évaluation'), () => navigation.setParams({ intent: 'lesson_plan' })],
-        ['task_alt', L('Solve a past paper', 'Résoudre une épreuve'), L('With a marking guide', 'Avec un guide de correction'), () => setSheet('attach')],
-        ['quiz', L('Make a test', 'Préparer un devoir'), L('From your notes, with the marking scheme', 'De vos notes, avec le barème'), () => setSheet('attach')],
-      ]
-    : [
-        ['photo_camera', L('Solve questions', 'Résoudre des questions'), L('A paper, homework or worksheet', 'Épreuve, devoir ou exercice'), () => setSheet('attach')],
-        ['description', L('Explain notes', 'Expliquer des notes'), L('Your notes, made clear', 'Vos notes, rendues claires'), () => setSheet('attach')],
-        ['quiz', L('Revision questions', 'Questions de révision'), L('From your notes, marked', 'De vos notes, corrigées'), () => setSheet('attach')],
-      ];
+  // ---------- the screen ----------
+  const header = (
+    <V style={{ paddingTop: insets.top, backgroundColor: '#ffffff', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e3e8f0' }}>
+      <V c="h-14 px-1 flex-row items-center">
+        <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={tab ? showHistory : () => navigation.goBack()} accessibilityLabel={tab ? L('Your chats', 'Vos discussions') : L('Back', 'Retour')}>
+          <Ic n={tab ? 'menu' : 'arrow_back'} s={24} c="on-surface" />
+        </P>
+        <V c="flex-1 px-1">
+          <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }} numberOfLines={1}>
+            {chat?.title && chat.title !== 'New chat' ? chat.title : teacher || parent ? L('Assistant', 'Assistant') : L('Study', 'Étude')}
+          </T>
+        </V>
+        {!tab && (
+          <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={showHistory} accessibilityLabel={L('Your chats', 'Vos discussions')}>
+            <Ic n="history" s={23} c="on-surface" />
+          </P>
+        )}
+        <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={() => open(null)} accessibilityLabel={L('New chat', 'Nouvelle discussion')}>
+          <Ic n="edit_square" s={22} c="on-surface" />
+        </P>
+        {!!chat?.id && (
+          <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={() => setSheet('more')} accessibilityLabel={L('More', 'Plus')}>
+            <Ic n="more_vert" s={23} c="on-surface" />
+          </P>
+        )}
+      </V>
+    </V>
+  );
 
   const composer = (
-    <V c="px-space-sm pt-space-xs gap-space-xs" style={{ paddingBottom: 8 }}>
-      {lessonIntent && intent === 'lesson_plan' && (
-        <V c="flex-row items-center gap-1.5">
-          <T c="font-label-md text-label-md text-on-surface-variant">{L('Length', 'Durée')}</T>
-          {[40, 60, 80, 120].map((n) => (
-            <P key={n} c={`h-9 px-3 rounded-full border items-center justify-center ${minutes === n ? 'bg-primary-container border-primary-container' : 'border-surface-container'}`} onPress={() => setMinutes(n)} accessibilityRole="radio" accessibilityState={{ selected: minutes === n }}>
-              <T c={`font-label-md text-label-md ${minutes === n ? 'text-on-primary' : 'text-on-surface'}`} style={{ fontWeight: '700' }}>
-                {n} min
-              </T>
-            </P>
-          ))}
-        </V>
-      )}
-      {!!attached.length && (
-        <V c="gap-space-xs">
-          <FileChips files={attached} L={L} />
-          <V c="flex-row flex-wrap gap-1.5">
-            <Chip icon="task_alt" label={L('Solve the questions', 'Résoudre les questions')} onPress={find} disabled={!!working} />
-            <Chip icon="lightbulb" label={L('Explain these notes', 'Expliquer ces notes')} onPress={explain} disabled={!!working} />
-            <Chip icon="quiz" label={teacher ? L('Make a test', 'Préparer un devoir') : L('Revision questions', 'Questions de révision')} onPress={quiz} disabled={!!working} />
-            <Chip icon="short_text" label={L('Summarise', 'Résumer')} onPress={summarise} disabled={!!working} />
-            {teacher && <Chip icon="menu_book" label={L('Lesson notes', 'Notes de cours')} onPress={() => lesson('lesson_notes')} disabled={!!working} />}
-            {teacher && <Chip icon="event_note" label={L('Lesson plan', 'Fiche de préparation')} onPress={() => lesson('lesson_plan')} disabled={!!working} />}
-          </V>
-        </V>
-      )}
-      {listening ? (
-        // Recording: what is being heard, cancel, or send it.
-        <V c="flex-row items-center gap-space-xs">
-          <P c="w-11 h-11 rounded-full bg-surface-container-low items-center justify-center" onPress={cancelTalk} accessibilityRole="button" accessibilityLabel={L('Cancel', 'Annuler')}>
-            <Ic n="close" s={22} c="on-surface" />
+    <V c="px-space-sm pt-1.5" style={{ paddingBottom: 8, backgroundColor: '#ffffff' }}>
+      <V c="rounded-3xl border border-surface-container bg-surface-container-lowest px-1.5 py-1.5 gap-1.5" style={{ shadowColor: '#0f172a', shadowOpacity: 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}>
+        {!!attached.length && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 4, paddingTop: 2 }}>
+            {attached.map((f) => (
+              <V key={f.id}>
+                {previews.current[f.id] ? (
+                  <Image source={{ uri: previews.current[f.id] }} style={{ width: 60, height: 60, borderRadius: 12 }} />
+                ) : (
+                  <V c="h-[60px] flex-row items-center gap-1.5 px-2.5 rounded-xl bg-surface-container-low" style={{ maxWidth: 200 }}>
+                    <Ic n={FILE_ICON[f.kind] || 'description'} s={20} c="primary-container" />
+                    <T c="font-label-md text-label-md text-on-surface" numberOfLines={2} style={{ flexShrink: 1 }}>
+                      {f.name}
+                    </T>
+                  </V>
+                )}
+                <P c="w-6 h-6 rounded-full items-center justify-center" style={{ position: 'absolute', top: -4, right: -4, backgroundColor: '#1f2a37' }} onPress={() => setAttached((a) => a.filter((x) => x.id !== f.id))} accessibilityLabel={L('Remove', 'Retirer')} hitSlop={6}>
+                  <Ic n="close" s={14} c="on-primary" />
+                </P>
+              </V>
+            ))}
+          </ScrollView>
+        )}
+        <V c="flex-row items-end gap-1">
+          <P c="w-10 h-10 rounded-full items-center justify-center" onPress={() => setSheet('attach')} disabled={busy} accessibilityRole="button" accessibilityLabel={L('Add a photo or a document', 'Ajouter une photo ou un document')}>
+            <Ic n="add" s={26} c="on-surface" />
           </P>
-          <V c="flex-1 h-11 rounded-3xl bg-surface-container-low px-space-md flex-row items-center gap-2">
-            <V c="w-2.5 h-2.5 rounded-full bg-error" />
-            <T c="font-body-md text-body-md text-on-surface flex-1">{L('Listening...', 'J’écoute...')}</T>
-            <T c="font-label-md text-label-md text-on-surface-variant">{clock(recState.durationMillis)}</T>
-          </V>
-          <P c="w-11 h-11 rounded-full bg-primary-container items-center justify-center" onPress={sendTalk} accessibilityRole="button" accessibilityLabel={L('Send what I said', 'Envoyer ce que j’ai dit')}>
-            <Ic n="arrow_upward" s={22} c="on-primary" />
+          <Input
+            ref={input}
+            c="flex-1 py-2.5 text-body-md font-body-md text-on-surface"
+            placeholder={attached.length ? L('Say what to do with it, or just send', 'Dites quoi en faire, ou envoyez') : L('Ask anything', 'Demandez ce que vous voulez')}
+            value={text}
+            onChangeText={setText}
+            multiline
+            maxLength={8000}
+            style={{ maxHeight: 140, minHeight: 40 }}
+          />
+          <P
+            c={`w-10 h-10 rounded-full items-center justify-center ${(text.trim() || attached.length) && !busy ? 'bg-primary-container' : 'bg-surface-container'}`}
+            onPress={send}
+            disabled={(!text.trim() && !attached.length) || busy}
+            accessibilityRole="button"
+            accessibilityLabel={L('Send', 'Envoyer')}
+          >
+            <Ic n="arrow_upward" s={22} c={(text.trim() || attached.length) && !busy ? 'on-primary' : 'outline'} />
           </P>
         </V>
-      ) : (
-        <V c="flex-row items-end gap-space-xs">
-          <P c="w-11 h-11 rounded-full bg-surface-container-low items-center justify-center" onPress={() => setSheet('attach')} accessibilityRole="button" accessibilityLabel={L('Add a photo or a document', 'Ajouter une photo ou un document')}>
-            <Ic n="add" s={24} c="primary-container" />
-          </P>
-          <V c="flex-1 min-h-[44px] rounded-3xl bg-surface-container-low px-space-md justify-center">
-            <Input
-              ref={input}
-              c="py-2.5 text-body-md font-body-md text-on-surface"
-              placeholder={lessonIntent ? L('Topic and class, e.g. Photosynthesis, Form 3', 'Sujet et classe, ex. La photosynthèse, 3e') : attached.length ? L('Ask about it, or choose above', 'Posez une question, ou choisissez ci-dessus') : teacher ? L('Ask, or add your notes and papers', 'Demandez, ou ajoutez notes et épreuves') : L('Ask anything, or add a photo', 'Demandez, ou ajoutez une photo')}
-              value={text}
-              onChangeText={setText}
-              multiline
-              maxLength={8000}
-              style={{ maxHeight: 120 }}
-            />
-          </V>
-          {text.trim() || attached.length ? (
-            <P c="w-11 h-11 rounded-full bg-primary-container items-center justify-center" onPress={send} disabled={!!working} accessibilityRole="button" accessibilityLabel={L('Send', 'Envoyer')}>
-              <Ic n="arrow_upward" s={22} c="on-primary" />
-            </P>
-          ) : (
-            // Nothing typed: talk instead (and interrupt the AI if it is speaking).
-            <P c="w-11 h-11 rounded-full bg-primary-container items-center justify-center" onPress={startTalk} disabled={!!working} accessibilityRole="button" accessibilityLabel={L('Talk to the AI', 'Parler à l’IA')}>
-              <Ic n="mic" s={22} c="on-primary" fill />
-            </P>
-          )}
-        </V>
-      )}
+      </V>
     </V>
   );
 
   return (
-    <V c="flex-1">
-      <Screen
-        keyboard
-        scrollRef={scroll}
-        header={
-          <StackHeader
-            title={chat?.title || L('New chat', 'Nouvelle discussion')}
-            subtitle={teacher ? L('Teaching assistant', 'Assistant pédagogique') : user?.role === 'parent' ? L('Homework help', 'Aide aux devoirs') : L('Study with AI', 'Étudier avec l’IA')}
-            avatar={false}
-            right={
-              <V c="flex-row">
-                <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={toggleAloud} accessibilityRole="switch" accessibilityState={{ checked: aloud }} accessibilityLabel={L('Read solutions aloud', 'Lire les solutions à voix haute')}>
-                  <Ic n={aloud ? 'volume_up' : 'volume_off'} s={22} c={aloud ? 'primary-container' : 'outline'} />
-                </P>
-                <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={() => setSheet('more')} accessibilityLabel={L('More', 'Plus')}>
-                  <Ic n="more_vert" s={24} c="on-surface" />
-                </P>
-              </V>
-            }
-          />
-        }
-        footer={composer}
-      >
-        <V c="gap-space-md pt-space-md pb-space-lg" onLayout={(e) => (listY.current = e.nativeEvent.layout.y)}>
+    <V c="flex-1" style={{ backgroundColor: '#ffffff' }}>
+      <Screen keyboard scrollRef={scroll} header={header} footer={composer}>
+        <V c="gap-space-lg pt-space-md pb-space-lg" onLayout={(e) => (listY.current = e.nativeEvent.layout.y)}>
           {!messages.length && !working && (
-            <V c="gap-space-md pt-space-lg">
-              <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
-                {intent === 'solve'
-                  ? L('Add the questions: snap a photo or upload the paper.', 'Ajoutez les questions : une photo ou le document.')
-                  : intent === 'notes'
-                    ? L('Add your notes: photos, a PDF or a Word document.', 'Ajoutez vos notes : photos, PDF ou document Word.')
-                    : intent === 'quiz'
-                      ? L('Add the notes to make questions from.', 'Ajoutez les notes pour en faire des questions.')
-                      : intent === 'lesson_notes'
-                        ? L('Which topic, for which class?', 'Quel sujet, pour quelle classe ?')
-                        : intent === 'lesson_plan'
-                          ? L('Which lesson, for which class, and how long?', 'Quel cours, pour quelle classe, et quelle durée ?')
-                          : L('What shall we work on?', 'Sur quoi travaillons-nous ?')}
+            <V c="pt-space-xl gap-space-sm items-center">
+              <T c="font-headline-md text-headline-md text-on-surface text-center" style={{ fontWeight: '700' }}>
+                {teacher ? L('What are we preparing today?', 'Que préparons-nous aujourd’hui ?') : parent ? L('How can I help with homework?', 'Comment puis-je aider pour les devoirs ?') : L('What are we studying today?', 'Qu’étudions-nous aujourd’hui ?')}
               </T>
-              <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-                {lessonIntent
-                  ? intent === 'lesson_plan'
-                    ? L('I write the plan in the format used in our schools: objectives, each stage with what you and the students do, the evaluation and the board summary. You can also add your own notes to base it on.', 'J’écris la fiche au format de nos établissements : objectifs, chaque étape avec ce que vous et les élèves faites, l’évaluation et le résumé au tableau. Vous pouvez aussi ajouter vos notes.')
-                    : L('I write the full notes for the class to copy, following the MINESEC syllabus: objectives, each part explained with examples, the diagrams to draw, a summary and exercises with answers.', 'J’écris les notes complètes à faire copier, selon le programme du MINESEC : objectifs, chaque partie expliquée avec des exemples, les schémas, un résumé et des exercices corrigés.')
-                  : L('You can add many pages at once, even a whole year of papers. Then I read them, find every question and work through them with you, step by step.', 'Vous pouvez ajouter beaucoup de pages, même une année d’épreuves. Je les lis, trouve chaque question et les résous avec vous, étape par étape.')}
+              <T c="font-body-md text-body-md text-on-surface-variant text-center" style={{ lineHeight: 22, maxWidth: 420 }}>
+                {teacher
+                  ? L('Ask anything, or add a past paper or your notes with +. I solve and explain questions with a marking guide, explain and summarise notes, and write tests, lesson notes and lesson plans.', 'Demandez ce que vous voulez, ou ajoutez une épreuve ou vos notes avec +. Je résous et explique les questions avec un guide de correction, j’explique et je résume des notes, et je rédige devoirs, notes de cours et fiches de préparation.')
+                  : L('Ask anything, or add a photo or a document with +. I solve and explain questions step by step, explain your notes, and make revision questions and mark them.', 'Demandez ce que vous voulez, ou ajoutez une photo ou un document avec +. Je résous et explique les questions étape par étape, j’explique vos notes, et je fais des questions de révision que je corrige.')}
               </T>
-              {!intent &&
-                starters.map(([icon, t1, t2, go]) => (
-                  <P key={t1} c="flex-row items-center gap-space-sm p-space-md rounded-2xl border border-surface-container" onPress={go}>
-                    <Ic n={icon} s={22} c="primary-container" />
-                    <V c="flex-1">
-                      <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>{t1}</T>
-                      <T c="font-body-sm text-body-sm text-on-surface-variant">{t2}</T>
-                    </V>
-                  </P>
-                ))}
             </V>
           )}
 
           {messages.map((m) => {
-            if (m.body?.stepOf) return null; // shown under its step
-            if (m.role === 'user') return <UserBubble key={m.id} body={m.body} L={L} />;
-            if (m.kind === 'text') return <AiText key={m.id} body={m.body} />;
-            if (m.kind === 'questions') return <QuestionSet key={m.id} body={m.body} solved={solvedOf(m.body.setId)} busyN={busyN} running={running || !!working} onSolve={(n) => solve(m.body, n)} onSolveAll={() => solveAll(m.body)} L={L} />;
-            if (m.kind === 'solution')
-              return (
-                <V key={m.id} onLayout={(e) => (cardY.current[m.id] = e.nativeEvent.layout.y)}>
-                  <Solution id={m.id} onFollow={(y) => follow(m.id, y)} body={m.body} L={L} lang={lang} teacher={teacher} asks={asksOf(m.id)} live={liveIds.has(m.id)} onAsk={String(m.id).startsWith('local-') ? undefined : (step, q) => askStep(m, step, q)} />
-                </V>
-              );
-            if (m.kind === 'notes') return <NotesCard key={m.id} body={m.body} L={L} />;
-            if (m.kind === 'lessonNotes') return <LessonNotesCard key={m.id} body={m.body} L={L} />;
-            if (m.kind === 'lessonPlan') return <LessonPlanCard key={m.id} body={m.body} L={L} />;
-            if (m.kind === 'summary') return <SummaryCard key={m.id} body={m.body} L={L} />;
-            if (m.kind === 'quiz') return <Quiz key={m.id} body={m.body} marks={marksOf(m.body.quizId)} busyN={typeof busyN === 'string' && busyN.startsWith(m.body.quizId) ? Number(busyN.split(':')[1]) : null} onMark={(n, a) => mark(m.body.quizId, n, a)} onGive={teacher && !String(m.id).startsWith('local-') ? () => openGive(m.body) : undefined} L={L} />;
-            return null;
+            if (m.body?.stepOf) return null; // asked about a step (older chats)
+            if (m.role === 'user') return <UserMessage key={m.id} body={{ ...m.body, files: (m.body.files || []).map((f) => ({ ...f, preview: f.preview || previews.current[f.id] })) }} L={L} />;
+            return (
+              <V key={m.id} onLayout={(e) => (cardY.current[m.id] = e.nativeEvent.layout.y)}>
+                <AssistantMessage
+                  m={m}
+                  L={L}
+                  lang={lang}
+                  teacher={teacher}
+                  solved={m.kind === 'questions' ? solvedOf(m.body.setId) : null}
+                  running={busy}
+                  onContinue={m.kind === 'questions' ? () => solveSet(m.body, solvedOf(m.body.setId)) : undefined}
+                  quizMarked={m.kind === 'quiz' ? markedQuiz(m.body.quizId) : false}
+                  onPdf={pdfOne}
+                  onGive={teacher && m.kind === 'quiz' ? () => openGive(m.body) : undefined}
+                  onCopied={() => showToast(L('Copied', 'Copié'))}
+                  onFollow={(y) => follow(m.id, y)}
+                />
+              </V>
+            );
           })}
 
-          {!!working && <Working steps={working} L={L} />}
+          {!!working && <Thinking steps={working} />}
           {running && (
             <P c="self-start py-1" onPress={() => (stopAll.current = true)} hitSlop={8}>
-              <T c="font-label-md text-label-md text-error" style={{ fontWeight: '700' }}>{L('Stop after this question', 'Arrêter après cette question')}</T>
+              <T c="font-label-md text-label-md text-error" style={{ fontWeight: '700' }}>
+                {L('Stop after this question', 'Arrêter après cette question')}
+              </T>
             </P>
           )}
           <ErrorNote error={error} />
-          {hasWork && !working && (
-            <Cta variant="soft" icon={null} lead="download" h="h-11" label={L('Download as PDF', 'Télécharger en PDF')} onPress={teacher && hasQuestions ? () => setSheet('pdf') : () => pdf()} />
-          )}
         </V>
       </Screen>
 
-      <BottomSheet visible={sheet === 'attach'} onClose={() => setSheet(null)} insets={insets}>
-        <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>{L('Add material', 'Ajouter du contenu')}</T>
+      <Sheet visible={sheet === 'attach'} onClose={() => setSheet(null)} insets={insets}>
         <SheetRow icon="photo_camera" title={L('Take a photo', 'Prendre une photo')} sub={L('Of a page, a question or your notes', 'D’une page, d’une question ou de vos notes')} onPress={() => addFiles('camera')} />
         <SheetRow icon="photo_library" title={L('Choose photos', 'Choisir des photos')} sub={L('Up to 10 pages at once', 'Jusqu’à 10 pages à la fois')} onPress={() => addFiles('library')} />
         <SheetRow icon="upload_file" title={L('Upload a document', 'Envoyer un document')} sub={L('PDF, Word (.docx) or text, up to 5 MB', 'PDF, Word (.docx) ou texte, jusqu’à 5 Mo')} onPress={() => addFiles('doc')} />
-      </BottomSheet>
+      </Sheet>
 
-      <BottomSheet visible={sheet === 'more'} onClose={() => setSheet(null)} insets={insets}>
-        {hasWork && <SheetRow icon="download" title={L('Download as PDF', 'Télécharger en PDF')} sub={L('Every solution, explanation and quiz', 'Chaque solution, explication et quiz')} onPress={teacher && hasQuestions ? () => setSheet('pdf') : () => pdf()} />}
-        {!!chat?.id && <SheetRow icon="edit" title={L('Rename', 'Renommer')} onPress={() => (setTitle(chat.title || ''), setSheet('rename'))} />}
+      <Sheet visible={sheet === 'more'} onClose={() => setSheet(null)} insets={insets}>
+        {hasWork && <SheetRow icon="download" title={L('Download the whole chat as PDF', 'Télécharger toute la discussion en PDF')} sub={L('Every question with its solution, notes and tests', 'Chaque question avec sa solution, notes et devoirs')} onPress={() => (teacher && hasQuestions ? setSheet('pdf') : pdfOf(messages))} />}
+        <SheetRow icon="edit" title={L('Rename', 'Renommer')} onPress={() => (setTitle(chat?.title || ''), setSheet('rename'))} />
         <SheetRow icon="delete" title={L('Delete this chat', 'Supprimer cette discussion')} danger onPress={remove} />
-      </BottomSheet>
+      </Sheet>
 
-      <BottomSheet visible={sheet === 'give'} onClose={() => (setSheet(null), setGive(null))} insets={insets}>
+      <Sheet visible={sheet === 'pdf'} onClose={() => setSheet(null)} insets={insets}>
+        <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>{L('Download as PDF', 'Télécharger en PDF')}</T>
+        <SheetRow icon="article" title={L('Everything', 'Tout')} sub={L('The questions with the full solving and explanations', 'Les questions avec toute la résolution et les explications')} onPress={() => pdfOf(messages, null, 'full')} />
+        <SheetRow icon="fact_check" title={L('The marking guide only', 'Le guide de correction seul')} sub={L('Each question with its answer and marks', 'Chaque question avec sa réponse et ses points')} onPress={() => pdfOf(messages, null, 'guide')} />
+        <SheetRow icon="assignment" title={L('The questions for students', 'Les questions pour les élèves')} sub={L('No answers: to print or share with the class', 'Sans réponses : à imprimer ou partager')} onPress={() => pdfOf(messages, null, 'test')} />
+      </Sheet>
+
+      <Sheet visible={sheet === 'rename'} onClose={() => setSheet(null)} insets={insets}>
+        <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>{L('Rename this chat', 'Renommer la discussion')}</T>
+        <Input c="h-12 px-3 rounded-xl bg-surface-container-low text-body-md" value={title} onChangeText={setTitle} maxLength={60} autoFocus />
+        <Cta variant="dark" icon={null} label={L('Save', 'Enregistrer')} onPress={rename} />
+      </Sheet>
+
+      <Sheet visible={sheet === 'give'} onClose={() => (setSheet(null), setGive(null))} insets={insets}>
         <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>{L('Give this test to a class', 'Donner ce devoir à une classe')}</T>
         {!give?.classes ? (
           <ActivityIndicator style={{ marginVertical: 16 }} />
@@ -647,31 +458,43 @@ export default function StudyChat({ navigation, route }) {
             <Cta variant="dark" icon={null} label={give.sending ? L('Sending...', 'Envoi...') : L('Send to the class', 'Envoyer à la classe')} disabled={give.sending || !give.classId} onPress={sendTest} />
           </>
         )}
-      </BottomSheet>
+      </Sheet>
 
-      <BottomSheet visible={sheet === 'pdf'} onClose={() => setSheet(null)} insets={insets}>
-        <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>{L('Download as PDF', 'Télécharger en PDF')}</T>
-        <SheetRow icon="article" title={L('Everything', 'Tout')} sub={L('The full solving and explanations, notes and plans', 'Toute la résolution et les explications, notes et fiches')} onPress={() => pdf('full')} />
-        <SheetRow icon="fact_check" title={L('The marking guide only', 'Le guide de correction seul')} sub={L('Each question with its answer and marks', 'Chaque question avec sa réponse et ses points')} onPress={() => pdf('guide')} />
-        <SheetRow icon="assignment" title={L('The questions for students', 'Les questions pour les élèves')} sub={L('No answers: to print or share with the class', 'Sans réponses : à imprimer ou partager')} onPress={() => pdf('test')} />
-      </BottomSheet>
-
-      <BottomSheet visible={sheet === 'rename'} onClose={() => setSheet(null)} insets={insets}>
-        <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>{L('Rename this chat', 'Renommer la discussion')}</T>
-        <Input c="h-12 px-3 rounded-xl bg-surface-container-low text-body-md" value={title} onChangeText={setTitle} maxLength={60} autoFocus />
-        <Cta variant="dark" icon={null} label={L('Save', 'Enregistrer')} onPress={rename} />
-      </BottomSheet>
+      {/* the chats, in a panel from the left, like ChatGPT */}
+      <Modal visible={sheet === 'history'} transparent animationType="fade" onRequestClose={() => setSheet(null)}>
+        <V c="flex-1 flex-row">
+          <V c="bg-surface-container-lowest" style={{ width: Math.min(360, width * 0.84), paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8 }}>
+            <V c="px-space-md pb-space-sm gap-space-sm">
+              <T c="font-headline-sm text-headline-sm text-on-surface" style={{ fontWeight: '700' }}>
+                {L('Your chats', 'Vos discussions')}
+              </T>
+              <P c="h-11 rounded-xl bg-surface-container-low flex-row items-center gap-2 px-space-sm" onPress={() => open(null)}>
+                <Ic n="edit_square" s={20} c="primary-container" />
+                <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }}>
+                  {L('New chat', 'Nouvelle discussion')}
+                </T>
+              </P>
+            </V>
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 16 }}>
+              {chats === null && <ActivityIndicator style={{ marginTop: 16 }} />}
+              {chats?.length === 0 && (
+                <T c="font-body-md text-body-md text-on-surface-variant px-space-sm pt-space-sm">{L('Your chats will be kept here.', 'Vos discussions seront gardées ici.')}</T>
+              )}
+              {(chats || []).map((c) => (
+                <P key={c.id} c={`px-space-sm py-2.5 rounded-xl flex-row items-center gap-2 ${chat?.id === c.id ? 'bg-surface-container-low' : ''}`} onPress={() => open(c.id)}>
+                  <T c="font-body-md text-body-md text-on-surface flex-1" numberOfLines={1}>
+                    {c.title}
+                  </T>
+                  <T c="font-label-sm text-label-sm text-on-surface-variant">{when(c.updatedAt, L)}</T>
+                </P>
+              ))}
+            </ScrollView>
+          </V>
+          <Pressable style={{ flex: 1, backgroundColor: 'rgba(15,23,42,0.4)' }} onPress={() => setSheet(null)} accessibilityLabel={L('Close', 'Fermer')} />
+        </V>
+      </Modal>
       {toast}
     </V>
-  );
-}
-
-function Chip({ icon, label, onPress, disabled }) {
-  return (
-    <P c="h-9 px-3 rounded-full border border-primary-container flex-row items-center gap-1.5" onPress={onPress} disabled={disabled} accessibilityRole="button">
-      <Ic n={icon} s={16} c="primary-container" />
-      <T c="font-label-md text-label-md text-primary-container" style={{ fontWeight: '700' }}>{label}</T>
-    </P>
   );
 }
 
@@ -689,7 +512,7 @@ function SheetRow({ icon, title, sub, onPress, danger }) {
   );
 }
 
-function BottomSheet({ visible, onClose, children, insets }) {
+function Sheet({ visible, onClose, children, insets }) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <V c="flex-1 justify-end" style={{ backgroundColor: 'rgba(15,23,42,0.45)' }}>

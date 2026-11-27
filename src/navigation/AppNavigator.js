@@ -58,7 +58,6 @@ import AdminAnnounce from '../screens/admin/Announce';
 import AdminTeam from '../screens/admin/Team';
 import AdminCommunity from '../screens/admin/Community';
 import AdminKeys from '../screens/admin/Keys';
-import StudyHome from '../screens/study/StudyHome';
 import StudyChat from '../screens/study/StudyChat';
 import AdminProblems from '../screens/admin/Problems';
 import AdminAccount from '../screens/admin/Account';
@@ -126,7 +125,7 @@ function MainTabs() {
       <Tabs.Screen name="Home" component={Home} />
       {teacher && <Tabs.Screen name="Classes" component={TeacherClasses} />}
       {!partner && <Tabs.Screen name="Learn" component={Learn} />}
-      {!partner && <Tabs.Screen name="Study" component={StudyHome} />}
+      {!partner && <Tabs.Screen name="Study" component={StudyChat} />}
       {!partner && <Tabs.Screen name="Lab" component={Lab} />}
       {!partner && <Tabs.Screen name="Exams" component={Exams} />}
       <Tabs.Screen name="Me" component={Me} />

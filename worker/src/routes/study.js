@@ -9,7 +9,7 @@ import { today } from '../lib/notify.js';
 import { subjectOr } from '../lib/subjects.js';
 import { markAnswer } from '../lib/ai.js';
 import { KINDS, looksScanned, readDocument } from '../lib/docs.js';
-import { chatReply, explainNotes, findQuestions, lessonNotes, lessonPlan, makeQuestions, solveOne, summarise } from '../lib/study.js';
+import { askWhatToDo, chatReply, decide, explainNotes, findQuestions, lessonNotes, lessonPlan, makeQuestions, readAnswers, solveOne, summarise } from '../lib/study.js';
 import { AUDIO_TYPES, transcribe } from '../lib/llm.js';
 
 // Daily study actions (each answer, solution, explanation, quiz or marking).
@@ -54,6 +54,36 @@ async function useOne(env, user) {
 const SMALL_TALK = /^(hi|hello|hey|thanks|thank you|ok|okay|good|great|nice|cool|yes|no|bye|merci|bonjour|salut|d'accord|oui|non)\b[\s!.?]*$/i;
 const FOLLOW_UP = /\b(step \d+|this step|that step|previous|above|you said|again|repeat|slower|simpler|what do you mean|i don'?t understand|je ne comprends pas|encore|l'étape)\b/i;
 export const looksLikeQuestion = (t) => String(t || '').trim().length >= 12 && !SMALL_TALK.test(String(t).trim()) && !FOLLOW_UP.test(String(t));
+
+// Each message in a few words, so the AI knows what was already done in the
+// chat (a solution, revision questions, notes...), not only what was typed.
+function brief(kind, body) {
+  const b = typeof body === 'string' ? JSON.parse(body) : body;
+  switch (kind) {
+    case 'text':
+      return String(b.text || '').replace(/^…$/, '(sent files)');
+    case 'solution':
+      return `[I solved and explained: ${String(b.question).slice(0, 300)} Answer: ${String(b.answer).slice(0, 200)}]`;
+    case 'questions':
+      return `[I found ${b.questions.length} questions in ${b.title || 'the paper'} and solved them one by one]`;
+    case 'notes':
+      return `[I explained the notes: ${b.title}]`;
+    case 'summary':
+      return `[I summarised: ${b.title}]`;
+    case 'lessonNotes':
+      return `[I wrote lesson notes: ${b.title}]`;
+    case 'lessonPlan':
+      return `[I wrote a ${b.minutes} minute lesson plan: ${b.title}]`;
+    case 'quiz':
+      return `[I set revision questions, "${b.title}": ${b.questions.map((q) => `${q.n}. ${String(q.text).slice(0, 120)}`).join(' ')}]`;
+    case 'marked_all':
+      return `[I marked the answers: ${b.got}/${b.total} (${b.score}%)]`;
+    case 'marked':
+      return `[I marked an answer: ${b.awarded}/${b.total}]`;
+    default:
+      return '';
+  }
+}
 
 const shortTitle = (t) => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 60) || 'New chat';
 const settingsOf = (user, chat) => ({ subject: chat.subject || null, className: user.class_name, lang: user.lang === 'fr' ? 'fr' : 'en', mode: modeOf(user) });
@@ -149,14 +179,14 @@ export async function ask(request, env, id) {
   requireAccess(user, env);
   const chat = await chatOf(env, user, id);
   const b = await readJson(request, 64 * 1024);
-  const action = oneOf(b.action || 'chat', 'Action', ['chat', 'find', 'solve', 'solve_text', 'notes', 'quiz', 'mark', 'lesson_notes', 'lesson_plan', 'summary']);
+  let action = oneOf(b.action || 'chat', 'Action', ['auto', 'chat', 'find', 'solve', 'solve_text', 'notes', 'quiz', 'mark', 'mark_all', 'lesson_notes', 'lesson_plan', 'summary']);
   if (action === 'lesson_plan' && user.role !== 'teacher') throw new HttpError(403, 'Lesson plans are for teachers.', 'forbidden');
   await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are going too quickly. Wait a moment.');
   const opts = settingsOf(user, chat);
-  const fileIds = Array.isArray(b.fileIds) ? b.fileIds.filter((x) => typeof x === 'string').slice(0, 20) : [];
+  let fileIds = Array.isArray(b.fileIds) ? b.fileIds.filter((x) => typeof x === 'string').slice(0, 20) : [];
   const text = b.text ? str(b.text, 'Message', { max: 8000 }) : '';
   // What the person asked, shown in the chat (find, notes and quiz)
-  const note = b.note ? str(b.note, 'Note', { max: 300 }) : '';
+  let note = b.note ? str(b.note, 'Note', { max: 300 }) : '';
   const out = [];
   // The person's message is saved only once the AI has answered, so a failed
   // attempt leaves nothing half done in the chat.
@@ -167,20 +197,55 @@ export async function ask(request, env, id) {
   // The first message names the chat.
   const first = !(await env.DB.prepare('SELECT 1 FROM study_messages WHERE chat_id = ? LIMIT 1').bind(chat.id).first());
 
+  // One chat that does everything: what the message asks for decides the task.
+  let plan = null;
+  let earlier = ''; // what the chat was about, for "a test on it", "the same topic"
+  if (action === 'auto') {
+    const { results: before } = await env.DB.prepare('SELECT role, kind, body FROM study_messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT 6').bind(chat.id).all();
+    earlier = before
+      .reverse()
+      .map((m) => `${m.role === 'assistant' ? 'Assistant' : 'Person'}: ${brief(m.kind, m.body).slice(0, 600)}`)
+      .filter((l) => !l.endsWith(': '))
+      .join('\n');
+    if (!text && !fileIds.length) throw new HttpError(400, 'Write a message or add a file.', 'invalid_input');
+    const last = await env.DB.prepare("SELECT kind, body FROM study_messages WHERE chat_id = ? AND role = 'assistant' ORDER BY created_at DESC LIMIT 1").bind(chat.id).first();
+    const lastBody = last ? JSON.parse(last.body) : null;
+    // files sent last time, waiting for the instruction now given
+    if (!fileIds.length && lastBody?.pendingFiles?.length) fileIds = lastBody.pendingFiles;
+    if (fileIds.length && !text) {
+      // nothing said with them: ask what to do first
+      const files = await filesOf(env, chat.id, fileIds);
+      await said('…', files);
+      out.push(await addMessage(env, chat.id, 'assistant', 'text', { text: askWhatToDo(files.list, opts.mode, opts.lang), pendingFiles: fileIds }));
+      return ok({ messages: out });
+    }
+    const files = fileIds.length ? await filesOf(env, chat.id, fileIds) : null;
+    const quizRow = await env.DB.prepare("SELECT body FROM study_messages WHERE chat_id = ? AND kind = 'quiz' ORDER BY created_at DESC LIMIT 1").bind(chat.id).first();
+    const quizOpen = quizRow ? JSON.parse(quizRow.body).title || 'Revision questions' : null;
+    plan = (await decide(env, { text, files, role: user.role, quizOpen, lastAnswer: lastBody?.text || lastBody?.title || lastBody?.question })) || {
+      intent: files ? (/note|explain|summar/i.test(text) ? 'notes' : 'solve') : looksLikeQuestion(text) ? 'solve_text' : 'chat',
+    };
+    if (plan.intent === 'lesson_plan' && user.role !== 'teacher') plan.intent = 'lesson_notes';
+    if (plan.intent === 'mark' && !quizRow) plan.intent = 'chat';
+    if ((plan.intent === 'notes' || plan.intent === 'summary' || plan.intent === 'solve') && !files) plan.intent = plan.intent === 'solve' ? 'solve_text' : plan.intent === 'notes' ? 'solve_text' : 'summary';
+    action = { solve: 'find', solve_text: 'solve_text', notes: 'notes', summary: 'summary', quiz: 'quiz', lesson_notes: 'lesson_notes', lesson_plan: 'lesson_plan', mark: 'mark_all', chat: 'chat' }[plan.intent];
+    note = text.slice(0, 300) === text ? text : `${text.slice(0, 297)}...`;
+  }
+
   if (action === 'chat') {
     if (!text && !fileIds.length) throw new HttpError(400, 'Write a message or add a file.', 'invalid_input');
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
-    const { results } = await env.DB.prepare("SELECT role, kind, body FROM study_messages WHERE chat_id = ? AND kind = 'text' ORDER BY created_at DESC LIMIT 12").bind(chat.id).all();
+    const { results } = await env.DB.prepare('SELECT role, kind, body FROM study_messages WHERE chat_id = ? ORDER BY created_at DESC LIMIT 14').bind(chat.id).all();
     const history = results
       .reverse()
-      .map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(JSON.parse(m.body).text || '').slice(0, 4000) }))
+      .map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: brief(m.kind, m.body).slice(0, 4000) }))
       .filter((m) => m.content);
     while (history.length && history[0].role !== 'user') history.shift();
     const all = await filesOf(env, chat.id, null);
     // Asked in the middle of a spoken explanation: what was being explained.
     const during = b.context ? str(b.context, 'Context', { max: 3000 }) : '';
-    if (!during && !stepOf && looksLikeQuestion(text)) {
+    if (!during && !stepOf && !plan && looksLikeQuestion(text)) {
       // A real question (a problem, a definition, an explanation to give):
       // solved and explained step by step, not just answered in a line.
       const sol = await solveOne(env, { question: text, images: fileIds.length ? files.images.slice(0, 2) : [], ...opts });
@@ -201,6 +266,14 @@ export async function ask(request, env, id) {
     const source = text ? `${text}\n\n${files.text}` : files.text;
     if (!source.trim() && !files.images.length) throw new HttpError(400, 'Add a photo or a document with the questions first.', 'invalid_input');
     const found = await findQuestions(env, { text: source, images: files.images.slice(0, 12), ...opts });
+    if (!found.questions.length && plan) {
+      // no questions in it: these are notes, so they are explained instead
+      const r = await explainNotes(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, ...opts });
+      await said(note, files);
+      out.push(await addMessage(env, chat.id, 'assistant', 'notes', r));
+      if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
+      return ok({ messages: out });
+    }
     if (!found.questions.length) throw new HttpError(422, 'No questions were found in this material. If it is notes, choose "Explain these notes" instead.', 'no_questions');
     await said(note, files);
     out.push(await addMessage(env, chat.id, 'assistant', 'questions', { setId: uuid(), title: found.title, fileIds: files.list.map((f) => f.id), questions: found.questions }));
@@ -221,8 +294,9 @@ export async function ask(request, env, id) {
   } else if (action === 'solve_text') {
     if (!text) throw new HttpError(400, 'Write the question to solve.', 'invalid_input');
     await useOne(env, user);
-    const sol = await solveOne(env, { question: text, ...opts });
-    await said(text, { list: [] });
+    const files = fileIds.length ? await filesOf(env, chat.id, fileIds) : { list: [], images: [] };
+    const sol = await solveOne(env, { question: text, images: files.images.slice(0, 2), ...opts });
+    await said(text, files);
     out.push(await addMessage(env, chat.id, 'assistant', 'solution', { question: text, ...sol }));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(text), chat.id).run();
   } else if (action === 'notes') {
@@ -235,26 +309,26 @@ export async function ask(request, env, id) {
   } else if (action === 'quiz') {
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
-    const r = await makeQuestions(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, mcq: b.mcq ?? 5, structured: b.structured ?? 3, ...opts });
+    const r = await makeQuestions(env, { text: [text, files.text, !fileIds.length && earlier ? `Earlier in this chat:\n${earlier}` : ''].filter(Boolean).join('\n\n'), images: files.images, mcq: plan?.mcq ?? b.mcq ?? (opts.mode === 'teacher' ? 10 : 5), structured: plan?.structured ?? b.structured ?? (opts.mode === 'teacher' ? 5 : 3), ...opts });
     await said(note, files);
     out.push(await addMessage(env, chat.id, 'assistant', 'quiz', { quizId: uuid(), ...r }));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
   } else if (action === 'lesson_notes' || action === 'lesson_plan') {
     // From the topic typed, or the notes and photos just added.
-    const topic = text || '';
+    const topic = [text, !fileIds.length && earlier ? `(Earlier in this chat:\n${earlier})` : ''].filter(Boolean).join('\n');
     if (!topic && !fileIds.length) throw new HttpError(400, 'Say the topic and the class, for example "Photosynthesis, Form 3".', 'invalid_input');
-    const minutes = int(b.minutes ?? 40, 'Lesson length', { min: 20, max: 180 });
+    const minutes = int(plan?.minutes ? Math.min(180, Math.max(20, plan.minutes)) : (b.minutes ?? 40), 'Lesson length', { min: 20, max: 180 });
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
     const material = fileIds.length ? { text: files.text, images: files.images } : {};
     const r = action === 'lesson_notes' ? await lessonNotes(env, { topic, ...material, ...opts }) : await lessonPlan(env, { topic, ...material, minutes, ...opts });
-    await said(note || topic, files);
+    await said(note || text, files);
     out.push(await addMessage(env, chat.id, 'assistant', action === 'lesson_notes' ? 'lessonNotes' : 'lessonPlan', r));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
   } else if (action === 'summary') {
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
-    const r = await summarise(env, { text: [text, files.text].filter(Boolean).join('\n\n'), images: files.images, ...opts });
+    const r = await summarise(env, { text: [text, files.text, !fileIds.length && earlier ? `Earlier in this chat:\n${earlier}` : ''].filter(Boolean).join('\n\n'), images: files.images, ...opts });
     await said(note, files);
     out.push(await addMessage(env, chat.id, 'assistant', 'summary', r));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
@@ -269,6 +343,30 @@ export async function ask(request, env, id) {
     await useOne(env, user);
     const m = await markAnswer(env, { question: q.text, markScheme: q.scheme.map((p) => ({ point: p.point, marks: p.marks })), maxMarks: q.marks, answerText: answer, subject: opts.subject || 'biology' });
     out.push(await addMessage(env, chat.id, 'assistant', 'marked', { quizId, n, answer, ...m, total: q.marks }));
+  } else if (action === 'mark_all') {
+    const row = await env.DB.prepare("SELECT body FROM study_messages WHERE chat_id = ? AND kind = 'quiz' ORDER BY created_at DESC LIMIT 1").bind(chat.id).first();
+    if (!row) throw new HttpError(404, 'There are no questions to mark in this chat yet.', 'not_found');
+    const quiz = JSON.parse(row.body);
+    await useOne(env, user);
+    const files = fileIds.length ? await filesOf(env, chat.id, fileIds) : { list: [], images: [], text: '' };
+    const read = await readAnswers(env, { quiz, text: [text, files.text].filter(Boolean).join('\n'), images: files.images });
+    const marks = [];
+    for (const q of quiz.questions) {
+      const a = String(read.answers.find((x) => x.n === q.n)?.answer || '').trim();
+      if (q.type === 'mcq') {
+        const pick = (a.match(/^\(?([A-D])\b/i) || a.match(/\b([A-D])\b/))?.[1]?.toUpperCase() || null;
+        marks.push({ n: q.n, type: 'mcq', answer: pick, correct: q.answer, explanation: q.explanation, awarded: pick === q.answer ? 1 : 0, total: 1 });
+      } else if (!a) {
+        marks.push({ n: q.n, type: 'structured', answer: '', awarded: 0, total: q.marks, feedback: opts.lang === 'fr' ? 'Pas de réponse.' : 'Not answered.' });
+      } else {
+        const m = await markAnswer(env, { question: q.text, markScheme: q.scheme.map((p) => ({ point: p.point, marks: p.marks })), maxMarks: q.marks, answerText: a, subject: opts.subject || 'biology' });
+        marks.push({ n: q.n, type: 'structured', answer: a, awarded: m.awarded, total: q.marks, feedback: m.feedback, criteria: m.criteria });
+      }
+    }
+    const got = marks.reduce((x, m) => x + m.awarded, 0);
+    const total = marks.reduce((x, m) => x + m.total, 0);
+    await said(text || note || '…', files);
+    out.push(await addMessage(env, chat.id, 'assistant', 'marked_all', { quizId: quiz.quizId, got, total, score: total ? Math.round((got / total) * 100) : 0, marks }));
   }
   return ok({ messages: out });
 }

@@ -372,3 +372,88 @@ export async function chatReply(env, { history = [], message, material = '', sub
     .replace(/^#{1,4}\s*/gm, '')
     .slice(0, 12_000);
 }
+
+// ---------- 7. one chat that does everything ----------
+// What a message asks for, so the chat can do it at once: solve, explain,
+// summarise, make questions, write lesson notes or a plan, mark answers, or
+// simply answer.
+export const INTENTS = ['solve', 'solve_text', 'notes', 'summary', 'quiz', 'lesson_notes', 'lesson_plan', 'mark', 'chat'];
+const DECIDE_SYSTEM = `You read one message sent to the Klass8 study assistant (a study app for secondary schools in Cameroon) and decide which task it asks for. Reply with JSON only: {"intent": string, "mcq": number|null, "structured": number|null, "minutes": number|null}.
+Intents:
+- "solve": solve and explain the questions in the attached material (a past paper, worksheet, homework, photos of questions).
+- "solve_text": the message itself is a question, exercise or problem to work out, or asks to explain a concept or topic in depth ("Explain osmosis", "What is Ohm's law?", "Calculate ...", "Balance this equation ...").
+- "notes": explain the attached notes, chapter or document.
+- "summary": summarise the attached material or the text in the message.
+- "quiz": make revision questions, a test or an exercise sheet, from the attached material or on a topic. Put the numbers of multiple choice and written questions asked for in "mcq" and "structured" (null when not said).
+- "lesson_notes": write lesson notes on a topic.
+- "lesson_plan": write a lesson plan (the length in minutes in "minutes" when said).
+- "mark": the message gives answers to the revision questions or test set earlier in this chat ("1 B, 2 C, 3 ...", or a photo of written answers), to be marked.
+- "chat": anything else: greetings, thanks, a follow-up about an earlier answer ("why step 2?", "explain it more simply", "and the next one?"), advice, a short factual reply.
+When files are attached and the message is general ("help me with this", "do it", "this one"), choose "solve" if the material holds questions, otherwise "notes".`;
+
+const num = (x) => (Number.isFinite(Number(x)) && Number(x) > 0 ? Math.round(Number(x)) : null);
+
+export async function decide(env, { text, files, role, quizOpen, lastAnswer }) {
+  const facts = [
+    `The person is a ${role}.`,
+    files?.list?.length
+      ? `Attached: ${files.list.map((f) => `${f.name} (${f.kind})`).join(', ')}.${files.text ? `\nStart of the attached text:\n"""\n${files.text.slice(0, 900)}\n"""` : ''}`
+      : 'Nothing attached.',
+    quizOpen ? `Revision questions were set earlier in this chat: "${quizOpen}".` : null,
+    lastAnswer ? `The assistant's last message began: "${String(lastAnswer).slice(0, 300)}"` : null,
+    `Message: """${String(text || '').slice(0, 2000)}"""`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+  try {
+    const { text: out } = await groqChat(env, { json: true, maxTokens: 400, temperature: 0, reasoning: 'low', patience: 20_000, messages: [{ role: 'system', content: DECIDE_SYSTEM }, { role: 'user', content: facts }] });
+    const r = parseJson(out);
+    if (INTENTS.includes(r.intent)) return { intent: r.intent, mcq: num(r.mcq), structured: num(r.structured), minutes: num(r.minutes) };
+  } catch (e) {
+    console.error('study_decide', String(e?.message || e).slice(0, 200));
+  }
+  return null;
+}
+
+// A student's answers to the questions set in the chat, per question number,
+// from their message or a photo of their work.
+const READ_SYSTEM = `You read a student's answers to numbered questions and write them out per question number, exactly as the student gave them. For multiple choice, "answer" is the letter only (A, B, C or D). For written questions, copy the student's answer as written (from the message or the photos), without correcting it. Leave out questions the student did not answer.
+Reply with JSON only: {"answers": [{"n": number, "answer": string}]}`;
+const Answers = z.object({ answers: z.array(z.object({ n: z.coerce.number(), answer: s(6000) })).default([]) });
+
+export async function readAnswers(env, { quiz, text, images = [] }) {
+  const qs = quiz.questions.map((q) => `${q.n}. (${q.type === 'mcq' ? 'multiple choice' : 'written'}) ${String(q.text).slice(0, 220)}`).join('\n');
+  const prompt = `Questions:\n${qs}\n\nThe student's reply:\n"""\n${text || '(the answers are in the photos)'}\n"""`;
+  return task(env, { system: READ_SYSTEM, prompt, images: images.slice(0, 4), schema: Answers, maxTokens: 4000, reasoning: 'low' });
+}
+
+// Files sent with no instruction: say what came in and ask what to do.
+export function askWhatToDo(list, mode, lang) {
+  const fr = lang === 'fr';
+  const imgs = list.filter((f) => f.kind === 'image').length;
+  const docs = list.filter((f) => f.kind !== 'image');
+  const what =
+    docs.length === 1 && !imgs
+      ? `"${docs[0].name}"`
+      : !docs.length
+        ? fr
+          ? `vos ${imgs} photo${imgs > 1 ? 's' : ''}`
+          : `your ${imgs === 1 ? 'photo' : `${imgs} photos`}`
+        : fr
+          ? `vos ${list.length} fichiers`
+          : `your ${list.length} files`;
+  const can =
+    mode === 'teacher'
+      ? fr
+        ? 'résoudre et expliquer chaque question avec un guide de correction, expliquer ou résumer le contenu, en faire un devoir avec le barème, ou en tirer des notes de cours ou une fiche de préparation'
+        : 'solve and explain every question in it with a marking guide, explain or summarise it, make a test from it with the marking scheme, or turn it into lesson notes or a lesson plan'
+      : mode === 'parent'
+        ? fr
+          ? 'résoudre et expliquer les questions simplement pour que vous puissiez aider votre enfant, expliquer les notes, ou en faire des questions pour votre enfant'
+          : 'solve and explain the questions in plain words so you can help your child, explain the notes, or make questions from it for your child'
+        : fr
+          ? 'résoudre et expliquer chaque question, expliquer les notes, les résumer, ou en faire des questions de révision'
+          : 'solve and explain every question in it, explain the notes, summarise them, or make revision questions from them';
+  return fr ? `J’ai bien reçu ${what}. Que voulez-vous que j’en fasse ? Je peux ${can}. Dites-le-moi, ou posez votre question.` : `I have ${what}. What would you like me to do with it? I can ${can}. Just tell me, or ask your question.`;
+}
+
