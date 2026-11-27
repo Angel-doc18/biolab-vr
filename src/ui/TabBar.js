@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ic, T, V } from './kit';
 import { useL } from '../i18n';
+import { useApp } from '../state/store';
 
 export const TABS = [
   { name: 'Home', icon: 'home', en: 'Home', fr: 'Accueil' },
@@ -14,6 +15,21 @@ export const TABS = [
   { name: 'Exams', icon: 'assignment', en: 'Exams', fr: 'Examens' },
   { name: 'Me', icon: 'account_circle', en: 'Me', fr: 'Moi' },
 ];
+
+// A teacher's own bar: their classes, the Assistant in the middle and the
+// lessons as a library. The student Lab and Exams stay reachable from links.
+export const TEACHER_TABS = [
+  { name: 'Home', icon: 'home', en: 'Home', fr: 'Accueil' },
+  { name: 'Classes', icon: 'groups', en: 'Classes', fr: 'Classes' },
+  { name: 'Study', icon: 'auto_awesome', en: 'Assistant', fr: 'Assistant', center: true },
+  { name: 'Learn', icon: 'local_library', en: 'Library', fr: 'Bibliothèque' },
+  { name: 'Me', icon: 'account_circle', en: 'Me', fr: 'Moi' },
+];
+
+// A partner account is for inviting people: Home and Me only.
+export const PARTNER_TABS = TABS.filter((t) => t.name === 'Home' || t.name === 'Me');
+
+export const tabsFor = (role) => (role === 'teacher' ? TEACHER_TABS : role === 'partner' ? PARTNER_TABS : TABS);
 
 // Bottom navigation (h-16). The active pill glides between tabs. `tabs` is the
 // student set by default; the admin console passes its own.
@@ -141,11 +157,13 @@ export default function TabBar({ state, navigation, tabs, centerLabel }) {
     <TabBarView
       tabs={tabs}
       centerLabel={centerLabel}
-      activeIndex={state.index}
-      onSelect={(name, i) => {
-        const route = state.routes[i];
+      // matched by name: a role's bar can leave out screens that still exist
+      activeIndex={(tabs || TABS).findIndex((t) => t.name === state.routes[state.index]?.name)}
+      onSelect={(name) => {
+        const route = state.routes.find((r) => r.name === name);
+        if (!route) return;
         const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-        if (state.index !== i && !event.defaultPrevented) navigation.navigate(name);
+        if (state.routes[state.index]?.name !== name && !event.defaultPrevented) navigation.navigate(name);
       }}
     />
   );
@@ -154,5 +172,7 @@ export default function TabBar({ state, navigation, tabs, centerLabel }) {
 // Same bar on stacked screens that keep the navigation visible in the design.
 export function StaticTabBar({ active }) {
   const nav = useNavigation();
-  return <TabBarView activeIndex={TABS.findIndex((t) => t.name === active)} onSelect={(name) => nav.navigate('Main', { screen: name })} />;
+  const { user } = useApp();
+  const tabs = tabsFor(user?.role);
+  return <TabBarView tabs={tabs} activeIndex={tabs.findIndex((t) => t.name === active)} onSelect={(name) => nav.navigate('Main', { screen: name })} />;
 }

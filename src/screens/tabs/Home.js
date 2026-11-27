@@ -35,7 +35,7 @@ export function Section({ title, action, onAction, children }) {
 }
 
 // One quiet shortcut: a soft round icon with a short name under it.
-function Shortcut({ icon, label, onPress }) {
+export function Shortcut({ icon, label, onPress }) {
   return (
     <P c="flex-1 items-center gap-1.5 py-space-xs" onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
       <V c="w-14 h-14 rounded-2xl bg-surface-container-low items-center justify-center">

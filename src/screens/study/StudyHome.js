@@ -103,7 +103,7 @@ export default function StudyHome({ navigation }) {
           <ErrorNote error={error} />
           {chats && !chats.length && (
             <T c="font-body-md text-body-md text-on-surface-variant" style={{ lineHeight: 22 }}>
-              {L('Nothing yet. Start with one of the four above: everything you do is kept here to come back to.', 'Rien pour l’instant. Commencez par l’un des quatre ci-dessus : tout est gardé ici.')}
+              {L('Nothing yet. Start with one of the tools above: everything you do is kept here to come back to.', 'Rien pour l’instant. Commencez par l’un des outils ci-dessus : tout est gardé ici.')}
             </T>
           )}
           {!!chats?.length && (

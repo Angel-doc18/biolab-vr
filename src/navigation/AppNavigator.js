@@ -2,7 +2,8 @@ import { useCallback, useEffect } from 'react';
 import { createNavigationContainerRef, NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import TabBar, { TABS } from '../ui/TabBar';
+import { TeacherClasses } from '../screens/tabs/TeacherHome';
+import TabBar, { tabsFor } from '../ui/TabBar';
 import { C } from '../ui/tw';
 import { useApp } from '../state/store';
 import { calmMotion, noSlide } from '../lib/device';
@@ -100,17 +101,16 @@ const modalOptions = () => ({ animation: noSlide() ? 'none' : 'slide_from_bottom
 // The first screens after the opening logo fade in over its white.
 const fadeIn = () => ({ animation: noSlide() ? 'none' : 'fade' });
 
-// A partner account is for inviting people: Home (their promo code and
-// earnings) and Me only.
-const PARTNER_TABS = TABS.filter((t) => t.name === 'Home' || t.name === 'Me');
-
+// Each role has its own bar (TabBar tabsFor): a partner has Home and Me; a
+// teacher has Home, Classes, the Assistant, the Library and Me.
 function MainTabs() {
   const { user } = useApp();
   const partner = user?.role === 'partner';
+  const teacher = user?.role === 'teacher';
   return (
     <Tabs.Navigator
-      key={partner ? 'partner' : 'all'}
-      tabBar={(props) => <TabBar {...props} tabs={partner ? PARTNER_TABS : undefined} centerLabel={user?.role === 'teacher' ? (user?.lang === 'fr' ? 'Assistant' : 'Assistant') : undefined} />}
+      key={partner ? 'partner' : teacher ? 'teacher' : 'all'}
+      tabBar={(props) => <TabBar {...props} tabs={tabsFor(user?.role)} />}
       screenOptions={{
         headerShown: false,
         // A short fade between tabs, left out on entry-level phones.
@@ -121,6 +121,7 @@ function MainTabs() {
       }}
     >
       <Tabs.Screen name="Home" component={Home} />
+      {teacher && <Tabs.Screen name="Classes" component={TeacherClasses} />}
       {!partner && <Tabs.Screen name="Learn" component={Learn} />}
       {!partner && <Tabs.Screen name="Study" component={StudyHome} />}
       {!partner && <Tabs.Screen name="Lab" component={Lab} />}

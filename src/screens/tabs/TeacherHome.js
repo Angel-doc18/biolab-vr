@@ -11,7 +11,8 @@ import { unitById, unitsFor } from '../../data/units';
 import { labsFor } from '../../data/labs';
 import { mockRef, p1For } from '../../lib/exam';
 import { minutesLabel, subjectName } from '../../data/subjects';
-import { Section } from './Home';
+import { Section, Shortcut } from './Home';
+import { firstName, greeting } from '../../state/selectors';
 import ChargesCard from '../../ui/ChargesCard';
 
 const DAY = 86400000;
@@ -50,7 +51,7 @@ function Row({ title, sub, right, onPress, first, disabled }) {
   );
 }
 
-export function TeacherPortal({ navigation, standalone }) {
+export function TeacherPortal({ navigation, route, standalone, tab }) {
   const { user } = useApp();
   const L = useL();
   const lang = useLang();
@@ -75,7 +76,9 @@ export function TeacherPortal({ navigation, standalone }) {
     try {
       const r = await get('/v1/classes');
       setClasses(r.items);
-      const id = active && r.items.some((c) => c.id === active) ? active : r.items[0]?.id;
+      const want = route?.params?.classId;
+      if (want) navigation.setParams({ classId: undefined });
+      const id = want && r.items.some((c) => c.id === want) ? want : active && r.items.some((c) => c.id === active) ? active : r.items[0]?.id;
       setActive(id || null);
       if (id) await loadDetail(id);
       setError(null);
@@ -83,7 +86,8 @@ export function TeacherPortal({ navigation, standalone }) {
       setError(e);
       setClasses((c) => c || []);
     }
-  }, [active, loadDetail]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, loadDetail, route?.params?.classId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -112,7 +116,7 @@ export function TeacherPortal({ navigation, standalone }) {
   const quiet = (s) => !s.lastActive || Date.now() - s.lastActive > 3 * DAY;
   const weak = weakUnit(students, subject);
   const P1 = p1For(subject);
-  const header = standalone ? <StackHeader title={L('Classes', 'Classes')} logo /> : <TabHeader subtitle={[L('Teacher', 'Enseignant'), user?.schoolName].filter(Boolean).join(', ')} />;
+  const header = standalone ? <StackHeader title={L('Classes', 'Classes')} logo /> : tab ? <TabHeader title={L('Classes', 'Classes')} subtitle={L('Your classes and their work', 'Vos classes et leur travail')} /> : <TabHeader subtitle={[L('Teacher', 'Enseignant'), user?.schoolName].filter(Boolean).join(', ')} />;
   const sending = (ref) => (assigning === ref ? L('Sending', 'Envoi') : L('Set', 'Donner'));
 
   if (classes === null) return <Screen header={header}><Spinner /></Screen>;
@@ -122,7 +126,7 @@ export function TeacherPortal({ navigation, standalone }) {
       <Screen header={header} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}>
         <V c="pt-space-md pb-space-xl gap-space-lg">
           <ErrorNote error={error} />
-          <ChargesCard user={user} quiet onPress={() => navigation.navigate('Paywall')} />
+          {!tab && <ChargesCard user={user} quiet onPress={() => navigation.navigate('Paywall')} />}
 
           {!classes.length ? (
             <V c="gap-space-sm">
@@ -297,6 +301,122 @@ export function TeacherPortal({ navigation, standalone }) {
   );
 }
 
-export default function TeacherHome(props) {
-  return <TeacherPortal {...props} />;
+
+// When a chat was last used: today's time, or the date.
+const when = (t, L) => {
+  const d = new Date(t);
+  return new Date().toDateString() === d.toDateString() ? d.toTimeString().slice(0, 5) : d.toLocaleDateString(L('en-GB', 'fr-FR'), { day: 'numeric', month: 'short' });
+};
+
+// The Classes tab: each class's code, progress and the work to set.
+export function TeacherClasses(props) {
+  return <TeacherPortal {...props} tab />;
+}
+
+// A teacher's Home: quick tools to prepare a lesson, their classes at a
+// glance and the latest work prepared with the Assistant. Everything about
+// one class is in the Classes tab.
+export default function TeacherHome({ navigation }) {
+  const { user, refreshUnread } = useApp();
+  const L = useL();
+  const lang = useLang();
+  const [classes, setClasses] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    refreshUnread?.();
+    const [c, s] = await Promise.allSettled([get('/v1/classes'), get('/v1/study/chats')]);
+    if (c.status === 'fulfilled') setClasses(c.value.items);
+    else setClasses((x) => x || []);
+    if (s.status === 'fulfilled') setChats((s.value.chats || []).slice(0, 3));
+  }, [refreshUnread]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
+
+  const prepare = (intent) => navigation.navigate('StudyChat', { intent });
+  const pupils = (classes || []).reduce((a, c) => a + (c.students || 0), 0);
+
+  return (
+    <Screen
+      header={<TabHeader subtitle={[L('Teacher', 'Enseignant'), user?.schoolName].filter(Boolean).join(', ')} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}
+    >
+      <V c="gap-space-lg pb-space-xl">
+        <V c="pt-space-md gap-1">
+          <T c="font-headline-lg text-headline-lg text-on-surface tracking-tight" numberOfLines={1}>
+            {greeting(L)}, {firstName(user?.name)}
+          </T>
+          <T c="font-body-md text-body-md text-on-surface-variant" numberOfLines={1}>
+            {classes?.length
+              ? `${classes.length} ${classes.length === 1 ? L('class', 'classe') : L('classes', 'classes')}, ${pupils} ${pupils === 1 ? L('student', 'élève') : L('students', 'élèves')}`
+              : L('Your teaching space', 'Votre espace enseignant')}
+          </T>
+        </V>
+
+        <ChargesCard user={user} quiet onPress={() => navigation.navigate('Paywall')} />
+
+        <Section title={L('Prepare', 'Préparer')}>
+          <V c="flex-row">
+            <Shortcut icon="menu_book" label={L('Notes', 'Notes')} onPress={() => prepare('lesson_notes')} />
+            <Shortcut icon="event_note" label={L('Lesson plan', 'Fiche')} onPress={() => prepare('lesson_plan')} />
+            <Shortcut icon="quiz" label={L('A test', 'Un devoir')} onPress={() => prepare('quiz')} />
+            <Shortcut icon="task_alt" label={L('Past paper', 'Épreuve')} onPress={() => prepare('solve')} />
+          </V>
+        </Section>
+
+        <Section title={L('Your classes', 'Vos classes')} action={classes?.length ? L('All classes', 'Toutes') : null} onAction={() => navigation.navigate('Classes')}>
+          {classes === null ? (
+            <Spinner />
+          ) : !classes.length ? (
+            <V c="rounded-2xl border border-surface-container p-space-md gap-space-sm">
+              <T c="font-body-md text-body-md text-on-surface" style={{ lineHeight: 22 }}>
+                {L('Create a class to get a code for your students. Then you can follow their progress and set them work.', 'Créez une classe pour obtenir un code pour vos élèves. Vous suivrez leurs progrès et leur donnerez du travail.')}
+              </T>
+              <Cta variant="dark" icon={null} label={L('Create a class', 'Créer une classe')} onPress={() => navigation.navigate('CreateClass', { fromPortal: true })} />
+            </V>
+          ) : (
+            <V c="rounded-2xl bg-surface-container-lowest border border-surface-container overflow-hidden">
+              {classes.map((c, i) => (
+                <P key={c.id} c={`px-space-md py-space-sm flex-row items-center gap-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => navigation.navigate('Classes', { classId: c.id })}>
+                  <V c="w-10 h-10 rounded-xl bg-surface-container-low items-center justify-center">
+                    <Ic n="groups" s={22} c="primary-container" />
+                  </V>
+                  <V c="flex-1 min-w-0">
+                    <T c="font-label-lg text-label-lg text-on-surface" style={{ fontWeight: '700' }} numberOfLines={1}>
+                      {c.name}
+                    </T>
+                    <T c="font-body-sm text-body-sm text-on-surface-variant" numberOfLines={1}>
+                      {subjectName(c.subject, lang)}, {c.students} {c.students === 1 ? L('student', 'élève') : L('students', 'élèves')}
+                    </T>
+                  </V>
+                  <Ic n="chevron_right" s={22} c="outline" />
+                </P>
+              ))}
+            </V>
+          )}
+        </Section>
+
+        {!!chats.length && (
+          <Section title={L('Recently prepared', 'Préparé récemment')} action={L('Assistant', 'Assistant')} onAction={() => navigation.navigate('Study')}>
+            <V c="rounded-2xl bg-surface-container-lowest border border-surface-container overflow-hidden">
+              {chats.map((c, i) => (
+                <P key={c.id} c={`px-space-md py-space-sm flex-row items-center gap-space-sm ${i ? 'border-t border-surface-container' : ''}`} onPress={() => navigation.navigate('StudyChat', { chatId: c.id })}>
+                  <Ic n="description" s={20} c="outline" />
+                  <T c="font-body-md text-body-md text-on-surface flex-1" numberOfLines={1}>
+                    {c.title}
+                  </T>
+                  <T c="font-label-sm text-label-sm text-on-surface-variant">{when(c.updatedAt, L)}</T>
+                </P>
+              ))}
+            </V>
+          </Section>
+        )}
+      </V>
+    </Screen>
+  );
 }
