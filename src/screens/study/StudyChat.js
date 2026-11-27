@@ -16,6 +16,7 @@ import { del, get, patch, post } from '../../api/client';
 import { pickStudyDocuments, pickStudyPhotos } from '../../lib/studyFiles';
 import { shareStudyPdf } from '../../lib/studyPdf';
 import { explain, interrupt, isTalking, pausedNow, reply, stopTalking } from '../../lib/talk';
+import { unlockAudio } from '../../lib/voice';
 import { AssistantMessage, Thinking, UserMessage, solutionParts } from './messages';
 import { CallBar, useCall } from './call';
 
@@ -31,9 +32,9 @@ const contextOf = (m, part) => {
   if (!m) return undefined;
   if (m.kind !== 'solution') return String(m.body?.text || m.body?.title || '').slice(0, 2000);
   const sol = m.body;
-  const k = part - 1 - (sol.concepts || []).length;
+  const k = part;
   const st = k >= 0 ? sol.steps[k] : null;
-  return `Question: ${sol.question}\n${st ? `Step ${k + 1} on the board: ${st.board}${st.why ? `\nReason given: ${st.why}` : ''}` : 'The beginning of the solution (what the question asks and the ideas behind it).'}`;
+  return `Question: ${sol.question}\n${st ? `Step ${k + 1} on the board: ${st.board}${st.why ? `\nReason given: ${st.why}` : ''}` : 'The beginning of the solution (what the question asks).'}`;
 };
 
 export default function StudyChat({ navigation, route }) {
@@ -151,14 +152,19 @@ export default function StudyChat({ navigation, route }) {
       }
       const fresh = r.messages.filter((x) => x.role === 'assistant');
       const onCall = callRef.current?.active() && !quiet;
-      // on a call, solutions start empty and are written as they are explained
-      if (onCall && fresh.some((x) => x.kind === 'solution')) setLiveIds((s) => new Set([...s, ...fresh.filter((x) => x.kind === 'solution').map((x) => x.id)]));
+      // Each new solution starts with an empty board and is written step by
+      // step while it is explained, one after another, like the Workspace.
+      const sols = quiet ? [] : fresh.filter((x) => x.kind === 'solution');
+      if (sols.length) setLiveIds((s) => new Set([...s, ...sols.map((x) => x.id)]));
       setMessages((m) => [...m.filter((x) => !String(x.id).startsWith('local-')), ...r.messages]);
       toEnd();
       if (onCall) {
         // a paper's questions: they are solved next, so it does not listen yet
         if (fresh.some((x) => x.kind === 'questions')) solving.current = true;
-        queue.current.push(...fresh);
+        queue.current.push(...fresh); // on a call every answer is spoken
+        playNext();
+      } else if (sols.length) {
+        queue.current.push(...sols);
         playNext();
       }
       return r.messages;
@@ -204,6 +210,9 @@ export default function StudyChat({ navigation, route }) {
   const send = async () => {
     const t = text.trim();
     if ((!t && !attached.length) || working || running) return;
+    unlockAudio(); // the tap lets the voice speak when the answer comes
+    stopTalking();
+    queue.current = [];
     const files = attached;
     setAttached([]);
     setText('');
@@ -245,20 +254,27 @@ export default function StudyChat({ navigation, route }) {
   // The next answer is spoken; when nothing is left, it listens again.
   const playNext = () => {
     const c = callRef.current;
-    if (!c?.active() || isTalking()) return;
+    if (isTalking()) return;
+    const onCall = !!c?.active();
     const m = queue.current.shift();
     if (!m) {
-      if (!solving.current && !['listening', 'thinking'].includes(c.phaseNow())) c.listen();
+      if (onCall && !solving.current && !['listening', 'hearing', 'thinking'].includes(c.phaseNow())) c.listen();
       return;
     }
     const parts = speechOf(m).map((x) => String(x || '').trim()).filter(Boolean);
     if (!parts.length) return playNext();
-    c.speaking();
-    explain(m.id, parts, { lang, onEnd: playNext });
+    if (onCall) c.speaking();
+    explain(m.id, parts, { lang, onEnd: playNext, voice: onCall ? true : undefined });
   };
   // What the person said on the call.
   const onHeard = async (said) => {
-    const paused = pausedNow();
+    let paused = pausedNow();
+    // a reply that was cut into is dropped, as in a conversation; a solution
+    // on the board is gone back to after the question
+    if (paused && messagesRef.current.find((x) => x.id === paused.id)?.kind !== 'solution') {
+      stopTalking();
+      paused = null;
+    }
     if (paused) {
       // a question in the middle of an explanation: answered, then back to it
       const m = messagesRef.current.find((x) => x.id === paused.id);
@@ -266,7 +282,7 @@ export default function StudyChat({ navigation, route }) {
       const ans = r?.filter((x) => x.role === 'assistant' && x.kind === 'text').pop();
       if (ans && callRef.current?.active()) {
         callRef.current.speaking();
-        reply(ans.body.text, { lang, onEnd: playNext });
+        reply(ans.body.text, { lang, onEnd: playNext, voice: true });
       } else playNext();
       return;
     }
@@ -275,7 +291,11 @@ export default function StudyChat({ navigation, route }) {
     const set = r.find((m) => m.kind === 'questions');
     if (set) solveSet(set.body);
   };
-  const call = useCall({ onHeard, onError: setError });
+  const cutIn = () => {
+    interrupt();
+    callRef.current?.listen();
+  };
+  const call = useCall({ onHeard, onCutIn: cutIn, onError: setError });
   const callRef = useRef(null);
   callRef.current = { ...call, phaseNow: () => call.phaseNow() };
   const endCall = () => {
@@ -287,6 +307,7 @@ export default function StudyChat({ navigation, route }) {
   const endCallRef = useRef(null);
   endCallRef.current = endCall;
   const startCall = async () => {
+    unlockAudio(); // the tap lets the AI's voice play during the call
     stopTalking();
     setError(null);
     queue.current = [];
@@ -294,10 +315,8 @@ export default function StudyChat({ navigation, route }) {
   };
   // A tap on the call bar: cut in while the AI speaks, or send now while listening.
   const tapCall = () => {
-    if (call.phase === 'speaking') {
-      interrupt();
-      call.listen();
-    } else if (call.phase === 'listening') call.finish(true);
+    if (call.phase === 'speaking') cutIn();
+    else if (call.phase === 'listening') call.finish(true);
   };
 
   // ---------- adding files ----------

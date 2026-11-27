@@ -255,6 +255,9 @@ export async function transcribe(env, bytes, mime, lang) {
     form.append('response_format', 'json');
     form.append('temperature', '0');
     if (lang === 'fr' || lang === 'en') form.append('language', lang);
+    form.append('prompt', lang === 'fr'
+      ? 'Un élève du secondaire au Cameroun parle avec son professeur de biologie, chimie, physique ou mathématiques.'
+      : 'A secondary school student in Cameroon talking with a tutor about biology, chemistry, physics and mathematics.');
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 45_000);
     try {

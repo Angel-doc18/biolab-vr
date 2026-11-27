@@ -222,9 +222,11 @@ export async function ask(request, env, id) {
     const files = fileIds.length ? await filesOf(env, chat.id, fileIds) : null;
     const quizRow = await env.DB.prepare("SELECT body FROM study_messages WHERE chat_id = ? AND kind = 'quiz' ORDER BY created_at DESC LIMIT 1").bind(chat.id).first();
     const quizOpen = quizRow ? JSON.parse(quizRow.body).title || 'Revision questions' : null;
-    plan = (await decide(env, { text, files, role: user.role, quizOpen, lastAnswer: lastBody?.text || lastBody?.title || lastBody?.question })) || {
+    plan = (await decide(env, { text, files, role: user.role, quizOpen, lastAnswer: lastBody?.text || lastBody?.title || lastBody?.question, spoken: !!b.spoken })) || {
       intent: files ? (/note|explain|summar/i.test(text) ? 'notes' : 'solve') : looksLikeQuestion(text) ? 'solve_text' : 'chat',
     };
+    // an exercise to work out (solve, calculate, find... with numbers) goes on the board
+    if (plan.intent === 'chat' && !files && /\b(solve|calculate|work out|find|simplify|factori[sz]e|expand|evaluate|differentiate|integrate|balance|prove|show that|résou|calcul|trouve|simplifie|développe|factorise)/i.test(text) && /\d|equation|équation|formula|formule/i.test(text)) plan.intent = 'solve_text';
     if (plan.intent === 'lesson_plan' && user.role !== 'teacher') plan.intent = 'lesson_notes';
     if (plan.intent === 'mark' && !quizRow) plan.intent = 'chat';
     if ((plan.intent === 'notes' || plan.intent === 'summary' || plan.intent === 'solve') && !files) plan.intent = plan.intent === 'solve' ? 'solve_text' : plan.intent === 'notes' ? 'solve_text' : 'summary';
@@ -255,7 +257,7 @@ export async function ask(request, env, id) {
       const message = during
         ? `${opts.mode === 'teacher' ? 'The teacher' : 'The student'} interrupted your spoken explanation to ask a question. You were explaining this:\n"""\n${during}\n"""\nAnswer the question briefly and clearly (it will be read aloud), then stop: the explanation continues after your answer.\n\nQuestion: ${text}`
         : text || 'Explain what is in the file I just shared.';
-      const reply = await chatReply(env, { history, message, material: all.text, images: fileIds.length ? files.images.slice(0, 4) : [], ...opts });
+      const reply = await chatReply(env, { history, message, material: all.text, images: fileIds.length ? files.images.slice(0, 4) : [], spoken: !!b.spoken, ...opts });
       await said(text || '…', files);
       out.push(await addMessage(env, chat.id, 'assistant', 'text', { text: reply, ...(stepOf ? { stepOf } : {}) }));
     }

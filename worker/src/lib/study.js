@@ -359,10 +359,13 @@ const CHAT_SYSTEM = (mode) => `${who(mode)}
 ${mode === 'teacher' ? 'Answer the teacher' : mode === 'parent' ? 'Answer the parent' : 'Answer the student'} in a natural conversation. Use the material they shared (shown below when there is some) as your main reference. Answer the actual question first, then explain why, briefly and clearly, then offer the next useful step. Keep answers short unless asked for detail. If a question is outside school subjects, say kindly that you help with school work.
 ${RULES}`;
 
-export async function chatReply(env, { history = [], message, material = '', subject, className, lang, mode, images = [] }) {
+export async function chatReply(env, { history = [], message, material = '', subject, className, lang, mode, images = [], spoken = false }) {
   if (!groqConfigured(env)) throw new HttpError(503, 'The AI is not available yet.', 'ai_unavailable');
   const ctx = context({ subject, className, lang, mode });
-  const sys = `${CHAT_SYSTEM(mode)}\n\n${ctx}${material ? `\n\nMaterial shared in this chat:\n"""\n${String(material).slice(0, 24_000)}\n"""` : ''}`;
+  const talk = spoken
+    ? '\nThis is a spoken conversation, like a phone call: your reply is read aloud. Answer in two to five short, natural sentences, the way a warm teacher talks, then ask one short question to keep the conversation going when it helps. No lists, headings or symbols; say formulas in words.'
+    : '';
+  const sys = `${CHAT_SYSTEM(mode)}${talk}\n\n${ctx}${material ? `\n\nMaterial shared in this chat:\n"""\n${String(material).slice(0, 24_000)}\n"""` : ''}`;
   const user = images.length ? [{ type: 'text', text: message }, ...images.map((im) => ({ type: 'image_url', image_url: { url: `data:${im.mediaType};base64,${im.data}` } }))] : message;
   const { text } = await groqChat(env, { vision: images.length > 0, maxTokens: 2500, temperature: 0.4, messages: [{ role: 'system', content: sys }, ...history, { role: 'user', content: user }] });
   // Plain text: no markdown emphasis or headings.
@@ -393,9 +396,12 @@ When files are attached and the message is general ("help me with this", "do it"
 
 const num = (x) => (Number.isFinite(Number(x)) && Number(x) > 0 ? Math.round(Number(x)) : null);
 
-export async function decide(env, { text, files, role, quizOpen, lastAnswer }) {
+export async function decide(env, { text, files, role, quizOpen, lastAnswer, spoken = false }) {
   const facts = [
     `The person is a ${role}.`,
+    spoken
+      ? 'The message was spoken aloud in a voice conversation. Choose "chat" for conversation, definitions and explanations of ideas ("what is osmosis", "why does ice float"). Choose "solve_text" only for an exercise to work out step by step on the board: a calculation, an equation, a problem with numbers or an exam question.'
+      : null,
     files?.list?.length
       ? `Attached: ${files.list.map((f) => `${f.name} (${f.kind})`).join(', ')}.${files.text ? `\nStart of the attached text:\n"""\n${files.text.slice(0, 900)}\n"""` : ''}`
       : 'Nothing attached.',

@@ -148,7 +148,91 @@ async function audioMode() {
 
 const current = { finish: null };
 
+// ---------- the web ----------
+// In a browser one audio element plays every clip. It is unlocked by the
+// person's tap (unlockAudio), so speech that starts seconds later, once the AI
+// has answered, may still play: phones and browsers block sound that starts
+// without a tap.
+const SILENCE = 'data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA=='; // 0.1 s of silence
+let webEl = null;
+let unlocked = false;
+function webAudio() {
+  if (!webEl && typeof Audio !== 'undefined') {
+    webEl = new Audio();
+    webEl.preload = 'auto';
+    webEl.setAttribute('playsinline', '');
+  }
+  return webEl;
+}
+// Call from a tap (send, the call button, Play): afterwards the voice can speak.
+export function unlockAudio() {
+  if (Platform.OS !== 'web' || unlocked) return;
+  const el = webAudio();
+  if (!el) return;
+  try {
+    el.src = SILENCE;
+    const p = el.play();
+    if (p && p.then) p.then(() => (unlocked = true)).catch(() => {});
+    else unlocked = true;
+  } catch {
+    // no audio in this browser
+  }
+  try {
+    // the browser's own voice (used when the natural voice cannot be had)
+    if (window.speechSynthesis) {
+      const u = new window.SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    }
+  } catch {
+    // no speech synthesis
+  }
+}
+
+function playWeb(uri) {
+  return new Promise((resolve, reject) => {
+    const el = webAudio();
+    if (!el) {
+      reject(new Error('no audio'));
+      return;
+    }
+    let done = false;
+    let started = false;
+    const finish = (err) => {
+      if (done) return;
+      done = true;
+      clearTimeout(startTimer);
+      el.onplaying = null;
+      el.onended = null;
+      el.onerror = null;
+      try {
+        el.pause();
+      } catch {
+        // already stopped
+      }
+      if (current.finish === finish) current.finish = null;
+      if (err) reject(err);
+      else resolve();
+    };
+    const startTimer = setTimeout(() => !started && finish(new Error('audio did not start')), 7000);
+    el.onplaying = () => {
+      started = true;
+    };
+    el.onended = () => finish();
+    el.onerror = () => finish(new Error('audio failed'));
+    current.finish = finish;
+    el.src = uri;
+    try {
+      const p = el.play();
+      if (p && p.catch) p.catch((e) => finish(e));
+    } catch (e) {
+      finish(e);
+    }
+  });
+}
+
 function playUri(uri) {
+  if (Platform.OS === 'web') return playWeb(uri);
   return new Promise((resolve, reject) => {
     let player;
     try {
