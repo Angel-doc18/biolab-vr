@@ -204,7 +204,7 @@ const QUIZ_SYSTEM = (mode, n) => `${who(mode)}
 From the material given (notes, a lesson or a past paper), write ${n.mcq} multiple choice questions and ${n.structured} structured questions${mode === 'teacher' ? ' for the teacher to give their class' : ' for the student to revise with'}, in the style of the Cameroon GCE.
 - Every question must be answerable from the material and the syllabus at this level. Cover the important ideas, not trivia. Vary them: recall, understanding, application and calculation where the topic has them.
 - Multiple choice: 4 options (A to D), exactly one correct, with plausible wrong options built on common mistakes. "answer" is the letter. "explanation" says why the answer is right and why the others are wrong, briefly.
-- Structured: a question with parts where natural ((a), (b)), the marks for it (2 to 12), a mark scheme of points that add up to the marks, and a model answer that would earn full marks.
+- Structured: a question with parts where natural ((a), (b)), the marks for it (2 to 12), and a mark scheme written the way GCE examiners write it: one point for each creditable fact, step or skill, each point worth 1 mark (2 only for a substantial step), so a question worth 6 marks has about 5 or 6 points, adding up exactly to the marks. Then a model answer that would earn full marks.
 ${RULES}
 Reply with JSON only: {"title": string, "questions": [{"type": "mcq", "text": string, "options": [string, string, string, string], "answer": "A"|"B"|"C"|"D", "explanation": string} | {"type": "structured", "text": string, "marks": number, "scheme": [{"point": string, "marks": number}], "modelAnswer": string}]}`;
 
@@ -248,5 +248,10 @@ export async function chatReply(env, { history = [], message, material = '', sub
   const sys = `${CHAT_SYSTEM(mode)}\n\n${ctx}${material ? `\n\nMaterial shared in this chat:\n"""\n${String(material).slice(0, 24_000)}\n"""` : ''}`;
   const user = images.length ? [{ type: 'text', text: message }, ...images.map((im) => ({ type: 'image_url', image_url: { url: `data:${im.mediaType};base64,${im.data}` } }))] : message;
   const { text } = await groqChat(env, { vision: images.length > 0, maxTokens: 2500, temperature: 0.4, messages: [{ role: 'system', content: sys }, ...history, { role: 'user', content: user }] });
-  return clean(text).replace(/\*\*/g, '').slice(0, 12_000);
+  // Plain text: no markdown emphasis or headings.
+  return clean(text)
+    .replace(/\*\*/g, '')
+    .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s.,;:!?)]|$)/g, '$1$2')
+    .replace(/^#{1,4}\s*/gm, '')
+    .slice(0, 12_000);
 }
