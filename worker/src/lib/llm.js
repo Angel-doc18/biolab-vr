@@ -120,7 +120,9 @@ function waitFrom(res, body) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export async function aiChat(env, opts, retried = false) {
-  const { messages, vision = false, json = false, maxTokens = 2000, temperature = 0.4, reasoning = null } = opts;
+  // patience: how long to wait for a briefly busy key before failing (study
+  // tasks, which show progress, wait longer than a quick question).
+  const { messages, vision = false, json = false, maxTokens = 2000, temperature = 0.4, reasoning = null, patience = 25_000 } = opts;
   const order = vision ? VISION_ORDER.map((id) => SLOTS.find((s) => s.id === id)) : SLOTS;
   let anyKey = false;
   let busy = false;
@@ -206,7 +208,7 @@ export async function aiChat(env, opts, retried = false) {
   }
   if (!anyKey) throw new HttpError(503, 'The AI tutor is not available yet.', 'ai_unavailable');
   // Every key only briefly busy (a per-minute limit): wait for the first one
-  // to be free (at most 25 s) and try once more, rather than failing.
+  // to be free (up to `patience`) and try once more, rather than failing.
   if (busy && !retried) {
     let soonest = Infinity;
     for (const slot of SLOTS) {
@@ -215,7 +217,7 @@ export async function aiChat(env, opts, retried = false) {
       if (st.reason === 'busy' && st.restUntil > Date.now()) soonest = Math.min(soonest, st.restUntil);
     }
     const ms = soonest - Date.now();
-    if (ms > 0 && ms <= 25_000) {
+    if (ms > 0 && ms <= patience) {
       await sleep(ms + 300);
       return aiChat(env, opts, true);
     }

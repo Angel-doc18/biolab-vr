@@ -32,7 +32,7 @@ async function task(env, { system, prompt, images = [], schema, maxTokens = 6000
   const content = images.length ? [{ type: 'text', text: prompt }, ...images.map((im) => ({ type: 'image_url', image_url: { url: `data:${im.mediaType};base64,${im.data}` } }))] : prompt;
   let last = null;
   for (const temperature of [0.2, 0]) {
-    const { text } = await groqChat(env, { json: true, vision: images.length > 0, maxTokens, temperature, reasoning, messages: [{ role: 'system', content: system }, { role: 'user', content }] });
+    const { text } = await groqChat(env, { json: true, vision: images.length > 0, maxTokens, temperature, reasoning, patience: 55_000, messages: [{ role: 'system', content: system }, { role: 'user', content }] });
     try {
       return schema.parse(parseJson(text));
     } catch (e) {
