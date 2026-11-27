@@ -227,6 +227,41 @@ export async function aiChat(env, opts, retried = false) {
   throw new HttpError(502, 'The AI tutor could not answer just now. Please try again.', 'ai_failed');
 }
 
+// Speech to text with Groq's Whisper (the Groq keys), for talking to the AI.
+// bytes: the recording (m4a, mp4, webm, ogg, mp3 or wav). Returns the text.
+const AUDIO_EXT = { 'audio/m4a': 'm4a', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/aac': 'm4a', 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mpeg': 'mp3', 'audio/wav': 'wav' };
+export const AUDIO_TYPES = Object.keys(AUDIO_EXT);
+export async function transcribe(env, bytes, mime, lang) {
+  let anyKey = false;
+  for (const slot of SLOTS.filter((s) => s.provider === 'groq')) {
+    const { value: key } = await keyOf(env, slot);
+    if (!key) continue;
+    anyKey = true;
+    const form = new FormData();
+    form.append('file', new Blob([bytes], { type: mime }), `speech.${AUDIO_EXT[mime] || 'm4a'}`);
+    form.append('model', env.WHISPER_MODEL || 'whisper-large-v3-turbo');
+    form.append('response_format', 'json');
+    form.append('temperature', '0');
+    if (lang === 'fr' || lang === 'en') form.append('language', lang);
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 45_000);
+    try {
+      const res = await fetch(`${PROVIDERS.groq.base}/audio/transcriptions`, { method: 'POST', signal: ctrl.signal, headers: { authorization: `Bearer ${key}` }, body: form });
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        return String(data.text || '').trim();
+      }
+      console.error('whisper_error', slot.id, res.status, (await res.text().catch(() => '')).slice(0, 200));
+    } catch (e) {
+      console.error('whisper_error', slot.id, e?.message);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  if (!anyKey) throw new HttpError(503, 'Speaking to the AI needs a Groq key. Type your question instead.', 'ai_unavailable');
+  throw new HttpError(502, 'Your voice could not be understood just now. Try again, or type your question.', 'stt_failed');
+}
+
 // A small real request with one key, for the CTO's "Test" button and to check a
 // new key before it is saved. Returns { ok, model?, ms, error? }.
 export async function testKey(env, slot, key) {

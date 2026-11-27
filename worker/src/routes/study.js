@@ -10,6 +10,7 @@ import { subjectOr } from '../lib/subjects.js';
 import { markAnswer } from '../lib/ai.js';
 import { KINDS, looksScanned, readDocument } from '../lib/docs.js';
 import { chatReply, explainNotes, findQuestions, makeQuestions, solveOne } from '../lib/study.js';
+import { AUDIO_TYPES, transcribe } from '../lib/llm.js';
 
 // Daily study actions (each answer, solution, explanation, quiz or marking).
 export const STUDY_LIMIT = { pro: 150, free: 10 };
@@ -46,6 +47,13 @@ async function useOne(env, user) {
     .bind(user.id, today())
     .run();
 }
+
+// Is a message a question to solve and explain (a problem, a definition, an
+// explanation asked for), rather than small talk or a follow-up about what was
+// just said (which gets a conversational answer)?
+const SMALL_TALK = /^(hi|hello|hey|thanks|thank you|ok|okay|good|great|nice|cool|yes|no|bye|merci|bonjour|salut|d'accord|oui|non)\b[\s!.?]*$/i;
+const FOLLOW_UP = /\b(step \d+|this step|that step|previous|above|you said|again|repeat|slower|simpler|what do you mean|i don'?t understand|je ne comprends pas|encore|l'étape)\b/i;
+export const looksLikeQuestion = (t) => String(t || '').trim().length >= 12 && !SMALL_TALK.test(String(t).trim()) && !FOLLOW_UP.test(String(t));
 
 const shortTitle = (t) => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 60) || 'New chat';
 const settingsOf = (user, chat) => ({ subject: chat.subject || null, className: user.class_name, lang: user.lang === 'fr' ? 'fr' : 'en', mode: modeOf(user) });
@@ -167,9 +175,22 @@ export async function ask(request, env, id) {
       .filter((m) => m.content);
     while (history.length && history[0].role !== 'user') history.shift();
     const all = await filesOf(env, chat.id, null);
-    const reply = await chatReply(env, { history, message: text || 'Explain what is in the file I just shared.', material: all.text, images: fileIds.length ? files.images.slice(0, 4) : [], ...opts });
-    await said(text || '…', files);
-    out.push(await addMessage(env, chat.id, 'assistant', 'text', { text: reply }));
+    // Asked in the middle of a spoken explanation: what was being explained.
+    const during = b.context ? str(b.context, 'Context', { max: 3000 }) : '';
+    if (!during && looksLikeQuestion(text)) {
+      // A real question (a problem, a definition, an explanation to give):
+      // solved and explained step by step, not just answered in a line.
+      const sol = await solveOne(env, { question: text, images: fileIds.length ? files.images.slice(0, 2) : [], ...opts });
+      await said(text, files);
+      out.push(await addMessage(env, chat.id, 'assistant', 'solution', { question: text, ...sol }));
+    } else {
+      const message = during
+        ? `${opts.mode === 'teacher' ? 'The teacher' : 'The student'} interrupted your spoken explanation to ask a question. You were explaining this:\n"""\n${during}\n"""\nAnswer the question briefly and clearly (it will be read aloud), then stop: the explanation continues after your answer.\n\nQuestion: ${text}`
+        : text || 'Explain what is in the file I just shared.';
+      const reply = await chatReply(env, { history, message, material: all.text, images: fileIds.length ? files.images.slice(0, 4) : [], ...opts });
+      await said(text || '…', files);
+      out.push(await addMessage(env, chat.id, 'assistant', 'text', { text: reply }));
+    }
     if (first && text) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(text), chat.id).run();
   } else if (action === 'find') {
     await useOne(env, user);
@@ -228,4 +249,20 @@ export async function ask(request, env, id) {
     out.push(await addMessage(env, chat.id, 'assistant', 'marked', { quizId, n, answer, ...m, total: q.marks }));
   }
   return ok({ messages: out });
+}
+
+// POST /v1/study/transcribe { base64, mime }: what the person said, as text
+// (Whisper). The recording is not kept.
+export async function transcribeSpeech(request, env) {
+  const user = await requireUser(request, env);
+  requireAccess(user, env);
+  await limit(env.AI_LIMITER, `ai:${user.id}`, 'You are going too quickly. Wait a moment.');
+  const b = await readJson(request, 6 * 1024 * 1024);
+  const mime = oneOf(String(b.mime || '').split(';')[0], 'Recording type', AUDIO_TYPES);
+  const bytes = Uint8Array.from(Buffer.from(String(b.base64 || '').replace(/^data:[^,]+,/, ''), 'base64'));
+  if (bytes.length < 800) throw new HttpError(400, 'Nothing was heard. Hold the phone closer and speak again.', 'too_short');
+  if (bytes.length > 4 * 1024 * 1024) throw new HttpError(413, 'That recording is too long. Keep it under two minutes.', 'too_large');
+  const text = await transcribe(env, bytes, mime, user.lang === 'fr' ? 'fr' : 'en');
+  if (!text || text.length < 2) throw new HttpError(422, 'Nothing was heard. Speak again a little louder.', 'nothing_heard');
+  return ok({ text: text.slice(0, 4000) });
 }

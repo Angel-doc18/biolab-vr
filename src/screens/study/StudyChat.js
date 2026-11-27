@@ -13,7 +13,16 @@ import { useL, useLang } from '../../i18n';
 import { del, get, patch, post } from '../../api/client';
 import { pickStudyDocuments, pickStudyPhotos } from '../../lib/studyFiles';
 import { shareStudyPdf } from '../../lib/studyPdf';
-import { AiText, FileChips, NotesCard, Quiz, QuestionSet, Solution, UserBubble, Working } from './cards';
+import { useAudioRecorder, useAudioRecorderState } from 'expo-audio';
+import { VOICE_RECORDING, micAllowed, micDone, recordingData } from '../../lib/recordVoice';
+import { explain, interrupt, isTalking, pausedNow, reply, stopTalking } from '../../lib/talk';
+import { AiText, FileChips, NotesCard, Quiz, QuestionSet, Solution, UserBubble, Working, solutionParts } from './cards';
+
+// Same rule as the server: a real question is solved and explained step by
+// step; small talk and follow-ups get a conversational answer.
+const SMALL_TALK = /^(hi|hello|hey|thanks|thank you|ok|okay|good|great|nice|cool|yes|no|bye|merci|bonjour|salut|d'accord|oui|non)\b[\s!.?]*$/i;
+const FOLLOW_UP = /\b(step \d+|this step|that step|previous|above|you said|again|repeat|slower|simpler|what do you mean|i don'?t understand|je ne comprends pas|encore|l'étape)\b/i;
+const looksLikeQuestion = (t) => String(t || '').trim().length >= 12 && !SMALL_TALK.test(String(t).trim()) && !FOLLOW_UP.test(String(t));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -37,6 +46,36 @@ export default function StudyChat({ navigation, route }) {
   const scroll = useRef(null);
   const input = useRef(null);
   const stopAll = useRef(false);
+  const recorder = useAudioRecorder(VOICE_RECORDING);
+  const recState = useAudioRecorderState(recorder, 250);
+  const [listening, setListening] = useState(false);
+  // Read aloud: solutions are explained by voice as they arrive, one after
+  // another (on by default; the speaker button in the header turns it off).
+  const [aloud, setAloud] = useState(true);
+  const aloudRef = useRef(true);
+  const queue = useRef([]);
+  const playNext = () => {
+    if (isTalking()) return;
+    const m = queue.current.shift();
+    if (m) explain(m.id, solutionParts(m.body, lang), { lang, onEnd: playNext });
+  };
+  // spoken: the person asked by voice, so the answer is spoken even when off
+  const speakSolutions = (sols, spoken) => {
+    if (!aloudRef.current && !spoken) return;
+    queue.current.push(...sols);
+    playNext();
+  };
+  const toggleAloud = () => {
+    const on = !aloudRef.current;
+    aloudRef.current = on;
+    setAloud(on);
+    if (!on) {
+      queue.current = [];
+      stopTalking();
+    }
+  };
+  // Leaving the chat stops the voice.
+  useEffect(() => () => stopTalking(), []);
   const intent = route.params?.intent;
 
   const toEnd = () => setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 80);
@@ -89,6 +128,9 @@ export default function StudyChat({ navigation, route }) {
         }
         setMessages((m) => [...m.filter((x) => !String(x.id).startsWith('local-')), ...r.messages]);
         toEnd();
+        // Each solution is explained aloud as it arrives, one after another.
+        const sols = r.messages.filter((x) => x.kind === 'solution');
+        if (sols.length) speakSolutions(sols, body.spoken);
         return r.messages;
       } catch (e) {
         setMessages((m) => m.filter((x) => !String(x.id).startsWith('local-')));
@@ -148,10 +190,13 @@ export default function StudyChat({ navigation, route }) {
     return { ids: files.map((f) => f.id), files };
   };
 
+  // Find the questions, then solve and explain them one after another, at once.
   const find = async () => {
     const { ids, files } = take();
     const note = L('Find the questions and solve them with me.', 'Trouvez les questions et résolvons-les ensemble.');
-    await run(S.read, { action: 'find', fileIds: ids, note }, { text: note, files });
+    const r = await run(S.read, { action: 'find', fileIds: ids, note }, { text: note, files });
+    const set = r?.find((m) => m.kind === 'questions');
+    if (set) await solveAll(set.body, new Set());
   };
   const explain = async () => {
     const { ids, files } = take();
@@ -174,7 +219,7 @@ export default function StudyChat({ navigation, route }) {
     const solveTyped = intent === 'solve' && !attached.length && !messages.length;
     const { ids, files } = take();
     setText('');
-    await run(solveTyped ? S.solve() : S.chat, solveTyped ? { action: 'solve_text', text: t } : { action: 'chat', text: t, fileIds: ids }, { text: t, files });
+    await run(solveTyped || looksLikeQuestion(t) ? S.solve() : S.chat, solveTyped ? { action: 'solve_text', text: t } : { action: 'chat', text: t, fileIds: ids }, { text: t, files });
   };
 
   const solve = async (set, n) => {
@@ -183,10 +228,10 @@ export default function StudyChat({ navigation, route }) {
     await run(S.solve(k + 1, set.questions.length), { action: 'solve', setId: set.setId, n });
     setBusyN(null);
   };
-  const solveAll = async (set) => {
+  const solveAll = async (set, solvedAlready) => {
     setRunning(true);
     stopAll.current = false;
-    const done = new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === set.setId).map((m) => m.body.n));
+    const done = solvedAlready || new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === set.setId).map((m) => m.body.n));
     for (const q of set.questions) {
       if (stopAll.current) break;
       if (done.has(q.n)) continue;
@@ -229,6 +274,58 @@ export default function StudyChat({ navigation, route }) {
     }
   };
 
+  // ---------- talking ----------
+  // Tap the microphone: the AI stops speaking (remembering where it was), the
+  // phone listens; tap send: Whisper writes it down, the AI answers aloud, then
+  // goes back to the explanation it was giving.
+  const startTalk = async () => {
+    setError(null);
+    try {
+      interrupt();
+      await micAllowed();
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+      setListening(true);
+    } catch (e) {
+      setError(e);
+    }
+  };
+  const cancelTalk = async () => {
+    setListening(false);
+    try {
+      await recorder.stop();
+    } catch {
+      // already stopped
+    }
+    await micDone();
+  };
+  const sendTalk = async () => {
+    setListening(false);
+    try {
+      await recorder.stop();
+      await micDone();
+      if (!recorder.uri) throw new Error(L('Nothing was recorded. Try again.', 'Rien n’a été enregistré. Réessayez.'));
+      setWorking([L('Listening to what you said...', 'Écoute de ce que vous avez dit...')]);
+      const audio = await recordingData(recorder.uri);
+      const heard = await post('/v1/study/transcribe', audio, { timeout: 60000 });
+      // What was being explained when the question came, for the AI.
+      const p = pausedNow();
+      let context;
+      const sol = p && messages.find((x) => x.id === p.id);
+      if (sol) {
+        const k = p.index - (sol.body.interpretation ? 1 : 0);
+        context = `Question: ${sol.body.question}\n${k >= 0 && sol.body.steps[k] ? `You were at step ${k + 1}: ${sol.body.steps[k].board}` : 'You were at the beginning of the solution.'}`;
+      }
+      const r = await run(!context && looksLikeQuestion(heard.text) ? S.solve() : S.chat, { action: 'chat', text: heard.text, context, spoken: true }, { text: heard.text, files: [] });
+      const answer = r?.filter((m) => m.role === 'assistant' && m.kind === 'text').pop();
+      if (answer) reply(answer.body.text, { lang });
+    } catch (e) {
+      setWorking(null);
+      setError(e);
+    }
+  };
+  const clock = (ms = 0) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, '0')}`;
+
   // what each set, quiz and solution look like now
   const solvedOf = (setId) => new Set(messages.filter((m) => m.kind === 'solution' && m.body.setId === setId).map((m) => m.body.n));
   const marksOf = (quizId) => new Map(messages.filter((m) => m.kind === 'marked' && m.body.quizId === quizId).map((m) => [m.body.n, m.body]));
@@ -252,26 +349,50 @@ export default function StudyChat({ navigation, route }) {
           </V>
         </V>
       )}
-      <V c="flex-row items-end gap-space-xs">
-        <P c="w-11 h-11 rounded-full bg-surface-container-low items-center justify-center" onPress={() => setSheet('attach')} accessibilityRole="button" accessibilityLabel={L('Add a photo or a document', 'Ajouter une photo ou un document')}>
-          <Ic n="add" s={24} c="primary-container" />
-        </P>
-        <V c="flex-1 min-h-[44px] rounded-3xl bg-surface-container-low px-space-md justify-center">
-          <Input
-            ref={input}
-            c="py-2.5 text-body-md font-body-md text-on-surface"
-            placeholder={attached.length ? L('Ask about it, or choose above', 'Posez une question, ou choisissez ci-dessus') : teacher ? L('Ask, or add your notes and papers', 'Demandez, ou ajoutez notes et épreuves') : L('Ask anything, or add a photo', 'Demandez, ou ajoutez une photo')}
-            value={text}
-            onChangeText={setText}
-            multiline
-            maxLength={8000}
-            style={{ maxHeight: 120 }}
-          />
+      {listening ? (
+        // Recording: what is being heard, cancel, or send it.
+        <V c="flex-row items-center gap-space-xs">
+          <P c="w-11 h-11 rounded-full bg-surface-container-low items-center justify-center" onPress={cancelTalk} accessibilityRole="button" accessibilityLabel={L('Cancel', 'Annuler')}>
+            <Ic n="close" s={22} c="on-surface" />
+          </P>
+          <V c="flex-1 h-11 rounded-3xl bg-surface-container-low px-space-md flex-row items-center gap-2">
+            <V c="w-2.5 h-2.5 rounded-full bg-error" />
+            <T c="font-body-md text-body-md text-on-surface flex-1">{L('Listening...', 'J’écoute...')}</T>
+            <T c="font-label-md text-label-md text-on-surface-variant">{clock(recState.durationMillis)}</T>
+          </V>
+          <P c="w-11 h-11 rounded-full bg-primary-container items-center justify-center" onPress={sendTalk} accessibilityRole="button" accessibilityLabel={L('Send what I said', 'Envoyer ce que j’ai dit')}>
+            <Ic n="arrow_upward" s={22} c="on-primary" />
+          </P>
         </V>
-        <P c={`w-11 h-11 rounded-full items-center justify-center ${text.trim() || attached.length ? 'bg-primary-container' : 'bg-surface-container-high'}`} onPress={send} disabled={!!working || (!text.trim() && !attached.length)} accessibilityRole="button" accessibilityLabel={L('Send', 'Envoyer')}>
-          <Ic n="arrow_upward" s={22} c="on-primary" />
-        </P>
-      </V>
+      ) : (
+        <V c="flex-row items-end gap-space-xs">
+          <P c="w-11 h-11 rounded-full bg-surface-container-low items-center justify-center" onPress={() => setSheet('attach')} accessibilityRole="button" accessibilityLabel={L('Add a photo or a document', 'Ajouter une photo ou un document')}>
+            <Ic n="add" s={24} c="primary-container" />
+          </P>
+          <V c="flex-1 min-h-[44px] rounded-3xl bg-surface-container-low px-space-md justify-center">
+            <Input
+              ref={input}
+              c="py-2.5 text-body-md font-body-md text-on-surface"
+              placeholder={attached.length ? L('Ask about it, or choose above', 'Posez une question, ou choisissez ci-dessus') : teacher ? L('Ask, or add your notes and papers', 'Demandez, ou ajoutez notes et épreuves') : L('Ask anything, or add a photo', 'Demandez, ou ajoutez une photo')}
+              value={text}
+              onChangeText={setText}
+              multiline
+              maxLength={8000}
+              style={{ maxHeight: 120 }}
+            />
+          </V>
+          {text.trim() || attached.length ? (
+            <P c="w-11 h-11 rounded-full bg-primary-container items-center justify-center" onPress={send} disabled={!!working} accessibilityRole="button" accessibilityLabel={L('Send', 'Envoyer')}>
+              <Ic n="arrow_upward" s={22} c="on-primary" />
+            </P>
+          ) : (
+            // Nothing typed: talk instead (and interrupt the AI if it is speaking).
+            <P c="w-11 h-11 rounded-full bg-primary-container items-center justify-center" onPress={startTalk} disabled={!!working} accessibilityRole="button" accessibilityLabel={L('Talk to the AI', 'Parler à l’IA')}>
+              <Ic n="mic" s={22} c="on-primary" fill />
+            </P>
+          )}
+        </V>
+      )}
     </V>
   );
 
@@ -286,9 +407,14 @@ export default function StudyChat({ navigation, route }) {
             subtitle={teacher ? L('Teaching assistant', 'Assistant pédagogique') : L('Study with AI', 'Étudier avec l’IA')}
             avatar={false}
             right={
-              <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={() => setSheet('more')} accessibilityLabel={L('More', 'Plus')}>
-                <Ic n="more_vert" s={24} c="on-surface" />
-              </P>
+              <V c="flex-row">
+                <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={toggleAloud} accessibilityRole="switch" accessibilityState={{ checked: aloud }} accessibilityLabel={L('Read solutions aloud', 'Lire les solutions à voix haute')}>
+                  <Ic n={aloud ? 'volume_up' : 'volume_off'} s={22} c={aloud ? 'primary-container' : 'outline'} />
+                </P>
+                <P c="w-11 h-11 items-center justify-center rounded-xl" onPress={() => setSheet('more')} accessibilityLabel={L('More', 'Plus')}>
+                  <Ic n="more_vert" s={24} c="on-surface" />
+                </P>
+              </V>
             }
           />
         }
@@ -326,7 +452,7 @@ export default function StudyChat({ navigation, route }) {
             if (m.role === 'user') return <UserBubble key={m.id} body={m.body} L={L} />;
             if (m.kind === 'text') return <AiText key={m.id} body={m.body} />;
             if (m.kind === 'questions') return <QuestionSet key={m.id} body={m.body} solved={solvedOf(m.body.setId)} busyN={busyN} running={running || !!working} onSolve={(n) => solve(m.body, n)} onSolveAll={() => solveAll(m.body)} L={L} />;
-            if (m.kind === 'solution') return <Solution key={m.id} body={m.body} L={L} lang={lang} teacher={teacher} />;
+            if (m.kind === 'solution') return <Solution key={m.id} id={m.id} body={m.body} L={L} lang={lang} teacher={teacher} />;
             if (m.kind === 'notes') return <NotesCard key={m.id} body={m.body} L={L} />;
             if (m.kind === 'quiz') return <Quiz key={m.id} body={m.body} marks={marksOf(m.body.quizId)} busyN={typeof busyN === 'string' && busyN.startsWith(m.body.quizId) ? Number(busyN.split(':')[1]) : null} onMark={(n, a) => mark(m.body.quizId, n, a)} L={L} />;
             return null;

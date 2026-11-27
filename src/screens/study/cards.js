@@ -7,7 +7,7 @@ import { C, Ic, Input, P, T, V } from '../../ui/kit';
 import { Cta } from '../../ui/chrome';
 import ListenButton from '../../ui/ListenButton';
 import FunctionGraph from '../../ui/FunctionGraph';
-import { speak, stop as stopVoice, voiceSession } from '../../lib/voice';
+import { explain, stopTalking, subscribe } from '../../lib/talk';
 
 const FILE_ICON = { image: 'image', pdf: 'picture_as_pdf', docx: 'description', text: 'notes' };
 
@@ -131,50 +131,26 @@ export function QuestionSet({ body, solved, busyN, onSolve, onSolveAll, running,
 }
 
 // ---------- one solution ----------
-function useStepVoice(sol, lang) {
-  const [cursor, setCursor] = useState(-1);
-  const run = useRef(0);
-  const stopAll = () => {
-    run.current += 1;
-    stopVoice();
-    setCursor(-1);
+// The parts read aloud for a solution: what it asks, each step, the answer.
+export const solutionParts = (sol, lang) => [sol.interpretation, ...sol.steps.map((s) => s.say || s.board), sol.answer ? `${lang === 'fr' ? 'Donc la réponse est :' : 'So the answer is:'} ${sol.answer}` : null].filter(Boolean);
+
+// Follows the shared voice (lib/talk): which step of this solution is being
+// read now, and whether it was paused for a question.
+function useTalk(id, sol) {
+  const [st, setSt] = useState({ id: null, index: -1, playing: false, pausedId: null, pausedIndex: -1 });
+  useEffect(() => subscribe(setSt), []);
+  const offset = sol.interpretation ? 1 : 0;
+  return {
+    playing: st.id === id && st.playing,
+    cursor: st.id === id ? st.index - offset : -1,
+    paused: st.pausedId === id,
   };
-  useEffect(() => () => (run.current += 1), []);
-  const play = () => {
-    stopAll();
-    const mine = run.current;
-    const session = voiceSession();
-    const parts = [sol.interpretation, ...sol.steps.map((s) => s.say || s.board), sol.answer ? `${lang === 'fr' ? 'Donc la réponse est :' : 'So the answer is:'} ${sol.answer}` : null].filter(Boolean);
-    const go = (i) => {
-      if (mine !== run.current) return;
-      if (i >= parts.length) return setCursor(-1);
-      setCursor(i - (sol.interpretation ? 1 : 0));
-      speak(parts[i], { lang, session, quick: i === 0, next: parts[i + 1], onDone: () => go(i + 1), onError: () => go(i + 1) });
-    };
-    go(0);
-  };
-  return { cursor, playing: cursor > -2 && run.current > 0 && cursor !== -1, play, stop: stopAll };
 }
 
-export function Solution({ body, L, lang, teacher }) {
+export function Solution({ id, body, L, lang, teacher }) {
   const [showQ, setShowQ] = useState(false);
-  const v = useStepVoice(body, lang);
-  const [speaking, setSpeaking] = useState(false);
-  const toggle = () => {
-    if (speaking) {
-      v.stop();
-      setSpeaking(false);
-    } else {
-      setSpeaking(true);
-      v.play();
-    }
-  };
-  useEffect(() => {
-    if (v.cursor === -1 && speaking) {
-      const t = setTimeout(() => setSpeaking(false), 600);
-      return () => clearTimeout(t);
-    }
-  }, [v.cursor, speaking]);
+  const v = useTalk(id, body);
+  const toggle = () => (v.playing ? stopTalking() : explain(id, solutionParts(body, lang), { lang }));
   return (
     <V c="rounded-2xl border border-surface-container bg-surface-container-lowest overflow-hidden">
       <P c="p-space-md gap-1 bg-surface-container-low" onPress={() => setShowQ((x) => !x)}>
@@ -206,7 +182,12 @@ export function Solution({ body, L, lang, teacher }) {
             </T>
           </V>
         )}
-        <ListenButton size="sm" label={L('Explain it to me', 'Expliquez-moi')} stopLabel={L('Stop', 'Arrêter')} playing={speaking} onPress={toggle} />
+        <V c="flex-row items-center flex-wrap gap-2">
+          <ListenButton size="sm" label={L('Explain it to me', 'Expliquez-moi')} stopLabel={L('Stop', 'Arrêter')} playing={v.playing} onPress={toggle} />
+          {v.paused && (
+            <T c="font-label-sm text-label-sm text-on-surface-variant">{L('Paused for your question', 'En pause pour votre question')}</T>
+          )}
+        </V>
         {body.steps.map((s, i) => (
           <V key={i} c="flex-row gap-space-sm">
             <V c={`w-6 h-6 rounded-full items-center justify-center mt-0.5 ${v.cursor === i ? 'bg-tertiary' : 'bg-primary-container'}`}>

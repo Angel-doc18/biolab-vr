@@ -129,6 +129,7 @@ const routes = [
   ['DELETE', `/v1/study/chats/${ID}`, study.deleteChat],
   ['POST', `/v1/study/chats/${ID}/files`, study.addFile],
   ['POST', `/v1/study/chats/${ID}/ask`, study.ask],
+  ['POST', '/v1/study/transcribe', study.transcribeSpeech],
   ['PUT', '/v1/admin/community', community.putCommunity],
   // the partner programme
   ['GET', '/v1/partner/programme', partner.publicProgramme],
@@ -196,7 +197,7 @@ function corsHeaders(request, env) {
 // Open during maintenance: admins, signing in (admins still can), payments
 // arriving from Fapshi, error reports and the public website's data.
 const OPEN_IN_MAINTENANCE = /^\/v1\/(health|admin\/|auth\/login|billing\/(fapshi-webhook|plans|return)|app\/errors|team|contact|partner\/programme)/;
-const AI_PATHS = /^\/v1\/(ai\/(ask|mark|explain|solve|mark-any)|study\/chats\/[A-Za-z0-9-]+\/ask)$/;
+const AI_PATHS = /^\/v1\/(ai\/(ask|mark|explain|solve|mark-any)|study\/(chats\/[A-Za-z0-9-]+\/ask|transcribe))$/;
 const blockNoted = new Map();
 
 async function handle(request, env) {
