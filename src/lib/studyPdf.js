@@ -173,12 +173,71 @@ ${body || `<p>${L('Nothing solved or explained in this chat yet.', 'Rien de rés
 </body></html>`;
 }
 
+// The file's name: the chat's title, then Klass8.
+const fileName = (title) => `${String(title || 'Study').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Study'} - Klass8.pdf`;
+
+// On the web: html2pdf (loaded only when a PDF is asked for) turns the same
+// document into a real PDF file that downloads; printing would only capture
+// the screen.
+const HTML2PDF = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+let loading = null;
+function loadHtml2pdf() {
+  if (window.html2pdf) return Promise.resolve(window.html2pdf);
+  loading =
+    loading ||
+    new Promise((resolve, reject) => {
+      const el = document.createElement('script');
+      el.src = HTML2PDF;
+      el.async = true;
+      el.onload = () => resolve(window.html2pdf);
+      el.onerror = () => {
+        loading = null;
+        reject(new Error('The PDF could not be prepared. Check your connection and try again.'));
+      };
+      document.head.appendChild(el);
+    });
+  return loading;
+}
+
+// The document as html2pdf takes it: the page's styles scoped to one block
+// of A4 width (no outer margin, so nothing runs past the page's edge).
+export const webDocument = (args) => {
+  const doc = new DOMParser().parseFromString(studyHtml(args), 'text/html');
+  const css = `${CSS.replace(/(^|\})\s*body\{/g, '$1.k8doc{')}.k8doc{margin:0!important;box-sizing:border-box;width:100%;padding:2px 4px;background:#ffffff}.k8doc *{box-sizing:border-box;max-width:100%}`;
+  return `<div class="k8doc"><style>${css}</style>${doc.body.innerHTML}</div>`;
+};
+
+async function downloadOnWeb(args) {
+  const html2pdf = await loadHtml2pdf();
+  await html2pdf()
+    .set({
+      margin: [10, 10, 12, 10],
+      filename: fileName(args.title),
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['.step', '.ans', '.concept', '.block', '.q', 'tr', 'h2', 'p', 'li'] },
+    })
+    .from(webDocument(args), 'string')
+    .save();
+}
+
+// Downloads (web) or shares (phone) the PDF of the given messages: a whole
+// chat, or one solution with its question.
 export async function shareStudyPdf(args) {
-  const html = studyHtml(args);
-  if (Platform.OS === 'web') {
-    await Print.printAsync({ html });
-    return;
+  if (Platform.OS === 'web') return downloadOnWeb(args);
+  const { uri } = await Print.printToFileAsync({ html: studyHtml(args) });
+  // a file named after the chat, not "Print-1234.pdf"
+  let file = uri;
+  try {
+    const { File, Paths } = require('expo-file-system');
+    const from = new File(uri);
+    const to = new File(Paths.cache, fileName(args.title));
+    if (to.exists) to.delete();
+    from.move(to);
+    file = from.uri;
+  } catch {
+    // keep the printed file's own name
   }
-  const { uri } = await Print.printToFileAsync({ html });
-  if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: args.title });
+  if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(file, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: args.title });
 }
