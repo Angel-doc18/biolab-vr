@@ -20,12 +20,13 @@ function normaliseIdentifier(v) {
   return d.length === 9 ? `237${d}` : d;
 }
 
-export default function Login({ navigation }) {
+export default function Login({ navigation, route }) {
   const { login, auth, startSession } = useApp();
   const L = useL();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
+  // a Google sign-in that did not finish comes back here with its reason
+  const [error, setError] = useState(route?.params?.googleError || null);
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {

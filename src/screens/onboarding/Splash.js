@@ -9,6 +9,7 @@ import { LOW_END, noSlide } from '../../lib/device';
 import { firstName, greeting } from '../../state/selectors';
 import { useL } from '../../i18n';
 import { loadAdminSession } from '../../api/adminClient';
+import { googleReturn } from '../../ui/GoogleButton';
 
 // The opening. It takes over from the system splash (the K8 mark alone,
 // centred): a soft ring pulses out, the graduation cap is tossed up with a full
@@ -71,7 +72,7 @@ const flight = (to, fall) => {
 };
 
 export default function Splash({ navigation }) {
-  const { ready, auth, user, prefs } = useApp();
+  const { ready, auth, user, prefs, startSession } = useApp();
   const L = useL();
   const { width } = useWindowDimensions();
   const [still] = useState(() => noSlide());
@@ -98,6 +99,13 @@ export default function Splash({ navigation }) {
   const [admin, setAdmin] = useState(undefined);
   useEffect(() => {
     loadAdminSession().then((sess) => setAdmin(sess || null), () => setAdmin(null));
+  }, []);
+  // On the web, back from Google's sign-in page: { session } or { error }
+  // (null when not; undefined while the code is being exchanged).
+  const [google, setGoogle] = useState(Platform.OS === 'web' ? undefined : null);
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    googleReturn().then(setGoogle, () => setGoogle(null));
   }, []);
   const name = firstName(user?.name);
 
@@ -163,12 +171,20 @@ export default function Splash({ navigation }) {
   // The first screen opens once the opening has played (or been tapped away)
   // and the app is ready.
   useEffect(() => {
-    if (!shown || !ready || admin === undefined || went.current) return;
+    if (!shown || !ready || admin === undefined || google === undefined || went.current) return;
     went.current = true;
+    const googleFailed = (e) => navigation.reset({ index: 0, routes: [{ name: 'Login', params: { googleError: e?.message || String(e) } }] });
+    if (google?.session) {
+      // signed in with Google: a new account chooses its role next
+      const r = google.session;
+      startSession(r).then(() => navigation.reset(r.created ? { index: 0, routes: [{ name: 'Role' }] } : routeAfterAuth(r.user)), googleFailed);
+      return;
+    }
+    if (google?.error) return googleFailed(google.error);
     if (admin) navigation.reset({ index: 0, routes: [{ name: 'Admin' }] });
     else if (auth.status === 'authed') navigation.reset(routeAfterAuth(user));
     else navigation.replace(prefs.seenWelcome ? 'Login' : 'Welcome');
-  }, [shown, ready, admin, auth.status, user, prefs.seenWelcome, navigation]);
+  }, [shown, ready, admin, google, auth.status, user, prefs.seenWelcome, navigation, startSession]);
 
   const markStyle = {
     transform: [

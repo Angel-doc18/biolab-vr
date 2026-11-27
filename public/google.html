@@ -6,84 +6,111 @@
 <meta name="robots" content="noindex">
 <title>Klass8: continue with Google</title>
 <!--
-  The Klass8 app's "Continue with Google": the app opens this page in the
-  phone's browser with a challenge (the hash of a secret only the app holds)
-  and its own return address. After Google's sign-in, the server checks the
-  Google token and gives a one-time code bound to that challenge, and the page
-  sends the code back to the app, which exchanges it (with the secret) for its
-  session. The page only talks to its own server and only returns to the
-  Klass8 app (klass8://, or Expo Go during development).
+  "Continue with Google" for the Klass8 app, web and phone, with Google's
+  standard full-page sign-in (no pop-up, no Google script on this page).
+
+  1. The app opens this page with ?challenge (the hash of a secret only the
+     app holds), &redirect (where to come back: the phone app, or
+     https://klass8.com/app/), &role, &lang and &ref. The page sends the
+     person to Google's sign-in, with a one-time value (nonce) and these
+     details in "state".
+  2. Google sends the person back here with #id_token and state. The page
+     gives the token to the server, which checks it (and the nonce) and
+     answers with a one-time code bound to the challenge.
+  3. The page goes back to the app with the code (or the error); the app
+     exchanges the code, with its secret, for its session.
+  The page only talks to its own server and only returns to the Klass8 app.
 -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-  :root { --navy: #02287b; --amber: #fbac02; --ink: #101b36; --muted: #4e5b77; --bg: #ffffff; }
+  :root { --navy: #02287b; --amber: #fbac02; --ink: #101b36; --muted: #4e5b77; }
   * { box-sizing: border-box; }
-  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; padding: 24px 16px; }
-  main { width: 100%; max-width: 380px; text-align: center; display: flex; flex-direction: column; gap: 18px; align-items: center; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #ffffff; color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; padding: 24px 16px; }
+  main { width: 100%; max-width: 380px; text-align: center; display: flex; flex-direction: column; gap: 16px; align-items: center; }
   .brand { font-size: 30px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; }
   .brand span { color: var(--amber); }
-  h1 { font-size: 20px; margin: 0; }
   p { margin: 0; color: var(--muted); line-height: 1.5; font-size: 15px; }
-  #btn { min-height: 44px; display: flex; justify-content: center; }
-  #msg { min-height: 22px; font-size: 14px; }
+  .spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid #e3e8f0; border-top-color: var(--navy); animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
   #msg.error { color: #b3261e; }
+  a.again { color: var(--navy); font-weight: 700; text-decoration: none; }
+  @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
 </style>
 </head>
 <body>
 <main>
   <div class="brand">Klass<span>8</span></div>
-  <h1 id="title">Continue with Google</h1>
-  <p id="lead">Choose your Google account to sign in to the Klass8 app.</p>
-  <div id="btn"></div>
-  <p id="msg"></p>
+  <div class="spin" id="spin"></div>
+  <p id="msg">Opening Google...</p>
 </main>
 <script>
 (function () {
-  var q = new URLSearchParams(location.search);
-  var challenge = q.get('challenge') || '';
-  var redirect = q.get('redirect') || '';
-  var role = q.get('role') || 'student';
-  var lang = q.get('lang') === 'fr' ? 'fr' : 'en';
-  var ref = q.get('ref') || '';
+  var SITE = 'https://klass8.com';
   var msg = document.getElementById('msg');
-  if (lang === 'fr') {
-    document.getElementById('title').textContent = 'Continuer avec Google';
-    document.getElementById('lead').textContent = 'Choisissez votre compte Google pour vous connecter à l’application Klass8.';
-  }
-  var fail = function (text) { msg.textContent = text; msg.className = 'error'; };
-  // only back to the Klass8 app (or Expo Go while developing)
-  if (!/^(klass8|exp|exps):\/\//.test(redirect) || challenge.length < 43) {
-    fail(lang === 'fr' ? 'Ouvrez cette page depuis l’application Klass8.' : 'Open this page from the Klass8 app.');
+  var spin = document.getElementById('spin');
+  var b64url = function (s) { return btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  var unb64url = function (s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return decodeURIComponent(escape(atob(s))); };
+  var rand = function () { var a = new Uint8Array(24); crypto.getRandomValues(a); var s = ''; for (var i = 0; i < a.length; i++) s += ('0' + a[i].toString(16)).slice(-2); return s; };
+  // only back to the Klass8 app: the phone app (or Expo Go while developing) or the web app
+  var okReturn = function (r) { return /^(klass8|exp|exps):\/\//.test(r) || r.indexOf(SITE + '/app') === 0 || r.indexOf(location.origin + '/app') === 0; };
+  var fail = function (text, fr) { spin.style.display = 'none'; msg.className = 'error'; msg.textContent = text; };
+  var back = function (st, key, value) {
+    // the phone app reads ?code=, the web app ?google_code=
+    var name = st.w ? 'google_' + key : key;
+    location.replace(st.r + (st.r.indexOf('?') >= 0 ? '&' : '?') + name + '=' + encodeURIComponent(value));
+  };
+
+  var hash = new URLSearchParams(location.hash.slice(1));
+  var query = new URLSearchParams(location.search);
+
+  // 2. back from Google
+  if (hash.get('state') || query.get('state')) {
+    var st;
+    try { st = JSON.parse(unb64url(hash.get('state') || query.get('state'))); } catch (e) { st = null; }
+    if (!st || !okReturn(st.r || '')) return fail('Open this page from the Klass8 app.');
+    var fr = st.l === 'fr';
+    msg.textContent = fr ? 'Connexion...' : 'Signing in...';
+    var err = hash.get('error') || query.get('error');
+    if (err) return back(st, 'error', err === 'access_denied' ? (fr ? 'Connexion Google annulée.' : 'Google sign-in was cancelled.') : (fr ? 'Google a refusé la connexion : ' : 'Google could not sign you in: ') + err);
+    var token = hash.get('id_token');
+    if (!token) return back(st, 'error', fr ? 'Google n’a pas répondu. Réessayez.' : 'Google did not answer. Try again.');
+    history.replaceState(null, '', location.pathname); // the token leaves the address bar
+    fetch('/v1/auth/google', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-klass8-client': '2' },
+      body: JSON.stringify({ credential: token, nonce: st.n, challenge: st.c, role: st.role, lang: st.l, referralCode: st.ref || undefined })
+    })
+      .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok) return back(st, 'error', x.j.error || 'Google sign-in failed.');
+        msg.textContent = fr ? 'Retour à Klass8...' : 'Going back to Klass8...';
+        back(st, 'code', x.j.code);
+      })
+      .catch(function () { fail(fr ? 'Pas de connexion. Réessayez.' : 'No connection. Try again.'); });
     return;
   }
-  var back = function (key, value) { location.href = redirect + (redirect.indexOf('?') >= 0 ? '&' : '?') + key + '=' + encodeURIComponent(value); };
-  var start = function (clientId) {
-    if (!window.google || !google.accounts) return setTimeout(function () { start(clientId); }, 200);
-    google.accounts.id.initialize({
-      client_id: clientId,
-      ux_mode: 'popup',
-      callback: function (r) {
-        msg.className = '';
-        msg.textContent = lang === 'fr' ? 'Connexion...' : 'Signing in...';
-        fetch('/v1/auth/google', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', 'x-klass8-client': '2' },
-          body: JSON.stringify({ credential: r.credential, challenge: challenge, role: role, lang: lang, referralCode: ref || undefined })
-        })
-          .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, j: j }; }); })
-          .then(function (x) {
-            if (!x.ok) return back('error', x.j.error || 'Google sign-in failed.');
-            msg.textContent = lang === 'fr' ? 'Retour à l’application...' : 'Going back to the app...';
-            back('code', x.j.code);
-          })
-          .catch(function () { fail(lang === 'fr' ? 'Pas de connexion. Réessayez.' : 'No connection. Try again.'); });
-      }
-    });
-    google.accounts.id.renderButton(document.getElementById('btn'), { type: 'standard', theme: 'outline', size: 'large', text: 'continue_with', shape: 'pill', logo_alignment: 'center', width: Math.min(340, window.innerWidth - 40) });
-  };
+
+  // 1. from the app: off to Google
+  var challenge = query.get('challenge') || '';
+  var redirect = query.get('redirect') || '';
+  var lang = query.get('lang') === 'fr' ? 'fr' : 'en';
+  if (!okReturn(redirect) || challenge.length < 43) return fail(lang === 'fr' ? 'Ouvrez cette page depuis l’application Klass8.' : 'Open this page from the Klass8 app.');
+  if (lang === 'fr') msg.textContent = 'Ouverture de Google...';
+  var state = { c: challenge, r: redirect, role: query.get('role') || 'student', l: lang, ref: query.get('ref') || '', n: rand(), w: redirect.indexOf('/app') > 0 && /^https:/.test(redirect) ? 1 : 0 };
   fetch('/v1/auth/google/config')
     .then(function (r) { return r.json(); })
-    .then(function (j) { if (j.clientId) start(j.clientId); else fail(lang === 'fr' ? 'La connexion Google n’est pas encore disponible.' : 'Google sign-in is not available yet.'); })
+    .then(function (j) {
+      if (!j.clientId) return fail(lang === 'fr' ? 'La connexion Google n’est pas encore disponible.' : 'Google sign-in is not available yet.');
+      location.replace('https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+        client_id: j.clientId,
+        redirect_uri: SITE + '/google.html',
+        response_type: 'id_token',
+        scope: 'openid email profile',
+        nonce: state.n,
+        state: b64url(JSON.stringify(state)),
+        prompt: 'select_account',
+        hl: lang
+      }).toString());
+    })
     .catch(function () { fail(lang === 'fr' ? 'Pas de connexion. Réessayez.' : 'No connection. Try again.'); });
 })();
 </script>

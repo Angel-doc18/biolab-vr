@@ -316,6 +316,8 @@ export async function googleSignIn(request, env) {
   await limit(env.AUTH_LIMITER, `google:${clientIp(request)}`, 'Too many attempts. Wait a minute and try again.');
   const b = await readJson(request);
   const g = await verifyGoogleToken(env, str(b.credential, 'Google sign-in', { max: 4096 }));
+  // the one-time value the sign-in page put in Google's request: no replayed tokens
+  if (b.nonce && g.nonce !== String(b.nonce)) throw new HttpError(401, 'Google sign-in could not be checked. Try again.', 'google_invalid');
   const role = oneOf(b.role ?? 'student', 'Role', ['student', 'parent', 'teacher', 'partner']);
   const lang = oneOf(b.lang ?? 'en', 'Language', ['en', 'fr']);
   const { user, created: isNew } = await googleAccount(env, request, g, { role, lang, referralCode: b.referralCode });

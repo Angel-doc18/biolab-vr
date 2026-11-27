@@ -49,5 +49,5 @@ export async function verifyGoogleToken(env, token) {
   if (!ids.includes(claims.aud)) throw bad();
   if (!(claims.exp * 1000 > Date.now() - 60_000)) throw new HttpError(401, 'The Google sign-in took too long. Try again.', 'google_expired');
   if (!claims.email || !(claims.email_verified === true || claims.email_verified === 'true')) throw new HttpError(401, 'This Google account has no verified email address.', 'google_unverified');
-  return { sub: String(claims.sub), email: String(claims.email).toLowerCase(), name: String(claims.name || claims.given_name || claims.email.split('@')[0]).slice(0, 80), picture: claims.picture || null };
+  return { nonce: claims.nonce || null, sub: String(claims.sub), email: String(claims.email).toLowerCase(), name: String(claims.name || claims.given_name || claims.email.split('@')[0]).slice(0, 80), picture: claims.picture || null };
 }
