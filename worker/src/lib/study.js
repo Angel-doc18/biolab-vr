@@ -288,11 +288,11 @@ const LessonNotes = z.object({
   exercises: z.array(z.object({ question: s(800), answer: s(1200) })).default([]),
 });
 
-export async function lessonNotes(env, { topic, text = '', subject, className, lang, mode }) {
+export async function lessonNotes(env, { topic, text = '', images = [], subject, className, lang, mode }) {
   const ctx = context({ subject, className, lang, mode });
-  if (!String(topic || '').trim() && !String(text).trim()) throw new HttpError(400, 'Say the topic for the notes, for example "Photosynthesis, Form 3".', 'invalid_input');
-  const prompt = `${ctx}\n\nTopic: ${topic || '(the material below)'}\n${levelOf(`${className || ''} ${topic || ''}`)}${text ? `\n\nBase the notes on this material:\n"""\n${String(text).slice(0, 40_000)}\n"""` : ''}`;
-  const { scope: _scope, ...notes } = await task(env, { system: NOTES_WRITE_SYSTEM(mode), prompt, schema: LessonNotes, maxTokens: 12000, reasoning: 'medium' });
+  if (!String(topic || '').trim() && !String(text).trim() && !images.length) throw new HttpError(400, 'Say the topic for the notes, for example "Photosynthesis, Form 3".', 'invalid_input');
+  const prompt = `${ctx}\n\nTopic: ${topic || '(the material below)'}\n${levelOf(`${className || ''} ${topic || ''}`)}${text ? `\n\nBase the notes on this material:\n"""\n${String(text).slice(0, 40_000)}\n"""` : ''}${images.length ? '\n\nBase the notes on the material in the photos.' : ''}`;
+  const { scope: _scope, ...notes } = await task(env, { system: NOTES_WRITE_SYSTEM(mode), prompt, images: images.slice(0, 6), schema: LessonNotes, maxTokens: 12000, reasoning: 'medium' });
   return notes;
 }
 
@@ -319,11 +319,11 @@ const Plan = z.object({
   boardSummary: s(2000).default(''),
 });
 
-export async function lessonPlan(env, { topic, text = '', subject, className, lang, minutes = 40 }) {
-  if (!String(topic || '').trim() && !String(text).trim()) throw new HttpError(400, 'Say the topic of the lesson, for example "Ohm\'s law, Form 4".', 'invalid_input');
+export async function lessonPlan(env, { topic, text = '', images = [], subject, className, lang, minutes = 40 }) {
+  if (!String(topic || '').trim() && !String(text).trim() && !images.length) throw new HttpError(400, 'Say the topic of the lesson, for example "Ohm\'s law, Form 4".', 'invalid_input');
   const ctx = context({ subject, className, lang, mode: 'teacher' });
-  const prompt = `${ctx}\n\nTopic: ${topic || '(the material below)'}\n${levelOf(`${className || ''} ${topic || ''}`)}\nLesson length: ${minutes} minutes.${text ? `\n\nBase it on this material:\n"""\n${String(text).slice(0, 30_000)}\n"""` : ''}`;
-  const r = await task(env, { system: PLAN_SYSTEM, prompt, schema: Plan, maxTokens: 9000, reasoning: 'medium' });
+  const prompt = `${ctx}\n\nTopic: ${topic || '(the material below)'}\n${levelOf(`${className || ''} ${topic || ''}`)}\nLesson length: ${minutes} minutes.${text ? `\n\nBase it on this material:\n"""\n${String(text).slice(0, 30_000)}\n"""` : ''}${images.length ? '\n\nBase it on the material in the photos.' : ''}`;
+  const r = await task(env, { system: PLAN_SYSTEM, prompt, images: images.slice(0, 6), schema: Plan, maxTokens: 9000, reasoning: 'medium' });
   return { ...r, minutes };
 }
 

@@ -240,13 +240,14 @@ export async function ask(request, env, id) {
     out.push(await addMessage(env, chat.id, 'assistant', 'quiz', { quizId: uuid(), ...r }));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
   } else if (action === 'lesson_notes' || action === 'lesson_plan') {
+    // From the topic typed, or the notes and photos just added.
+    const topic = text || '';
+    if (!topic && !fileIds.length) throw new HttpError(400, 'Say the topic and the class, for example "Photosynthesis, Form 3".', 'invalid_input');
+    const minutes = int(b.minutes ?? 40, 'Lesson length', { min: 20, max: 180 });
     await useOne(env, user);
     const files = await filesOf(env, chat.id, fileIds.length ? fileIds : null);
-    const topic = text || '';
-    const r =
-      action === 'lesson_notes'
-        ? await lessonNotes(env, { topic, text: fileIds.length ? files.text : '', ...opts })
-        : await lessonPlan(env, { topic, text: fileIds.length ? files.text : '', minutes: int(b.minutes ?? 40, 'Lesson length', { min: 20, max: 180 }), ...opts });
+    const material = fileIds.length ? { text: files.text, images: files.images } : {};
+    const r = action === 'lesson_notes' ? await lessonNotes(env, { topic, ...material, ...opts }) : await lessonPlan(env, { topic, ...material, minutes, ...opts });
     await said(note || topic, files);
     out.push(await addMessage(env, chat.id, 'assistant', action === 'lesson_notes' ? 'lessonNotes' : 'lessonPlan', r));
     if (first) await env.DB.prepare('UPDATE study_chats SET title = ? WHERE id = ?').bind(shortTitle(r.title), chat.id).run();
