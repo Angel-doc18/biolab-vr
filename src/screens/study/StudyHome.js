@@ -39,6 +39,7 @@ export default function StudyHome({ navigation }) {
   const { user } = useApp();
   const L = useL();
   const teacher = user?.role === 'teacher';
+  const parent = user?.role === 'parent';
   const [chats, setChats] = useState(null);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -59,7 +60,14 @@ export default function StudyHome({ navigation }) {
   );
   const open = (intent) => navigation.navigate('StudyChat', { intent });
 
-  const starters = teacher
+  const starters = parent
+    ? [
+        ['photo_camera', L('Help with homework', 'Aider aux devoirs'), L('Snap the question: solved and explained in plain words', 'Une photo de la question : résolue et expliquée simplement'), 'solve'],
+        ['description', L('Understand the notes', 'Comprendre les notes'), L('Your child’s notes, explained for you', 'Les notes de votre enfant, expliquées pour vous'), 'notes'],
+        ['quiz', L('Questions for my child', 'Questions pour mon enfant'), L('From their notes, with the answers', 'À partir de leurs notes, avec les réponses'), 'quiz'],
+        ['forum', L('Ask', 'Demander'), L('What a topic means, how to help', 'Ce que veut dire un sujet, comment aider'), 'ask'],
+      ]
+    : teacher
     ? [
         ['menu_book', L('Lesson notes', 'Notes de cours'), L('Full notes on any topic, for your class', 'Notes complètes sur un sujet, pour votre classe'), 'lesson_notes'],
         ['event_note', L('Lesson plan', 'Fiche de préparation'), L('Objectives, stages, evaluation', 'Objectifs, étapes, évaluation'), 'lesson_plan'],
@@ -77,7 +85,7 @@ export default function StudyHome({ navigation }) {
 
   return (
     <Screen
-      header={<TabHeader title={teacher ? L('Assistant', 'Assistant') : L('Study', 'Étude')} subtitle={teacher ? L('Your teaching assistant', 'Votre assistant pédagogique') : L('Your AI study partner', 'Votre partenaire d’étude IA')} />}
+      header={<TabHeader title={teacher || parent ? L('Assistant', 'Assistant') : L('Study', 'Étude')} subtitle={teacher ? L('Your teaching assistant', 'Votre assistant pédagogique') : parent ? L('Help with your child’s school work', 'Pour aider votre enfant') : L('Your AI study partner', 'Votre partenaire d’étude IA')} />}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => (setRefreshing(true), await load(), setRefreshing(false))} />}
     >
       <V c="gap-space-lg pt-space-md pb-space-xl">
@@ -86,7 +94,7 @@ export default function StudyHome({ navigation }) {
             {L('Hi', 'Bonjour')} {firstName(user?.name)}.
           </T>
           <T c="font-body-md text-body-md text-on-surface-variant">
-            {teacher ? L('What are we preparing today?', 'Que préparons-nous aujourd’hui ?') : L('What are we studying today?', 'Qu’étudions-nous aujourd’hui ?')}
+            {teacher ? L('What are we preparing today?', 'Que préparons-nous aujourd’hui ?') : parent ? L('What can I help you with?', 'Comment puis-je vous aider ?') : L('What are we studying today?', 'Qu’étudions-nous aujourd’hui ?')}
           </T>
         </V>
 

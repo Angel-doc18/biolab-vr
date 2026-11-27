@@ -17,7 +17,7 @@ export const STUDY_LIMIT = { pro: 150, free: 10 };
 const MAX_FILES = 40;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
-const modeOf = (user) => (user.role === 'teacher' ? 'teacher' : 'student');
+const modeOf = (user) => (user.role === 'teacher' ? 'teacher' : user.role === 'parent' ? 'parent' : 'student');
 const parse = (row) => ({ id: row.id, role: row.role, kind: row.kind, body: JSON.parse(row.body), createdAt: row.created_at });
 
 async function chatOf(env, user, id) {

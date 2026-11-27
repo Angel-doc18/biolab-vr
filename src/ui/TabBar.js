@@ -29,7 +29,16 @@ export const TEACHER_TABS = [
 // A partner account is for inviting people: Home and Me only.
 export const PARTNER_TABS = TABS.filter((t) => t.name === 'Home' || t.name === 'Me');
 
-export const tabsFor = (role) => (role === 'teacher' ? TEACHER_TABS : role === 'partner' ? PARTNER_TABS : TABS);
+// A parent's bar: their children on Home, the Assistant for homework help,
+// the lessons as a library, and Me.
+export const PARENT_TABS = [
+  { name: 'Home', icon: 'home', en: 'Home', fr: 'Accueil' },
+  { name: 'Study', icon: 'auto_awesome', en: 'Assistant', fr: 'Assistant', center: true },
+  { name: 'Learn', icon: 'local_library', en: 'Library', fr: 'Bibliothèque' },
+  { name: 'Me', icon: 'account_circle', en: 'Me', fr: 'Moi' },
+];
+
+export const tabsFor = (role) => (role === 'teacher' ? TEACHER_TABS : role === 'parent' ? PARENT_TABS : role === 'partner' ? PARTNER_TABS : TABS);
 
 // Bottom navigation (h-16). The active pill glides between tabs. `tabs` is the
 // student set by default; the admin console passes its own.

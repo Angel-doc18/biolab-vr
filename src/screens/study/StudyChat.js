@@ -517,7 +517,7 @@ export default function StudyChat({ navigation, route }) {
         header={
           <StackHeader
             title={chat?.title || L('New chat', 'Nouvelle discussion')}
-            subtitle={teacher ? L('Teaching assistant', 'Assistant pédagogique') : L('Study with AI', 'Étudier avec l’IA')}
+            subtitle={teacher ? L('Teaching assistant', 'Assistant pédagogique') : user?.role === 'parent' ? L('Homework help', 'Aide aux devoirs') : L('Study with AI', 'Étudier avec l’IA')}
             avatar={false}
             right={
               <V c="flex-row">

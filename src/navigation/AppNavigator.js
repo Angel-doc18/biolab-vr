@@ -37,6 +37,7 @@ import LabRun from '../screens/lab/LabRun';
 import Workbook from '../screens/lab/Workbook';
 import Quiz from '../screens/exams/Quiz';
 import ClassTest from '../screens/exams/ClassTest';
+import ChildDetail from '../screens/tabs/ChildDetail';
 import TestResults from '../screens/exams/TestResults';
 import Paper1 from '../screens/exams/Paper1';
 import Paper2 from '../screens/exams/Paper2';
@@ -111,7 +112,7 @@ function MainTabs() {
   const teacher = user?.role === 'teacher';
   return (
     <Tabs.Navigator
-      key={partner ? 'partner' : teacher ? 'teacher' : 'all'}
+      key={user?.role || 'all'}
       tabBar={(props) => <TabBar {...props} tabs={tabsFor(user?.role)} />}
       screenOptions={{
         headerShown: false,
@@ -211,6 +212,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Workbook" component={Workbook} />
         <Stack.Screen name="Quiz" component={Quiz} />
         <Stack.Screen name="ClassTest" component={ClassTest} />
+        <Stack.Screen name="ChildDetail" component={ChildDetail} />
         <Stack.Screen name="TestResults" component={TestResults} />
         <Stack.Screen name="Paper1" component={Paper1} options={{ gestureEnabled: false }} />
         <Stack.Screen name="Paper2" component={Paper2} options={{ gestureEnabled: false }} />

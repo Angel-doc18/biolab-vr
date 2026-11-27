@@ -258,6 +258,17 @@ export async function myChildren(request, env) {
       const report = await buildReport(env, r.student_id);
       const u = await env.DB.prepare('SELECT role, created_at, pro_until, is_admin FROM users WHERE id = ?').bind(r.student_id).first();
       report.access = { open: isPro(u, env), until: accessEnd(u) || null, paidUntil: u.pro_until && u.pro_until > now() ? u.pro_until : null, charging: paywallOn(env) && !u.is_admin }; // staff and preview accounts are always free
+      // the work their teachers set, done or not, with the scores
+      const { results: work } = await env.DB.prepare(
+        `SELECT a.id, a.title, a.kind, a.ref, a.due_at AS dueAt, c.name AS className, d.done_at AS doneAt, d.score
+         FROM assignments a JOIN class_members m ON m.class_id = a.class_id AND m.student_id = ?
+         JOIN classes c ON c.id = a.class_id
+         LEFT JOIN assignment_done d ON d.assignment_id = a.id AND d.student_id = ?
+         ORDER BY a.due_at DESC LIMIT 12`
+      )
+        .bind(r.student_id, r.student_id)
+        .all();
+      report.work = work;
       reports.push(report);
     } catch {
       // deleted student: skip

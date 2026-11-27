@@ -14,7 +14,7 @@ export default function Learn({ navigation }) {
   const cards = useSubjectCards('learn');
 
   return (
-    <Screen header={<TabHeader title={user?.role === 'teacher' ? L('Library', 'Bibliothèque') : L('Learn', 'Apprendre')} subtitle={L('Lessons, labelled diagrams and 3D models', 'Leçons, schémas légendés et modèles 3D')} />}>
+    <Screen header={<TabHeader title={user?.role === 'teacher' || user?.role === 'parent' ? L('Library', 'Bibliothèque') : L('Learn', 'Apprendre')} subtitle={L('Lessons, labelled diagrams and 3D models', 'Leçons, schémas légendés et modèles 3D')} />}>
       <V c="pt-space-md pb-space-xl gap-space-lg">
         <V c="gap-space-xs">
           <StepLine step={L('Step 1 of 3', 'Étape 1 sur 3')} text={L('Choose a subject', 'Choisissez une matière')} />
