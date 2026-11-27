@@ -109,7 +109,18 @@ export async function aiConfigured(env) {
 
 // One chat completion. messages: OpenAI format (images as image_url data URIs).
 // Returns { text, model, provider, slot }.
-export async function aiChat(env, { messages, vision = false, json = false, maxTokens = 2000, temperature = 0.4, reasoning = null }) {
+// How long a provider asks us to wait after a per-minute limit: the
+// retry-after header, or "try again in 7.5s" / "in 1m2s" in the message.
+function waitFrom(res, body) {
+  const h = Number(res.headers.get('retry-after'));
+  if (Number.isFinite(h) && h > 0) return h * 1000;
+  const m = /try again in (?:(\d+)m)?(\d+(?:\.\d+)?)s/i.exec(body);
+  return m ? ((Number(m[1]) || 0) * 60 + Number(m[2])) * 1000 : null;
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+export async function aiChat(env, opts, retried = false) {
+  const { messages, vision = false, json = false, maxTokens = 2000, temperature = 0.4, reasoning = null } = opts;
   const order = vision ? VISION_ORDER.map((id) => SLOTS.find((s) => s.id === id)) : SLOTS;
   let anyKey = false;
   let busy = false;
@@ -127,6 +138,7 @@ export async function aiChat(env, { messages, vision = false, json = false, maxT
     const models = await modelsFor(env, slot, key, vision);
     let slotBusy = false;
     let refused = false;
+    let wait = null;
     for (const model of models) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 60_000);
@@ -180,6 +192,8 @@ export async function aiChat(env, { messages, vision = false, json = false, maxT
           break;
         }
         slotBusy = true;
+        const w = waitFrom(res, body);
+        if (w != null) wait = wait == null ? w : Math.min(wait, w);
         lastError = new Error('ai_429');
         continue;
       }
@@ -187,11 +201,26 @@ export async function aiChat(env, { messages, vision = false, json = false, maxT
       lastError = new Error(`ai_${res.status}`);
     }
     if (refused) rest(slot.id, 6 * 3_600_000, 'refused');
-    else if (slotBusy && stateOf(slot.id).restUntil <= Date.now()) rest(slot.id, 20_000, 'busy');
+    else if (slotBusy && stateOf(slot.id).restUntil <= Date.now()) rest(slot.id, Math.min(60_000, Math.max(2_000, wait ?? 20_000)), 'busy');
     if (slotBusy) busy = true;
   }
   if (!anyKey) throw new HttpError(503, 'The AI tutor is not available yet.', 'ai_unavailable');
-  console.error('ai_all_keys_failed', lastError?.message);
+  // Every key only briefly busy (a per-minute limit): wait for the first one
+  // to be free (at most 25 s) and try once more, rather than failing.
+  if (busy && !retried) {
+    let soonest = Infinity;
+    for (const slot of SLOTS) {
+      if (!(await keyOf(env, slot)).value) continue;
+      const st = stateOf(slot.id);
+      if (st.reason === 'busy' && st.restUntil > Date.now()) soonest = Math.min(soonest, st.restUntil);
+    }
+    const ms = soonest - Date.now();
+    if (ms > 0 && ms <= 25_000) {
+      await sleep(ms + 300);
+      return aiChat(env, opts, true);
+    }
+  }
+  console.error('ai_all_keys_failed', lastError?.message || (busy ? 'busy' : 'none'));
   if (busy) throw new HttpError(503, 'The AI tutor is very busy right now. Please try again in a minute.', 'ai_busy');
   throw new HttpError(502, 'The AI tutor could not answer just now. Please try again.', 'ai_failed');
 }
