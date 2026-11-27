@@ -61,6 +61,7 @@ export default function StudyChat({ navigation, route }) {
   const [aloud, setAloud] = useState(true);
   const aloudRef = useRef(true);
   const queue = useRef([]);
+  const [liveIds, setLiveIds] = useState(() => new Set()); // solutions taught live
   const playNext = () => {
     if (isTalking()) return;
     const m = queue.current.shift();
@@ -69,6 +70,7 @@ export default function StudyChat({ navigation, route }) {
   // spoken: the person asked by voice, so the answer is spoken even when off
   const speakSolutions = (sols, spoken) => {
     if (!aloudRef.current && !spoken) return;
+    setLiveIds((s) => new Set([...s, ...sols.map((m) => m.id)]));
     queue.current.push(...sols);
     playNext();
   };
@@ -86,6 +88,10 @@ export default function StudyChat({ navigation, route }) {
   const intent = route.params?.intent;
 
   const toEnd = () => setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 80);
+  // Following the board while it is written: each card's place in the list.
+  const listY = useRef(0);
+  const cardY = useRef({});
+  const follow = (id, y) => scroll.current?.scrollTo({ y: Math.max(0, listY.current + (cardY.current[id] || 0) + y - 110), animated: true });
 
   useEffect(() => {
     if (!route.params?.chatId) return;
@@ -133,10 +139,12 @@ export default function StudyChat({ navigation, route }) {
           await sleep(8000);
           r = await post(`/v1/study/chats/${id}/ask`, body, { timeout: 175000 });
         }
+        // Each solution is explained aloud as it arrives, one after another
+        // (marked live first, so its board starts empty and is written as it goes).
+        const sols = r.messages.filter((x) => x.kind === 'solution');
+        if (sols.length && (aloudRef.current || body.spoken)) setLiveIds((s) => new Set([...s, ...sols.map((m) => m.id)]));
         setMessages((m) => [...m.filter((x) => !String(x.id).startsWith('local-')), ...r.messages]);
         toEnd();
-        // Each solution is explained aloud as it arrives, one after another.
-        const sols = r.messages.filter((x) => x.kind === 'solution');
         if (sols.length) speakSolutions(sols, body.spoken);
         return r.messages;
       } catch (e) {
@@ -453,7 +461,7 @@ export default function StudyChat({ navigation, route }) {
         }
         footer={composer}
       >
-        <V c="gap-space-md pt-space-md pb-space-lg">
+        <V c="gap-space-md pt-space-md pb-space-lg" onLayout={(e) => (listY.current = e.nativeEvent.layout.y)}>
           {!messages.length && !working && (
             <V c="gap-space-md pt-space-lg">
               <T c="font-headline-md text-headline-md text-on-surface" style={{ fontWeight: '700' }}>
@@ -486,7 +494,12 @@ export default function StudyChat({ navigation, route }) {
             if (m.role === 'user') return <UserBubble key={m.id} body={m.body} L={L} />;
             if (m.kind === 'text') return <AiText key={m.id} body={m.body} />;
             if (m.kind === 'questions') return <QuestionSet key={m.id} body={m.body} solved={solvedOf(m.body.setId)} busyN={busyN} running={running || !!working} onSolve={(n) => solve(m.body, n)} onSolveAll={() => solveAll(m.body)} L={L} />;
-            if (m.kind === 'solution') return <Solution key={m.id} id={m.id} body={m.body} L={L} lang={lang} teacher={teacher} asks={asksOf(m.id)} onAsk={String(m.id).startsWith('local-') ? undefined : (step, q) => askStep(m, step, q)} />;
+            if (m.kind === 'solution')
+              return (
+                <V key={m.id} onLayout={(e) => (cardY.current[m.id] = e.nativeEvent.layout.y)}>
+                  <Solution id={m.id} onFollow={(y) => follow(m.id, y)} body={m.body} L={L} lang={lang} teacher={teacher} asks={asksOf(m.id)} live={liveIds.has(m.id)} onAsk={String(m.id).startsWith('local-') ? undefined : (step, q) => askStep(m, step, q)} />
+                </V>
+              );
             if (m.kind === 'notes') return <NotesCard key={m.id} body={m.body} L={L} />;
             if (m.kind === 'quiz') return <Quiz key={m.id} body={m.body} marks={marksOf(m.body.quizId)} busyN={typeof busyN === 'string' && busyN.startsWith(m.body.quizId) ? Number(busyN.split(':')[1]) : null} onMark={(n, a) => mark(m.body.quizId, n, a)} L={L} />;
             return null;
