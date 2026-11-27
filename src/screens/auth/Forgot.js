@@ -8,11 +8,12 @@ import { useL } from '../../i18n';
 const validEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(s).trim());
 
 // First step of password recovery: a 6 digit code to the account's email (by
-// Brevo) or phone (by SMS or WhatsApp). When codes by phone are not available,
-// the screen moves to email by itself.
-export default function Forgot({ navigation }) {
+// Brevo) or phone (by SMS or WhatsApp). It opens on the way that works (Log in
+// passes which ones do) and offers the other only when it works too.
+export default function Forgot({ navigation, route }) {
   const L = useL();
-  const [byEmail, setByEmail] = useState(false);
+  const ways = route?.params?.ways || { email: true, phone: true };
+  const [byEmail, setByEmail] = useState(!ways.phone);
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState(null);
@@ -68,11 +69,19 @@ export default function Forgot({ navigation }) {
         )}
         <ErrorNote error={error} />
         <Cta variant="dark" icon={null} label={L('Send code', 'Envoyer le code')} loading={busy} onPress={submit} />
-        <P c="self-center py-space-xs" onPress={() => (setByEmail((x) => !x), setError(null), setNote(null))} hitSlop={8}>
-          <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
-            {byEmail ? L('Use my phone number instead', 'Utiliser mon numéro de téléphone') : L('Use my email instead', 'Utiliser mon e-mail')}
+        {ways.email && ways.phone ? (
+          <P c="self-center py-space-xs" onPress={() => (setByEmail((x) => !x), setError(null), setNote(null))} hitSlop={8}>
+            <T c="font-label-lg text-label-lg text-primary-container" style={{ fontWeight: '700' }}>
+              {byEmail ? L('Use my phone number instead', 'Utiliser mon numéro de téléphone') : L('Use my email instead', 'Utiliser mon e-mail')}
+            </T>
+          </P>
+        ) : (
+          <T c="font-body-sm text-body-sm text-on-surface-variant text-center" style={{ lineHeight: 20 }}>
+            {byEmail
+              ? L('The code goes to the email address on your account. If you never added one, contact Klass8 support.', 'Le code est envoyé à l’adresse e-mail de votre compte. Si vous n’en avez jamais ajouté, contactez le support Klass8.')
+              : null}
           </T>
-        </P>
+        )}
       </V>
     </Screen>
   );

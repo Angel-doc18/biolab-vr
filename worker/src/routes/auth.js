@@ -264,6 +264,13 @@ export async function changePassword(request, env) {
 }
 
 // ---------- Google ----------
+// GET /v1/auth/recovery: how a forgotten password can be reset right now:
+// by email once the CTO has set up Brevo and a sender, by phone once SMS or
+// WhatsApp codes are set up. The app shows "Forgot password?" when one works.
+export async function recoveryOptions(request, env) {
+  return ok({ email: await mailConfigured(env), phone: messagingConfigured(env) });
+}
+
 // GET /v1/auth/google/config: the public Client ID, or null while Google
 // sign-in is not set up (the app then hides the button).
 export async function googleConfig(request, env) {

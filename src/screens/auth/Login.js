@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrandLogo, Ic, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
 import GoogleButton from '../../ui/GoogleButton';
@@ -7,10 +7,18 @@ import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
 import { routeAfterAuth } from '../../navigation/routes';
 import { NeedsInternet } from '../../ui/Offline';
+import { get } from '../../api/client';
 
-// Password reset needs codes sent by SMS or WhatsApp; it stays hidden until a
-// sender is set up on the server.
-const FORGOT_OPEN = false;
+// "Forgot password?" shows once a reset code can be sent: by email when the
+// CTO has set up the email sender, or by SMS/WhatsApp. Asked once per launch.
+let recovery = null;
+const recoveryWays = () =>
+  (recovery =
+    recovery ||
+    get('/v1/auth/recovery', { auth: false }).catch(() => {
+      recovery = null;
+      return { email: false, phone: false };
+    }));
 
 // Accepts 6XXXXXXXX, +237 6XX..., or an email address.
 function normaliseIdentifier(v) {
@@ -28,6 +36,14 @@ export default function Login({ navigation, route }) {
   // a Google sign-in that did not finish comes back here with its reason
   const [error, setError] = useState(route?.params?.googleError || null);
   const [busy, setBusy] = useState(false);
+  const [ways, setWays] = useState(null);
+  useEffect(() => {
+    let live = true;
+    recoveryWays().then((w) => live && setWays(w));
+    return () => {
+      live = false;
+    };
+  }, []);
 
   const submit = async () => {
     if (!identifier.trim() || !password) {
@@ -92,8 +108,8 @@ export default function Login({ navigation, route }) {
         <V c="gap-1.5">
           <Label
             right={
-              FORGOT_OPEN ? (
-                <P onPress={() => navigation.navigate('Forgot')} hitSlop={8}>
+              ways?.email || ways?.phone ? (
+                <P onPress={() => navigation.navigate('Forgot', { ways })} hitSlop={8}>
                   <T c="font-label-md text-label-md text-primary py-0.5">{L('Forgot password?', 'Mot de passe oublié ?')}</T>
                 </P>
               ) : null

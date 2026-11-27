@@ -48,6 +48,7 @@ const routes = [
   ['POST', '/v1/auth/logout', auth.logout],
   ['POST', '/v1/auth/otp/send', auth.sendVerifyOtp],
   ['POST', '/v1/auth/otp/verify', auth.verifyOtp],
+  ['GET', '/v1/auth/recovery', auth.recoveryOptions],
   ['POST', '/v1/auth/password/forgot', auth.forgotPassword],
   ['POST', '/v1/auth/password/reset', auth.resetPassword],
   ['POST', '/v1/auth/password/change', auth.changePassword],
