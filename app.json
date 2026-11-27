@@ -58,7 +58,7 @@
         {
           "cameraPermission": "Klass8 uses the camera to photograph your handwritten answers for marking.",
           "photosPermission": "Klass8 lets you choose a photo of your handwritten answer for marking.",
-          "microphonePermission": false
+          "microphonePermission": "Klass8 uses the microphone only when you talk to the AI. Recordings are not kept."
         }
       ],
       [
