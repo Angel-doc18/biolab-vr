@@ -22,7 +22,7 @@ export default function Role({ navigation }) {
     {
       id: 'parent',
       name: L('Parent or guardian', 'Parent ou tuteur'),
-      body: L('Follow your child’s revision, approve their account and receive weekly reports.', 'Suivez les révisions de votre enfant, approuvez son compte et recevez un rapport chaque semaine.'),
+      body: L('Follow your child’s revision and receive a report every week.', 'Suivez les révisions de votre enfant et recevez un rapport chaque semaine.'),
     },
     {
       id: 'teacher',

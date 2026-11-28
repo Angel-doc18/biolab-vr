@@ -1,7 +1,6 @@
 // Profile pictures. The app crops the picture square and saves it at low JPEG
 // quality, so it is small; the server checks its type and size and keeps it as
-// base64 in D1. Students under 18 need a parent's approval first, as for all
-// personal data.
+// base64 in D1. Any account can add one.
 import { HttpError, now, ok, readJson } from '../lib/http.js';
 import { publicUser, requireUser } from '../lib/auth.js';
 

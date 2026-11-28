@@ -213,7 +213,7 @@ export default function Offline({ navigation }) {
 
         <Section title={L('Your data on this phone', 'Vos données sur ce téléphone')}>
           <V c="bg-surface-container-lowest rounded-xl shadow-sm">
-            <Row first title={L('Study record', 'Progression')} sub={`${fmt(sizes.progress)}. ${L('Also saved to your account once approved.', 'Aussi enregistrée sur votre compte après approbation.')}`} />
+            <Row first title={L('Study record', 'Progression')} sub={`${fmt(sizes.progress)}. ${L('Also saved to your account.', 'Aussi enregistrée sur votre compte.')}`} />
             <Row title={L('Tutor conversations', 'Conversations avec le tuteur')} sub={fmt(sizes.chat)} action={sizes.chat ? L('Clear', 'Effacer') : null} onAction={() => clear(['bs:tutor'], L('Conversations cleared', 'Conversations effacées'))} />
             <Row title={L('Unfinished papers', 'Épreuves en cours')} sub={fmt(sizes.drafts)} action={sizes.drafts ? L('Clear', 'Effacer') : null} onAction={() => clear(['bs:p1', 'bs:p2'], L('Unfinished papers cleared', 'Épreuves en cours effacées'))} />
           </V>

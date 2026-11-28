@@ -52,11 +52,11 @@ export default function LinkChild({ navigation, route }) {
         <ErrorNote error={error} />
         <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 19 }}>
           {L(
-            'If your child is under 18, linking also approves their account: their name, class, study progress and the questions they send to the tutor are stored as described in the Privacy Policy. You can withdraw this at any time.',
-            'Si votre enfant a moins de 18 ans, la liaison approuve aussi son compte : son nom, sa classe, sa progression et les questions envoyées au tuteur sont enregistrés comme décrit dans la politique de confidentialité. Vous pouvez retirer cet accord à tout moment.'
+            'Your child finds this code in their app: Me, then Parent reports. Once linked, you see their class, study progress and weekly report.',
+            'Votre enfant trouve ce code dans son application : Moi, puis Rapports au parent. Une fois lié, vous voyez sa classe, sa progression et son rapport de la semaine.'
           )}
         </T>
-        <Cta h="h-12" variant="dark" icon={null} label={L('Link and approve', 'Lier et approuver')} loading={busy} onPress={submit} />
+        <Cta h="h-12" variant="dark" icon={null} label={L('Link my child', 'Lier mon enfant')} loading={busy} onPress={submit} />
       </V>
       {child && (
         <V c="p-space-md rounded-xl bg-surface-container-low flex-row items-center gap-space-sm mb-space-md">

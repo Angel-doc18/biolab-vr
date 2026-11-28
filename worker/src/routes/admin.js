@@ -304,7 +304,6 @@ export async function deleteUser(request, env, id) {
     env.DB.prepare('DELETE FROM ai_usage WHERE user_id = ?').bind(id),
     env.DB.prepare('DELETE FROM voice_usage WHERE user_id = ?').bind(id),
     env.DB.prepare('DELETE FROM ai_reports WHERE user_id = ?').bind(id),
-    env.DB.prepare('DELETE FROM consent_requests WHERE user_id = ?').bind(id),
     env.DB.prepare('DELETE FROM admin_grants WHERE user_id = ?').bind(id),
     env.DB.prepare("UPDATE licence_requests SET user_id = 'deleted' WHERE user_id = ?").bind(id),
     env.DB.prepare("UPDATE schools SET created_by = 'deleted' WHERE created_by = ?").bind(id),
