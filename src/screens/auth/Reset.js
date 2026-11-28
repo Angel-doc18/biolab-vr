@@ -33,10 +33,9 @@ export default function Reset({ navigation, route }) {
       await post('/v1/auth/password/reset', email ? { email, code, password: pw } : { phone, code, password: pw }, { auth: false });
       setDone(true);
     } catch (e) {
-      if (e.code === 'otp_invalid' || e.code === 'otp_expired') {
-        setError(e);
-        setTimeout(() => navigation.goBack(), 1600);
-      } else setError(e);
+      // a wrong or old code: back to the code screen, which shows why
+      if (e.code === 'otp_invalid' || e.code === 'otp_expired') navigation.popTo('Otp', { codeError: e.message, codeErrorAt: Date.now() }, { merge: true });
+      else setError(e);
     } finally {
       setBusy(false);
     }

@@ -26,6 +26,14 @@ export default function Otp({ navigation, route }) {
   const [busy, setBusy] = useState(false);
   const [channel, setChannel] = useState(purpose === 'reset' ? firstChannel || null : null);
   const [sent, setSent] = useState(purpose === 'reset');
+  // back from Reset with a refused code: say why and empty the boxes
+  const { codeError, codeErrorAt } = route.params || {};
+  useEffect(() => {
+    if (!codeErrorAt) return;
+    setError(codeError);
+    setDigits('');
+    input.current?.focus?.();
+  }, [codeErrorAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const send = async () => {
     setError(null);
@@ -137,7 +145,7 @@ export default function Otp({ navigation, route }) {
 
         {purpose === 'reset' && (
           <P c="items-center py-2" onPress={() => navigation.goBack()} hitSlop={8}>
-            <T c="font-label-md text-label-md text-on-surface-variant">{L('Use a different number', 'Utiliser un autre numéro')}</T>
+            <T c="font-label-md text-label-md text-on-surface-variant">{email ? L('Use a different email', 'Utiliser un autre e-mail') : L('Use a different number', 'Utiliser un autre numéro')}</T>
           </P>
         )}
         {purpose === 'verify' && (

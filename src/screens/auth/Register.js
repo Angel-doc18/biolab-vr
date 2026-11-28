@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Ic, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
-import GoogleButton from '../../ui/GoogleButton';
+import GoogleButton, { useGoogleShown } from '../../ui/GoogleButton';
 import { routeAfterAuth } from '../../navigation/routes';
 import { Check, Field, PhoneField, passwordValid, validPhone } from '../../ui/form';
 import { useApp } from '../../state/store';
@@ -163,6 +163,7 @@ export default function Register({ navigation }) {
 
 // Sign up with Google in one tap, then "or with your phone number".
 function GoogleSignUp({ L, onSession, onError, referralCode, navigation }) {
+  if (!useGoogleShown()) return null;
   return (
     <V c="gap-space-sm">
       <GoogleButton mode="signup" referralCode={referralCode} onSession={onSession} onError={onError} />

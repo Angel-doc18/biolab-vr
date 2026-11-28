@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrandLogo, Ic, P, T, V } from '../../ui/kit';
 import { AuthHeader, Cta, ErrorNote, Screen } from '../../ui/chrome';
-import GoogleButton from '../../ui/GoogleButton';
+import GoogleButton, { useGoogleShown } from '../../ui/GoogleButton';
 import { Field, Label } from '../../ui/form';
 import { useApp } from '../../state/store';
 import { useL } from '../../i18n';
@@ -155,8 +155,9 @@ export default function Login({ navigation, route }) {
   );
 }
 
-// "or", then Google's button (nothing shows until Google sign-in is set up).
+// "or", then Google's button (nothing shows while Google sign-in is off).
 function GoogleBlock({ L, children }) {
+  if (!useGoogleShown()) return null;
   return (
     <V c="gap-space-sm pt-space-xs">
       <V c="flex-row items-center gap-space-sm">

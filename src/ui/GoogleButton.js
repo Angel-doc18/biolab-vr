@@ -130,6 +130,20 @@ export async function googleReturn() {
   }
 }
 
+// Whether the button shows: at once, unless Google sign-in is known to be
+// off or cannot work here. The "or" lines around it use this too.
+export function useGoogleShown() {
+  const [on, setOn] = useState(known);
+  useEffect(() => {
+    let live = true;
+    googleOn().then((v) => live && setOn(v));
+    return () => {
+      live = false;
+    };
+  }, []);
+  return on !== false && usable();
+}
+
 function GoogleG() {
   return (
     <Svg width={18} height={18} viewBox="0 0 48 48">
@@ -147,17 +161,9 @@ function GoogleG() {
 export default function GoogleButton({ mode = 'signin', role, referralCode, onSession, onError }) {
   const L = useL();
   const lang = useLang();
-  const [on, setOn] = useState(known);
+  const shown = useGoogleShown();
   const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    let live = true;
-    googleOn().then((v) => live && setOn(v));
-    return () => {
-      live = false;
-    };
-  }, []);
-  // shown at once unless Google sign-in is known to be off
-  if (on === false || !usable()) return null;
+  if (!shown) return null;
 
   const label = mode === 'signup' ? L('Sign up with Google', 'S’inscrire avec Google') : L('Continue with Google', 'Continuer avec Google');
   const press = async () => {
