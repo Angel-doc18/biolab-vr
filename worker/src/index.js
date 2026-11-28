@@ -176,6 +176,7 @@ const routes = [
   ['GET', '/v1/admin/system/email', keys.getEmailSettings],
   ['PUT', '/v1/admin/system/email', keys.putEmailSettings],
   ['POST', '/v1/admin/system/email/test', keys.testEmail],
+  ['PUT', '/v1/admin/system/email/gmail', keys.putGmailSettings],
   ['POST', '/v1/admin/system/sign-out', system.signOutEveryone],
   ['POST', '/v1/admin/system/backup', system.backupNow],
   ['POST', '/v1/admin/updates', system.announceUpdate],

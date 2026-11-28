@@ -1,4 +1,4 @@
-// The CTO's keys: the five AI keys and the Brevo email key, set, replaced
+// The CTO's keys: the five AI keys and the email senders (Gmail, Brevo), set, replaced
 // ("rotated"), tested and removed from System in the app. Only the CTO (or the
 // operator token) may use these. A key is checked with its provider before it is
 // saved and is never sent back in full.
@@ -8,7 +8,7 @@ import { email as emailField, str } from '../lib/validate.js';
 import { saveSettings, setting } from '../lib/settings.js';
 import { hint, setSecret } from '../lib/secrets.js';
 import { PROVIDERS, SLOTS, forgetHealth, keyOf, keyProblem, slotHealth, testKey, usageToday } from '../lib/llm.js';
-import { brevoKey, checkBrevoKey, mailFrom, sendEmail, simpleEmail } from '../lib/mail.js';
+import { brevoKey, checkBrevoKey, checkGmail, cleanAppPassword, gmailPassword, gmailUser, looksLikeAppPassword, mailFrom, mailWay, sendEmail, simpleEmail } from '../lib/mail.js';
 import { securityEvent } from '../lib/monitor.js';
 
 const slotOf = (id) => {
@@ -74,7 +74,24 @@ export async function testAiKey(request, env, id) {
 async function emailView(env) {
   const { value, from } = await brevoKey(env);
   const sender = mailFrom(env);
-  return { set: Boolean(value), from, hint: hint(value), senderEmail: sender.email || null, senderName: sender.name, ready: Boolean(value && sender.email) };
+  const gUser = gmailUser(env);
+  const gPass = await gmailPassword(env);
+  const brevoReady = Boolean(value && sender.email);
+  const gmailReady = Boolean(gUser && gPass.value);
+  return {
+    // Brevo (the fields the app already reads)
+    set: Boolean(value),
+    from,
+    hint: hint(value),
+    senderEmail: sender.email || null,
+    senderName: sender.name,
+    brevoReady,
+    // Gmail
+    gmail: { address: gUser || null, set: Boolean(gPass.value), from: gPass.from, hint: hint(gPass.value), ready: gmailReady },
+    // what password reset emails use first
+    via: await mailWay(env),
+    ready: brevoReady || gmailReady,
+  };
 }
 
 // GET /v1/admin/system/email
@@ -108,14 +125,48 @@ export async function putEmailSettings(request, env) {
   return ok({ email: await emailView(env) });
 }
 
+// PUT /v1/admin/system/email/gmail { address, appPassword }
+// Checked with Google before it is saved. An empty address removes Gmail.
+export async function putGmailSettings(request, env) {
+  const admin = await requireAdminCan(request, env, 'system');
+  const b = await readJson(request);
+  const address = String(b.address || '').trim().toLowerCase();
+  if (!address) {
+    await saveSettings(env, { gmail_user: '' }, admin.id || 'operator');
+    await setSecret(env, 'gmail', '', admin.id || 'operator');
+    await securityEvent(env, 'email_settings', request, `${admin.name}: Gmail removed`);
+    return ok({ email: await emailView(env) });
+  }
+  const user = emailField(address, 'Gmail address', { optional: false });
+  // a new app password, or the one already saved (when only the address changes)
+  const typed = cleanAppPassword(b.appPassword);
+  const pass = typed || (await gmailPassword(env)).value;
+  if (!pass) throw new HttpError(400, 'Enter the app password Google gave you (16 letters).', 'invalid_input');
+  if (typed && !looksLikeAppPassword(typed)) throw new HttpError(400, 'An app password is 16 letters (Google shows it in four groups of four). Your normal Gmail password does not work here.', 'invalid_input');
+  const c = await checkGmail(env, user, pass);
+  if (!c.ok) throw new HttpError(400, `${c.error} Nothing was saved.`, 'key_refused');
+  await saveSettings(env, { gmail_user: user }, admin.id || 'operator');
+  if (typed) await setSecret(env, 'gmail', typed, admin.id || 'operator');
+  await securityEvent(env, 'email_settings', request, `${admin.name}: Gmail set (${user}${typed ? `, app password ${hint(typed)}` : ''})`);
+  return ok({ email: await emailView(env) });
+}
+
 // POST /v1/admin/system/email/test { to }
 export async function testEmail(request, env) {
   await requireAdminCan(request, env, 'system');
   const b = await readJson(request);
   const to = emailField(b.to, 'Email address', { optional: false });
-  const m = simpleEmail({ title: 'Klass8 email works', lines: ['This test message was sent from the CTO page of Klass8 through Brevo. Password reset codes will arrive the same way.'] });
-  await sendEmail(env, { to, subject: 'Klass8: test email', html: m.html, text: m.text });
-  return ok({ sent: true });
+  const way = await mailWay(env);
+  const name = way === 'gmail' ? `Gmail (${gmailUser(env)})` : 'Brevo';
+  const m = simpleEmail({ title: 'Klass8 email works', lines: [`This test message was sent from the CTO page of Klass8 through ${name}. Password reset codes will arrive the same way.`] });
+  try {
+    const went = await sendEmail(env, { to, subject: 'Klass8: test email', html: m.html, text: m.text });
+    return ok({ sent: true, via: went });
+  } catch (e) {
+    // the CTO sees why, not just "could not be sent"
+    if (e.reason) throw new HttpError(e.status || 502, `The test email was not sent. ${e.reason}`, e.code || 'mail_failed');
+    throw e;
+  }
 }
 
 // ---------- Google sign-in ----------

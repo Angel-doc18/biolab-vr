@@ -1,6 +1,12 @@
-// Email through Brevo (transactional email API). The API key is set by the CTO
-// in the app (encrypted in the database) or as BREVO_API_KEY on the server; the
-// sender address must be one verified in Brevo (Senders, domains).
+// Email: password reset codes and the CTO's test message. Two ways, both set
+// by the CTO in the app (encrypted in the database), or on the server:
+//   Gmail: a Gmail (or Google Workspace) address and an app password, sent
+//     through Google's mail server; free, about 500 emails a day. The emails
+//     come from that address. (GMAIL_USER / GMAIL_APP_PASSWORD)
+//   Brevo: transactional email API; free plan about 300 a day; the sender is
+//     an address verified in Brevo. (BREVO_API_KEY / MAIL_FROM)
+// When both are set, Gmail sends and Brevo takes over when Gmail fails.
+import nodemailer from 'nodemailer';
 import { HttpError } from './http.js';
 import { secret } from './secrets.js';
 import { setting } from './settings.js';
@@ -11,8 +17,86 @@ export const mailFrom = (env) => ({
   name: setting('mail_from_name') || env.MAIL_FROM_NAME || 'Klass8',
 });
 
+const senderName = (env) => setting('mail_from_name') || env.MAIL_FROM_NAME || 'Klass8';
+
+// ---------- Gmail ----------
+export const gmailUser = (env) => String(setting('gmail_user') || env.GMAIL_USER || '').trim().toLowerCase();
+export const gmailPassword = (env) => secret(env, 'gmail', 'GMAIL_APP_PASSWORD');
+// Google shows an app password as four groups of four letters.
+export const cleanAppPassword = (s) => String(s || '').replace(/\s+/g, '');
+export const looksLikeAppPassword = (s) => /^[a-z]{16}$/i.test(cleanAppPassword(s));
+
+// Google's mail server (a test server can be set on the server for tests).
+function gmailTransport(env, user, pass) {
+  const host = env.GMAIL_SMTP_HOST || 'smtp.gmail.com';
+  const port = Number(env.GMAIL_SMTP_PORT || 465);
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    ignoreTLS: Boolean(env.GMAIL_SMTP_HOST) && port !== 465,
+    auth: { user, pass },
+    connectionTimeout: 15_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
+  });
+}
+
+// A plain reason for a Gmail failure.
+function gmailError(e) {
+  const code = e?.code || '';
+  const said = `${e?.responseCode || ''} ${e?.response || e?.message || ''}`;
+  if (code === 'EAUTH' || /\b53[45]\b/.test(said)) return 'Google refused the address or app password. Check the Gmail address, and create a new app password (2-Step Verification must be on).';
+  if (/daily (user )?sending (quota|limit)|5\.4\.5/i.test(said)) return 'Gmail’s daily sending limit is reached. It starts again within 24 hours.';
+  if (/ETIMEDOUT|ECONNECTION|ESOCKET|ECONNREFUSED|ENOTFOUND|EDNS/.test(code)) return 'Google’s mail server could not be reached. Try again in a moment.';
+  return `Gmail refused the email (${String(said).trim().slice(0, 120) || code || 'unknown error'}).`;
+}
+
+// Checks an address and app password with Google before they are saved.
+// Returns { ok, error? }.
+export async function checkGmail(env, user, pass) {
+  const t = gmailTransport(env, user, cleanAppPassword(pass));
+  try {
+    await t.verify();
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: gmailError(e) };
+  } finally {
+    t.close();
+  }
+}
+
+async function gmailReady(env) {
+  const user = gmailUser(env);
+  const { value } = await gmailPassword(env);
+  return user && value ? { user, pass: cleanAppPassword(value) } : null;
+}
+
+async function sendWithGmail(env, g, { to, toName, subject, html, text }) {
+  const t = gmailTransport(env, g.user, g.pass);
+  try {
+    await t.sendMail({ from: { name: senderName(env), address: g.user }, to: toName ? { name: toName, address: to } : to, subject, html, text });
+  } finally {
+    t.close();
+  }
+}
+
+// ---------- which way ----------
+async function brevoReady(env) {
+  const { value } = await brevoKey(env);
+  const from = mailFrom(env);
+  return value && from.email ? { key: value, from } : null;
+}
+
+// 'gmail' | 'brevo' | null: the way emails go first.
+export async function mailWay(env) {
+  if (await gmailReady(env)) return 'gmail';
+  if (await brevoReady(env)) return 'brevo';
+  return null;
+}
+
 export async function mailConfigured(env) {
-  return Boolean((await brevoKey(env)).value && mailFrom(env).email);
+  return Boolean(await mailWay(env));
 }
 
 // Checks a key with Brevo before it is saved. Returns { ok, account?, error? }.
@@ -47,20 +131,47 @@ ${code ? `<div style="font-size:32px;font-weight:800;letter-spacing:8px;color:#0
   return { html, text };
 }
 
-// Sends one email. Throws an HttpError when email is not set up or Brevo refuses.
-export async function sendEmail(env, { to, toName, subject, html, text }) {
-  const { value: key } = await brevoKey(env);
-  const from = mailFrom(env);
-  if (!key || !from.email) throw new HttpError(503, 'Email is not set up yet.', 'mail_unavailable');
+async function sendWithBrevo(b, { to, toName, subject, html, text }) {
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
-    headers: { 'api-key': key, 'content-type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify({ sender: from, to: [{ email: to, ...(toName ? { name: toName } : {}) }], subject, htmlContent: html, textContent: text }),
+    headers: { 'api-key': b.key, 'content-type': 'application/json', accept: 'application/json' },
+    body: JSON.stringify({ sender: b.from, to: [{ email: to, ...(toName ? { name: toName } : {}) }], subject, htmlContent: html, textContent: text }),
+    signal: AbortSignal.timeout(20_000),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
     console.error('brevo_error', res.status, body.slice(0, 300));
-    throw new HttpError(502, 'The email could not be sent. Please try again.', 'mail_failed');
+    throw new Error(`Brevo answered ${res.status}.`);
   }
-  return true;
+}
+
+// Sends one email: by Gmail when it is set up, else (or when Gmail fails) by
+// Brevo. Returns the way it went ('gmail' | 'brevo'). Throws an HttpError when
+// email is not set up or every way failed; `reason` says why, for the CTO.
+export async function sendEmail(env, msg) {
+  const g = await gmailReady(env);
+  const b = await brevoReady(env);
+  if (!g && !b) throw new HttpError(503, 'Email is not set up yet.', 'mail_unavailable');
+  const reasons = [];
+  if (g) {
+    try {
+      await sendWithGmail(env, g, msg);
+      return 'gmail';
+    } catch (e) {
+      const why = gmailError(e);
+      console.error('gmail_error', e?.code || '', e?.responseCode || '', String(e?.response || e?.message || '').slice(0, 200));
+      reasons.push(`Gmail: ${why}`);
+    }
+  }
+  if (b) {
+    try {
+      await sendWithBrevo(b, msg);
+      return 'brevo';
+    } catch (e) {
+      reasons.push(`Brevo: ${e?.message || e}`);
+    }
+  }
+  const err = new HttpError(502, 'The email could not be sent. Please try again.', 'mail_failed');
+  err.reason = reasons.join(' ');
+  throw err;
 }

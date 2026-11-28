@@ -1,6 +1,7 @@
 // The CTO's keys: the five AI keys (Groq x2, Google Gemini x2, Mistral) that the
-// tutor switches between when one is used up, and the Brevo key that sends the
-// password reset emails. Add, replace (rotate), test or remove each one. A key
+// tutor switches between when one is used up, and the email senders for the
+// password reset codes: Gmail (free, with an app password) and Brevo. Add,
+// replace (rotate), test or remove each one. A key
 // is checked with its provider before it is saved and is never shown again in
 // full: only its last 4 characters.
 import { useState } from 'react';
@@ -144,6 +145,9 @@ export default function AdminKeys() {
   const [testTo, setTestTo] = useState('');
   const [mailBusy, setMailBusy] = useState(false);
   const [mailError, setMailError] = useState(null);
+  const [gmail, setGmail] = useState(null); // { address, password } being edited
+  const [gmailBusy, setGmailBusy] = useState(false);
+  const [gmailError, setGmailError] = useState(null);
 
   const keys = ai.data?.keys || [];
   const m = mail.data?.email;
@@ -224,12 +228,39 @@ export default function AdminKeys() {
       setMailBusy(false);
     }
   };
+  const saveGmail = async () => {
+    setGmailBusy(true);
+    setGmailError(null);
+    try {
+      const r = await put('/v1/admin/system/email/gmail', { address: gmail.address.trim(), appPassword: gmail.password.replace(/\s+/g, '') });
+      mail.setData(() => r);
+      setGmail(null);
+      showToast(L('Gmail checked with Google and saved', 'Gmail vérifié avec Google et enregistré'));
+    } catch (e) {
+      setGmailError(e);
+    } finally {
+      setGmailBusy(false);
+    }
+  };
+  const removeGmail = async () => {
+    setGmailBusy(true);
+    setGmailError(null);
+    try {
+      const r = await put('/v1/admin/system/email/gmail', { address: '' });
+      mail.setData(() => r);
+      showToast(L('Gmail removed', 'Gmail retiré'));
+    } catch (e) {
+      setGmailError(e);
+    } finally {
+      setGmailBusy(false);
+    }
+  };
   const sendTest = async () => {
     setMailBusy(true);
     setMailError(null);
     try {
-      await post('/v1/admin/system/email/test', { to: testTo.trim() });
-      showToast(L('Test email sent. Check the inbox (and spam).', 'E-mail de test envoyé. Vérifiez la boîte (et les spams).'));
+      const r = await post('/v1/admin/system/email/test', { to: testTo.trim() });
+      showToast(`${L('Test email sent', 'E-mail de test envoyé')}${r.via ? ` (${r.via === 'gmail' ? 'Gmail' : 'Brevo'})` : ''}. ${L('Check the inbox (and spam).', 'Vérifiez la boîte (et les spams).')}`);
     } catch (e) {
       setMailError(e);
     } finally {
@@ -258,7 +289,7 @@ export default function AdminKeys() {
             <ErrorNote error={ai.error} />
           </Section>
 
-          <Section title={L('Email (Brevo)', 'E-mail (Brevo)')}>
+          <Section title={L('Email for password reset', 'E-mail de réinitialisation')}>
             <Card>
               {!m ? (
                 <Loading />
@@ -269,6 +300,97 @@ export default function AdminKeys() {
                       {L('Password reset emails', 'E-mails de réinitialisation')}
                     </T>
                     <Pill text={m.ready ? L('Ready', 'Prêt') : L('Not set up', 'Non configuré')} tone={m.ready ? 'ok' : 'muted'} />
+                  </V>
+                  <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                    {m.via === 'gmail'
+                      ? `${L('Codes are sent with Gmail from', 'Les codes partent avec Gmail depuis')} ${m.gmail?.address}.${m.brevoReady ? ` ${L('If Gmail fails, Brevo sends them.', 'Si Gmail échoue, Brevo les envoie.')}` : ''}`
+                      : m.via === 'brevo'
+                        ? `${L('Codes are sent with Brevo from', 'Les codes partent avec Brevo depuis')} ${m.senderEmail}.`
+                        : L('Set up Gmail (free) or Brevo below. "Forgot password?" appears on the Log in screen as soon as one works.', 'Configurez Gmail (gratuit) ou Brevo ci-dessous. « Mot de passe oublié ? » apparaît sur l’écran de connexion dès que l’un fonctionne.')}
+                  </T>
+                  {m.ready && (
+                    <V c="gap-space-xs pt-space-xs">
+                      <Field label={L('Send a test email to', 'Envoyer un e-mail de test à')} value={testTo} onChangeText={setTestTo} placeholder="name@gmail.com" autoCapitalize="none" keyboardType="email-address" />
+                      <Cta variant="soft" icon={null} lead="send" h="h-11" label={L('Send test email', 'Envoyer le test')} loading={mailBusy} onPress={sendTest} />
+                    </V>
+                  )}
+                  {!sender && <ErrorNote error={mailError} />}
+                </V>
+              )}
+            </Card>
+            {!!m && (
+              <Card>
+                <V c="p-space-md gap-space-sm">
+                  <V c="flex-row items-center gap-space-sm">
+                    <T c="font-label-lg text-label-lg text-on-surface flex-1" style={{ fontWeight: '700' }}>
+                      {L('Gmail (free)', 'Gmail (gratuit)')}
+                    </T>
+                    <Pill text={m.gmail?.ready ? L('On', 'Activé') : L('Off', 'Désactivé')} tone={m.gmail?.ready ? 'ok' : 'muted'} />
+                  </V>
+                  {m.gmail?.ready ? (
+                    <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                      {`${m.gmail.address}. ${L('App password', 'Mot de passe d’application')} ${m.gmail.from === 'app' ? L('set here', 'défini ici') : L('on the server', 'sur le serveur')} (${m.gmail.hint}). ${L('Emails come from this address; Gmail sends about 500 a day.', 'Les e-mails viennent de cette adresse ; Gmail en envoie environ 500 par jour.')}`}
+                    </T>
+                  ) : (
+                    <V c="gap-1.5">
+                      {[
+                        [L('1. Use a Gmail account for Klass8, for example klass8.app@gmail.com. The codes come from this address.', '1. Utilisez un compte Gmail pour Klass8, par exemple klass8.app@gmail.com. Les codes viennent de cette adresse.')],
+                        [L('2. On that account, turn on 2-Step Verification:', '2. Sur ce compte, activez la validation en deux étapes :'), 'myaccount.google.com/security', 'https://myaccount.google.com/security'],
+                        [L('3. Create an app password named Klass8. Google shows 16 letters:', '3. Créez un mot de passe d’application nommé Klass8. Google affiche 16 lettres :'), 'myaccount.google.com/apppasswords', 'https://myaccount.google.com/apppasswords'],
+                        [L('4. Enter the address and the 16 letters here. Klass8 checks them with Google before saving. Your normal Gmail password does not work here.', '4. Saisissez ici l’adresse et les 16 lettres. Klass8 les vérifie avec Google avant d’enregistrer. Votre mot de passe Gmail habituel ne marche pas ici.')],
+                      ].map(([text, link, url]) => (
+                        <T key={text} c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
+                          {text}
+                          {link ? (
+                            <T c="font-body-sm text-body-sm text-primary-container" style={{ fontWeight: '700' }} onPress={() => Linking.openURL(url)}>
+                              {` ${link}`}
+                            </T>
+                          ) : null}
+                        </T>
+                      ))}
+                    </V>
+                  )}
+                  {gmail === null ? (
+                    <V c="flex-row flex-wrap gap-space-xs">
+                      <Cta variant="soft" icon={null} lead={m.gmail?.set ? 'edit' : 'add'} h="h-10" label={m.gmail?.set ? L('Change', 'Modifier') : L('Set up Gmail', 'Configurer Gmail')} onPress={() => (setGmailError(null), setGmail({ address: m.gmail?.address || '', password: '' }))} />
+                      {!!m.gmail?.address && <Cta variant="soft" icon={null} lead="block" h="h-10" label={L('Remove', 'Retirer')} loading={gmailBusy} onPress={removeGmail} />}
+                    </V>
+                  ) : (
+                    <V c="gap-space-xs pt-space-xs">
+                      <Field label={L('Gmail address', 'Adresse Gmail')} value={gmail.address} onChangeText={(t) => setGmail((g) => ({ ...g, address: t }))} placeholder="klass8.app@gmail.com" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" />
+                      <Field
+                        label={L('App password (16 letters)', 'Mot de passe d’application (16 lettres)')}
+                        value={gmail.password}
+                        onChangeText={(t) => setGmail((g) => ({ ...g, password: t }))}
+                        placeholder={m.gmail?.set ? L('Leave empty to keep the saved one', 'Laisser vide pour garder l’actuel') : 'abcd efgh ijkl mnop'}
+                        secure
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                      <V c="flex-row gap-space-xs">
+                        <V c="flex-1">
+                          <Cta variant="dark" icon={null} h="h-11" label={L('Check and save', 'Vérifier et enregistrer')} loading={gmailBusy} onPress={saveGmail} />
+                        </V>
+                        <V c="flex-1">
+                          <Cta variant="soft" icon={null} h="h-11" label={L('Cancel', 'Annuler')} onPress={() => (setGmail(null), setGmailError(null))} />
+                        </V>
+                      </V>
+                    </V>
+                  )}
+                  <ErrorNote error={gmailError} />
+                </V>
+              </Card>
+            )}
+            <Card>
+              {!m ? (
+                <Loading />
+              ) : (
+                <V c="p-space-md gap-space-sm">
+                  <V c="flex-row items-center gap-space-sm">
+                    <T c="font-label-lg text-label-lg text-on-surface flex-1" style={{ fontWeight: '700' }}>
+                      Brevo
+                    </T>
+                    <Pill text={m.brevoReady ? L('On', 'Activé') : L('Off', 'Désactivé')} tone={m.brevoReady ? 'ok' : 'muted'} />
                   </V>
                   <T c="font-body-sm text-body-sm text-on-surface-variant" style={{ lineHeight: 20 }}>
                     {m.set ? `${L('API key', 'Clé API')}: ${m.from === 'app' ? L('set here', 'définie ici') : L('on the server', 'sur le serveur')} (${m.hint}). ` : `${L('No API key yet. Create one in Brevo: SMTP & API, API keys.', 'Pas encore de clé. Créez-en une dans Brevo : SMTP & API, clés API.')} `}
@@ -283,15 +405,9 @@ export default function AdminKeys() {
                       <Field label={L('Sender email', 'E-mail de l’expéditeur')} value={sender.email} onChangeText={(t) => setSender((s) => ({ ...s, email: t }))} autoCapitalize="none" keyboardType="email-address" />
                       <Field label={L('Sender name', 'Nom de l’expéditeur')} value={sender.name} onChangeText={(t) => setSender((s) => ({ ...s, name: t }))} />
                       <Cta variant="dark" icon={null} h="h-12" label={L('Save the sender', 'Enregistrer l’expéditeur')} loading={mailBusy} onPress={saveSender} />
+                      <ErrorNote error={mailError} />
                     </V>
                   )}
-                  {m.ready && (
-                    <V c="gap-space-xs pt-space-xs">
-                      <Field label={L('Send a test email to', 'Envoyer un e-mail de test à')} value={testTo} onChangeText={setTestTo} placeholder="name@gmail.com" autoCapitalize="none" keyboardType="email-address" />
-                      <Cta variant="soft" icon={null} lead="send" h="h-11" label={L('Send test email', 'Envoyer le test')} loading={mailBusy} onPress={sendTest} />
-                    </V>
-                  )}
-                  <ErrorNote error={mailError} />
                 </V>
               )}
             </Card>
